@@ -812,7 +812,10 @@ bool Robot::ParseOptions(int argc, char* argv[])
 		("help", "produce help message")
 		("camera", po::value<std::string>(), "set camera index or path")
 		("locate_cursor", "find cursor instead of ball")
-		("skip-ports", "skip COM port checks")
+		("skip-ports", "skip ALL COM port checks")
+		("skip-wheels", "skip Wheel COM port checks")
+		("skip-coilgun", "skip Coilgun COM port checks")
+		("skip-arduino", "skip Arduino COM port checks")
 		("save-frames", "Save captured frames to disc");
 
 	po::store(po::parse_command_line(argc, argv, desc), config);
