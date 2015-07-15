@@ -1,0 +1,182 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="dialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="robot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Robotiina.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RobotTracker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadedClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Arduino.cpp">
+      <Filter>ComModule</Filter>
+    </ClCompile>
+    <ClCompile Include="autocalibrator.cpp">
+      <Filter>VisionModule</Filter>
+    </ClCompile>
+    <ClCompile Include="AutoPilot.cpp">
+      <Filter>LogicModule</Filter>
+    </ClCompile>
+    <ClCompile Include="BallFinder.cpp">
+      <Filter>VisionModule</Filter>
+    </ClCompile>
+    <ClCompile Include="calibrationconfreader.cpp">
+      <Filter>VisionModule</Filter>
+    </ClCompile>
+    <ClCompile Include="camera.cpp">
+      <Filter>VisionModule</Filter>
+    </ClCompile>
+    <ClCompile Include="coilBoard.cpp">
+      <Filter>ComModule</Filter>
+    </ClCompile>
+    <ClCompile Include="colorcalibrator.cpp">
+      <Filter>ComModule</Filter>
+    </ClCompile>
+    <ClCompile Include="ComPortScanner.cpp">
+      <Filter>ComModule</Filter>
+    </ClCompile>
+    <ClCompile Include="GateFinder.cpp">
+      <Filter>VisionModule</Filter>
+    </ClCompile>
+    <ClCompile Include="kalmanFilter.cpp">
+      <Filter>VisionModule</Filter>
+    </ClCompile>
+    <ClCompile Include="MouseFinder.cpp">
+      <Filter>VisionModule</Filter>
+    </ClCompile>
+    <ClCompile Include="objectfinder.cpp">
+      <Filter>VisionModule</Filter>
+    </ClCompile>
+    <ClCompile Include="stillcamera.cpp">
+      <Filter>VisionModule</Filter>
+    </ClCompile>
+    <ClCompile Include="wheel.cpp">
+      <Filter>ComModule</Filter>
+    </ClCompile>
+    <ClCompile Include="wheelcontroller.cpp">
+      <Filter>ComModule</Filter>
+    </ClCompile>
+    <ClCompile Include="VideoRecorder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NewAutoPilot.cpp">
+      <Filter>LogicModule</Filter>
+    </ClCompile>
+    <ClCompile Include="remotecontrol.cpp">
+      <Filter>ComModule</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="robot.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RobotTracker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadedClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VideoRecorder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wheelcontroller.h">
+      <Filter>ComModule</Filter>
+    </ClInclude>
+    <ClInclude Include="wheel.h">
+      <Filter>ComModule</Filter>
+    </ClInclude>
+    <ClInclude Include="stillcamera.h">
+      <Filter>VisionModule</Filter>
+    </ClInclude>
+    <ClInclude Include="simpleserial.h">
+      <Filter>ComModule</Filter>
+    </ClInclude>
+    <ClInclude Include="objectfinder.h">
+      <Filter>VisionModule</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageThresholder.h">
+      <Filter>VisionModule</Filter>
+    </ClInclude>
+    <ClInclude Include="GateFinder.h">
+      <Filter>VisionModule</Filter>
+    </ClInclude>
+    <ClInclude Include="ComPortScanner.h">
+      <Filter>ComModule</Filter>
+    </ClInclude>
+    <ClInclude Include="colorcalibrator.h">
+      <Filter>VisionModule</Filter>
+    </ClInclude>
+    <ClInclude Include="coilBoard.h">
+      <Filter>ComModule</Filter>
+    </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>VisionModule</Filter>
+    </ClInclude>
+    <ClInclude Include="calibrationconfreader.h">
+      <Filter>VisionModule</Filter>
+    </ClInclude>
+    <ClInclude Include="blockingreader.h">
+      <Filter>ComModule</Filter>
+    </ClInclude>
+    <ClInclude Include="NewAutoPilot.h">
+      <Filter>LogicModule</Filter>
+    </ClInclude>
+    <ClInclude Include="MouseFinder.h">
+      <Filter>VisionModule</Filter>
+    </ClInclude>
+    <ClInclude Include="BallFinder.h">
+      <Filter>VisionModule</Filter>
+    </ClInclude>
+    <ClInclude Include="Arduino.h">
+      <Filter>ComModule</Filter>
+    </ClInclude>
+    <ClInclude Include="autocalibrator.h">
+      <Filter>VisionModule</Filter>
+    </ClInclude>
+    <ClInclude Include="AutoPilot.h">
+      <Filter>LogicModule</Filter>
+    </ClInclude>
+    <ClInclude Include="kalmanFilter.h">
+      <Filter>VisionModule</Filter>
+    </ClInclude>
+    <ClInclude Include="remotecontrol.h">
+      <Filter>ComModule</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{df21dfdf-4d8b-41b5-bc20-ddd1238a251c}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{6343fadd-087a-4ea1-9584-7918e04eebcd}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="VisionModule">
+      <UniqueIdentifier>{72279558-0892-41c7-bff6-1323fa57f4e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LogicModule">
+      <UniqueIdentifier>{f20e3aaa-c87e-4aec-aa01-c6f335bf8c9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ComModule">
+      <UniqueIdentifier>{3a5a7f6d-3c34-4499-bc65-5878a73f7087}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

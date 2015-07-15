@@ -1,0 +1,168 @@
+
+velocity = 100
+direction = 56
+rotate = 30
+
+w_left  = (velocity*cos((150 - direction) * PI / 180.0)) + rotate);
+w_right = (velocity*cos((150 - direction) * PI / 180.0)) + rotate);
+w_back  = (velocity*cos((150 - direction) * PI / 180.0)) + rotate);
+
+
+w_left = 23.024352
+w_right = 119.87940462
+w_back = -52.903757255504
+
+solve 
+	23.024352		  =x*cos((150-y)*pi/180)+z
+	119.87940462	 = x*cos((30 -y)*pi/180)+z
+	-52.903757255504 = x*cos((270-y)*pi/180)+z
+
+http://www.wolframalpha.com/input/?i=solve+-52.903757255504+%3D+x*cos%28%28270-y%29*pi%2F180%29%2Bz%3B119.87940462%3Dx*cos%28%2830-y%29*pi%2F180%29%2Bz%3B23.024352%3Dx*cos%28%28150-y%29*pi%2F180%29+%2Bz#
+
+u = 150
+v = 30
+w = 270
+
+a = x * cos(u - y) + z
+b = x * cos(v - y) + z
+c = x * cos(w - y) + z
+
+cos(u - y) = cos u cos y + sin u sin y
+
+
+
+a = x * [cos(u) * cos(y) + sin(u) * sin(y)] + z
+b = x * [cos(v) * cos(y) + sin(v) * sin(y)] + z
+c = x * [cos(w) * cos(y) + sin(w) * sin(y)] + z
+
+cu = cos(u)		su = sin(u)
+cv = cos(v)     sv = sin(v)
+cw = cos(w)     sw = sin(w)
+
+a = x * [cu * cos(y) + su * sin(y)] + z
+b = x * [cv * cos(y) + sv * sin(y)] + z
+c = x * [cw * cos(y) + sw * sin(y)] + z
+
+
+z = a - x * [cu * cos(y) + su * sin(y)]
+
+b = x * [cv * cos(y) + sv * sin(y)] + a - x * [cu * cos(y) + su * sin(y)]
+c = x * [cw * cos(y) + sw * sin(y)] + a - x * [cu * cos(y) + su * sin(y)]
+
+b - a = x * [cv * cos(y) + sv * sin(y) - cu * cos(y) - su * sin(y)]
+c - a = x * [cw * cos(y) + sw * sin(y) - cu * cos(y) - su * sin(y)]
+
+b - a    cv * cos(y) + sv * sin(y) - cu * cos(y) - su * sin(y)
+----- = -------------------------------------------------------
+c - a    cw * cos(y) + sw * sin(y) - cu * cos(y) - su * sin(y)
+
+
+b - a   cos(y) * [ cv + sv * tan(y) - cu - su * tan(y)]
+----- = -------------------------------------------------------
+c - a   cos(y) * [ cw + sw * tan(y) - cu - su * tan(y)]
+
+b - a   [ cv + sv * tan(y) - cu - su * tan(y)]
+----- = ---------------------------------------
+c - a   [ cw + sw * tan(y) - cu - su * tan(y)]
+
+
+b - a    cv - cu + sv * tan(y) - su * tan(y)
+----- = -------------------------------------
+c - a    cw - cu + sw * tan(y) - su * tan(y)
+
+b - a    cv - cu + (sv - su) * tan(y)
+----- = -------------------------------------
+c - a    cw - cu + (sw - su) * tan(y)
+
+cv - cu = cvu	cw - cu = cwu
+sv - su = svu   sw - su = swu
+
+	  cvu + svu * tan(y)
+s =  -------------------
+      cwu + swu * tan(y)
+	  
+http://www.wolframalpha.com/input/?i=s+%3D+%28119.87940462-23.024352%29%2F%28-52.903757255504-23.024352%29
+
+cvu + svu * tan(y) = s * [cwu + swu * tan(y)]
+
+cvu - s * cwu = s * swu * tan(y) - svu * tan(y)
+
+cvu - s * cwu
+------------- = tan(y)
+s * swu - svu
+
+		   ( cos(v) - cos(u) - s * [cos(w) - cos(u)]    )
+y = arctan {  ----------------------------------------- }
+		   ( s * [sin(w) - sin(u)] - [sin(v) - sin(u)]  )
+
+http://www.wolframalpha.com/input/?i=arctan%28%5B%28cos%2830%29+-+cos%28150%29%29+-+%28-1.275615230903158%29+*+%28cos%28270%29+-+cos%28150%29%29%5D%2F%5B-1.275615230903158+*+%28sin%28270%29+-+sin%28150%29%29+-+%28sin%2830%29+-+sin%28150%29%29%5D%29
+=========================================================
+
+b - a = x * [cv * cos(y) + sv * sin(y) - cu * cos(y) - su * sin(y)]
+c - a = x * [cw * cos(y) + sw * sin(y) - cu * cos(y) - su * sin(y)]
+
+cy = cos(y)
+sy = sin(y)
+
+b - a = x * [cv * cy + sv * sy - cu * cy - su * sy]
+
+	 		b - a
+x = ----------------------------------------
+	[cv * cy + sv * sy - cu * cy - su * sy]
+
+			b - a
+x = ----------------------------------------
+	 [cv * cy - cu * cy + sv * sy - su * sy]
+
+			b - a
+x = --------------------------------------
+	 [(cv - cu) * cy + (sv - su) * sy]
+
+http://www.wolframalpha.com/input/?i=%28119.87940462-23.024352%29%2F%28%28cos%28150%29+-+cos%2830%29%29+*+cos%2856%29+%2B+%28sin%28150%29+-+sin%2830%29%29+*+sin%2856%29%29+
+why negaitve speed?
+=========================================================
+
+z = ...
+
+
+++++++++++++++++++++++++++++++++++++++++++
+when c - a == 0
+
+a = x * [cu * cy + su * sy] + z
+b = x * [cv * cy + sv * sy] + z
+c = x * [cw * cy + sw * sy] + z
+
+z = b - x * [cv * cy + sv * sy]
+
+a = x * [cu * cy + su * sy] + b - x * [cv * cy + sv * sy]
+c = x * [cw * cy + sw * sy] + b - x * [cv * cy + sv * sy]
+
+a - b    [cu * cy + su * sy] - [cv * cy + sv * sy]
+----- = -------------------------------------------
+c - b    [cw * cy + sw * sy] - [cv * cy + sv * sy]
+
+ty = tan(y)
+
+     cu + su * ty - cv - sv * ty
+s = -----------------------------------
+     cw + sw * ty - cv - sv * ty
+
+     cuv + suv * ty
+s = -----------------
+     cwv + swv * ty
+
+#cvu + svu * tan(y) = s * [cwu + swu * tan(y)]
+#cvu - s * cwu = s * swu * tan(y) - svu * tan(y)
+
+#cvu - s * cwu
+#------------- = tan(y)
+#s * swu - svu
+
+cuv + suv * ty = s * (cwv + swv * ty)
+
+cuv - s * cwv
+------------- = tan(y)
+s * swv - suv
+
+s
+

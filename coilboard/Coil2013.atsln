@@ -1,0 +1,20 @@
+
+Microsoft Visual Studio Solution File, Format Version 11.00
+# AvrStudio Solution File, Format Version 11.00
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "Coil2013", "Coil2013\Coil2013.cproj", "{D189D394-0A52-49DB-ADB8-4935EC0741AD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AVR = Debug|AVR
+		Release|AVR = Release|AVR
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D189D394-0A52-49DB-ADB8-4935EC0741AD}.Debug|AVR.ActiveCfg = Debug|AVR
+		{D189D394-0A52-49DB-ADB8-4935EC0741AD}.Debug|AVR.Build.0 = Debug|AVR
+		{D189D394-0A52-49DB-ADB8-4935EC0741AD}.Release|AVR.ActiveCfg = Release|AVR
+		{D189D394-0A52-49DB-ADB8-4935EC0741AD}.Release|AVR.Build.0 = Release|AVR
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

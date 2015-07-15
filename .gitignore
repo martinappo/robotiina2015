@@ -1,57 +1,55 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
 
-# C extensions
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
 *.so
+*.dylib
+*.dll
 
-# Distribution / packaging
-.Python
-env/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-*.egg-info/
-.installed.cfg
-*.egg
+# Fortran module files
+*.mod
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+# Executables
+*.exe
+*.out
+*.app
+robotiina
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*,cover
+# CLion
+.idea/
+# Visual Studio
+Debug/
+ipch/
+*.opensdf
+*.sdf
+*.suo
+*.vcxproj.user
 
-# Translations
-*.mo
-*.pot
+# conf
+conf/*.ini
+*.TMP
+CMakeFiles/*
+CMakeCache.txt
+*.cmake
+Makefile
+robotiina
+videos/*
 
-# Django stuff:
-*.log
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-target/
+# backup
+*.cpp~
+*.h~
+test_images/
+Release/
