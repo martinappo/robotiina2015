@@ -94,6 +94,7 @@
     <ClInclude Include="colorcalibrator.h" />
     <ClInclude Include="ComPortScanner.h" />
     <ClInclude Include="dialog.h" />
+    <ClInclude Include="FrontCameraVision.h" />
     <ClInclude Include="GateFinder.h" />
     <ClInclude Include="ImageThresholder.h" />
     <ClInclude Include="kalmanFilter.h" />
@@ -122,6 +123,7 @@
     <ClCompile Include="colorcalibrator.cpp" />
     <ClCompile Include="ComPortScanner.cpp" />
     <ClCompile Include="dialog.cpp" />
+    <ClCompile Include="FrontCameraVision.cpp" />
     <ClCompile Include="GateFinder.cpp" />
     <ClCompile Include="kalmanFilter.cpp" />
     <ClCompile Include="MouseFinder.cpp" />

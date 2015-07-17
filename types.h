@@ -29,10 +29,10 @@ struct Speed
 	double rotation;
 };
 
-struct ObjectPosition
+struct ObjectPosition /* polar coordinates */
 {
 	double distance;
-	double horizontalDev;
+	double horizontalDev; // perhaps not needed
 	double horizontalAngle;
 };
 
@@ -48,6 +48,8 @@ enum OBJECT
 {
     BALL = 0, GATE1, GATE2, FIELD, INNER_BORDER, OUTER_BORDER, NUMBER_OF_OBJECTS, SIGHT_MASK
 };
+
+const int NUMBER_OF_BALLS = 11;
 
 enum STATE
 {
@@ -71,11 +73,35 @@ enum STATE
 	STATE_END_OF_GAME /* leave this last*/
 };
 
+struct FieldState {
+	ObjectPosition self; // our robot distance from center and rotation
+	ObjectPosition opponent; // distance from center and rotation
+	ObjectPosition balls[NUMBER_OF_BALLS];
+	ObjectPosition selfGate;
+	ObjectPosition opponentGate;
+};
+
+class IFieldStateListener {
+	virtual void OnFieldStateChanged(const FieldState &state) = 0;
+};
+
+class IDisplay {
+public:
+	virtual void ShowImage(const cv::Mat image) = 0;
+};
+
 class ICamera
 {
 public:
-    virtual const cv::Mat & Capture() = 0;
+	virtual const cv::Mat & Capture() = 0;
 };
+
+class IVisionModule {
+public:
+	virtual bool Init(ICamera * pCamera, IDisplay *pDisplay, IFieldStateListener * pFieldStateListener) = 0;
+	virtual const cv::Mat & GetFrame() = 0;
+};
+
 
 class IAutoPilot
 {

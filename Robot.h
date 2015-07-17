@@ -21,7 +21,6 @@ private:
 	CoilGun *coilBoard;
 	Arduino *arduino;
 
-	HSVColorRangeMap objectThresholds;
     //STATE state = STATE_NONE;
     std::atomic<STATE> state;
 	std::atomic<STATE> last_state;

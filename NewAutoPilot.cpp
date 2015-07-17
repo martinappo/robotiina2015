@@ -359,6 +359,10 @@ void NewAutoPilot::enableTestMode(bool enable)
 	if(!testMode) wheels->Stop();
 }
 
+void NewAutoPilot::OnFieldStateChanged(const FieldState &state){
+
+}
+
 void NewAutoPilot::Run()
 {
 	boost::posix_time::ptime lastStep = boost::posix_time::microsec_clock::local_time();

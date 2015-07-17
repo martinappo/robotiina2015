@@ -64,14 +64,17 @@
     <ClCompile Include="wheelcontroller.cpp">
       <Filter>ComModule</Filter>
     </ClCompile>
-    <ClCompile Include="VideoRecorder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="NewAutoPilot.cpp">
       <Filter>LogicModule</Filter>
     </ClCompile>
     <ClCompile Include="remotecontrol.cpp">
       <Filter>ComModule</Filter>
+    </ClCompile>
+    <ClCompile Include="VideoRecorder.cpp">
+      <Filter>VisionModule</Filter>
+    </ClCompile>
+    <ClCompile Include="FrontCameraVision.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -88,9 +91,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ThreadedClass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="VideoRecorder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="wheelcontroller.h">
@@ -155,6 +155,12 @@
     </ClInclude>
     <ClInclude Include="remotecontrol.h">
       <Filter>ComModule</Filter>
+    </ClInclude>
+    <ClInclude Include="VideoRecorder.h">
+      <Filter>VisionModule</Filter>
+    </ClInclude>
+    <ClInclude Include="FrontCameraVision.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
