@@ -338,7 +338,7 @@ NewDriveMode RecoverCrash::step(NewAutoPilot&newAutoPilot, double dt)
 	auto targetSpeed = newAutoPilot.wheels->GetTargetSpeed();
 
 	//Backwards
-	newAutoPilot.wheels->Drive(50, 180 - targetSpeed.heading);
+	newAutoPilot.wheels->Drive(50, 180 - targetSpeed.heading,0);
 	std::chrono::milliseconds dura(1000);
 	std::this_thread::sleep_for(dura);
 	newAutoPilot.wheels->Rotate(1, 50);

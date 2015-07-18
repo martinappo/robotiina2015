@@ -1,5 +1,5 @@
 #include "robot.h"
-#include "colorcalibrator.h"
+#include "autocalibrator.h"
 
 #include "camera.h"
 #include "stillcamera.h"
@@ -25,6 +25,7 @@
 #include "RobotTracker.h"
 #include "VideoRecorder.h"
 #include "FrontCameraVision.h"
+#include "ControlModule.h"
 
 #define STATE_BUTTON(name, new_state) \
 createButton(std::string("") + name, [&](){ this->SetState(new_state); });
@@ -219,28 +220,30 @@ void Robot::Run()
 	NewAutoPilot autoPilot(wheels, coilBoard, arduino);
 	FrontCameraVision visionModule;
 	visionModule.Init(camera, this, &autoPilot);
-
+	ControlModule controlModule;
+	controlModule.Init(wheels, coilBoard);
 	//RobotTracker tracker(wheels);
 
 
 
 	
 	std::stringstream subtitles;
-
+	/*
 	bool gaussianBlurEnabled = false;
 	bool sonarsEnabled = false;
 	bool greenAreaDetectionEnabled = false;
 	bool gateObstructionDetectionEnabled = false;
 	bool borderDetectionEnabled = false;
 	bool nightVisionEnabled = false;
-
+	*/
 
 	/* Input */
+	/*
 	bool ballInTribbler = false;
 	cv::Point3i sonars = {100,100,100};
 	bool somethingOnWay = false;
 	int mouseControl = 0;
-
+	*/
 
 	//cv::Mat frameBGR = visionModule.GetFrame();
 	/*
@@ -253,21 +256,10 @@ void Robot::Run()
 	*/
 
 	VideoRecorder videoRecorder("videos/", 30, display.size());
+	AutoCalibrator calibrator(display.size());
 
 	while (true)
     {
-		/*
-		if (last_state == STATE_SETTINGS) {
-			ptree pt;
-			pt.put("gaussianBlur", gaussianBlurEnabled);
-			pt.put("sonars", sonarsEnabled);
-			pt.put("greenAreaDetection", greenAreaDetectionEnabled);
-			pt.put("gateObstructionDetection", gateObstructionDetectionEnabled);
-			pt.put("borderDetection", borderDetectionEnabled);
-			pt.put("nightVision", nightVisionEnabled);
-			write_ini("conf/settings.ini", pt);
-		}
-		*/
 		time = boost::posix_time::microsec_clock::local_time();
 		boost::posix_time::time_duration::tick_type dt = (time - lastStepTime).total_milliseconds();
 		boost::posix_time::time_duration::tick_type rotateDuration = (time - rotateTime).total_milliseconds();
@@ -283,8 +275,6 @@ void Robot::Run()
 			videoRecorder.RecordFrame(display, subtitles.str());
 		}
 #endif
-		ClearDisplay();
-//		frameBGR = camera->Capture();
 		
 #ifndef RECORD_AFTER_PROCESSING
 		if (captureFrames) {
@@ -296,7 +286,7 @@ void Robot::Run()
 		/**************************************************/
 		/* STEP 5. check if ball is in tribbler			  */
 		/**************************************************/
-		ballInTribbler = coilBoard->BallInTribbler();
+		//ballInTribbler = coilBoard->BallInTribbler();
 
 		/**************************************************/
 		/* STEP 7. feed these variables to Autopilot	  */
@@ -319,31 +309,6 @@ void Robot::Run()
 */
 		/*
 
-		if (autoPilotEnabled || autoPilot.testMode) {
-			autoPilot.UpdateState(ballFound ? &ballPos : NULL, targetGatePos, ballInTribbler, sightObstructed, somethingOnWay, borderDistance.distance, ballCount);			
-		}
-		*/
-		//---------------------------------------------
-		
-		if (sonarsEnabled) { // TODO: make new flag
-			int gate = arduino->getGate();
-			int start = arduino->getStart();
-			if (gate > -1) {
-				OBJECT newGate = gate == 0 ? GATE1 : GATE2;
-				if(newGate != targetGate){
-					targetGate = newGate;
-					last_state = STATE_END_OF_GAME;
-				}
-			}
-			if (start == 1) {
-				autoPilotEnabled = !autoPilotEnabled;
-				last_state = STATE_END_OF_GAME;
-			}
-		}
-		/**************************************************/
-		/* STEP 8. kick and drive (done in AutoPilot	  */
-		/**************************************************/
-
 		/* Main UI */
 		if (STATE_NONE == state) {
 			START_DIALOG
@@ -353,11 +318,12 @@ void Robot::Run()
 				//STATE_BUTTON("(M)anualCalibrate objects", STATE_CALIBRATE)
 				STATE_BUTTON("(C)Change Gate [" + OBJECT_LABELS[targetGate] + "]", STATE_SELECT_GATE)
 				STATE_BUTTON("Auto(P)ilot [" + (autoPilotEnabled ? "On" : "Off") + "]", STATE_LAUNCH)
-
+				/*
 			createButton(std::string("(M)ouse control [") + (mouseControl == 0 ? "Off" : (mouseControl == 1 ? "Ball" : "Gate")) + "]", [this, &mouseControl]{
 				mouseControl = (mouseControl + 1) % 3;
 				this->last_state = STATE_END_OF_GAME; // force dialog redraw
 			});
+			*/
 			//				STATE_BUTTON("(D)ance", STATE_DANCE)
 				//STATE_BUTTON("(D)ance", STATE_DANCE)
 				//STATE_BUTTON("(R)emote Control", STATE_REMOTE_CONTROL)
@@ -417,30 +383,13 @@ void Robot::Run()
 		}
 		else if (STATE_SETTINGS == state) {
 			START_DIALOG
-				createButton(std::string("Gaussian blur: ") + (gaussianBlurEnabled ? "on" : "off"), [this, &gaussianBlurEnabled]{
-					gaussianBlurEnabled = !gaussianBlurEnabled;
-					this->last_state = STATE_END_OF_GAME; // force dialog redraw
-				});
-				createButton(std::string("Night vision: ") + (nightVisionEnabled ? "on" : "off"), [this, &nightVisionEnabled]{
-					nightVisionEnabled = !nightVisionEnabled;
-					this->last_state = STATE_END_OF_GAME; // force dialog redraw
-				});
-				createButton(std::string("Sonars: ") + (sonarsEnabled ? "on" : "off"), [this, &sonarsEnabled]{
-					sonarsEnabled = !sonarsEnabled;
-					this->last_state = STATE_END_OF_GAME; // force dialog redraw
-				});
-				createButton(std::string("Border Detection: ") + (borderDetectionEnabled ? "on" : "off"), [this, &borderDetectionEnabled]{
-					borderDetectionEnabled = !borderDetectionEnabled;
-					this->last_state = STATE_END_OF_GAME; // force dialog redraw
-				});
-				createButton(std::string("Field detection: ") + (greenAreaDetectionEnabled ? "on" : "off"), [this, &greenAreaDetectionEnabled]{
-					greenAreaDetectionEnabled = !greenAreaDetectionEnabled;
-					this->last_state = STATE_END_OF_GAME; // force dialog redraw
-				});
-				createButton(std::string("Gate obstructed det.: ") + (gateObstructionDetectionEnabled ? "on" : "off"), [this, &gateObstructionDetectionEnabled]{
-					gateObstructionDetectionEnabled = !gateObstructionDetectionEnabled;
-					this->last_state = STATE_END_OF_GAME; // force dialog redraw
-				});
+				IConfigurableModule *pModule = static_cast<IConfigurableModule*>(&visionModule);
+				for (auto setting : pModule->GetSettings()){
+					createButton(setting.first + ": "+std::get<0>(setting.second)(), [this, setting]{
+						std::get<1>(setting.second)();
+						this->last_state = STATE_END_OF_GAME; // force dialog redraw
+					});
+				}	
 				STATE_BUTTON("BACK", STATE_NONE)
 			END_DIALOG
 		}
@@ -514,10 +463,10 @@ void Robot::Run()
 		}
 		else if (STATE_MANUAL_CONTROL == state) {
 			START_DIALOG
-				createButton("Move Left", [this] {this->wheels->Drive(40, 90); });
-				createButton("Move Right", [this]{this->wheels->Drive(40, -90); });
-				createButton("Move Forward", [this]{this->wheels->Drive(190, 0); });
-				createButton("Move Back", [this]{this->wheels->Drive(-40, 0); });
+				createButton("Move Left", [this] {this->wheels->Drive(40, 90,0); });
+				createButton("Move Right", [this]{this->wheels->Drive(40, -90,0); });
+				createButton("Move Forward", [this]{this->wheels->Drive(190, 0,0); });
+				createButton("Move Back", [this]{this->wheels->Drive(-40, 0,0); });
 				createButton("Rotate Right", [this]{this->wheels->Rotate(0, 20); });
 				createButton("Rotate Left", [this]{this->wheels->Rotate(1, 20); });
 				STATE_BUTTON("Back", STATE_NONE)
@@ -536,7 +485,7 @@ void Robot::Run()
 		else if (STATE_DANCE == state) {
 			float move1, move2;
 			dance_step(((float)(time - epoch).total_milliseconds()), move1, move2);
-			wheels->Drive(move1, move2);
+			wheels->Drive(move1, move2,0);
 			//cv::putText(frameBGR, "move1:" + std::to_string(move1), cv::Point(frameBGR.cols - 140, 120), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 			//cv::putText(frameBGR, "move2:" + std::to_string(move2), cv::Point(frameBGR.cols - 140, 140), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 		}
@@ -633,7 +582,7 @@ std::string Robot::ExecuteRemoteCommand(const std::string &command){
         if (query == "drive" && tokens.size() == 3) {
             int speed = atoi(tokens[1].c_str());
 			double direction = atof(tokens[2].c_str());
-            wheels->Drive(speed, direction);
+            wheels->Drive(speed, direction,0);
 		}
 		else if (query == "rdrive" && tokens.size() == 4) {
 			int speed = atoi(tokens[1].c_str());

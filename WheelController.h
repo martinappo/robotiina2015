@@ -6,7 +6,7 @@
 #include "ThreadedClass.h"
 #include <atomic>
 
-class WheelController: ThreadedClass {
+class WheelController: public IWheelController,ThreadedClass {
 private:
 	Speed targetSpeed; // velocity, heading, rotation
 	Speed actualSpeed; // velocity, heading, rotation.
@@ -33,7 +33,7 @@ public:
     void MoveTo(const CvPoint &);
 
 	void Rotate(bool direction, double speed);
-	void Drive(double velocity, double direction);
+	void Drive(double velocity, double direction, double rotate);
 	void DriveRotate(double velocity, double direction, double rotate);
 	void Stop();
 

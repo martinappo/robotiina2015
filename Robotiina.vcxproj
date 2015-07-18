@@ -93,6 +93,8 @@
     <ClInclude Include="coilBoard.h" />
     <ClInclude Include="colorcalibrator.h" />
     <ClInclude Include="ComPortScanner.h" />
+    <ClInclude Include="ConfigurableModule.h" />
+    <ClInclude Include="ControlModule.h" />
     <ClInclude Include="dialog.h" />
     <ClInclude Include="FrontCameraVision.h" />
     <ClInclude Include="GateFinder.h" />
@@ -122,6 +124,8 @@
     <ClCompile Include="coilBoard.cpp" />
     <ClCompile Include="colorcalibrator.cpp" />
     <ClCompile Include="ComPortScanner.cpp" />
+    <ClCompile Include="ConfigurableModule.cpp" />
+    <ClCompile Include="ControlModule.cpp" />
     <ClCompile Include="dialog.cpp" />
     <ClCompile Include="FrontCameraVision.cpp" />
     <ClCompile Include="GateFinder.cpp" />

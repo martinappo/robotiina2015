@@ -1,6 +1,8 @@
 #pragma once
 #include <opencv2/opencv.hpp>
 #include <math.h> 
+#include <functional>
+
 #ifdef WIN32
 	#define _WIN32_WINNT 0x0600 // vista for socket.cancel()
 	#ifndef _WIN32_WINNT_WS08
@@ -96,19 +98,44 @@ public:
 	virtual const cv::Mat & Capture() = 0;
 };
 
+
+typedef std::map<std::string, std::tuple<std::function<std::string()>, std::function<void()>>> SettingsList;
+
+class IConfigurableModule {
+public:
+	virtual SettingsList &GetSettings() = 0;
+	virtual std::string GetDebugInfo() = 0;
+};
+
 class IVisionModule {
 public:
 	virtual bool Init(ICamera * pCamera, IDisplay *pDisplay, IFieldStateListener * pFieldStateListener) = 0;
 	virtual const cv::Mat & GetFrame() = 0;
 };
 
+class IWheelController {
+public:
+	virtual void Drive(double fowardSpeed, double direction, double angularSpeed) = 0;
+
+};
+class ICoilGun {
+public:
+	virtual bool BallInTribbler() = 0;
+	virtual void Kick() = 0;
+	virtual void ToggleTribbler(bool start) = 0;
+
+};
+
+class IControlModule : public IWheelController, public ICoilGun {
+	virtual bool Init(IWheelController * pWheels, ICoilGun *pCoilGun) = 0;
+};
 
 class IAutoPilot
 {
 public:
 	virtual void UpdateState(ObjectPosition *ballLocation, ObjectPosition *gateLocation, bool ballInTribbler, bool sightObstructed, bool somethingOnWay, int borderDistance) = 0;
 	virtual std::string GetDebugInfo() = 0;
-	virtual ~IAutoPilot(){}
+	//virtual void Enable(bool enable) = 0;
 };
 
 class IButtonClickListener

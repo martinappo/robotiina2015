@@ -7,7 +7,7 @@
 #include <boost/property_tree/ini_parser.hpp>
 #include "ThreadedClass.h"
 
-class CoilGun
+class CoilGun: public ICoilGun
 {
 protected:
 	std::atomic_bool ballInTribbler;

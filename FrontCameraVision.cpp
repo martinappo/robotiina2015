@@ -3,31 +3,15 @@
 #include "GateFinder.h"
 #include "BallFinder.h"
 #include "autocalibrator.h"
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ini_parser.hpp>
 
-FrontCameraVision::FrontCameraVision()
+FrontCameraVision::FrontCameraVision(): ConfigurableModule("FrontCameraVision")
 {
-	using boost::property_tree::ptree;
-	try {
-
-		ptree pt;
-		read_ini("conf/FrontCameraVision.ini", pt);
-		gaussianBlurEnabled = pt.get<bool>("gaussianBlur");
-		greenAreaDetectionEnabled = pt.get<bool>("greenAreaDetection");
-		gateObstructionDetectionEnabled = pt.get<bool>("gateObstructionDetection");
-		borderDetectionEnabled = pt.get<bool>("borderDetection");
-		nightVisionEnabled = pt.get<bool>("nightVision");
-	}
-	catch (...){
-		ptree pt;
-		pt.put("gaussianBlur", false);
-		pt.put("greenAreaDetection", false);
-		pt.put("gateObstructionDetection", false);
-		pt.put("borderDetection", false);
-		pt.put("nightVision", false);
-		write_ini("conf/FrontCameraVision.ini", pt);
-	};
+	ADD_BOOL_SETTING(gaussianBlurEnabled);
+	ADD_BOOL_SETTING(greenAreaDetectionEnabled);
+	ADD_BOOL_SETTING(gateObstructionDetectionEnabled);
+	ADD_BOOL_SETTING(borderDetectionEnabled);
+	ADD_BOOL_SETTING(nightVisionEnabled);
+	LoadSettings();
 
 
 }
@@ -65,7 +49,6 @@ void FrontCameraVision::Run() {
 	}
 
 	frameBGR = m_pCamera->Capture();
-	AutoCalibrator calibrator(frameBGR.size());
 
 	cv::Mat white(frameBGR.rows, frameBGR.cols, frameBGR.type(), cv::Scalar(255, 255, 255));
 	cv::Mat black(frameBGR.rows, frameBGR.cols, frameBGR.type(), cv::Scalar(40, 40, 40));
@@ -95,10 +78,10 @@ void FrontCameraVision::Run() {
 		if (!nightVisionEnabled || state == STATE_AUTOCALIBRATE) {
 			if (state == STATE_AUTOCALIBRATE) {
 				cv::Mat mask(frameBGR.rows, frameBGR.cols, CV_8U, cv::Scalar::all(0));
-				frameBGR.copyTo(display_roi, calibrator.mask);
+				frameBGR.copyTo(frameBGR, calibrator.mask);
 			}
 			else {
-				frameBGR.copyTo(display_roi);
+				frameBGR.copyTo(frameBGR);
 			}
 		}
 		*/
@@ -146,17 +129,17 @@ void FrontCameraVision::Run() {
 			thresholdedImages[SIGHT_MASK] = selected;
 			//sightObstructed = countNonZero(selected) > 10;
 		}
-		/*
+		
 		// copy thresholded images before they are destroyed
-		if (nightVisionEnabled && state != STATE_AUTOCALIBRATE) {
-			green.copyTo(display_roi, thresholdedImages[FIELD]);
-			white.copyTo(display_roi, thresholdedImages[INNER_BORDER]);
-			black.copyTo(display_roi, thresholdedImages[OUTER_BORDER]);
-			orange.copyTo(display_roi, thresholdedImages[BALL]);
-			yellow.copyTo(display_roi, thresholdedImages[GATE2]);
-			blue.copyTo(display_roi, thresholdedImages[GATE1]);
+		if (nightVisionEnabled) {
+			green.copyTo(frameBGR, thresholdedImages[FIELD]);
+			white.copyTo(frameBGR, thresholdedImages[INNER_BORDER]);
+			black.copyTo(frameBGR, thresholdedImages[OUTER_BORDER]);
+			orange.copyTo(frameBGR, thresholdedImages[BALL]);
+			yellow.copyTo(frameBGR, thresholdedImages[GATE2]);
+			blue.copyTo(frameBGR, thresholdedImages[GATE1]);
 		}
-		*/
+		
 		if (borderDetectionEnabled) {
 			float y = finder.IsolateField(thresholdedImages, frameHSV, frameBGR, false, nightVisionEnabled);
 			finder.LocateCursor(frameBGR, cv::Point2i(frameBGR.cols / 2, y), BALL, borderDistance);
@@ -176,7 +159,7 @@ void FrontCameraVision::Run() {
 
 		bool ballFound = /*mouseControl != 1 ?*/
 			finder.Locate(thresholdedImages, frameHSV, frameBGR, BALL, ballPos)
-			/*: finder.LocateCursor(display_roi, cv::Point2i(mouseX, mouseY), BALL, ballPos)*/;
+			/*: finder.LocateCursor(frameBGR, cv::Point2i(mouseX, mouseY), BALL, ballPos)*/;
 		/*
 		ObjectPosition *targetGatePos = 0;
 		if (targetGate == GATE1 && gate1Found) targetGatePos = &gate1Pos;

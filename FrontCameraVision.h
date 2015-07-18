@@ -1,9 +1,10 @@
 #pragma once
 #include "types.h"
 #include "ThreadedClass.h"
+#include "ConfigurableModule.h"
 
 class FrontCameraVision :
-	public IVisionModule, public ThreadedClass
+	public ConfigurableModule, public IVisionModule, public ThreadedClass
 {
 protected:
 	ICamera *m_pCamera;
