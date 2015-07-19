@@ -20,12 +20,20 @@ private:
     WheelController * wheels;
 	CoilGun *coilBoard;
 	Arduino *arduino;
+	bool coilBoardPortsOk;
+	bool wheelsPortsOk;
+	bool arduinoPortsOk;
 
 	HSVColorRangeMap objectThresholds;
     //STATE state = STATE_NONE;
     std::atomic<STATE> state;
 	std::atomic<STATE> last_state;
 	bool ParseOptions(int argc, char* argv[]);
+	void initCamera();
+	void initPorts();
+	void initWheels();
+	void initCoilboard();
+	void initArduino();
 
 	void Run();
     boost::mutex remote_mutex;

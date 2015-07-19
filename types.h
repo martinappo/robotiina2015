@@ -36,14 +36,16 @@ struct ObjectPosition
 	double horizontalAngle;
 };
 
-enum OBJECT_ID {
-	ID_WHEEL_LEFT = 1,
-	ID_WHEEL_RIGHT = 2,
-	ID_WHEEL_BACK = 3,
-	ID_COILGUN = 4,
-	ID_OBJECT_COUNT
+enum WHEEL_ID {
+	ID_WHEEL_FRONT_1 = 1,
+	ID_WHEEL_FRONT_2 = 2,
+	ID_WHEEL_BACK_1 = 3,
+	ID_WHEEL_BACK_2 = 4,
+	WHEEL_COUNT
 };
-const int ID_AUDRINO = 5;
+
+const int ID_COILGUN = 4;
+const int ID_ARDUINO = 5;
 enum OBJECT
 {
     BALL = 0, GATE1, GATE2, FIELD, INNER_BORDER, OUTER_BORDER, NUMBER_OF_OBJECTS, SIGHT_MASK

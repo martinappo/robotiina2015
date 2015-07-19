@@ -11,14 +11,18 @@ private:
 	const std::string prefix = "/dev/ttyACM";
 #endif
 
+	std::string CheckPort(boost::asio::io_service &io_service, const std::string &port);
+
 public:
 	ComPortScanner();
-	bool Verify(boost::asio::io_service &io_service, const std::string &conf_file = "conf/ports.ini");
 	bool VerifyObject(boost::asio::io_service &io_service, const std::string &conf_file, int id);
+
+	bool VerifyWheels(boost::asio::io_service &io_service, const std::string &conf_file = "conf/ports.ini");
+	bool VerifyCoilboard(boost::asio::io_service &io_service, const std::string &conf_file = "conf/ports.ini");
+	bool VerifyAll(boost::asio::io_service &io_service, const std::string &conf_file = "conf/ports.ini");
 
 	bool Scan(boost::asio::io_service &io_service);
 	bool ScanObject(boost::asio::io_service &io_service, const std::string &conf_file, int id);
-	std::string CheckPort(boost::asio::io_service &io_service, const std::string &port);
 	~ComPortScanner();
 };
 
