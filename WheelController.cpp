@@ -80,9 +80,9 @@ void WheelController::Rotate(bool direction, double speed)
 {
 	DriveRotate(0,0, direction ? speed : -speed);
 }
-void WheelController::Drive(double velocity, double direction)
+void WheelController::Drive(double velocity, double direction, double rotate)
 {
-	DriveRotate(velocity, direction, 0);
+	DriveRotate(velocity, direction, rotate);
 }
 
 void WheelController::DriveRotate(double velocity, double direction, double rotate)
@@ -136,7 +136,7 @@ cv::Point3d WheelController::CalculateWheelSpeeds(double velocity, double direct
 }
 void WheelController::Stop()
 {
-	Drive(0,0);
+	Drive(0,0,0);
 }
 
 bool WheelController::IsStalled()

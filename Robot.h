@@ -24,7 +24,6 @@ private:
 	bool wheelsPortsOk;
 	bool arduinoPortsOk;
 
-	HSVColorRangeMap objectThresholds;
     //STATE state = STATE_NONE;
     std::atomic<STATE> state;
 	std::atomic<STATE> last_state;

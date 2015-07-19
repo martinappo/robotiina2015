@@ -131,7 +131,7 @@ class CoilGun;
 class WheelController;
 class Arduino;
 
-class NewAutoPilot /*: public IAutoPilot*/
+class NewAutoPilot : public IFieldStateListener
 {
 	friend class Idle;
 	friend class DriveToBall;
@@ -192,6 +192,7 @@ protected:
 	void WriteInfoOnScreen();
 public:
 	NewAutoPilot(WheelController *wheels, CoilGun *coilgun, Arduino *arduino);
+	virtual void OnFieldStateChanged(const FieldState &state);
 	void UpdateState(ObjectPosition *ballLocation, ObjectPosition *gateLocation, bool ballInTribbler, bool sightObstructed, bool somethingOnWay, int borderDistance, cv::Point2i ballCount);
 	void setTestMode(NewDriveMode mode);
 	void enableTestMode(bool enable);
