@@ -16,37 +16,37 @@ WheelController::WheelController() : ThreadedClass("WheelController")
 	targetSpeed = { 0, 0, 0 };
 };
 
-void WheelController::InitWheels(boost::asio::io_service &io, bool useDummyPorts/* = false*/)
+void WheelController::InitDummyWheels()
+{
+	w_left = new SoftwareWheel("left");
+	w_left->Start();
+	w_right = new SoftwareWheel("right");
+	w_right->Start();
+	w_back = new SoftwareWheel("back");
+	w_back->Start();	
+	Start();
+}
+
+void WheelController::InitWheels(boost::asio::io_service &io)
 {
 	using boost::property_tree::ptree;
 	ptree pt;
-	if (useDummyPorts) {
-		w_left = new SoftwareWheel("left");
-		w_right = new SoftwareWheel("right");
-		w_back = new SoftwareWheel("back");
+	read_ini("conf/ports.ini", pt);
 
-	}
-	else {
-		read_ini("conf/ports.ini", pt);
+	std::cout << "left wheel " << std::to_string(ID_WHEEL_FRONT_1) << " " << pt.get<std::string>(std::to_string(ID_WHEEL_FRONT_1)) << std::endl;
+	w_left = new SerialWheel(io, pt.get<std::string>(std::to_string(ID_WHEEL_FRONT_1)), 115200, "left");
 
-		std::cout << "left wheel " << std::to_string(ID_WHEEL_LEFT) << " " << pt.get<std::string>(std::to_string(ID_WHEEL_LEFT)) << std::endl;
-		w_left = new SerialWheel(io, pt.get<std::string>(std::to_string(ID_WHEEL_LEFT)), 115200, "left");
+	std::cout << "right wheel " << std::to_string(ID_WHEEL_FRONT_2) << " " << pt.get<std::string>(std::to_string(ID_WHEEL_FRONT_2)) << std::endl;
+	w_right = new SerialWheel(io, pt.get<std::string>(std::to_string(ID_WHEEL_FRONT_2)), 115200, "right");
 
+	std::cout << "back wheel " << std::to_string(ID_WHEEL_BACK_1) << " " << pt.get<std::string>(std::to_string(ID_WHEEL_BACK_1)) << std::endl;
+	w_back = new SerialWheel(io, pt.get<std::string>(std::to_string(ID_WHEEL_BACK_1)), 115200, "back");
+	std::cout << "wheels done" << std::endl;
 
-		std::cout << "right wheel " << std::to_string(ID_WHEEL_RIGHT) << " " << pt.get<std::string>(std::to_string(ID_WHEEL_RIGHT)) << std::endl;
-		w_right = new SerialWheel(io, pt.get<std::string>(std::to_string(ID_WHEEL_RIGHT)), 115200, "right");
-
-
-		std::cout << "back wheel " << std::to_string(ID_WHEEL_BACK) << " " << pt.get<std::string>(std::to_string(ID_WHEEL_BACK)) << std::endl;
-		w_back = new SerialWheel(io, pt.get<std::string>(std::to_string(ID_WHEEL_BACK)), 115200, "back");
-		std::cout << "wheels done" << std::endl;
-
-	}
 	w_left->Start();
 	w_right->Start();
 	w_back->Start();
 	Start();
-
 }
 
 void WheelController::DestroyWheels()

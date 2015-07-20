@@ -102,7 +102,6 @@ Robot::~Robot()
 	std::cout << "arduino " << arduino << std::endl;
 	if (arduino)
 		delete arduino;
-
 }
 
 bool Robot::Launch(int argc, char* argv[])
@@ -110,90 +109,112 @@ bool Robot::Launch(int argc, char* argv[])
 	if (!ParseOptions(argc, argv)) return false;
 
 	// Compose robot from its parts
+
+	wheels = new WheelController();
+	captureFrames = config.count("capture-frames") > 0;
+	coilBoardPortsOk = false;
+	wheelsPortsOk = false;
+
+	initCamera();
+	initPorts();
+	initWheels();
+	initCoilboard();
+	initArduino();
+
+	std::cout << "Done initializing" << std::endl;
+	std::cout << "Starting Robot" << std::endl;
+    Run();
+	return true;
+}
+
+void Robot::initCamera()
+{
+
 	std::cout << "Initializing camera... " << std::endl;
 	if (config.count("camera"))
 		camera = new Camera(config["camera"].as<std::string>());
 	else
 		camera = new Camera(0);
 	std::cout << "Done" << std::endl;
+}
 
-	captureFrames = config.count("capture-frames") > 0;
 
-	wheels = new WheelController();
-
-	bool portsOk = false;
+void Robot::initPorts()
+{
 	if (config.count("skip-ports")) {
 		std::cout << "Skiping COM port check" << std::endl;
-		portsOk = true;
+		coilBoardPortsOk = true;
+		wheelsPortsOk = true;
 	}
 	else {
 		std::cout << "Checking COM ports... " << std::endl;
-		{ // new scope for scanner variable
-			ComPortScanner scanner;
-			if ((portsOk = scanner.Verify(io)) == false){
-				std::cout << "Chek failed, rescanning all ports" << std::endl;
-				portsOk = scanner.Scan(io);
-			}
+		ComPortScanner scanner;
+		if ((scanner.VerifyAll(io)) == false) {
+			std::cout << "Ports check failed, rescanning all ports" << std::endl;
+			scanner.Scan(io);
 		}
-		std::cout << "Done" << std::endl;
+		wheelsPortsOk = scanner.VerifyWheels(io);
+		coilBoardPortsOk = scanner.VerifyCoilboard(io);
 	}
-	if (portsOk) {
-		std::cout << "Initializing Wheels... " << std::endl;
-		try {
-			wheels->InitWheels(io, config.count("skip-ports") > 0);
-			std::cout << "Initializing Coilgun... " << std::endl;
-			{
-				if (config.count("skip-ports") == 0) {
-					using boost::property_tree::ptree;
-					ptree pt;
-					read_ini("conf/ports.ini", pt);
-					std::string port = pt.get<std::string>(std::to_string(ID_COILGUN));
+}
 
-					coilBoard = new CoilBoard(io, port);
-				}
-				else {
-					coilBoard = new CoilGun();
-				}
-	
-			}
+void Robot::initWheels()
+{
+	if (wheelsPortsOk) {
+		std::cout << "Using real wheels" << std::endl;
+		try {
+			wheels->InitWheels(io);
 		}
 		catch (...) {
-                throw;
-			//throw std::runtime_error("error to open wheel port(s)");
+			throw;
 		}
-		std::cout << "Done" << std::endl;
-		std::cout << "Initializing Arduino... " << std::endl;
-				if (config.count("skip-ports") == 0) {
-					ComPortScanner scanner2;
-					if ((portsOk = scanner2.VerifyObject(io, "arduino", ID_AUDRINO)) == false){
-						std::cout << "Chek failed, rescanning all ports" << std::endl;
-						portsOk = scanner2.ScanObject(io, "arduino", ID_AUDRINO);
-					}
-					if (portsOk) {
-						using boost::property_tree::ptree;
-						ptree pt;
-						read_ini("conf/arduino.ini", pt);
-						std::string port2 = pt.get<std::string>(std::to_string(ID_AUDRINO));
-
-						arduino = new ArduinoBoard(io, port2);
-					} else {
-						arduino = new Arduino();
-					}
-				}
-				else {
-					coilBoard = new CoilGun();
-					arduino = new Arduino();
-				}
-		std::cout << "Done" << std::endl;
-		
 	}
 	else {
-		throw std::runtime_error("unable find wheels use \"--skip-ports\" parameter to launch without wheels ");
+		std::cout << "WARNING: Using dummy wheels" << std::endl;
+		wheels->InitDummyWheels();
 	}
+	
+}
 
-	std::cout << "Starting Robot" << std::endl;
-    Run();
-	return true;
+void Robot::initCoilboard() {
+	if (coilBoardPortsOk) {
+		std::cout << "Using coilgun" << std::endl;
+		try {
+			using boost::property_tree::ptree;
+			ptree pt;
+			read_ini("conf/ports.ini", pt);
+			std::string port = pt.get<std::string>(std::to_string(ID_COILGUN));
+			coilBoard = new CoilBoard(io, port);
+		}
+		catch (...) {
+			throw;
+		}
+	}
+	else {
+		std::cout << "WARNING: Not using coilgun" << std::endl;
+		coilBoard = new CoilGun();
+	}
+}
+
+void Robot::initArduino() {
+	std::cout << "Initializing Arduino... " << std::endl;
+
+	ComPortScanner scanner2;
+	if ((arduinoPortsOk = scanner2.VerifyObject(io, "arduino", ID_ARDUINO)) == false) {
+		std::cout << "Chek failed, rescanning all ports" << std::endl;
+		arduinoPortsOk = scanner2.ScanObject(io, "arduino", ID_ARDUINO);
+	}
+	if (arduinoPortsOk) {
+		using boost::property_tree::ptree;
+		ptree pt;
+		read_ini("conf/arduino.ini", pt);
+		std::string port2 = pt.get<std::string>(std::to_string(ID_ARDUINO));
+
+		arduino = new ArduinoBoard(io, port2);
+	}
+	else {
+		arduino = new Arduino();
+	}
 }
 
 void Robot::Run()
@@ -228,9 +249,9 @@ void Robot::Run()
 	controlModule.Init(wheels, coilBoard);
 	//RobotTracker tracker(wheels);
 
+
 	cv::Mat frameBGR = visionModule.GetFrame();
 	AutoCalibrator calibrator(frameBGR.size());
-
 
 	
 	std::stringstream subtitles;
@@ -262,6 +283,7 @@ void Robot::Run()
 			videoRecorder.RecordFrame(display, subtitles.str());
 		}
 #endif
+
 
 		std::ostringstream oss;
 		oss.precision(4);
@@ -449,8 +471,12 @@ void Robot::Run()
 		//subtitles << oss.str();
 		subtitles << "|" << autoPilot.GetDebugInfo();
 		subtitles << "|" << wheels->GetDebugInfo();
-		subtitles << "|" << arduino->GetDebugInfo();
-
+		if (!wheelsPortsOk) {
+			subtitles << "|" << "WARNING: real wheels not connected!";
+		}
+		if (!coilBoardPortsOk) {
+			subtitles << "   " << "WARNING: coilgun not connected!";
+		}
 
 		cv::putText(display, "fps: " + std::to_string(fps), cv::Point(display.cols - 140, 20), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 		//assert(STATE_END_OF_GAME != state);

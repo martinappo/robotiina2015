@@ -26,7 +26,8 @@ protected:
 	cv::Point3d GetWheelSpeeds();
 public:
 	WheelController();
-	void InitWheels(boost::asio::io_service &io, bool useDummyPorts = false);
+	void InitWheels(boost::asio::io_service &io);
+	void WheelController::InitDummyWheels();
 	void Forward(int speed);
 	void rotateBack(int speed);
 	bool directControl = false;
