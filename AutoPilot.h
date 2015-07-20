@@ -6,7 +6,6 @@
 
 class CoilGun;
 class WheelController;
-class Arduino;
 enum DriveMode {
 	IDLE = 0,
 	LOCATE_BALL,
@@ -23,7 +22,6 @@ class AutoPilot: public IAutoPilot
 private:
 	WheelController *wheels;
 	CoilGun *coilgun;
-	Arduino *arduino;
 	ObjectPosition lastBallLocation;
 	ObjectPosition lastGateLocation;
 	ObjectPosition lastHomeGateLocation;
@@ -56,7 +54,7 @@ protected:
 	void Step();
 	void WriteInfoOnScreen();
 public:
-	AutoPilot(WheelController *wheels, CoilGun *coilgun, Arduino *arduino);
+	AutoPilot(WheelController *wheels, CoilGun *coilgun);
 	void UpdateState(ObjectPosition *ballLocation, ObjectPosition *gateLocation, bool ballInTribbler, bool sightObstructed, bool somethingOnWay, int borderDistance);
 	void Run();
 	virtual ~AutoPilot();

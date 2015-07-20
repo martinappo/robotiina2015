@@ -16,9 +16,6 @@
     <ClCompile Include="ThreadedClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Arduino.cpp">
-      <Filter>ComModule</Filter>
-    </ClCompile>
     <ClCompile Include="autocalibrator.cpp">
       <Filter>VisionModule</Filter>
     </ClCompile>
@@ -149,9 +146,6 @@
     </ClInclude>
     <ClInclude Include="BallFinder.h">
       <Filter>VisionModule</Filter>
-    </ClInclude>
-    <ClInclude Include="Arduino.h">
-      <Filter>ComModule</Filter>
     </ClInclude>
     <ClInclude Include="autocalibrator.h">
       <Filter>VisionModule</Filter>

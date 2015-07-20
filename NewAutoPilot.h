@@ -129,7 +129,6 @@ public:
 
 class CoilGun;
 class WheelController;
-class Arduino;
 
 class NewAutoPilot : public IFieldStateListener
 {
@@ -151,7 +150,6 @@ private:
 	std::map<NewDriveMode, DriveInstruction*>::iterator curDriveMode;
 	WheelController *wheels;
 	CoilGun *coilgun;
-	Arduino *arduino;
 	ObjectPosition lastBallLocation;
 	ObjectPosition lastGateLocation;
 	ObjectPosition lastHomeGateLocation;
@@ -191,7 +189,7 @@ protected:
 	void Step();
 	void WriteInfoOnScreen();
 public:
-	NewAutoPilot(WheelController *wheels, CoilGun *coilgun, Arduino *arduino);
+	NewAutoPilot(WheelController *wheels, CoilGun *coilgun);
 	virtual void OnFieldStateChanged(const FieldState &state);
 	void UpdateState(ObjectPosition *ballLocation, ObjectPosition *gateLocation, bool ballInTribbler, bool sightObstructed, bool somethingOnWay, int borderDistance, cv::Point2i ballCount);
 	void setTestMode(NewDriveMode mode);

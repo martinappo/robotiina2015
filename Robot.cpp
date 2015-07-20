@@ -8,7 +8,6 @@
 #include "dialog.h"
 #include "wheel.h"
 #include "ComPortScanner.h"
-#include "Arduino.h"
 
 #include <opencv2/opencv.hpp>
 #include <chrono>
@@ -79,7 +78,7 @@ void dance_step(float time, float &move1, float &move2) {
 
 /* END DANCE MOVES */
 
-Robot::Robot(boost::asio::io_service &io) : Dialog("Robotiina"), io(io), camera(0), wheels(0), coilBoard(0),arduino(0)
+Robot::Robot(boost::asio::io_service &io) : Dialog("Robotiina"), io(io), camera(0), wheels(0), coilBoard(0)
 {
 	
 	last_state = STATE_END_OF_GAME;
@@ -99,9 +98,6 @@ Robot::~Robot()
 	std::cout << "wheels " << wheels << std::endl;
 	if(wheels)
         delete wheels;
-	std::cout << "arduino " << arduino << std::endl;
-	if (arduino)
-		delete arduino;
 }
 
 bool Robot::Launch(int argc, char* argv[])
@@ -119,7 +115,6 @@ bool Robot::Launch(int argc, char* argv[])
 	initPorts();
 	initWheels();
 	initCoilboard();
-	initArduino();
 
 	std::cout << "Done initializing" << std::endl;
 	std::cout << "Starting Robot" << std::endl;
@@ -196,27 +191,6 @@ void Robot::initCoilboard() {
 	}
 }
 
-void Robot::initArduino() {
-	std::cout << "Initializing Arduino... " << std::endl;
-
-	ComPortScanner scanner2;
-	if ((arduinoPortsOk = scanner2.VerifyObject(io, "arduino", ID_ARDUINO)) == false) {
-		std::cout << "Chek failed, rescanning all ports" << std::endl;
-		arduinoPortsOk = scanner2.ScanObject(io, "arduino", ID_ARDUINO);
-	}
-	if (arduinoPortsOk) {
-		using boost::property_tree::ptree;
-		ptree pt;
-		read_ini("conf/arduino.ini", pt);
-		std::string port2 = pt.get<std::string>(std::to_string(ID_ARDUINO));
-
-		arduino = new ArduinoBoard(io, port2);
-	}
-	else {
-		arduino = new Arduino();
-	}
-}
-
 void Robot::Run()
 {
 	double fps = 0;
@@ -242,7 +216,7 @@ void Robot::Run()
 	}
 	*/
 
-	NewAutoPilot autoPilot(wheels, coilBoard, arduino);
+	NewAutoPilot autoPilot(wheels, coilBoard);
 	FrontCameraVision visionModule;
 	visionModule.Init(camera, this, &autoPilot);
 	ControlModule controlModule;

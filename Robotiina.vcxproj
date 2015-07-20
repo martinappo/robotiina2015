@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -83,7 +83,6 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Arduino.h" />
     <ClInclude Include="autocalibrator.h" />
     <ClInclude Include="AutoPilot.h" />
     <ClInclude Include="BallFinder.h" />
@@ -116,7 +115,6 @@
     <ClInclude Include="wheelcontroller.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Arduino.cpp" />
     <ClCompile Include="autocalibrator.cpp" />
     <ClCompile Include="AutoPilot.cpp" />
     <ClCompile Include="BallFinder.cpp" />

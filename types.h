@@ -48,7 +48,6 @@ enum WHEEL_ID {
 };
 
 const int ID_COILGUN = 4;
-const int ID_ARDUINO = 5;
 
 enum OBJECT
 {

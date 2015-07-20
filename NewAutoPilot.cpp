@@ -1,7 +1,6 @@
 
 #include "NewAutoPilot.h"
 #include "coilBoard.h"
-#include "Arduino.h"
 #include "wheelcontroller.h"
 #include <thread>
 
@@ -22,7 +21,7 @@ std::pair<NewDriveMode, DriveInstruction*> NewDriveModes[] = {
 };
 
 
-NewAutoPilot::NewAutoPilot(WheelController *wheels, CoilGun *coilgun, Arduino *arduino) :wheels(wheels), coilgun(coilgun), arduino(arduino)
+NewAutoPilot::NewAutoPilot(WheelController *wheels, CoilGun *coilgun) :wheels(wheels), coilgun(coilgun)
 , driveModes(NewDriveModes, NewDriveModes + sizeof(NewDriveModes) / sizeof(NewDriveModes[0]))
 {
 	curDriveMode = driveModes.find(DRIVEMODE_IDLE);

@@ -9,7 +9,6 @@ namespace po = boost::program_options;
 class ObjectFinder;
 class WheelController;
 class CoilGun;
-class Arduino;
 
 
 class Robot : public Dialog {
@@ -19,10 +18,8 @@ private:
     ICamera *camera;
     WheelController * wheels;
 	CoilGun *coilBoard;
-	Arduino *arduino;
 	bool coilBoardPortsOk;
 	bool wheelsPortsOk;
-	bool arduinoPortsOk;
 
     //STATE state = STATE_NONE;
     std::atomic<STATE> state;
@@ -32,7 +29,6 @@ private:
 	void initPorts();
 	void initWheels();
 	void initCoilboard();
-	void initArduino();
 
 	void Run();
     boost::mutex remote_mutex;
