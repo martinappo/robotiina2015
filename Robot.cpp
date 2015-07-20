@@ -109,6 +109,7 @@ bool Robot::Launch(int argc, char* argv[])
 {
 	if (!ParseOptions(argc, argv)) return false;
 
+	// Compose robot from its parts
 	std::cout << "Initializing camera... " << std::endl;
 	if (config.count("camera"))
 		camera = new Camera(config["camera"].as<std::string>());
@@ -116,8 +117,10 @@ bool Robot::Launch(int argc, char* argv[])
 		camera = new Camera(0);
 	std::cout << "Done" << std::endl;
 
-	wheels = new WheelController();
 	captureFrames = config.count("capture-frames") > 0;
+
+	wheels = new WheelController();
+
 	bool portsOk = false;
 	if (config.count("skip-ports")) {
 		std::cout << "Skiping COM port check" << std::endl;
@@ -217,6 +220,7 @@ void Robot::Run()
 		boost::filesystem::create_directories(captureDir);
 	}
 	*/
+
 	NewAutoPilot autoPilot(wheels, coilBoard, arduino);
 	FrontCameraVision visionModule;
 	visionModule.Init(camera, this, &autoPilot);
@@ -224,39 +228,16 @@ void Robot::Run()
 	controlModule.Init(wheels, coilBoard);
 	//RobotTracker tracker(wheels);
 
+	cv::Mat frameBGR = visionModule.GetFrame();
+	AutoCalibrator calibrator(frameBGR.size());
 
 
 	
 	std::stringstream subtitles;
-	/*
-	bool gaussianBlurEnabled = false;
-	bool sonarsEnabled = false;
-	bool greenAreaDetectionEnabled = false;
-	bool gateObstructionDetectionEnabled = false;
-	bool borderDetectionEnabled = false;
-	bool nightVisionEnabled = false;
-	*/
 
-	/* Input */
-	/*
-	bool ballInTribbler = false;
-	cv::Point3i sonars = {100,100,100};
-	bool somethingOnWay = false;
-	int mouseControl = 0;
-	*/
 
-	//cv::Mat frameBGR = visionModule.GetFrame();
-	/*
-	cv::Mat white(frameBGR.rows, frameBGR.cols, frameBGR.type(), cv::Scalar(255, 255, 255));
-	cv::Mat black(frameBGR.rows, frameBGR.cols, frameBGR.type(), cv::Scalar(40, 40, 40));
-	cv::Mat green(frameBGR.rows, frameBGR.cols, frameBGR.type(), cv::Scalar(21, 188, 80));
-	cv::Mat yellow(frameBGR.rows, frameBGR.cols, frameBGR.type(), cv::Scalar(61, 255, 244));
-	cv::Mat blue(frameBGR.rows, frameBGR.cols, frameBGR.type(), cv::Scalar(236, 137, 48));
-	cv::Mat orange(frameBGR.rows, frameBGR.cols, frameBGR.type(), cv::Scalar(48, 154, 236));
-	*/
 
 	VideoRecorder videoRecorder("videos/", 30, display.size());
-	AutoCalibrator calibrator(display.size());
 
 	while (true)
     {
@@ -281,16 +262,7 @@ void Robot::Run()
 			videoRecorder.RecordFrame(display, subtitles.str());
 		}
 #endif
-		//
 
-		/**************************************************/
-		/* STEP 5. check if ball is in tribbler			  */
-		/**************************************************/
-		//ballInTribbler = coilBoard->BallInTribbler();
-
-		/**************************************************/
-		/* STEP 7. feed these variables to Autopilot	  */
-		/**************************************************/
 		std::ostringstream oss;
 		oss.precision(4);
 
@@ -344,10 +316,11 @@ void Robot::Run()
 				STATE_BUTTON("E(x)it", STATE_END_OF_GAME)
 			END_DIALOG
 		}
-		/*
+		
 		else if (STATE_AUTOCALIBRATE == state) {
 			START_DIALOG
 				calibrator.reset();
+				frameBGR = visionModule.GetFrame();
 				createButton("Take a screenshot", [this, &frameBGR, &calibrator]{
 					if (calibrator.LoadFrame(frameBGR)) {
 						this->SetState(STATE_CALIBRATE);
@@ -361,14 +334,14 @@ void Robot::Run()
 			START_DIALOG
 				for (int i = 0; i < NUMBER_OF_OBJECTS; i++) {
 					// objectThresholds[(OBJECT) i] = calibrator->GetObjectThresholds(i, OBJECT_LABELS[(OBJECT) i]);
-					createButton(OBJECT_LABELS[(OBJECT)i], [this, i, &frameBGR, &calibrator]{
-						this->objectThresholds[(OBJECT)i] = calibrator.GetObjectThresholds(i, OBJECT_LABELS[(OBJECT)i]);
+					createButton(OBJECT_LABELS[(OBJECT)i], [this, i, &calibrator]{
+						/*this->objectThresholds[(OBJECT)i] =*/ calibrator.GetObjectThresholds(i, OBJECT_LABELS[(OBJECT)i]);
 					});
 				}
 				STATE_BUTTON("BACK", STATE_NONE)
 			END_DIALOG
 		}
-		*/
+		
 		else if (STATE_SELECT_GATE == state) {
 			START_DIALOG
 				createButton(OBJECT_LABELS[GATE1], [this]{
@@ -461,27 +434,6 @@ void Robot::Run()
 			STATE_BUTTON("BACK", STATE_NONE)
 				END_DIALOG
 		}
-		else if (STATE_MANUAL_CONTROL == state) {
-			START_DIALOG
-				createButton("Move Left", [this] {this->wheels->Drive(40, 90,0); });
-				createButton("Move Right", [this]{this->wheels->Drive(40, -90,0); });
-				createButton("Move Forward", [this]{this->wheels->Drive(190, 0,0); });
-				createButton("Move Back", [this]{this->wheels->Drive(-40, 0,0); });
-				createButton("Rotate Right", [this]{this->wheels->Rotate(0, 20); });
-				createButton("Rotate Left", [this]{this->wheels->Rotate(1, 20); });
-				STATE_BUTTON("Back", STATE_NONE)
-			END_DIALOG
-		}
-		else if (STATE_TEST_COILGUN == state) {
-			START_DIALOG
-				createButton("Kick", [this] {this->coilBoard->Kick(); });
-				createButton("Start tribbler", [this]{this->coilBoard->ToggleTribbler(true); });
-				createButton("Stop tribbler", [this]{this->coilBoard->ToggleTribbler(false); });
-				STATE_BUTTON("Back", STATE_NONE)
-			END_DIALOG
-		}
-
-
 		else if (STATE_DANCE == state) {
 			float move1, move2;
 			dance_step(((float)(time - epoch).total_milliseconds()), move1, move2);
@@ -603,9 +555,7 @@ bool Robot::ParseOptions(int argc, char* argv[])
 		("camera", po::value<std::string>(), "set camera index or path")
 		("locate_cursor", "find cursor instead of ball")
 		("skip-ports", "skip ALL COM port checks")
-		("skip-wheels", "skip Wheel COM port checks")
-		("skip-coilgun", "skip Coilgun COM port checks")
-		("skip-arduino", "skip Arduino COM port checks")
+		("skip-missing-ports", "skip missing COM ports")
 		("save-frames", "Save captured frames to disc");
 
 	po::store(po::parse_command_line(argc, argv, desc), config);

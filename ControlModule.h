@@ -1,7 +1,7 @@
 #pragma once
 #include "types.h"
 class ControlModule :
-	public IControlModule
+	public ICommunicationModule
 {
 public:
 	ControlModule();

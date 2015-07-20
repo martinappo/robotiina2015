@@ -38,14 +38,15 @@ struct ObjectPosition /* polar coordinates */
 	double horizontalAngle;
 };
 
-enum OBJECT_ID {
+enum COM_ID {
 	ID_WHEEL_LEFT = 1,
 	ID_WHEEL_RIGHT = 2,
 	ID_WHEEL_BACK = 3,
 	ID_COILGUN = 4,
+	ID_AUDRINO = 5,
 	ID_OBJECT_COUNT
 };
-const int ID_AUDRINO = 5;
+
 enum OBJECT
 {
     BALL = 0, GATE1, GATE2, FIELD, INNER_BORDER, OUTER_BORDER, NUMBER_OF_OBJECTS, SIGHT_MASK
@@ -126,8 +127,12 @@ public:
 
 };
 
-class IControlModule : public IWheelController, public ICoilGun {
+class ICommunicationModule : public IWheelController, public ICoilGun {
 	virtual bool Init(IWheelController * pWheels, ICoilGun *pCoilGun) = 0;
+};
+
+class IControlModule {
+	virtual bool Init(ICommunicationModule * pComModule) = 0;
 };
 
 class IAutoPilot

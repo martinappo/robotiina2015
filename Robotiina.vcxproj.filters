@@ -17,7 +17,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Arduino.cpp">
-      <Filter>ControlModule</Filter>
+      <Filter>ComModule</Filter>
     </ClCompile>
     <ClCompile Include="autocalibrator.cpp">
       <Filter>VisionModule</Filter>
@@ -35,13 +35,10 @@
       <Filter>VisionModule</Filter>
     </ClCompile>
     <ClCompile Include="coilBoard.cpp">
-      <Filter>ControlModule</Filter>
-    </ClCompile>
-    <ClCompile Include="colorcalibrator.cpp">
-      <Filter>ControlModule</Filter>
+      <Filter>ComModule</Filter>
     </ClCompile>
     <ClCompile Include="ComPortScanner.cpp">
-      <Filter>ControlModule</Filter>
+      <Filter>ComModule</Filter>
     </ClCompile>
     <ClCompile Include="GateFinder.cpp">
       <Filter>VisionModule</Filter>
@@ -59,27 +56,33 @@
       <Filter>VisionModule</Filter>
     </ClCompile>
     <ClCompile Include="wheel.cpp">
-      <Filter>ControlModule</Filter>
+      <Filter>ComModule</Filter>
     </ClCompile>
     <ClCompile Include="wheelcontroller.cpp">
-      <Filter>ControlModule</Filter>
+      <Filter>ComModule</Filter>
     </ClCompile>
     <ClCompile Include="NewAutoPilot.cpp">
       <Filter>LogicModule</Filter>
     </ClCompile>
     <ClCompile Include="remotecontrol.cpp">
-      <Filter>ControlModule</Filter>
+      <Filter>ComModule</Filter>
     </ClCompile>
     <ClCompile Include="VideoRecorder.cpp">
       <Filter>VisionModule</Filter>
     </ClCompile>
     <ClCompile Include="ControlModule.cpp">
-      <Filter>ControlModule</Filter>
+      <Filter>ComModule</Filter>
     </ClCompile>
     <ClCompile Include="ConfigurableModule.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FrontCameraVision.cpp">
+      <Filter>VisionModule</Filter>
+    </ClCompile>
+    <ClCompile Include="ManualControl.cpp">
+      <Filter>LogicModule</Filter>
+    </ClCompile>
+    <ClCompile Include="colorcalibrator.cpp">
       <Filter>VisionModule</Filter>
     </ClCompile>
   </ItemGroup>
@@ -100,16 +103,16 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="wheelcontroller.h">
-      <Filter>ControlModule</Filter>
+      <Filter>ComModule</Filter>
     </ClInclude>
     <ClInclude Include="wheel.h">
-      <Filter>ControlModule</Filter>
+      <Filter>ComModule</Filter>
     </ClInclude>
     <ClInclude Include="stillcamera.h">
       <Filter>VisionModule</Filter>
     </ClInclude>
     <ClInclude Include="simpleserial.h">
-      <Filter>ControlModule</Filter>
+      <Filter>ComModule</Filter>
     </ClInclude>
     <ClInclude Include="objectfinder.h">
       <Filter>VisionModule</Filter>
@@ -121,13 +124,13 @@
       <Filter>VisionModule</Filter>
     </ClInclude>
     <ClInclude Include="ComPortScanner.h">
-      <Filter>ControlModule</Filter>
+      <Filter>ComModule</Filter>
     </ClInclude>
     <ClInclude Include="colorcalibrator.h">
       <Filter>VisionModule</Filter>
     </ClInclude>
     <ClInclude Include="coilBoard.h">
-      <Filter>ControlModule</Filter>
+      <Filter>ComModule</Filter>
     </ClInclude>
     <ClInclude Include="camera.h">
       <Filter>VisionModule</Filter>
@@ -136,7 +139,7 @@
       <Filter>VisionModule</Filter>
     </ClInclude>
     <ClInclude Include="blockingreader.h">
-      <Filter>ControlModule</Filter>
+      <Filter>ComModule</Filter>
     </ClInclude>
     <ClInclude Include="NewAutoPilot.h">
       <Filter>LogicModule</Filter>
@@ -148,7 +151,7 @@
       <Filter>VisionModule</Filter>
     </ClInclude>
     <ClInclude Include="Arduino.h">
-      <Filter>ControlModule</Filter>
+      <Filter>ComModule</Filter>
     </ClInclude>
     <ClInclude Include="autocalibrator.h">
       <Filter>VisionModule</Filter>
@@ -160,19 +163,22 @@
       <Filter>VisionModule</Filter>
     </ClInclude>
     <ClInclude Include="remotecontrol.h">
-      <Filter>ControlModule</Filter>
+      <Filter>ComModule</Filter>
     </ClInclude>
     <ClInclude Include="VideoRecorder.h">
       <Filter>VisionModule</Filter>
     </ClInclude>
     <ClInclude Include="ControlModule.h">
-      <Filter>ControlModule</Filter>
+      <Filter>ComModule</Filter>
     </ClInclude>
     <ClInclude Include="ConfigurableModule.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FrontCameraVision.h">
       <Filter>VisionModule</Filter>
+    </ClInclude>
+    <ClInclude Include="ManualControl.h">
+      <Filter>LogicModule</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -193,7 +199,7 @@
     <Filter Include="LogicModule">
       <UniqueIdentifier>{f20e3aaa-c87e-4aec-aa01-c6f335bf8c9f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ControlModule">
+    <Filter Include="ComModule">
       <UniqueIdentifier>{3a5a7f6d-3c34-4499-bc65-5878a73f7087}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
