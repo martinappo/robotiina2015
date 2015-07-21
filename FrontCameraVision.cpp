@@ -2,7 +2,7 @@
 #include "ImageThresholder.h"
 #include "GateFinder.h"
 #include "BallFinder.h"
-#include "autocalibrator.h"
+#include "AutoCalibrator.h"
 
 FrontCameraVision::FrontCameraVision(): ConfigurableModule("FrontCameraVision")
 {

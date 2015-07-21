@@ -1,4 +1,4 @@
-#include "kalmanFilter.h"
+#include "KalmanFilter.h"
 
 KalmanFilter::KalmanFilter(const cv::Point2i &startPoint){
 	KF.transitionMatrix = *(cv::Mat_<float>(4, 4) << 1, 0, 1, 0, 

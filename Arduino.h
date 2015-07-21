@@ -1,7 +1,7 @@
 #pragma once
 #include "types.h"
 #include "ThreadedClass.h"
-#include "simpleserial.h"
+#include "SimpleSerial.h"
 #include <boost/atomic.hpp>
 
 

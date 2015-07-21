@@ -1,5 +1,5 @@
 #include "types.h"
-#include "dialog.h"
+#include "Dialog.h"
 #include <atomic>
 #include <boost/program_options.hpp>
 #include <boost/asio.hpp>

@@ -6,7 +6,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include "simpleserial.h"
+#include "SimpleSerial.h"
 #include <boost/atomic.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/thread/mutex.hpp>

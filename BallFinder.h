@@ -1,5 +1,5 @@
 #pragma once
-#include "objectfinder.h"
+#include "ObjectFinder.h"
 
 class BallFinder :
 	public ObjectFinder

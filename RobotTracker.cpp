@@ -1,6 +1,6 @@
 #include <thread>
 #include "RobotTracker.h"
-#include "wheelcontroller.h"
+#include "WheelController.h"
 
 RobotTracker::RobotTracker(WheelController *wheels) :wheels(wheels)
 {

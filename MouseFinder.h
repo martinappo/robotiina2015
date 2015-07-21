@@ -1,6 +1,6 @@
 #pragma once
-#include "objectfinder.h"
-#include "kalmanFilter.h"
+#include "ObjectFinder.h"
+#include "KalmanFilter.h"
 class MouseFinder :
 	public ObjectFinder
 {

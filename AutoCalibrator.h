@@ -1,5 +1,5 @@
 #pragma once
-#include "colorcalibrator.h"
+#include "ColorCalibrator.h"
 
 class AutoCalibrator : public ColorCalibrator {
 public:

@@ -1,5 +1,5 @@
 #pragma once
-#include "calibrationconfreader.h"
+#include "CalibrationConfReader.h"
 
 class ColorCalibrator : public CalibrationConfReader {
 protected:

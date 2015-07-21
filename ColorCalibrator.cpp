@@ -1,4 +1,4 @@
-#include "colorcalibrator.h"
+#include "ColorCalibrator.h"
 
 
 ColorCalibrator::ColorCalibrator()

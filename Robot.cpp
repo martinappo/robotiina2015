@@ -1,12 +1,12 @@
-#include "robot.h"
-#include "autocalibrator.h"
+#include "Robot.h"
+#include "AutoCalibrator.h"
 
-#include "camera.h"
-#include "stillcamera.h"
-#include "wheelcontroller.h"
-#include "coilBoard.h"
-#include "dialog.h"
-#include "wheel.h"
+#include "Camera.h"
+#include "StillCamera.h"
+#include "WheelController.h"
+#include "CoilBoard.h"
+#include "Dialog.h"
+#include "Wheel.h"
 #include "ComPortScanner.h"
 
 #include <opencv2/opencv.hpp>

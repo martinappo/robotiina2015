@@ -1,6 +1,6 @@
 #pragma  once
 #include "types.h"
-#include "simpleserial.h"
+#include "SimpleSerial.h"
 #include <atomic>
 #include <boost/timer/timer.hpp>
 #include <boost/property_tree/ptree.hpp>
