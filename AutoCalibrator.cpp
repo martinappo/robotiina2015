@@ -3,12 +3,12 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 
-AutoCalibrator::AutoCalibrator(cv::Point frame_size) :frame_size(frame_size)
+AutoCalibrator::AutoCalibrator()
 {
     range = {{0,179},{0,255},{0,255}};
 	reset();
 };
-bool AutoCalibrator::LoadFrame(cv::Mat &image)
+bool AutoCalibrator::LoadFrame()
 {
 	image.copyTo(this->image, mask);
     //ColorCalibrator::LoadImage(image);
@@ -129,7 +129,21 @@ void AutoCalibrator::mouseClicked(int x, int y, int flags) {
 
 }
 AutoCalibrator::~AutoCalibrator(){
-//    cvDestroyWindow("ColorCalibrator");
+	WaitForStop();
+}
+
+bool AutoCalibrator::Init(ICamera * pCamera, IDisplay *pDisplay, IFieldStateListener * pFieldStateListener){
+	m_pCamera = pCamera;
+	m_pDisplay = pDisplay;
+//	Start();
+	return true;
+}
+
+void AutoCalibrator::Run() {
+	while (!stop_thread){
+		image = m_pCamera->Capture();
+		m_pDisplay->ShowImage(image);
+	}
 }
 
 void AutoCalibrator::DetectThresholds(int number_of_objects){

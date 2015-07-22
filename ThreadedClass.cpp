@@ -9,6 +9,7 @@ ThreadedClass::ThreadedClass(const std::string &name): name(name)
 
 void ThreadedClass::Start()
 {
+	running = true;
 	threads.create_thread(boost::bind(&ThreadedClass::Run, this));
 };
 void ThreadedClass::WaitForStop()
@@ -16,6 +17,7 @@ void ThreadedClass::WaitForStop()
 	//std::cout << "Stoping thread: " << name << std::endl;
 	stop_thread = true;
 	threads.join_all();
+	running = false;
 };
 
 ThreadedClass::~ThreadedClass()

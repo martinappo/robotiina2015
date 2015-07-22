@@ -225,8 +225,8 @@ void Robot::Run()
 
 
 	cv::Mat frameBGR = visionModule.GetFrame();
-	AutoCalibrator calibrator(frameBGR.size());
-
+	AutoCalibrator calibrator;
+	calibrator.Init(camera, this, NULL);
 	
 	std::stringstream subtitles;
 
@@ -280,6 +280,9 @@ void Robot::Run()
 		/* Main UI */
 		if (STATE_NONE == state) {
 			START_DIALOG
+				visionModule.Enable(true);
+				calibrator.Enable(false);
+
 				autoPilot.enableTestMode(false);
 				wheels->Stop();
 				STATE_BUTTON("(A)utoCalibrate objects", STATE_AUTOCALIBRATE)
@@ -315,10 +318,11 @@ void Robot::Run()
 		
 		else if (STATE_AUTOCALIBRATE == state) {
 			START_DIALOG
+				visionModule.Enable(false);
+				calibrator.Enable(true);
 				calibrator.reset();
-				frameBGR = visionModule.GetFrame();
-				createButton("Take a screenshot", [this, &frameBGR, &calibrator]{
-					if (calibrator.LoadFrame(frameBGR)) {
+				createButton("Take a screenshot", [this, &calibrator]{
+					if (calibrator.LoadFrame()) {
 						this->SetState(STATE_CALIBRATE);
 					};
 
