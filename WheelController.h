@@ -1,6 +1,6 @@
 #pragma once
 
-#include "wheel.h"
+#include "Wheel.h"
 #include "types.h"
 #include <boost/timer/timer.hpp>
 #include "ThreadedClass.h"
@@ -27,7 +27,7 @@ protected:
 public:
 	WheelController();
 	void InitWheels(boost::asio::io_service &io);
-	void WheelController::InitDummyWheels();
+	void InitDummyWheels();
 	void Forward(int speed);
 	void rotateBack(int speed);
 	bool directControl = false;

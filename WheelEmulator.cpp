@@ -1,5 +1,5 @@
 
-#include "wheelemulator.h"
+#include "WheelEmulator.h"
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/thread/thread.hpp>
 #include <sstream>

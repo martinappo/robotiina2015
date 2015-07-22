@@ -1,4 +1,4 @@
-#include "stillcamera.h"
+#include "StillCamera.h"
 
 StillCamera::StillCamera(const std::string &fileName)
 {

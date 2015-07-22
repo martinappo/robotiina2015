@@ -1,7 +1,7 @@
 #pragma once
-#include "colorcalibrator.h"
 #include "ThreadedClass.h"
 //#include "ConfigurableModule.h"
+#include "ColorCalibrator.h"
 
 class AutoCalibrator : public ColorCalibrator,
 	/*public ConfigurableModule,*/ public IVisionModule, public ThreadedClass{

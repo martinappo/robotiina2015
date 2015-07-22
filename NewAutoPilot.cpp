@@ -1,7 +1,7 @@
 
 #include "NewAutoPilot.h"
-#include "coilBoard.h"
-#include "wheelcontroller.h"
+#include "CoilBoard.h"
+#include "WheelController.h"
 #include <thread>
 
 std::pair<NewDriveMode, DriveInstruction*> NewDriveModes[] = {

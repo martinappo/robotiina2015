@@ -2,8 +2,8 @@
 //
 
 //#include "stdafx.h"
-#include "robot.h"
-#include "remotecontrol.h"
+#include "Robot.h"
+#include "RemoteControl.h"
 
 
 int main(int argc, char *argv[])

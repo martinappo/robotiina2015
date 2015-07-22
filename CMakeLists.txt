@@ -37,11 +37,11 @@ include_directories(${Boost_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 
 #endif()
 
-set(SOURCE_FILES Robotiina.cpp camera.cpp stillcamera.cpp robot.cpp objectfinder.cpp colorcalibrator.cpp autocalibrator.cpp wheelcontroller.cpp calibrationconfreader.cpp dialog.cpp wheel.cpp remotecontrol.cpp MouseFinder.cpp ComPortScanner.cpp coilBoard.cpp AutoPilot.cpp RobotTracker.cpp ThreadedClass.cpp kalmanFilter.cpp VideoRecorder.cpp Arduino.cpp NewAutoPilot.cpp GateFinder.cpp BallFinder.cpp)
+set(SOURCE_FILES Robotiina.cpp Camera.cpp FrontCameraVision.cpp ManualControl.cpp ConfigurableModule.cpp ControlModule.cpp StillCamera.cpp Robot.cpp ObjectFinder.cpp ColorCalibrator.cpp AutoCalibrator.cpp WheelController.cpp CalibrationConfReader.cpp Dialog.cpp Wheel.cpp RemoteControl.cpp MouseFinder.cpp ComPortScanner.cpp CoilBoard.cpp AutoPilot.cpp RobotTracker.cpp ThreadedClass.cpp KalmanFilter.cpp VideoRecorder.cpp Arduino.cpp NewAutoPilot.cpp GateFinder.cpp BallFinder.cpp)
 add_executable(robotiina ${SOURCE_FILES})
 target_link_libraries( robotiina  ${OpenCV_LIBS} ${Boost_LIBRARIES} ${WINSOCK_LIB} ${WINSOCK2_LIB})
 
-set(WHEELEMULATOR_FILES wheelemulator.cpp)
+set(WHEELEMULATOR_FILES WheelEmulator.cpp)
 add_executable(wheelemulator ${WHEELEMULATOR_FILES})
 target_link_libraries( wheelemulator ${OpenCV_LIBS} ${Boost_LIBRARIES} ${WINSOCK_LIB})
 

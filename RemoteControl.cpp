@@ -1,6 +1,6 @@
 #include "types.h"
-#include "robot.h"
-#include "remotecontrol.h"
+#include "Robot.h"
+#include "RemoteControl.h"
 #include <sstream>
 #include <iostream>
 

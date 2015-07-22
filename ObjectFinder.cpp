@@ -1,4 +1,4 @@
-#include "objectfinder.h"
+#include "ObjectFinder.h"
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 #include <math.h>

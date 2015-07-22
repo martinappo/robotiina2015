@@ -1,4 +1,4 @@
-#include "coilBoard.h"
+#include "CoilBoard.h"
 #include <chrono>
 #include <thread>
 #define TRIBBLER_QUEUE_SIZE 30
