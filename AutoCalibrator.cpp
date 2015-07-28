@@ -2,33 +2,53 @@
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
+#include <chrono>
+#include <thread>
 
 AutoCalibrator::AutoCalibrator()
 {
     range = {{0,179},{0,255},{0,255}};
-	reset();
+	screenshot_mode = true;
+//	reset();
 };
 bool AutoCalibrator::LoadFrame()
 {
-	image.copyTo(this->image, mask);
+	// lock mutex
+	//image.copyTo(this->image, mask);
+	m_pDisplay->ShowImage(white);
     //ColorCalibrator::LoadImage(image);
-
     //float data[6][3] = {{1, 0, 0/*blue*/}, {0, 0, 1 /* orange*/}, {1 ,1, 0 /* yellow*/}, {0,1, 0}/*green*/, {1,1,1}, {0,0,0}};
 	//bestLabels = cv::Mat(6, 3, CV_32F, &data); //BGR
-	frames++;
-	if (frames >= max_image_count) {
-		DetectThresholds(32);
-		return true;
+	cv::Mat thumb(frame_size.y / 2, frame_size.x / 2, CV_8U, cv::Scalar::all(0));
+	{
+		boost::mutex::scoped_lock lock(mutex); //allow one command at a time
+		resize(frameBGR, thumb, thumb.size());//resize image
+		if (frames == 0){
+			frameBGR.copyTo(image);
+		}
 	}
-	mask = cv::Mat(frame_size.y, frame_size.x, CV_8U, cv::Scalar::all(0));
-	if (frames == 1) {
-		cv::rectangle(mask, cv::Point(frame_size.x / 2, 0), cv::Point(frame_size.x, frame_size.y / 2), cv::Scalar::all(255), -1);
+	cv::Mat roi;
+	if (frames ==	0) {
+		roi = image(cv::Rect(0, 0, frame_size.x / 2, frame_size.y / 2));
+	}
+	else if (frames == 1) {
+		roi = image(cv::Rect(frame_size.x/2, 0, frame_size.x/2, frame_size.y / 2));
 	}
 	else if (frames == 2) {
-		cv::rectangle(mask, cv::Point(0, frame_size.y / 2), cv::Point(frame_size.x/2, frame_size.y), cv::Scalar::all(255), -1);
+		roi = image(cv::Rect(0, frame_size.y/2, frame_size.x / 2, frame_size.y/2));
 	}
 	else if (frames == 3) {
-		cv::rectangle(mask, cv::Point(frame_size.x / 2, frame_size.y / 2), cv::Point(frame_size.x, frame_size.y), cv::Scalar::all(255), -1);
+		roi = image(cv::Rect(frame_size.x/2,  frame_size.y/2, frame_size.x/2, frame_size.y/2));
+	}
+	thumb.copyTo(roi);
+	frames++;
+	cv::imshow("mosaic", image); //show the thresholded image
+	if (frames >= max_image_count) {
+		cv::imshow("mosaic", image); //show the thresholded image
+		//DetectThresholds(32);
+		screenshot_mode = false;
+
+		return true;
 	}
 
 	return false;
@@ -57,11 +77,14 @@ HSVColorRange AutoCalibrator::GetObjectThresholds (int index, const std::string 
     done = false;
     while (!done)
     {
+		std::this_thread::sleep_for(std::chrono::milliseconds(30)); // do not poll serial to fast
+		/*
         if (cv::waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
         {
             std::cout << "esc key is pressed by user" << std::endl;
             done = true;
         }
+		*/
     }
     cvDestroyWindow(name.c_str());
     SaveConf(name);
@@ -135,14 +158,22 @@ AutoCalibrator::~AutoCalibrator(){
 bool AutoCalibrator::Init(ICamera * pCamera, IDisplay *pDisplay, IFieldStateListener * pFieldStateListener){
 	m_pCamera = pCamera;
 	m_pDisplay = pDisplay;
+	frame_size = m_pCamera->GetFrameSize();
 //	Start();
 	return true;
 }
 
 void AutoCalibrator::Run() {
-	while (!stop_thread){
-		image = m_pCamera->Capture();
-		m_pDisplay->ShowImage(image);
+	while (!stop_thread)
+	{
+		boost::mutex::scoped_lock lock(mutex); //allow one command at a time
+		if (screenshot_mode){
+			frameBGR = m_pCamera->Capture();
+			m_pDisplay->ShowImage(frameBGR);
+		}
+		else{
+			m_pDisplay->ShowImage(image);
+		}
 	}
 }
 

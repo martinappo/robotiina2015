@@ -29,19 +29,19 @@ Dialog::Dialog(const std::string &title, int flags/* = CV_WINDOW_AUTOSIZE*/) {
 
 };
 void Dialog::ShowImage(const cv::Mat image) {
-	boost::mutex::scoped_lock lock(mutex); //allow one command at a time
+	boost::mutex::scoped_lock lock(display_mutex); //allow one command at a time
 	resize(image, cam_area, cv::Size(CAM_WIDTH, CAM_HEIGHT));//resize image
 	//resize(image, display, cv::Size(WINDOW_WIDTH, WINDOW_HEIGHT));//resize image
 }
 
 int Dialog::createButton(const std::string& bar_name, std::function<void()> const & on_change){
-	boost::mutex::scoped_lock lock(mutex); //allow one command at a time
+	boost::mutex::scoped_lock lock(click_mutex); //allow one command at a time
 	m_buttons.push_back(std::make_tuple(bar_name, on_change));
 	return 0;
 };
 
 void Dialog::clearButtons() {
-	boost::mutex::scoped_lock lock(mutex); //allow one command at a time
+	boost::mutex::scoped_lock lock(click_mutex); //allow one command at a time
 	m_buttons.clear();
 }
 
@@ -51,7 +51,7 @@ void Dialog::ClearDisplay() {
 }
 
 int Dialog::show(const cv::Mat background) {
-	boost::mutex::scoped_lock lock(mutex); //allow one command at a time
+	boost::mutex::scoped_lock lock(click_mutex); //allow one command at a time
 	//cv::Mat image;
 	//background.copyTo(image);
     //int window_width = image.cols;
@@ -70,7 +70,7 @@ int Dialog::show(const cv::Mat background) {
 };
 
 void Dialog::mouseClicked(int x, int y) {
-	boost::mutex::scoped_lock lock(mutex); //allow one command at a time
+	boost::mutex::scoped_lock lock(click_mutex); //allow one command at a time
 	int index = round((float)y / m_buttonHeight) - 1;
     if (index < m_buttons.size()){
         auto button = m_buttons[index];

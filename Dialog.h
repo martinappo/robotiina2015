@@ -31,6 +31,7 @@ private:
     std::string m_title;
 	std::vector<std::tuple<std::string, std::function<void()>>> m_buttons;
     int m_buttonHeight = 60; /* calculated automatically*/
-	boost::mutex mutex;
+	boost::mutex click_mutex;
+	boost::mutex display_mutex;
 
 };

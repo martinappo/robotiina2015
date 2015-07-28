@@ -9,6 +9,10 @@ Camera::Camera(const std::string &device)
     {
 		throw std::runtime_error("Camera not found");
     }
+
+	frameSize = cv::Size((int)cap->get(CV_CAP_PROP_FRAME_WIDTH),    // Acquire input size
+		(int)cap->get(CV_CAP_PROP_FRAME_HEIGHT));
+
 	//cap->set(CV_CAP_PROP_FPS, 60);
 	//cap->set(CV_CAP_PROP_FRAME_WIDTH, 1280);
 	//cap->set(CV_CAP_PROP_FRAME_HEIGHT, 720);
@@ -46,10 +50,9 @@ Camera::Camera(int device)
 
 const cv::Mat &Camera::Capture()
 {
-	if (cap->isOpened())
-		
+	if (cap->isOpened()){
 		*cap >> frame;
-		
+	}
 	if (frame.size().height > 0) {
 		frame.copyTo(lastframe);
 	}

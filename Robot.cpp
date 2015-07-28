@@ -138,8 +138,8 @@ void Robot::initPorts()
 {
 	if (config.count("skip-ports")) {
 		std::cout << "Skiping COM port check" << std::endl;
-		coilBoardPortsOk = true;
-		wheelsPortsOk = true;
+		coilBoardPortsOk = false;
+		wheelsPortsOk = false;
 	}
 	else {
 		std::cout << "Checking COM ports... " << std::endl;
@@ -224,7 +224,7 @@ void Robot::Run()
 	//RobotTracker tracker(wheels);
 
 
-	cv::Mat frameBGR = visionModule.GetFrame();
+	//cv::Mat frameBGR = visionModule.GetFrame();
 	AutoCalibrator calibrator;
 	calibrator.Init(camera, this, NULL);
 	

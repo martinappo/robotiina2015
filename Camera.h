@@ -17,5 +17,8 @@ public:
 		cap->release();
 		delete cap;
 	}
+	virtual cv::Size GetFrameSize(){
+		return frameSize;
+	};
 
 };
