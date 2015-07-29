@@ -64,6 +64,8 @@ std::pair<STATE, std::string> states[] = {
 	std::pair<STATE, std::string>(STATE_TEST_COILGUN, "Test CoilGun"),
 	std::pair<STATE, std::string>(STATE_SELECT_GATE, "Select Gate"),
 	std::pair<STATE, std::string>(STATE_DANCE, "Dance"),
+	std::pair<STATE, std::string>(STATE_REINIT_WHEELS, "Reinit wheels"),
+	std::pair<STATE, std::string>(STATE_REINIT_COILBOARD, "Reinit coilboard"),
 	//	std::pair<STATE, std::string>(STATE_END_OF_GAME, "End of Game") // this is intentionally left out
 
 };
@@ -313,6 +315,8 @@ void Robot::Run()
 					this->last_state = STATE_END_OF_GAME; // force dialog redraw
 				});
 				STATE_BUTTON("Settings", STATE_SETTINGS)
+				STATE_BUTTON("Reinit wheels", STATE_REINIT_WHEELS)
+				STATE_BUTTON("Reinit coilboard", STATE_REINIT_COILBOARD)
 				STATE_BUTTON("Manual (C)ontrol", STATE_MANUAL_CONTROL)
 				STATE_BUTTON("(T)est CoilGun", STATE_TEST_COILGUN)
 				STATE_BUTTON("(T)est Autopilot", STATE_TEST)
@@ -444,6 +448,16 @@ void Robot::Run()
 			wheels->Drive(move1, move2,0);
 			//cv::putText(frameBGR, "move1:" + std::to_string(move1), cv::Point(frameBGR.cols - 140, 120), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 			//cv::putText(frameBGR, "move2:" + std::to_string(move2), cv::Point(frameBGR.cols - 140, 140), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
+		}
+		else if (STATE_REINIT_WHEELS == state) {
+			initPorts();
+			initWheels();
+			SetState(STATE_NONE);
+		}
+		else if (STATE_REINIT_COILBOARD == state) {
+			initPorts();
+			initCoilboard();
+			SetState(STATE_NONE);
 		}
 		else if (STATE_END_OF_GAME == state) {
 			break;
