@@ -15,6 +15,12 @@ Dialog::Dialog(const std::string &title, int flags/* = CV_WINDOW_AUTOSIZE*/) {
 	//cvSetWindowProperty(m_title.c_str(), CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
 	cv::moveWindow(m_title, 0, 0);
 	cv::setMouseCallback(m_title, [](int event, int x, int y, int flags, void* self) {
+		for (auto pListener : ((Dialog*)self)->m_EventListeners){
+			if (pListener->OnMouseEvent(event, (float)x/CAM_WIDTH, (float)y/CAM_HEIGHT, flags)) {
+				return; // event was handled
+			}
+		}
+
 		((Dialog*)self)->mouseX = x;
 		((Dialog*)self)->mouseY = y;
 		if (event == cv::EVENT_LBUTTONUP){
@@ -25,12 +31,13 @@ Dialog::Dialog(const std::string &title, int flags/* = CV_WINDOW_AUTOSIZE*/) {
 	display_empty = cv::Mat(WINDOW_HEIGHT, WINDOW_WIDTH, CV_8UC3, cv::Scalar(0));
 	display = cv::Mat(WINDOW_HEIGHT, WINDOW_WIDTH, CV_8UC3);
 	display_roi = display(cv::Rect(0, 0, CAM_WIDTH, CAM_HEIGHT)); // region of interest
-	cam_area = cv::Mat(CAM_HEIGHT, CAM_WIDTH, CV_8UC3);
+	//cam_area = cv::Mat(CAM_HEIGHT, CAM_WIDTH, CV_8UC3);
 
 };
-void Dialog::ShowImage(const cv::Mat image) {
+void Dialog::ShowImage(const cv::Mat &image) {
 	boost::mutex::scoped_lock lock(display_mutex); //allow one command at a time
-	resize(image, cam_area, cv::Size(CAM_WIDTH, CAM_HEIGHT));//resize image
+	image.copyTo(cam_area);
+	//	resize(image, cam_area, cv::Size(CAM_WIDTH, CAM_HEIGHT));//resize image
 	//resize(image, display, cv::Size(WINDOW_WIDTH, WINDOW_HEIGHT));//resize image
 }
 
@@ -50,14 +57,18 @@ void Dialog::ClearDisplay() {
 //	display_empty.copyTo(display);
 }
 
-int Dialog::show(const cv::Mat background) {
+int Dialog::show(const cv::Mat &background) {
 	boost::mutex::scoped_lock lock(click_mutex); //allow one command at a time
 	//cv::Mat image;
 	//background.copyTo(image);
     //int window_width = image.cols;
     //int window_height = image.rows;
     //cv::Mat image = cv::Mat::zeros( window_height, window_width, CV_8UC3 );
-	cam_area.copyTo(display_roi);
+	//cam_area.copyTo(display_roi);
+	if (cam_area.size().height > 0) {
+		resize(cam_area, display_roi, display_roi.size());//resize image
+	}
+
     int i = 0;
     for (const auto& button : m_buttons) {
 		cv::putText(display, std::get<0>(button), cv::Point(30, (++i)*m_buttonHeight), cv::FONT_HERSHEY_DUPLEX, 0.9, cv::Scalar(255, 255, 255));

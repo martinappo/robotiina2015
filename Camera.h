@@ -1,5 +1,6 @@
 #pragma  once
 #include "types.h"
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 class Camera: public ICamera
 {
@@ -8,6 +9,13 @@ private:
 	cv::VideoCapture *cap;
 	cv::Size frameSize;
 	bool flip = false;
+	double fps;
+	int frames = 0;
+	boost::posix_time::time_duration dt;
+	boost::posix_time::ptime lastCapture2;
+	boost::posix_time::ptime lastCapture;
+	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
+
 public:
     Camera(const std::string &device);
 	Camera(int device);
@@ -20,5 +28,9 @@ public:
 	virtual cv::Size GetFrameSize(){
 		return frameSize;
 	};
+	virtual double GetFPS() {
+		return fps;
+	}
+
 
 };

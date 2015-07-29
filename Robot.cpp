@@ -193,8 +193,8 @@ void Robot::initCoilboard() {
 
 void Robot::Run()
 {
-	double fps = 0;
-	int frames = 0;
+	//double fps;
+	//int frames = 0;
 	//timer for rotation measure
 	boost::posix_time::ptime lastStepTime;	
 	boost::posix_time::time_duration dt;	
@@ -217,8 +217,11 @@ void Robot::Run()
 	*/
 
 	NewAutoPilot autoPilot(wheels, coilBoard);
+	/* Vision modules */
 	FrontCameraVision visionModule;
 	visionModule.Init(camera, this, &autoPilot);
+
+	/* Control modules*/
 	ControlModule controlModule;
 	controlModule.Init(wheels, coilBoard);
 	//RobotTracker tracker(wheels);
@@ -237,14 +240,15 @@ void Robot::Run()
 	while (true)
     {
 		time = boost::posix_time::microsec_clock::local_time();
-		boost::posix_time::time_duration::tick_type dt = (time - lastStepTime).total_milliseconds();
+//		boost::posix_time::time_duration::tick_type dt = (time - lastStepTime).total_milliseconds();
 		boost::posix_time::time_duration::tick_type rotateDuration = (time - rotateTime).total_milliseconds();
-
+		/*
 		if (dt > 1000) {
 			fps = 1000.0 * frames / dt;
 			lastStepTime = time;
 			frames = 0;
 		}
+		*/
 #define RECORD_AFTER_PROCESSING
 #ifdef RECORD_AFTER_PROCESSING
 		if (captureFrames) {
@@ -358,11 +362,11 @@ void Robot::Run()
 			START_DIALOG
 				IConfigurableModule *pModule = static_cast<IConfigurableModule*>(&visionModule);
 				for (auto setting : pModule->GetSettings()){
-					createButton(setting.first + ": "+std::get<0>(setting.second)(), [this, setting]{
+					createButton(setting.first + ": " + std::get<0>(setting.second)(), [this, setting]{
 						std::get<1>(setting.second)();
 						this->last_state = STATE_END_OF_GAME; // force dialog redraw
 					});
-				}	
+				}
 				STATE_BUTTON("BACK", STATE_NONE)
 			END_DIALOG
 		}
@@ -456,7 +460,7 @@ void Robot::Run()
 			subtitles << "   " << "WARNING: coilgun not connected!";
 		}
 
-		cv::putText(display, "fps: " + std::to_string(fps), cv::Point(display.cols - 140, 20), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
+		cv::putText(display, "fps: " + std::to_string(camera->GetFPS()), cv::Point(display.cols - 140, 20), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 		//assert(STATE_END_OF_GAME != state);
 		cv::putText(display, "state: " + STATE_LABELS[state], cv::Point(display.cols - 140, 40), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 		/*
@@ -506,11 +510,12 @@ void Robot::Run()
 		cv::circle(display, center, 60, colorCircle, 2);
 		*/
 		show(display);
-		if (cv::waitKey(1) == 27) {
+		int key = cv::waitKey(1);
+		if (key == 27) {
 			std::cout << "exiting program" << std::endl;
 			break;
 		}
-		frames++;
+//		frames++;
 
     }
     	

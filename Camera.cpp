@@ -1,5 +1,7 @@
 #include "Camera.h"
 #include <opencv2/opencv.hpp>
+#include <chrono>
+#include <thread>
 
 Camera::Camera(const std::string &device)
 {
@@ -61,6 +63,22 @@ const cv::Mat &Camera::Capture()
 	else
 		lastframe.copyTo(buffer);
 
+	time = boost::posix_time::microsec_clock::local_time();
+	boost::posix_time::time_duration::tick_type dt = (time - lastCapture).total_milliseconds();
+	boost::posix_time::time_duration::tick_type dt2 = (time - lastCapture2).total_milliseconds();
+	if (dt < 24){
+		std::this_thread::sleep_for(std::chrono::milliseconds(12)); // limit fps to about 50fps
+	}
+
+	if (dt2 > 1000) {
+		fps = 1000.0 * frames / dt2;
+		lastCapture2 = time;
+		frames = 0;
+	}
+	else {
+		frames++;
+	}
+	lastCapture = time;
 	return buffer;
 }
 const cv::Mat &Camera::CaptureHSV() {

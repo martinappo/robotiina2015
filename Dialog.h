@@ -11,10 +11,17 @@ class Dialog: public IDisplay {
 public:
     Dialog(const std::string &m_Title, int flags = CV_WINDOW_AUTOSIZE);
 	int createButton(const std::string& bar_name, std::function<void()> const &);
-    int show(const cv::Mat background);
+    int show(const cv::Mat &background);
 	void clearButtons();
-	virtual void ShowImage(const cv::Mat image);
+	virtual void ShowImage(const cv::Mat &image);
 	void ClearDisplay();
+	virtual void AddEventListener(IUIEventListener *pEventListener){
+		m_EventListeners.push_back(pEventListener);
+	};
+	virtual void RemoveEventListener(IUIEventListener *pEventListener){
+		std::remove_if(m_EventListeners.begin(), m_EventListeners.end(), [pEventListener](IUIEventListener *p){return p = pEventListener; });
+	};
+	std::vector<IUIEventListener*> m_EventListeners;
 
 protected:
     void mouseClicked(int x, int y);

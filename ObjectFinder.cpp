@@ -348,6 +348,7 @@ void ObjectFinder::WriteInfoOnScreen(const ObjectPosition &info){
 	cv::putText(infoWindow, oss.str(), cv::Point(20, 80), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 	cv::namedWindow("Info Window");
 	cv::imshow("Info Window", infoWindow);
+	cv::waitKey(1); // draw window
 	return;
 }
 

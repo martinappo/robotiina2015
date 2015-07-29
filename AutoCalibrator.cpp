@@ -8,24 +8,33 @@
 AutoCalibrator::AutoCalibrator()
 {
     range = {{0,179},{0,255},{0,255}};
-	screenshot_mode = true;
+	screenshot_mode = LIVE_FEED;
 //	reset();
 };
 bool AutoCalibrator::LoadFrame()
 {
+	if(screenshot_mode != LIVE_FEED) return false;
+
+	screenshot_mode = GRAB_FRAME;
+	/*
+	{
+		boost::mutex::scoped_lock lock(mutex); //allow one command at a time
+		white.copyTo(display);
+	}
+	*/
 	// lock mutex
 	//image.copyTo(this->image, mask);
-	m_pDisplay->ShowImage(white);
+//	m_pDisplay->ShowImage(white);
     //ColorCalibrator::LoadImage(image);
     //float data[6][3] = {{1, 0, 0/*blue*/}, {0, 0, 1 /* orange*/}, {1 ,1, 0 /* yellow*/}, {0,1, 0}/*green*/, {1,1,1}, {0,0,0}};
 	//bestLabels = cv::Mat(6, 3, CV_32F, &data); //BGR
 	cv::Mat thumb(frame_size.y / 2, frame_size.x / 2, CV_8U, cv::Scalar::all(0));
 	{
-		boost::mutex::scoped_lock lock(mutex); //allow one command at a time
+		//boost::mutex::scoped_lock lock(mutex); //allow one command at a time
 		resize(frameBGR, thumb, thumb.size());//resize image
-		if (frames == 0){
-			frameBGR.copyTo(image);
-		}
+		//if (frames == 0){
+		//	frameBGR.copyTo(image);
+		//}
 	}
 	cv::Mat roi;
 	if (frames ==	0) {
@@ -42,26 +51,34 @@ bool AutoCalibrator::LoadFrame()
 	}
 	thumb.copyTo(roi);
 	frames++;
-	cv::imshow("mosaic", image); //show the thresholded image
+	//cv::imshow("mosaic", image); //show the thresholded image
 	if (frames >= max_image_count) {
-		cv::imshow("mosaic", image); //show the thresholded image
+		//cv::imshow("mosaic", image); //show the thresholded image
 		//DetectThresholds(32);
-		screenshot_mode = false;
+		//screenshot_mode = CALIBRATION;
+		//screenshot_mode = false;
 
 		return true;
 	}
-
+	//screenshot_mode = true;
 	return false;
 };
 
 HSVColorRange AutoCalibrator::GetObjectThresholds (int index, const std::string &name)
 {
+	screenshot_mode = GET_THRESHOLD;
+	clustered.copyTo(display);
+
 	try {
 		LoadConf(name);
 	}
 	catch (...) {
 	}
 	this->name = name;
+	return range;
+
+
+	/*
     cv::imshow(name.c_str(), image); //show the thresholded image
 	cv::moveWindow(name.c_str(), 0, 0);
     cv::setMouseCallback(name.c_str(), [](int event, int x, int y, int flags, void* self) {
@@ -78,17 +95,31 @@ HSVColorRange AutoCalibrator::GetObjectThresholds (int index, const std::string 
     while (!done)
     {
 		std::this_thread::sleep_for(std::chrono::milliseconds(30)); // do not poll serial to fast
-		/*
+		
         if (cv::waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
         {
             std::cout << "esc key is pressed by user" << std::endl;
             done = true;
         }
-		*/
+	
     }
     cvDestroyWindow(name.c_str());
+	*/
     SaveConf(name);
+	screenshot_mode = THRESHOLDING;
     return range;
+
+};
+bool AutoCalibrator::OnMouseEvent(int event, float x, float y, int flags) {
+	if (!running || screenshot_mode != GET_THRESHOLD) return false;
+	if (event == cv::EVENT_LBUTTONUP && x < 1.0 && y < 1.0) {
+		mouseClicked(x*frame_size.x, y*frame_size.y, flags);
+	}
+	if (event == cv::EVENT_RBUTTONUP) {
+		SaveConf(this->name);
+		screenshot_mode = THRESHOLDING;
+	}
+	return true;
 
 };
 
@@ -139,19 +170,19 @@ void AutoCalibrator::mouseClicked(int x, int y, int flags) {
 	
 	cv::Mat selected(imgThresholded.rows, imgThresholded.cols, CV_8U, cv::Scalar::all(0));
 
-	image.copyTo(selected, 255 - imgThresholded);
+	clustered.copyTo(selected, 255 - imgThresholded);
+	selected.copyTo(display);
 
 	//cv::imshow("auto thresholded", image); //show the thresholded image
     //cv::imshow("auto thresholded 2", imgThresholded); //show the thresholded image
     //cv::imshow("auto thresholded 3", clustered); //show the thresholded image
 
 	//cv::imshow("original", image); //show the thresholded image
-	cv::imshow(this->name.c_str(), selected); //show the thresholded image
-	if ((flags & cv::EVENT_FLAG_RBUTTON))
-		done = true;
+	//cv::imshow(this->name.c_str(), selected); //show the thresholded image
 
 }
 AutoCalibrator::~AutoCalibrator(){
+	m_pDisplay->RemoveEventListener(this);
 	WaitForStop();
 }
 
@@ -159,6 +190,7 @@ bool AutoCalibrator::Init(ICamera * pCamera, IDisplay *pDisplay, IFieldStateList
 	m_pCamera = pCamera;
 	m_pDisplay = pDisplay;
 	frame_size = m_pCamera->GetFrameSize();
+	pDisplay->AddEventListener(this);
 //	Start();
 	return true;
 }
@@ -167,13 +199,44 @@ void AutoCalibrator::Run() {
 	while (!stop_thread)
 	{
 		boost::mutex::scoped_lock lock(mutex); //allow one command at a time
-		if (screenshot_mode){
+		if (screenshot_mode == LIVE_FEED){
 			frameBGR = m_pCamera->Capture();
+			frameBGR.copyTo(display);
 			m_pDisplay->ShowImage(frameBGR);
 		}
-		else{
-			m_pDisplay->ShowImage(image);
+		else if(screenshot_mode == GRAB_FRAME){
+			m_pDisplay->ShowImage(white);
+			std::this_thread::sleep_for(std::chrono::milliseconds(150)); 
+			image.copyTo(display);
+			m_pDisplay->ShowImage(display);
+			std::this_thread::sleep_for(std::chrono::milliseconds(1600)); 
+			if (frames < max_image_count) {
+				screenshot_mode = LIVE_FEED;
+			}
+			else {
+				screenshot_mode = CALIBRATION;
+				//image.copyTo(display);
+				cv::putText(display, "Please wait, clustering", cv::Point(200, 220), cv::FONT_HERSHEY_DUPLEX, 0.9, cv::Scalar(23, 40, 245));
+				m_pDisplay->ShowImage(display);
+
+				DetectThresholds(32);
+				screenshot_mode = THRESHOLDING;
+				//clustered.copyTo(display);
+				m_pDisplay->ShowImage(display);
+
+			}
 		}
+		else if (screenshot_mode == THRESHOLDING) {
+			m_pDisplay->ShowImage(clustered);
+		}
+		else if (screenshot_mode == GET_THRESHOLD) {
+			cv::putText(display, name, cv::Point(250, 220), cv::FONT_HERSHEY_DUPLEX, 1, cv::Scalar(23, 67, 245));
+			cv::putText(display, "(ctrl +) click to select pixels, right click back", cv::Point(190, 320), cv::FONT_HERSHEY_DUPLEX, 0.3, cv::Scalar(23, 67, 245));
+			m_pDisplay->ShowImage(display);
+
+		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
 	}
 }
 
@@ -208,12 +271,9 @@ void AutoCalibrator::DetectThresholds(int number_of_objects){
 			);
     }
 
-    //clustered.convertTo(clustered, CV_8UC3, 255);
+    clustered.convertTo(clustered, CV_8UC3, 255);
 
-    clustered = clustered.reshape(3, img.rows);
-    std::cout << "clustered image is: " << clustered.rows << "x" << clustered.cols << std::endl;
-
-
+	clustered = clustered.reshape(3, img.rows);
 
 
 }

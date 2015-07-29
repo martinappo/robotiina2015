@@ -90,9 +90,18 @@ class IFieldStateListener {
 	virtual void OnFieldStateChanged(const FieldState &state) = 0;
 };
 
+class IUIEventListener {
+public:
+	// xy coordinates are from 0...1.0...
+	virtual bool OnMouseEvent(int event, float x, float y, int flags) { return false; };
+	virtual void OnKeyPress(char key) {};
+};
+
 class IDisplay {
 public:
-	virtual void ShowImage(const cv::Mat image) = 0;
+	virtual void ShowImage(const cv::Mat &image) = 0;
+	virtual void AddEventListener(IUIEventListener *pEventListener) = 0;
+	virtual void RemoveEventListener(IUIEventListener *pEventListener) = 0;
 };
 
 class ICamera
@@ -100,6 +109,7 @@ class ICamera
 public:
 	virtual const cv::Mat & Capture() = 0;
 	virtual cv::Size GetFrameSize() = 0;
+	virtual double GetFPS() = 0;
 };
 
 
