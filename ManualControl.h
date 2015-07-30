@@ -6,10 +6,9 @@ class ManualControl :
 	public ConfigurableModule, public IControlModule, public ThreadedClass
 {
 public:
-	ManualControl();
+	ManualControl(ICommunicationModule *pComModule);
 	virtual ~ManualControl();
 
-	bool Init(ICommunicationModule *pComModule, FieldState *pState);
 	void Run();
 
 protected:

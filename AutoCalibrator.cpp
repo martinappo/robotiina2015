@@ -5,10 +5,15 @@
 #include <chrono>
 #include <thread>
 
-AutoCalibrator::AutoCalibrator()
+AutoCalibrator::AutoCalibrator(ICamera * pCamera, IDisplay *pDisplay)
 {
     range = {{0,179},{0,255},{0,255}};
+	m_pCamera = pCamera;
+	m_pDisplay = pDisplay;
+	frame_size = m_pCamera->GetFrameSize();
+	pDisplay->AddEventListener(this);
 	screenshot_mode = LIVE_FEED;
+
 //	reset();
 };
 bool AutoCalibrator::LoadFrame()
@@ -186,14 +191,6 @@ AutoCalibrator::~AutoCalibrator(){
 	WaitForStop();
 }
 
-bool AutoCalibrator::Init(ICamera * pCamera, IDisplay *pDisplay, FieldState*){
-	m_pCamera = pCamera;
-	m_pDisplay = pDisplay;
-	frame_size = m_pCamera->GetFrameSize();
-	pDisplay->AddEventListener(this);
-//	Start();
-	return true;
-}
 
 void AutoCalibrator::Run() {
 	while (!stop_thread)

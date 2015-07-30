@@ -94,6 +94,7 @@
     <ClInclude Include="ConfigurableModule.h" />
     <ClInclude Include="ComModule.h" />
     <ClInclude Include="dialog.h" />
+    <ClInclude Include="MouseVision.h" />
     <ClInclude Include="SoccerField.h" />
     <ClInclude Include="FrontCameraVision.h" />
     <ClInclude Include="GateFinder.h" />
@@ -125,6 +126,7 @@
     <ClCompile Include="ConfigurableModule.cpp" />
     <ClCompile Include="ComModule.cpp" />
     <ClCompile Include="dialog.cpp" />
+    <ClCompile Include="MouseVision.cpp" />
     <ClCompile Include="SoccerField.cpp" />
     <ClCompile Include="FrontCameraVision.cpp" />
     <ClCompile Include="GateFinder.cpp" />

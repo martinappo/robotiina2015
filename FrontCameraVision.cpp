@@ -4,14 +4,19 @@
 #include "BallFinder.h"
 #include "AutoCalibrator.h"
 
-FrontCameraVision::FrontCameraVision(): ConfigurableModule("FrontCameraVision")
+FrontCameraVision::FrontCameraVision(ICamera * pCamera, IDisplay *pDisplay, FieldState *pFieldState) : ConfigurableModule("FrontCameraVision")
 {
+	m_pCamera = pCamera;
+	m_pDisplay = pDisplay;
+	m_pState = pFieldState;
+
 	ADD_BOOL_SETTING(gaussianBlurEnabled);
 	ADD_BOOL_SETTING(greenAreaDetectionEnabled);
 	ADD_BOOL_SETTING(gateObstructionDetectionEnabled);
 	ADD_BOOL_SETTING(borderDetectionEnabled);
 	ADD_BOOL_SETTING(nightVisionEnabled);
 	LoadSettings();
+	Start();
 
 
 }
@@ -22,19 +27,11 @@ FrontCameraVision::~FrontCameraVision()
 	WaitForStop();
 }
 
-bool FrontCameraVision::Init(ICamera * pCamera, IDisplay *pDisplay, FieldState * pFieldState){
-	m_pCamera = pCamera;
-	m_pDisplay = pDisplay;
-	m_pState = pFieldState;
-	Start();
-	return true;
-}
-
 void FrontCameraVision::Run() {
 	ThresholdedImages thresholdedImages;
 	ImageThresholder thresholder(thresholdedImages, objectThresholds);
-	GateFinder gate1Finder;
-	GateFinder gate2Finder;
+	GateFinder BlueGateFinder;
+	GateFinder YelllowGateFinder;
 	BallFinder finder;
 
 	try {
@@ -59,7 +56,6 @@ void FrontCameraVision::Run() {
 
 	ObjectPosition borderDistance = { INT_MAX, 0, 0 };
 	bool notEnoughtGreen = false;
-	bool sightObstructed = false;
 	int mouseControl = 0;
 	bool somethingOnWay = false;
 
@@ -74,21 +70,11 @@ void FrontCameraVision::Run() {
 			cv::GaussianBlur(frameBGR, frameBGR, cv::Size(3, 3), 4);
 		}
 		cvtColor(frameBGR, frameHSV, cv::COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
-		/*
-		if (!nightVisionEnabled || state == STATE_AUTOCALIBRATE) {
-			if (state == STATE_AUTOCALIBRATE) {
-				cv::Mat mask(frameBGR.rows, frameBGR.cols, CV_8U, cv::Scalar::all(0));
-				frameBGR.copyTo(frameBGR, calibrator.mask);
-			}
-			else {
-				frameBGR.copyTo(frameBGR);
-			}
-		}
-		*/
+
 		/**************************************************/
 		/*	STEP 2. thresholding in parallel	          */
 		/**************************************************/
-		thresholder.Start(frameHSV, { BALL, GATE1, GATE2, INNER_BORDER, OUTER_BORDER, FIELD });
+		thresholder.Start(frameHSV, { BALL, BLUE_GATE, YELLOW_GATE, INNER_BORDER, OUTER_BORDER, FIELD });
 		thresholder.WaitForStop();
 
 		/* STEP 2.2 cover own balls */
@@ -112,7 +98,6 @@ void FrontCameraVision::Run() {
 		/* this is done here, because finding contures	  */
 		/* corrupts thresholded imagees					  */
 		/**************************************************/
-		sightObstructed = false;
 		if (gateObstructionDetectionEnabled) {
 			cv::Mat selected(frameBGR.rows, frameBGR.cols, CV_8U, cv::Scalar::all(0));
 			cv::Mat mask(frameBGR.rows, frameBGR.cols, CV_8U, cv::Scalar::all(0));
@@ -136,8 +121,8 @@ void FrontCameraVision::Run() {
 			white.copyTo(frameBGR, thresholdedImages[INNER_BORDER]);
 			black.copyTo(frameBGR, thresholdedImages[OUTER_BORDER]);
 			orange.copyTo(frameBGR, thresholdedImages[BALL]);
-			yellow.copyTo(frameBGR, thresholdedImages[GATE2]);
-			blue.copyTo(frameBGR, thresholdedImages[GATE1]);
+			yellow.copyTo(frameBGR, thresholdedImages[YELLOW_GATE]);
+			blue.copyTo(frameBGR, thresholdedImages[BLUE_GATE]);
 		}
 		
 		if (borderDetectionEnabled) {
@@ -151,19 +136,23 @@ void FrontCameraVision::Run() {
 		/**************************************************/
 		/* STEP 4. extract closest ball and gate positions*/
 		/**************************************************/
-		ObjectPosition ballPos, gate1Pos, gate2Pos;
+		ObjectPosition ballPos, blueGatePos, yellowGatePos;
 		//Cut out gate contour.	
 
-		bool gate1Found = gate2Finder.Locate(thresholdedImages, frameHSV, frameBGR, GATE1, gate1Pos);
-		bool gate2Found = gate1Finder.Locate(thresholdedImages, frameHSV, frameBGR, GATE2, gate2Pos);
+		bool BlueGateFound = YelllowGateFinder.Locate(thresholdedImages, frameHSV, frameBGR, BLUE_GATE, blueGatePos);
+		bool YellowGateFound = BlueGateFinder.Locate(thresholdedImages, frameHSV, frameBGR, YELLOW_GATE, yellowGatePos);
 
 		bool ballFound = /*mouseControl != 1 ?*/
 			finder.Locate(thresholdedImages, frameHSV, frameBGR, BALL, ballPos)
 			/*: finder.LocateCursor(frameBGR, cv::Point2i(mouseX, mouseY), BALL, ballPos)*/;
+		m_pState->blueGate = blueGatePos;
+		m_pState->yellowGate = yellowGatePos;
+		m_pState->balls[0] = ballPos;
+		m_pState->self = { 0, 0, 0 };
 		/*
 		ObjectPosition *targetGatePos = 0;
-		if (targetGate == GATE1 && gate1Found) targetGatePos = &gate1Pos;
-		else if (targetGate == GATE2 && gate2Found) targetGatePos = &gate2Pos;
+		if (targetGate == BLUE_GATE && BlueGateFound) targetGatePos = &blueGatePos;
+		else if (targetGate == YELLOW_GATE && YellowGateFound) targetGatePos = &yellowGatePos;
 		// else leave to NULL
 		*/
 		if (gateObstructionDetectionEnabled) {
@@ -171,9 +160,12 @@ void FrontCameraVision::Run() {
 			int count = countNonZero(thresholdedImages[SIGHT_MASK]);
 			std::ostringstream osstr;
 			osstr << "nonzero :" << count;
-			sightObstructed = count > 900;
+			m_pState->gateObstructed = count > 900;
 			//cv::putText(thresholdedImages[SIGHT_MASK], osstr.str(), cv::Point(20, 20), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 			//cv::imshow("mmm", thresholdedImages[SIGHT_MASK]);
+		}
+		else {
+			m_pState->gateObstructed = false;
 		}
 
 		notEnoughtGreen = false;

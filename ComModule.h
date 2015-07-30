@@ -4,12 +4,7 @@ class ComModule :
 	public ICommunicationModule
 {
 public:
-	ComModule();
-	virtual bool Init(IWheelController * pWheels, ICoilGun *pCoilGun) {
-		m_pWheels = pWheels;
-		m_pCoilGun = pCoilGun;
-		return true;
-	}
+	ComModule(IWheelController * pWheels, ICoilGun *pCoilGun);
 
 	virtual ~ComModule();
 

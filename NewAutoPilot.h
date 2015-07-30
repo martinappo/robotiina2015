@@ -196,8 +196,7 @@ protected:
 	void Step();
 	void WriteInfoOnScreen();
 public:
-	NewAutoPilot();
-	bool Init(ICommunicationModule *pComModule, FieldState *pState);
+	NewAutoPilot(ICommunicationModule *pComModule, FieldState *pState);
 	//void UpdateState(ObjectPosition *ballLocation, ObjectPosition *gateLocation, bool ballInTribbler, bool sightObstructed, bool somethingOnWay, int borderDistance, cv::Point2i ballCount);
 	void setTestMode(NewDriveMode mode);
 	void enableTestMode(bool enable);

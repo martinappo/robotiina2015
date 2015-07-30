@@ -11,6 +11,7 @@
 	#endif
 #endif
 #define PI 3.14159265
+#define TAU (2*PI)
 
 struct ColorRange
 {
@@ -53,7 +54,7 @@ const int ID_COILGUN = 4;
 
 enum OBJECT
 {
-    BALL = 0, GATE1, GATE2, FIELD, INNER_BORDER, OUTER_BORDER, NUMBER_OF_OBJECTS, SIGHT_MASK
+    BALL = 0, BLUE_GATE, YELLOW_GATE, FIELD, INNER_BORDER, OUTER_BORDER, NUMBER_OF_OBJECTS, SIGHT_MASK
 };
 
 const int NUMBER_OF_BALLS = 11;
@@ -67,29 +68,25 @@ enum STATE
 	STATE_SELECT_GATE,
 	STATE_RUN,
 	STATE_SETTINGS,
-	/* autopilot states
-	STATE_LOCATE_BALL,
-    STATE_LOCATE_GATE,
-	STATE_CRASH,
-	*/
 	STATE_REMOTE_CONTROL,
 	STATE_MANUAL_CONTROL,
 	STATE_DANCE,
 	STATE_TEST,
 	STATE_TEST_COILGUN,
-	STATE_REINIT_WHEELS,
-	STATE_REINIT_COILBOARD,
+	STATE_MOUSE_VISION,
 	STATE_END_OF_GAME /* leave this last*/
 };
 
 class FieldState {
 public:
 	std::atomic<ObjectPosition> self; // our robot distance from center and rotation
-	std::atomic<ObjectPosition> opponent; // distance from center and rotation
-	std::atomic<ObjectPosition> balls[NUMBER_OF_BALLS];
-	std::atomic<ObjectPosition> home; //gate
-	std::atomic<ObjectPosition> gate;
+	std::atomic<ObjectPosition> balls[NUMBER_OF_BALLS];// all others are distance from self and heading to it
+	std::atomic<ObjectPosition> blueGate;
+	std::atomic<ObjectPosition> yellowGate;
 	std::atomic_bool gateObstructed;
+	virtual void SetTargetGate(OBJECT gate) = 0;
+	virtual ObjectPosition GetTargetGate() = 0;
+
 
 };
 
@@ -103,7 +100,7 @@ public:
 
 class IDisplay {
 public:
-	virtual void ShowImage(const cv::Mat &image) = 0;
+	virtual void ShowImage(const cv::Mat &image, bool main = true) = 0;
 	virtual void AddEventListener(IUIEventListener *pEventListener) = 0;
 	virtual void RemoveEventListener(IUIEventListener *pEventListener) = 0;
 };
@@ -127,7 +124,7 @@ public:
 
 class IVisionModule {
 public:
-	virtual bool Init(ICamera * pCamera, IDisplay *pDisplay, FieldState *pFieldState) = 0;
+//	virtual bool Init(ICamera * pCamera, IDisplay *pDisplay, FieldState *pFieldState) = 0;
 	virtual const cv::Mat & GetFrame() = 0;
 };
 
@@ -147,12 +144,12 @@ public:
 };
 
 class ICommunicationModule : public IWheelController, public ICoilGun {
-	virtual bool Init(IWheelController * pWheels, ICoilGun *pCoilGun) = 0;
+//	virtual bool Init(IWheelController * pWheels, ICoilGun *pCoilGun) = 0;
 
 };
 
 class IControlModule {
-	virtual bool Init(ICommunicationModule * pComModule, FieldState *pFieldState) = 0;
+//	virtual bool Init(ICommunicationModule * pComModule, FieldState *pFieldState) = 0;
 };
 /*
 class IAutoPilot

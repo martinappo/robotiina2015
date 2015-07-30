@@ -1,8 +1,11 @@
 #include "ComModule.h"
 
 
-ComModule::ComModule()
+ComModule::ComModule(IWheelController * pWheels, ICoilGun *pCoilGun)
 {
+	m_pWheels = pWheels;
+	m_pCoilGun = pCoilGun;
+
 }
 
 

@@ -15,7 +15,7 @@ class AutoCalibrator : public ColorCalibrator,
 	};
 
 public:
-	AutoCalibrator();
+	AutoCalibrator(ICamera * pCamera, IDisplay *pDisplay);
 	bool LoadFrame();
 	void reset() { 
 		boost::mutex::scoped_lock lock(mutex); //allow one command at a time
@@ -26,7 +26,6 @@ public:
 		screenshot_mode = LIVE_FEED;
 	};
 	HSVColorRange GetObjectThresholds(int index, const std::string &name);
-	bool Init(ICamera * pCamera, IDisplay *pDisplay, FieldState *);
 
 	~AutoCalibrator();
 	int frames = 0;

@@ -2,8 +2,9 @@
 #include <chrono>
 #include <thread>
 
-ManualControl::ManualControl() :ConfigurableModule("ManualControl")
+ManualControl::ManualControl(ICommunicationModule *pComModule) :ConfigurableModule("ManualControl")
 {
+	m_pComModule = pComModule;
 
 	AddSetting("Turn Left", []{return "a"; }, [this] {this->m_pComModule->Drive(0, 0, 40); });
 	AddSetting("Turn Right", []{return "d"; }, [this]{this->m_pComModule->Drive(0, 0, -40); });
@@ -18,10 +19,7 @@ ManualControl::ManualControl() :ConfigurableModule("ManualControl")
 	AddSetting("Stop tribbler", []{return "x"; }, [this]{this->m_pComModule->ToggleTribbler(false); });
 
 }
-bool ManualControl::Init(ICommunicationModule *pComModule, FieldState *pState){
-	m_pComModule = pComModule;
-	return true;
-}
+
 
 void ManualControl::Run(){
 	while (!stop_thread){

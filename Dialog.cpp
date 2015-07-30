@@ -30,13 +30,14 @@ Dialog::Dialog(const std::string &title, int flags/* = CV_WINDOW_AUTOSIZE*/) {
 
 	display_empty = cv::Mat(WINDOW_HEIGHT, WINDOW_WIDTH, CV_8UC3, cv::Scalar(0));
 	display = cv::Mat(WINDOW_HEIGHT, WINDOW_WIDTH, CV_8UC3);
-	display_roi = display(cv::Rect(0, 0, CAM_WIDTH, CAM_HEIGHT)); // region of interest
+	cam1_roi = display(cv::Rect(0, 0, CAM_WIDTH, CAM_HEIGHT)); // region of interest
+	cam2_roi = display(cv::Rect(CAM_WIDTH, CAM_HEIGHT - 160, WINDOW_WIDTH - CAM_WIDTH, 160));
 	//cam_area = cv::Mat(CAM_HEIGHT, CAM_WIDTH, CV_8UC3);
 
 };
-void Dialog::ShowImage(const cv::Mat &image) {
+void Dialog::ShowImage(const cv::Mat &image, bool main) {
 	boost::mutex::scoped_lock lock(display_mutex); //allow one command at a time
-	image.copyTo(cam_area);
+	image.copyTo(main ? cam1_area : cam2_area);
 	//	resize(image, cam_area, cv::Size(CAM_WIDTH, CAM_HEIGHT));//resize image
 	//resize(image, display, cv::Size(WINDOW_WIDTH, WINDOW_HEIGHT));//resize image
 }
@@ -65,8 +66,13 @@ int Dialog::show(const cv::Mat &background) {
     //int window_height = image.rows;
     //cv::Mat image = cv::Mat::zeros( window_height, window_width, CV_8UC3 );
 	//cam_area.copyTo(display_roi);
-	if (cam_area.size().height > 0) {
-		resize(cam_area, display_roi, display_roi.size());//resize image
+	cv::Mat main_roi = m_bCam1Active ? cam1_roi : cam2_roi;
+	cv::Mat sec_roi = !m_bCam1Active ? cam1_roi : cam2_roi;
+	if (cam1_area.size().height > 0) {
+		resize(cam1_area, main_roi, main_roi.size());//resize image
+	}
+	if (cam2_area.size().height > 0) {
+		resize(cam2_area, sec_roi, sec_roi.size());//resize image
 	}
 
     int i = 0;

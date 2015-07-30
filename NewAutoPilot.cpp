@@ -20,19 +20,16 @@ std::pair<NewDriveMode, DriveInstruction*> NewDriveModes[] = {
 
 };
 
-bool NewAutoPilot::Init(ICommunicationModule *pComModule, FieldState *pState){
+
+NewAutoPilot::NewAutoPilot(ICommunicationModule *pComModule, FieldState *pState) : driveModes(NewDriveModes, NewDriveModes + sizeof(NewDriveModes) / sizeof(NewDriveModes[0]))
+{
 	m_pComModule = pComModule;
 	m_pFieldState = pState;
 	for (auto driveMode : driveModes){
 		driveMode.second->Init(pComModule, pState);
 	}
-	return true;
-}
 
-NewAutoPilot::NewAutoPilot(): driveModes(NewDriveModes, NewDriveModes + sizeof(NewDriveModes) / sizeof(NewDriveModes[0]))
-{
 	curDriveMode = driveModes.find(DRIVEMODE_IDLE);
-	stop_thread = false;
 	/*
 	ballInSight = false;
 	gateInSight = false;
@@ -253,7 +250,7 @@ NewDriveMode CatchBall::step(double dt)
 /*BEGIN LocateGate*/
 NewDriveMode LocateGate::step(double dt)
 {
-	ObjectPosition lastGateLocation = m_pFieldState->gate;
+	ObjectPosition lastGateLocation = m_pFieldState->GetTargetGate();
 	bool gateInSight = lastGateLocation.distance > 0;
 	bool sightObstructed = m_pFieldState->gateObstructed;
 
@@ -278,7 +275,7 @@ NewDriveMode LocateGate::step(double dt)
 NewDriveMode AimGate::step(double dt)
 {
 
-	ObjectPosition lastGateLocation = m_pFieldState->gate;
+	ObjectPosition lastGateLocation = m_pFieldState->GetTargetGate();
 	bool gateInSight = lastGateLocation.distance > 0;
 	bool sightObstructed = m_pFieldState->gateObstructed;
 

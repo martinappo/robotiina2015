@@ -13,7 +13,7 @@ public:
 	int createButton(const std::string& bar_name, char shortcut, std::function<void()> const &);
     int show(const cv::Mat &background);
 	void clearButtons();
-	virtual void ShowImage(const cv::Mat &image);
+	virtual void ShowImage(const cv::Mat &image, bool main = true);
 	void ClearDisplay();
 	virtual void AddEventListener(IUIEventListener *pEventListener){
 		m_EventListeners.push_back(pEventListener);
@@ -30,9 +30,10 @@ protected:
 
 	cv::Mat display_empty;// (frameBGR.rows + 160, frameBGR.cols + 200, frameBGR.type(), cv::Scalar(0));
 	cv::Mat display;// (frameBGR.rows + 160, frameBGR.cols + 200, frameBGR.type(), cv::Scalar(0));
-	cv::Mat display_roi;// = display(cv::Rect(0, 0, frameBGR.cols, frameBGR.rows)); // region of interest
-	cv::Mat cam_area;
+	cv::Mat cam1_roi, cam2_roi;// = display(cv::Rect(0, 0, frameBGR.cols, frameBGR.rows)); // region of interest
+	cv::Mat cam1_area, cam2_area;
 	void KeyPressed(int key);
+	bool m_bCam1Active = true;
 private:
     bool m_close = false;
     std::string m_title;

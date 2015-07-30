@@ -26,6 +26,7 @@
 #include "ComModule.h"
 #include "ManualControl.h"
 #include "SoccerField.h"
+#include "MouseVision.h"
 
 #define STATE_BUTTON(name, shortcut, new_state) \
 createButton(std::string("") + name, shortcut, [&](){ this->SetState(new_state); });
@@ -39,8 +40,8 @@ last_state = (STATE)state;
 
 std::pair<OBJECT, std::string> objects[] = {
 	std::pair<OBJECT, std::string>(BALL, "Ball"),
-	std::pair<OBJECT, std::string>(GATE1, "Blue Gate"),
-	std::pair<OBJECT, std::string>(GATE2, "Yellow Gate"),
+	std::pair<OBJECT, std::string>(BLUE_GATE, "Blue Gate"),
+	std::pair<OBJECT, std::string>(YELLOW_GATE, "Yellow Gate"),
 	std::pair<OBJECT, std::string>(FIELD, "Field"),
     std::pair<OBJECT, std::string>(INNER_BORDER, "Inner Border"),
 	std::pair<OBJECT, std::string>(OUTER_BORDER, "Outer Border"),
@@ -65,8 +66,7 @@ std::pair<STATE, std::string> states[] = {
 	std::pair<STATE, std::string>(STATE_TEST_COILGUN, "Test CoilGun"),
 	std::pair<STATE, std::string>(STATE_SELECT_GATE, "Select Gate"),
 	std::pair<STATE, std::string>(STATE_DANCE, "Dance"),
-	std::pair<STATE, std::string>(STATE_REINIT_WHEELS, "Reinit wheels"),
-	std::pair<STATE, std::string>(STATE_REINIT_COILBOARD, "Reinit coilboard"),
+	std::pair<STATE, std::string>(STATE_MOUSE_VISION, "Mouse Vision"),
 	//	std::pair<STATE, std::string>(STATE_END_OF_GAME, "End of Game") // this is intentionally left out
 
 };
@@ -219,25 +219,21 @@ void Robot::Run()
 	}
 	*/
 	/* Field state */
-	SoccerField field;
+	SoccerField field(this);
 
 	/* Vision modules */
-	FrontCameraVision visionModule;
-	visionModule.Init(camera, this, &field);
+	FrontCameraVision visionModule(camera, this, &field);
+	MouseVision mouseVision(camera, this, &field);
 
-	AutoCalibrator calibrator;
-	calibrator.Init(camera, this, NULL);
+	AutoCalibrator calibrator(camera, this);
 
 	/* Communication modules */
-	ComModule comModule;
-	comModule.Init(wheels, coilBoard);
+	ComModule comModule(wheels, coilBoard);
 
 	/* Logic modules */
-	NewAutoPilot autoPilot;
-	autoPilot.Init(&comModule, &field);
+	NewAutoPilot autoPilot(&comModule, &field);
 
-	ManualControl manualControl;
-	manualControl.Init(&comModule, NULL);
+	ManualControl manualControl(&comModule);
 
 	//RobotTracker tracker(wheels);
 
@@ -296,8 +292,9 @@ void Robot::Run()
 		/* Main UI */
 		if (STATE_NONE == state) {
 			START_DIALOG
-				visionModule.Enable(true);
+				mouseVision.Enable(false);
 				calibrator.Enable(false);
+				visionModule.Enable(true);
 				autoPilot.Enable(false);
 				manualControl.Enable(false);
 				autoPilot.enableTestMode(false);
@@ -326,9 +323,23 @@ void Robot::Run()
 					this->last_state = STATE_END_OF_GAME; // force dialog redraw
 				});
 				STATE_BUTTON("(S)ettings", 's', STATE_SETTINGS)
-				STATE_BUTTON("Reinit wheels", '-', STATE_REINIT_WHEELS)
-				STATE_BUTTON("Reinit coilboard", '-', STATE_REINIT_COILBOARD)
+				createButton("Reinit wheels", '-', [this] {
+					initPorts();
+					initWheels();
+					this->last_state = STATE_END_OF_GAME; // force dialog redraw
+				});
+				createButton("Reinit coilboard", '-', [this] {
+					initPorts();
+					initCoilboard();
+					this->last_state = STATE_END_OF_GAME; // force dialog redraw
+				});
+				createButton("Swap displays", '-', [this] {
+					m_bCam1Active = !m_bCam1Active;
+				});
+
+
 				STATE_BUTTON("(M)anual Control", 'm', STATE_MANUAL_CONTROL)
+				STATE_BUTTON("M(o)use vision", 'o', STATE_MOUSE_VISION)
 				STATE_BUTTON("Test CoilGun", '-', STATE_TEST_COILGUN)
 				STATE_BUTTON("Test Autopilot", '-', STATE_TEST)
 				STATE_BUTTON("E(x)it", 27, STATE_END_OF_GAME)
@@ -338,6 +349,7 @@ void Robot::Run()
 		else if (STATE_AUTOCALIBRATE == state) {
 			START_DIALOG
 				visionModule.Enable(false);
+				mouseVision.Enable(false);
 				calibrator.Enable(true);
 				calibrator.reset();
 				createButton("Take a screenshot", '-',[this, &calibrator]{
@@ -349,6 +361,16 @@ void Robot::Run()
 			STATE_BUTTON("BACK", 8,STATE_NONE)
 			END_DIALOG
 		}
+		else if (STATE_MOUSE_VISION == state) {
+			START_DIALOG
+				visionModule.Enable(false);
+				calibrator.Enable(false);
+				mouseVision.Enable(true);
+			
+			STATE_BUTTON("BACK", 8, STATE_NONE)
+				END_DIALOG
+		}
+
 		else if (STATE_CALIBRATE == state) {
 			START_DIALOG
 				for (int i = 0; i < NUMBER_OF_OBJECTS; i++) {
@@ -363,12 +385,12 @@ void Robot::Run()
 		
 		else if (STATE_SELECT_GATE == state) {
 			START_DIALOG
-				createButton(OBJECT_LABELS[GATE1], '-', [this]{
-				this->targetGate = GATE1;
+				createButton(OBJECT_LABELS[BLUE_GATE], '-', [&field, this]{
+				field.SetTargetGate(BLUE_GATE);
 				this->SetState(STATE_NONE);
 			});
-			createButton(OBJECT_LABELS[GATE2], '-', [this]{
-				this->targetGate = GATE2;
+			createButton(OBJECT_LABELS[YELLOW_GATE], '-', [&field, this]{
+				field.SetTargetGate(YELLOW_GATE);
 				this->SetState(STATE_NONE);
 			});
 			END_DIALOG
@@ -469,16 +491,6 @@ void Robot::Run()
 			wheels->Drive(move1, move2,0);
 			//cv::putText(frameBGR, "move1:" + std::to_string(move1), cv::Point(frameBGR.cols - 140, 120), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 			//cv::putText(frameBGR, "move2:" + std::to_string(move2), cv::Point(frameBGR.cols - 140, 140), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-		}
-		else if (STATE_REINIT_WHEELS == state) {
-			initPorts();
-			initWheels();
-			SetState(STATE_NONE);
-		}
-		else if (STATE_REINIT_COILBOARD == state) {
-			initPorts();
-			initCoilboard();
-			SetState(STATE_NONE);
 		}
 		else if (STATE_END_OF_GAME == state) {
 			break;

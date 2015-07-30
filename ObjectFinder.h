@@ -8,7 +8,7 @@ class ObjectFinder {
 protected:
 //	virtual cv::Point2i LocateGateOnScreen(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::Mat &frameBGR, OBJECT target);
 //	virtual cv::Point2i LocateBallOnScreen(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::Mat &frameBGR, OBJECT target);
-	virtual cv::Point2i LocateOnScreen(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::Mat &frameBGR, OBJECT target) = 0;
+	virtual cv::Point2i LocateOnScreen(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::Mat &frameBGR, OBJECT target) { return{ 0, 0 }; };
 private:
 	void WriteInfoOnScreen(const ObjectPosition &info);
 	KalmanFilter* filter = new KalmanFilter(cv::Point2i (400, 400));

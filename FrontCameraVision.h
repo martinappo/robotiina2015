@@ -22,8 +22,7 @@ protected:
 	bool nightVisionEnabled = false;
 
 public:
-	FrontCameraVision();
-	bool Init(ICamera * pCamera, IDisplay *pDisplay, FieldState *pFieldState);
+	FrontCameraVision(ICamera * pCamera, IDisplay *pDisplay, FieldState *pFieldState);
 	virtual ~FrontCameraVision();
 	void Run();
 	const cv::Mat & GetFrame() { return m_pCamera->Capture();  }

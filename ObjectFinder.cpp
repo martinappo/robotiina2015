@@ -52,6 +52,7 @@ bool ObjectFinder::Locate(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::M
 		cv::circle(frameBGR, point, 8, color2, -1);
 	}
 	*/
+#ifdef KALMAN_FILTERING
 	if (point.x < -1 && point.y < -1){//If ball is not valid then no predicting
 		lastPosition = point;
 		resetFilter = true;
@@ -73,6 +74,7 @@ bool ObjectFinder::Locate(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::M
 		point = filter->doFiltering(point);
 		lastPosition = point;
 	}
+#endif
 	//cv::circle(frameBGR, point, 8, color, -1);
 	//std::cout << point << std::endl;
 	targetPos = ConvertPixelToRealWorld(point, cv::Point2i(frameHSV.cols, frameHSV.rows));
@@ -188,10 +190,10 @@ void ObjectFinder::IsolateFieldOld(ThresholdedImages &HSVRanges, cv::Mat &frameH
 	cv::Mat outerThresholded = HSVRanges[OUTER_BORDER];
 
 	/*
-	cv::Mat gate1Thresholded;
-	inRange(frameHSV, cv::Scalar(gate1.hue.low, gate1.sat.low, gate1.val.low), cv::Scalar(gate1.hue.high, gate1.sat.high, gate1.val.high), gate1Thresholded); //Threshold the image
-	cv::Mat gate2Thresholded;
-	inRange(frameHSV, cv::Scalar(gate2.hue.low, gate2.sat.low, gate2.val.low), cv::Scalar(gate2.hue.high, gate2.sat.high, gate2.val.high), gate2Thresholded); //Threshold the image
+	cv::Mat BLUE_GATEThresholded;
+	inRange(frameHSV, cv::Scalar(BLUE_GATE.hue.low, BLUE_GATE.sat.low, BLUE_GATE.val.low), cv::Scalar(BLUE_GATE.hue.high, BLUE_GATE.sat.high, BLUE_GATE.val.high), BLUE_GATEThresholded); //Threshold the image
+	cv::Mat YELLOW_GATEThresholded;
+	inRange(frameHSV, cv::Scalar(YELLOW_GATE.hue.low, YELLOW_GATE.sat.low, YELLOW_GATE.val.low), cv::Scalar(YELLOW_GATE.hue.high, YELLOW_GATE.sat.high, YELLOW_GATE.val.high), YELLOW_GATEThresholded); //Threshold the image
 	*/
 
 
@@ -222,7 +224,7 @@ void ObjectFinder::IsolateFieldOld(ThresholdedImages &HSVRanges, cv::Mat &frameH
 	}
 	*/
 
-//	cv::Mat gateThresholded = gate1Thresholded + gate2Thresholded;
+//	cv::Mat gateThresholded = BLUE_GATEThresholded + YELLOW_GATEThresholded;
 
 	//dir: left -> right, right -> left, top -> down
 	for (int dir = 0; dir < 2; dir++) {
@@ -312,8 +314,8 @@ void ObjectFinder::IsolateFieldOld(ThresholdedImages &HSVRanges, cv::Mat &frameH
 
 ObjectPosition ObjectFinder::ConvertPixelToRealWorld(const cv::Point2i &point, const cv::Point2i &frame_size)
 {
-	if (point.y >= 0 && point.x >= 0 && point.y < frame_size.y && point.x < frame_size.x){//If there is no object found
-
+	if (!(point.y >= 0 && point.x >= 0 && point.y < frame_size.y && point.x < frame_size.x)){//If there is no object found
+		return{ -1, -1, -1 };
 	}
 		
 

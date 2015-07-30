@@ -1,0 +1,29 @@
+#pragma once
+#include "types.h"
+#include "ThreadedClass.h"
+
+class MouseVision :
+	public IVisionModule, public IUIEventListener, public ThreadedClass
+{
+public:
+	MouseVision(ICamera * pCamera, IDisplay *pDisplay, FieldState *pFieldState);
+	virtual ~MouseVision();
+	virtual bool OnMouseEvent(int event, float x, float y, int flags){
+		if (!running) return false;
+		this->x = x * frame_size.x;
+		this->y = y * frame_size.y;
+		return false;
+	}
+protected:
+	ICamera *m_pCamera;
+	IDisplay *m_pDisplay;
+	FieldState *m_pState;
+
+	cv::Mat frameBGR, display;
+	void Run();
+	const cv::Mat & GetFrame() { return m_pCamera->Capture(); }
+	std::atomic_int x, y;
+	cv::Point frame_size;
+
+};
+

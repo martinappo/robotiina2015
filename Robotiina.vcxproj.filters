@@ -82,6 +82,9 @@
     <ClCompile Include="SoccerField.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MouseVision.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dialog.h">
@@ -172,6 +175,9 @@
       <Filter>ComModule</Filter>
     </ClInclude>
     <ClInclude Include="SoccerField.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MouseVision.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
