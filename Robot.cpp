@@ -27,10 +27,10 @@
 #include "ManualControl.h"
 #include "SoccerField.h"
 
-#define STATE_BUTTON(name, new_state) \
-createButton(std::string("") + name, [&](){ this->SetState(new_state); });
-#define BUTTON(name, function_body) \
-createButton(name, [&]() function_body);
+#define STATE_BUTTON(name, shortcut, new_state) \
+createButton(std::string("") + name, shortcut, [&](){ this->SetState(new_state); });
+#define BUTTON(name, shortcut, function_body) \
+createButton(name, shortcut, [&]() function_body);
 #define START_DIALOG if (state != last_state) { \
 clearButtons();
 #define END_DIALOG } \
@@ -298,13 +298,14 @@ void Robot::Run()
 			START_DIALOG
 				visionModule.Enable(true);
 				calibrator.Enable(false);
-
+				autoPilot.Enable(false);
+				manualControl.Enable(false);
 				autoPilot.enableTestMode(false);
 				wheels->Stop();
-				STATE_BUTTON("(A)utoCalibrate objects", STATE_AUTOCALIBRATE)
+				STATE_BUTTON("(A)utoCalibrate objects", 'a', STATE_AUTOCALIBRATE)
 				//STATE_BUTTON("(M)anualCalibrate objects", STATE_CALIBRATE)
-				STATE_BUTTON("(C)Change Gate [" + OBJECT_LABELS[targetGate] + "]", STATE_SELECT_GATE)
-				STATE_BUTTON("Auto(P)ilot [" + (autoPilot.running ? "On" : "Off") + "]", STATE_LAUNCH)
+				STATE_BUTTON("(C)Change Gate [" + OBJECT_LABELS[targetGate] + "]", 'c', STATE_SELECT_GATE)
+				STATE_BUTTON("Auto(P)ilot [" + (autoPilot.running ? "On" : "Off") + "]", 'p', STATE_LAUNCH)
 				/*
 			createButton(std::string("(M)ouse control [") + (mouseControl == 0 ? "Off" : (mouseControl == 1 ? "Ball" : "Gate")) + "]", [this, &mouseControl]{
 				mouseControl = (mouseControl + 1) % 3;
@@ -314,7 +315,7 @@ void Robot::Run()
 			//				STATE_BUTTON("(D)ance", STATE_DANCE)
 				//STATE_BUTTON("(D)ance", STATE_DANCE)
 				//STATE_BUTTON("(R)emote Control", STATE_REMOTE_CONTROL)
-				createButton(std::string("Save video: ") + (captureFrames ? "on" : "off"), [this, &captureDir, &time, &videoRecorder]{
+				createButton(std::string("Save video: ") + (captureFrames ? "on" : "off"), 'v', [this, &captureDir, &time, &videoRecorder]{
 					if (this->captureFrames) {
 						// save old video
 					}
@@ -324,13 +325,13 @@ void Robot::Run()
 
 					this->last_state = STATE_END_OF_GAME; // force dialog redraw
 				});
-				STATE_BUTTON("Settings", STATE_SETTINGS)
-				STATE_BUTTON("Reinit wheels", STATE_REINIT_WHEELS)
-				STATE_BUTTON("Reinit coilboard", STATE_REINIT_COILBOARD)
-				STATE_BUTTON("Manual (C)ontrol", STATE_MANUAL_CONTROL)
-				STATE_BUTTON("(T)est CoilGun", STATE_TEST_COILGUN)
-				STATE_BUTTON("(T)est Autopilot", STATE_TEST)
-				STATE_BUTTON("E(x)it", STATE_END_OF_GAME)
+				STATE_BUTTON("(S)ettings", 's', STATE_SETTINGS)
+				STATE_BUTTON("Reinit wheels", '-', STATE_REINIT_WHEELS)
+				STATE_BUTTON("Reinit coilboard", '-', STATE_REINIT_COILBOARD)
+				STATE_BUTTON("(M)anual Control", 'm', STATE_MANUAL_CONTROL)
+				STATE_BUTTON("Test CoilGun", '-', STATE_TEST_COILGUN)
+				STATE_BUTTON("Test Autopilot", '-', STATE_TEST)
+				STATE_BUTTON("E(x)it", 27, STATE_END_OF_GAME)
 			END_DIALOG
 		}
 		
@@ -339,34 +340,34 @@ void Robot::Run()
 				visionModule.Enable(false);
 				calibrator.Enable(true);
 				calibrator.reset();
-				createButton("Take a screenshot", [this, &calibrator]{
+				createButton("Take a screenshot", '-',[this, &calibrator]{
 					if (calibrator.LoadFrame()) {
 						this->SetState(STATE_CALIBRATE);
 					};
 
 				});
-			STATE_BUTTON("BACK", STATE_NONE)
+			STATE_BUTTON("BACK", 8,STATE_NONE)
 			END_DIALOG
 		}
 		else if (STATE_CALIBRATE == state) {
 			START_DIALOG
 				for (int i = 0; i < NUMBER_OF_OBJECTS; i++) {
 					// objectThresholds[(OBJECT) i] = calibrator->GetObjectThresholds(i, OBJECT_LABELS[(OBJECT) i]);
-					createButton(OBJECT_LABELS[(OBJECT)i], [this, i, &calibrator]{
+					createButton(OBJECT_LABELS[(OBJECT)i], '-', [this, i, &calibrator]{
 						/*this->objectThresholds[(OBJECT)i] =*/ calibrator.GetObjectThresholds(i, OBJECT_LABELS[(OBJECT)i]);
 					});
 				}
-				STATE_BUTTON("BACK", STATE_NONE)
+				STATE_BUTTON("BACK", 8, STATE_NONE)
 			END_DIALOG
 		}
 		
 		else if (STATE_SELECT_GATE == state) {
 			START_DIALOG
-				createButton(OBJECT_LABELS[GATE1], [this]{
+				createButton(OBJECT_LABELS[GATE1], '-', [this]{
 				this->targetGate = GATE1;
 				this->SetState(STATE_NONE);
 			});
-			createButton(OBJECT_LABELS[GATE2], [this]{
+			createButton(OBJECT_LABELS[GATE2], '-', [this]{
 				this->targetGate = GATE2;
 				this->SetState(STATE_NONE);
 			});
@@ -376,12 +377,24 @@ void Robot::Run()
 			START_DIALOG
 				IConfigurableModule *pModule = static_cast<IConfigurableModule*>(&visionModule);
 				for (auto setting : pModule->GetSettings()){
-					createButton(setting.first + ": " + std::get<0>(setting.second)(), [this, setting]{
+					createButton(setting.first + ": " + std::get<0>(setting.second)(), '-', [this, setting]{
 						std::get<1>(setting.second)();
 						this->last_state = STATE_END_OF_GAME; // force dialog redraw
 					});
 				}
-				STATE_BUTTON("BACK", STATE_NONE)
+				STATE_BUTTON("BACK", 8, STATE_NONE)
+			END_DIALOG
+		}
+		else if (STATE_MANUAL_CONTROL == state) {
+			START_DIALOG
+				IConfigurableModule *pModule = static_cast<IConfigurableModule*>(&manualControl);
+				for (auto setting : pModule->GetSettings()){
+					createButton(setting.first + ": " + std::get<0>(setting.second)(), '-', [this, setting]{
+						std::get<1>(setting.second)();
+						this->last_state = STATE_END_OF_GAME; // force dialog redraw
+					});
+				}
+				STATE_BUTTON("BACK", 8,STATE_NONE)
 			END_DIALOG
 		}
 		else if (STATE_LAUNCH == state) {
@@ -412,7 +425,7 @@ void Robot::Run()
 		}
 		else if (STATE_RUN == state) {
 			START_DIALOG
-				createButton(std::string("Save video: ") + (captureFrames ? "on" : "off"), [this, &captureDir, &time, &videoRecorder]{
+				createButton(std::string("Save video: ") + (captureFrames ? "on" : "off"), '-', [this, &captureDir, &time, &videoRecorder]{
 					if (this->captureFrames) {
 						// save old video
 					}
@@ -430,8 +443,8 @@ void Robot::Run()
 					this->last_state = STATE_NONE;
 				});
 				*/
-				STATE_BUTTON("(B)ack", STATE_NONE)
-				STATE_BUTTON("E(x)it", STATE_END_OF_GAME)
+				STATE_BUTTON("(B)ack", 8, STATE_NONE)
+				STATE_BUTTON("E(x)it", 27, STATE_END_OF_GAME)
 			END_DIALOG
 
 				
@@ -443,12 +456,12 @@ void Robot::Run()
 			START_DIALOG
 				autoPilot.enableTestMode(true);
 				for (const auto d : autoPilot.driveModes) {
-					createButton(d.second->name, [this, &autoPilot, d]{
+					createButton(d.second->name, '-',[this, &autoPilot, d]{
 						autoPilot.setTestMode(d.first);
 					});
 				}
-			STATE_BUTTON("BACK", STATE_NONE)
-				END_DIALOG
+				STATE_BUTTON("BACK", 8, STATE_NONE)
+			END_DIALOG
 		}
 		else if (STATE_DANCE == state) {
 			float move1, move2;
@@ -533,6 +546,7 @@ void Robot::Run()
 		*/
 		show(display);
 		int key = cv::waitKey(1);
+		KeyPressed(key);
 		if (key == 27) {
 			std::cout << "exiting program" << std::endl;
 			break;

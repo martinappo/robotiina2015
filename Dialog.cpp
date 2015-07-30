@@ -41,9 +41,9 @@ void Dialog::ShowImage(const cv::Mat &image) {
 	//resize(image, display, cv::Size(WINDOW_WIDTH, WINDOW_HEIGHT));//resize image
 }
 
-int Dialog::createButton(const std::string& bar_name, std::function<void()> const & on_change){
+int Dialog::createButton(const std::string& bar_name, char shortcut, std::function<void()> const & on_change){
 	boost::mutex::scoped_lock lock(click_mutex); //allow one command at a time
-	m_buttons.push_back(std::make_tuple(bar_name, on_change));
+	m_buttons.push_back(std::make_tuple(bar_name, shortcut, on_change));
 	return 0;
 };
 
@@ -79,13 +79,22 @@ int Dialog::show(const cv::Mat &background) {
 
 	return 0;
 };
+void Dialog::KeyPressed(int key){
+	if (key == '-') return;
+	for (auto btn : m_buttons){
+		if(std::get<1>(btn) == key){
+			std::get<2>(btn)();
+			return;
+		}
+	}
+}
 
 void Dialog::mouseClicked(int x, int y) {
 	boost::mutex::scoped_lock lock(click_mutex); //allow one command at a time
 	int index = round((float)y / m_buttonHeight) - 1;
     if (index < m_buttons.size()){
         auto button = m_buttons[index];
-		std::get<1>(button)();
+		std::get<2>(button)();
         m_close = true;
     }
 
