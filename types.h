@@ -2,6 +2,7 @@
 #include <opencv2/opencv.hpp>
 #include <math.h> 
 #include <functional>
+#include <atomic>
 
 #ifdef WIN32
 	#define _WIN32_WINNT 0x0600 // vista for socket.cancel()
@@ -36,6 +37,7 @@ struct ObjectPosition /* polar coordinates */
 	double distance;
 	double horizontalDev; // perhaps not needed
 	double horizontalAngle;
+
 };
 
 
@@ -80,17 +82,17 @@ enum STATE
 	STATE_END_OF_GAME /* leave this last*/
 };
 
-struct FieldState {
-	ObjectPosition self; // our robot distance from center and rotation
-	ObjectPosition opponent; // distance from center and rotation
-	ObjectPosition balls[NUMBER_OF_BALLS];
-	ObjectPosition selfGate;
-	ObjectPosition opponentGate;
+class FieldState {
+public:
+	std::atomic<ObjectPosition> self; // our robot distance from center and rotation
+	std::atomic<ObjectPosition> opponent; // distance from center and rotation
+	std::atomic<ObjectPosition> balls[NUMBER_OF_BALLS];
+	std::atomic<ObjectPosition> home; //gate
+	std::atomic<ObjectPosition> gate;
+	std::atomic_bool gateObstructed;
+
 };
 
-class IFieldStateListener {
-	virtual void OnFieldStateChanged(const FieldState &state) = 0;
-};
 
 class IUIEventListener {
 public:
@@ -125,13 +127,15 @@ public:
 
 class IVisionModule {
 public:
-	virtual bool Init(ICamera * pCamera, IDisplay *pDisplay, IFieldStateListener * pFieldStateListener) = 0;
+	virtual bool Init(ICamera * pCamera, IDisplay *pDisplay, FieldState *pFieldState) = 0;
 	virtual const cv::Mat & GetFrame() = 0;
 };
 
 class IWheelController {
 public:
 	virtual void Drive(double fowardSpeed, double direction, double angularSpeed) = 0;
+	virtual const Speed & GetActualSpeed() = 0;
+	virtual const Speed & GetTargetSpeed() = 0;
 
 };
 class ICoilGun {
@@ -144,12 +148,13 @@ public:
 
 class ICommunicationModule : public IWheelController, public ICoilGun {
 	virtual bool Init(IWheelController * pWheels, ICoilGun *pCoilGun) = 0;
+
 };
 
 class IControlModule {
-	virtual bool Init(ICommunicationModule * pComModule) = 0;
+	virtual bool Init(ICommunicationModule * pComModule, FieldState *pFieldState) = 0;
 };
-
+/*
 class IAutoPilot
 {
 public:
@@ -157,7 +162,7 @@ public:
 	virtual std::string GetDebugInfo() = 0;
 	//virtual void Enable(bool enable) = 0;
 };
-
+*/
 class IButtonClickListener
 {
 	virtual void OnStartButtonClicked() = 0;

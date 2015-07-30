@@ -1,9 +1,9 @@
 #pragma once
 #include "types.h"
-#include <boost/thread/thread.hpp>
-#include <boost/atomic.hpp>
 #include <boost/thread/mutex.hpp>
 #include <atomic>
+#include "ThreadedClass.h"
+
 
 enum NewDriveMode {
 	DRIVEMODE_IDLE = 0,
@@ -24,15 +24,21 @@ class DriveInstruction
 {
 protected:
 	boost::posix_time::ptime actionStart;
-private:
+	FieldState *m_pFieldState;
+	ICommunicationModule *m_pCom;
 public:
 	const std::string name;
-	DriveInstruction(const std::string name) : name(name){};
-	virtual void onEnter(NewAutoPilot&NewAutoPilot){
+	DriveInstruction(const std::string name) : name(name){
+	};
+	void Init(ICommunicationModule *pCom, FieldState *pFieldState){
+		m_pCom = pCom;
+		m_pFieldState = pFieldState;
+	};
+	virtual void onEnter(){
 		actionStart = boost::posix_time::microsec_clock::local_time();
 	};
-	virtual NewDriveMode step(NewAutoPilot&NewAutoPilot, double dt) = 0;
-	virtual void onExit(NewAutoPilot& NewAutoPilot){};
+	virtual NewDriveMode step(double dt) = 0;
+	virtual void onExit(){};
 
 };
 class Idle : public DriveInstruction
@@ -41,9 +47,9 @@ private:
 	boost::posix_time::ptime idleStart;
 public:
 	Idle() : DriveInstruction("IDLE"){};
-	virtual void onEnter(NewAutoPilot&NewAutoPilot);
-	virtual void onExit(NewAutoPilot& NewAutoPilot);
-	virtual NewDriveMode step(NewAutoPilot&NewAutoPilot, double dt);
+	virtual void onEnter();
+	virtual void onExit();
+	virtual NewDriveMode step(double dt);
 };
 
 class LocateBall : public DriveInstruction
@@ -52,22 +58,22 @@ private:
 	boost::posix_time::ptime rotateStart;
 public:
 	LocateBall() : DriveInstruction("LOCATE_BALL"){};
-	virtual void onEnter(NewAutoPilot&NewAutoPilot);
-	virtual NewDriveMode step(NewAutoPilot&NewAutoPilot, double dt);
+	virtual void onEnter();
+	virtual NewDriveMode step(double dt);
 };
 
 class LocateHome : public DriveInstruction
 {
 public:
 	LocateHome() : DriveInstruction("LOCATE_HOME"){};
-	virtual NewDriveMode step(NewAutoPilot&NewAutoPilot, double dt);
+	virtual NewDriveMode step(double dt);
 };
 
 class DriveToHome : public DriveInstruction
 {
 public:
 	DriveToHome() : DriveInstruction("DRIVE_TO_HOME"){};
-	virtual NewDriveMode step(NewAutoPilot&NewAutoPilot, double dt);
+	virtual NewDriveMode step(double dt);
 };
 
 
@@ -77,9 +83,9 @@ private:
 	boost::posix_time::ptime catchStart;
 public:
 	CatchBall() : DriveInstruction("CATCH_BALL"){};
-	virtual void onEnter(NewAutoPilot&NewAutoPilot);
-	virtual void onExit(NewAutoPilot& NewAutoPilot);
-	virtual NewDriveMode step(NewAutoPilot&NewAutoPilot, double dt);
+	virtual void onEnter();
+	virtual void onExit();
+	virtual NewDriveMode step(double dt);
 };
 
 class DriveToBall : public DriveInstruction
@@ -93,8 +99,8 @@ private:
 	int desiredDistance = 210;
 public:
 	DriveToBall() : DriveInstruction("DRIVE_TO_BALL"){};
-	virtual void onEnter(NewAutoPilot&NewAutoPilot);
-	virtual NewDriveMode step(NewAutoPilot&NewAutoPilot, double dt);
+	virtual void onEnter();
+	virtual NewDriveMode step(double dt);
 };
 
 
@@ -102,35 +108,35 @@ class LocateGate : public DriveInstruction
 {
 public:
 	LocateGate() : DriveInstruction("LOCATE_GATE"){};
-	virtual NewDriveMode step(NewAutoPilot&NewAutoPilot, double dt);
+	virtual NewDriveMode step(double dt);
 };
 
 class AimGate : public DriveInstruction
 {
 public:
 	AimGate() : DriveInstruction("AIM_GATE"){};
-	virtual NewDriveMode step(NewAutoPilot&NewAutoPilot, double dt);
+	virtual NewDriveMode step(double dt);
 };
 
 class Kick : public DriveInstruction
 {
 public:
-	virtual void onEnter(NewAutoPilot&NewAutoPilot);
+	virtual void onEnter();
 	Kick() : DriveInstruction("KICK"){};
-	virtual NewDriveMode step(NewAutoPilot&NewAutoPilot, double dt);
+	virtual NewDriveMode step(double dt);
 };
 
 class RecoverCrash : public DriveInstruction
 {
 public:
 	RecoverCrash() : DriveInstruction("RECOVER_CRASH"){};
-	virtual NewDriveMode step(NewAutoPilot&NewAutoPilot, double dt);
+	virtual NewDriveMode step(double dt);
 };
 
 class CoilGun;
 class WheelController;
 
-class NewAutoPilot : public IFieldStateListener
+class NewAutoPilot : public IControlModule, public ThreadedClass
 {
 	friend class Idle;
 	friend class DriveToBall;
@@ -148,8 +154,9 @@ public:
 
 private:
 	std::map<NewDriveMode, DriveInstruction*>::iterator curDriveMode;
-	WheelController *wheels;
-	CoilGun *coilgun;
+	ICommunicationModule *m_pComModule;
+	FieldState *m_pFieldState;
+	/*
 	ObjectPosition lastBallLocation;
 	ObjectPosition lastGateLocation;
 	ObjectPosition lastHomeGateLocation;
@@ -163,12 +170,10 @@ private:
 	std::atomic_int borderDistance;
 	boost::atomic<cv::Point2i> ballCount;
 	cv::Point2i lastBallCount;
+	*/
 
 
-
-	std::atomic_bool stop_thread;
 	std::atomic_bool drive;
-	boost::thread_group threads;
 	boost::mutex mutex;
 	boost::posix_time::ptime rotateTime = time;
 
@@ -179,6 +184,7 @@ private:
 	NewDriveMode testDriveMode = DRIVEMODE_IDLE;
 
 protected:
+	/*
 	//	NewDriveMode DriveToBall();
 	NewDriveMode LocateBall();
 	NewDriveMode CatchBall();
@@ -186,12 +192,13 @@ protected:
 	NewDriveMode LocateHome();
 	NewDriveMode DriveToHome();
 	NewDriveMode RecoverCrash();
+	*/
 	void Step();
 	void WriteInfoOnScreen();
 public:
-	NewAutoPilot(WheelController *wheels, CoilGun *coilgun);
-	virtual void OnFieldStateChanged(const FieldState &state);
-	void UpdateState(ObjectPosition *ballLocation, ObjectPosition *gateLocation, bool ballInTribbler, bool sightObstructed, bool somethingOnWay, int borderDistance, cv::Point2i ballCount);
+	NewAutoPilot();
+	bool Init(ICommunicationModule *pComModule, FieldState *pState);
+	//void UpdateState(ObjectPosition *ballLocation, ObjectPosition *gateLocation, bool ballInTribbler, bool sightObstructed, bool somethingOnWay, int borderDistance, cv::Point2i ballCount);
 	void setTestMode(NewDriveMode mode);
 	void enableTestMode(bool enable);
 	void Run();

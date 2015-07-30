@@ -1,17 +1,17 @@
 #pragma once
 #include "types.h"
-class ControlModule :
+class ComModule :
 	public ICommunicationModule
 {
 public:
-	ControlModule();
+	ComModule();
 	virtual bool Init(IWheelController * pWheels, ICoilGun *pCoilGun) {
 		m_pWheels = pWheels;
 		m_pCoilGun = pCoilGun;
 		return true;
 	}
 
-	virtual ~ControlModule();
+	virtual ~ComModule();
 
 	virtual void Drive(double fowardSpeed, double direction, double angularSpeed) {
 		m_pWheels->Drive(fowardSpeed, direction, angularSpeed);
@@ -24,6 +24,12 @@ public:
 	}
 	virtual void ToggleTribbler(bool start){
 		m_pCoilGun->ToggleTribbler(start);
+	}
+	const Speed & GetActualSpeed(){
+		return m_pWheels->GetActualSpeed();
+	}
+	const Speed & GetTargetSpeed(){
+		return m_pWheels->GetTargetSpeed();
 	}
 
 protected:

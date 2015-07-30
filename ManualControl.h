@@ -1,21 +1,18 @@
 #pragma once
 #include "ConfigurableModule.h"
+#include "ThreadedClass.h"
+
 class ManualControl :
-	public ConfigurableModule, public IControlModule
+	public ConfigurableModule, public IControlModule, public ThreadedClass
 {
 public:
 	ManualControl();
 	virtual ~ManualControl();
 
-	virtual bool Init(IWheelController * pWheels, ICoilGun *pCoilGun) {
-		wheels = pWheels;
-		coilBoard = pCoilGun;
-		return true;
-	}
+	bool Init(ICommunicationModule *pComModule, FieldState *pState);
+	void Run();
 
 protected:
-	IWheelController *wheels;
-	ICoilGun * coilBoard;
-
+	ICommunicationModule *m_pComModule;
 };
 

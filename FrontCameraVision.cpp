@@ -22,10 +22,10 @@ FrontCameraVision::~FrontCameraVision()
 	WaitForStop();
 }
 
-bool FrontCameraVision::Init(ICamera * pCamera, IDisplay *pDisplay, IFieldStateListener * pFieldStateListener){
+bool FrontCameraVision::Init(ICamera * pCamera, IDisplay *pDisplay, FieldState * pFieldState){
 	m_pCamera = pCamera;
 	m_pDisplay = pDisplay;
-	m_pStateListener = pFieldStateListener;
+	m_pState = pFieldState;
 	Start();
 	return true;
 }
@@ -185,7 +185,6 @@ void FrontCameraVision::Run() {
 		cv::Point2i ballCount(finder.ballCountLeft, finder.ballCountRight);
 
 		m_pDisplay->ShowImage(frameBGR);
-
-
+		//TODO: update state
 	}
 }

@@ -84,7 +84,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="autocalibrator.h" />
-    <ClInclude Include="AutoPilot.h" />
     <ClInclude Include="BallFinder.h" />
     <ClInclude Include="blockingreader.h" />
     <ClInclude Include="calibrationconfreader.h" />
@@ -93,8 +92,9 @@
     <ClInclude Include="colorcalibrator.h" />
     <ClInclude Include="ComPortScanner.h" />
     <ClInclude Include="ConfigurableModule.h" />
-    <ClInclude Include="ControlModule.h" />
+    <ClInclude Include="ComModule.h" />
     <ClInclude Include="dialog.h" />
+    <ClInclude Include="SoccerField.h" />
     <ClInclude Include="FrontCameraVision.h" />
     <ClInclude Include="GateFinder.h" />
     <ClInclude Include="ImageThresholder.h" />
@@ -116,7 +116,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="autocalibrator.cpp" />
-    <ClCompile Include="AutoPilot.cpp" />
     <ClCompile Include="BallFinder.cpp" />
     <ClCompile Include="calibrationconfreader.cpp" />
     <ClCompile Include="camera.cpp" />
@@ -124,8 +123,9 @@
     <ClCompile Include="colorcalibrator.cpp" />
     <ClCompile Include="ComPortScanner.cpp" />
     <ClCompile Include="ConfigurableModule.cpp" />
-    <ClCompile Include="ControlModule.cpp" />
+    <ClCompile Include="ComModule.cpp" />
     <ClCompile Include="dialog.cpp" />
+    <ClCompile Include="SoccerField.cpp" />
     <ClCompile Include="FrontCameraVision.cpp" />
     <ClCompile Include="GateFinder.cpp" />
     <ClCompile Include="kalmanFilter.cpp" />

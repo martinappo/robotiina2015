@@ -19,11 +19,11 @@ public:
 			WaitForStop();
 		}
 	}
+	boost::atomic<bool> running;
 
 protected:
 	boost::thread_group threads;
 	boost::atomic<bool> stop_thread;
-	boost::atomic<bool> running;
 	std::string name;
 	virtual void Run() = 0;
 

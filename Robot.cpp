@@ -19,12 +19,13 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/posix_time/posix_time_io.hpp>
 #include <boost/filesystem.hpp>
-#include "AutoPilot.h"
 #include "NewAutoPilot.h"
 #include "RobotTracker.h"
 #include "VideoRecorder.h"
 #include "FrontCameraVision.h"
-#include "ControlModule.h"
+#include "ComModule.h"
+#include "ManualControl.h"
+#include "SoccerField.h"
 
 #define STATE_BUTTON(name, new_state) \
 createButton(std::string("") + name, [&](){ this->SetState(new_state); });
@@ -217,21 +218,30 @@ void Robot::Run()
 		boost::filesystem::create_directories(captureDir);
 	}
 	*/
+	/* Field state */
+	SoccerField field;
 
-	NewAutoPilot autoPilot(wheels, coilBoard);
 	/* Vision modules */
 	FrontCameraVision visionModule;
-	visionModule.Init(camera, this, &autoPilot);
+	visionModule.Init(camera, this, &field);
 
-	/* Control modules*/
-	ControlModule controlModule;
-	controlModule.Init(wheels, coilBoard);
+	AutoCalibrator calibrator;
+	calibrator.Init(camera, this, NULL);
+
+	/* Communication modules */
+	ComModule comModule;
+	comModule.Init(wheels, coilBoard);
+
+	/* Logic modules */
+	NewAutoPilot autoPilot;
+	autoPilot.Init(&comModule, &field);
+
+	ManualControl manualControl;
+	manualControl.Init(&comModule, NULL);
+
 	//RobotTracker tracker(wheels);
 
 
-	//cv::Mat frameBGR = visionModule.GetFrame();
-	AutoCalibrator calibrator;
-	calibrator.Init(camera, this, NULL);
 	
 	std::stringstream subtitles;
 
@@ -294,7 +304,7 @@ void Robot::Run()
 				STATE_BUTTON("(A)utoCalibrate objects", STATE_AUTOCALIBRATE)
 				//STATE_BUTTON("(M)anualCalibrate objects", STATE_CALIBRATE)
 				STATE_BUTTON("(C)Change Gate [" + OBJECT_LABELS[targetGate] + "]", STATE_SELECT_GATE)
-				STATE_BUTTON("Auto(P)ilot [" + (autoPilotEnabled ? "On" : "Off") + "]", STATE_LAUNCH)
+				STATE_BUTTON("Auto(P)ilot [" + (autoPilot.running ? "On" : "Off") + "]", STATE_LAUNCH)
 				/*
 			createButton(std::string("(M)ouse control [") + (mouseControl == 0 ? "Off" : (mouseControl == 1 ? "Ball" : "Gate")) + "]", [this, &mouseControl]{
 				mouseControl = (mouseControl + 1) % 3;
@@ -388,11 +398,9 @@ void Robot::Run()
 					}
 					*/
 					//SetState(STATE_SELECT_GATE);
-					autoPilotEnabled = !autoPilotEnabled;
-					if (!autoPilotEnabled) {
-						coilBoard->ToggleTribbler(false);
-						wheels->Stop();
-					}
+					coilBoard->ToggleTribbler(false);
+					wheels->Stop();
+					autoPilot.Enable(!autoPilot.running);
 					SetState(STATE_NONE);
 				}
 				catch (...){

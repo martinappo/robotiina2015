@@ -9,8 +9,7 @@ class FrontCameraVision :
 protected:
 	ICamera *m_pCamera;
 	IDisplay *m_pDisplay;
-	IFieldStateListener *m_pStateListener;
-	FieldState state;
+	FieldState *m_pState;
 
 	cv::Mat frameBGR, frameHSV;
 	HSVColorRangeMap objectThresholds;
@@ -24,7 +23,7 @@ protected:
 
 public:
 	FrontCameraVision();
-	bool Init(ICamera * pCamera, IDisplay *pDisplay, IFieldStateListener * pFieldStateListener);
+	bool Init(ICamera * pCamera, IDisplay *pDisplay, FieldState *pFieldState);
 	virtual ~FrontCameraVision();
 	void Run();
 	const cv::Mat & GetFrame() { return m_pCamera->Capture();  }

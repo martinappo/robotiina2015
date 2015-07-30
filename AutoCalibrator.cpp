@@ -186,7 +186,7 @@ AutoCalibrator::~AutoCalibrator(){
 	WaitForStop();
 }
 
-bool AutoCalibrator::Init(ICamera * pCamera, IDisplay *pDisplay, IFieldStateListener * pFieldStateListener){
+bool AutoCalibrator::Init(ICamera * pCamera, IDisplay *pDisplay, FieldState*){
 	m_pCamera = pCamera;
 	m_pDisplay = pDisplay;
 	frame_size = m_pCamera->GetFrameSize();

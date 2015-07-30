@@ -19,9 +19,6 @@
     <ClCompile Include="autocalibrator.cpp">
       <Filter>VisionModule</Filter>
     </ClCompile>
-    <ClCompile Include="AutoPilot.cpp">
-      <Filter>LogicModule</Filter>
-    </ClCompile>
     <ClCompile Include="BallFinder.cpp">
       <Filter>VisionModule</Filter>
     </ClCompile>
@@ -67,9 +64,6 @@
     <ClCompile Include="VideoRecorder.cpp">
       <Filter>VisionModule</Filter>
     </ClCompile>
-    <ClCompile Include="ControlModule.cpp">
-      <Filter>ComModule</Filter>
-    </ClCompile>
     <ClCompile Include="ConfigurableModule.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -81,6 +75,12 @@
     </ClCompile>
     <ClCompile Include="colorcalibrator.cpp">
       <Filter>VisionModule</Filter>
+    </ClCompile>
+    <ClCompile Include="ComModule.cpp">
+      <Filter>ComModule</Filter>
+    </ClCompile>
+    <ClCompile Include="SoccerField.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -150,9 +150,6 @@
     <ClInclude Include="autocalibrator.h">
       <Filter>VisionModule</Filter>
     </ClInclude>
-    <ClInclude Include="AutoPilot.h">
-      <Filter>LogicModule</Filter>
-    </ClInclude>
     <ClInclude Include="kalmanFilter.h">
       <Filter>VisionModule</Filter>
     </ClInclude>
@@ -162,9 +159,6 @@
     <ClInclude Include="VideoRecorder.h">
       <Filter>VisionModule</Filter>
     </ClInclude>
-    <ClInclude Include="ControlModule.h">
-      <Filter>ComModule</Filter>
-    </ClInclude>
     <ClInclude Include="ConfigurableModule.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -173,6 +167,12 @@
     </ClInclude>
     <ClInclude Include="ManualControl.h">
       <Filter>LogicModule</Filter>
+    </ClInclude>
+    <ClInclude Include="ComModule.h">
+      <Filter>ComModule</Filter>
+    </ClInclude>
+    <ClInclude Include="SoccerField.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
