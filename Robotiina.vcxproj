@@ -101,7 +101,6 @@
     <ClInclude Include="ImageThresholder.h" />
     <ClInclude Include="kalmanFilter.h" />
     <ClInclude Include="ManualControl.h" />
-    <ClInclude Include="MouseFinder.h" />
     <ClInclude Include="NewAutoPilot.h" />
     <ClInclude Include="objectfinder.h" />
     <ClInclude Include="remotecontrol.h" />
@@ -132,7 +131,6 @@
     <ClCompile Include="GateFinder.cpp" />
     <ClCompile Include="kalmanFilter.cpp" />
     <ClCompile Include="ManualControl.cpp" />
-    <ClCompile Include="MouseFinder.cpp" />
     <ClCompile Include="NewAutoPilot.cpp" />
     <ClCompile Include="objectfinder.cpp" />
     <ClCompile Include="remotecontrol.cpp" />

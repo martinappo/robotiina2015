@@ -40,9 +40,6 @@
     <ClCompile Include="kalmanFilter.cpp">
       <Filter>VisionModule</Filter>
     </ClCompile>
-    <ClCompile Include="MouseFinder.cpp">
-      <Filter>VisionModule</Filter>
-    </ClCompile>
     <ClCompile Include="objectfinder.cpp">
       <Filter>VisionModule</Filter>
     </ClCompile>
@@ -143,9 +140,6 @@
     </ClInclude>
     <ClInclude Include="NewAutoPilot.h">
       <Filter>LogicModule</Filter>
-    </ClInclude>
-    <ClInclude Include="MouseFinder.h">
-      <Filter>VisionModule</Filter>
     </ClInclude>
     <ClInclude Include="BallFinder.h">
       <Filter>VisionModule</Filter>
