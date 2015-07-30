@@ -116,7 +116,7 @@ public:
 	virtual double GetFPS() = 0;
 };
 
-
+//maybe use std::vector instead
 typedef std::map<std::string, std::tuple<std::function<std::string()>, std::function<void()>>> SettingsList;
 
 class IConfigurableModule {

@@ -389,7 +389,7 @@ void Robot::Run()
 			START_DIALOG
 				IConfigurableModule *pModule = static_cast<IConfigurableModule*>(&manualControl);
 				for (auto setting : pModule->GetSettings()){
-					createButton(setting.first + ": " + std::get<0>(setting.second)(), '-', [this, setting]{
+					createButton(setting.first + ": " + std::get<0>(setting.second)(), std::get<0>(setting.second)()[0], [this, setting]{
 						std::get<1>(setting.second)();
 						this->last_state = STATE_END_OF_GAME; // force dialog redraw
 					});
@@ -546,7 +546,9 @@ void Robot::Run()
 		*/
 		show(display);
 		int key = cv::waitKey(1);
-		KeyPressed(key);
+		if (key != -1) {
+			KeyPressed(key);
+		}
 		if (key == 27) {
 			std::cout << "exiting program" << std::endl;
 			break;
