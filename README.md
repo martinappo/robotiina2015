@@ -22,7 +22,7 @@ Robotex 2014 participant
 * start robotiina.bat to launch it or launch it form IDE
 
 
-###On Linux (Ubuntu)
+###On Linux (Ubuntu/jessie)
 
 * install cmake, gcc and git
  * sudo apt-get install build-essential cmake git 
@@ -36,4 +36,18 @@ Robotex 2014 participant
 * run make
 * to start program execute ./robotiina
 
+###On Rasperry Pi 2
+* make sure you upgrade to jessie
+ * Update /etc/apt/sources.list to have jessie wherever you've currently got wheezy
+ * sudo apt-get update
+ * sudo apt-get dist-upgrade
+ * sudo rpi-update
+ * reboot
+* And the stock gcc that gets installed is: 
+  * ii gcc 4:4.8.2-1 armhf GNU C compiler
+* Install OpenCV
+ * http://www.pyimagesearch.com/2015/02/23/install-opencv-and-python-on-your-raspberry-pi-2-and-b/
+* Install Boost 1.55.0
+ * https://jeanleflambeur.wordpress.com/2014/06/07/compiling-boost-1-55-with-c11-support-on-the-raspberry-pi/comment-page-1/
+ * Continue from "clone repro" on Linux instructions
 
