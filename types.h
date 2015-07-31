@@ -38,7 +38,6 @@ struct ObjectPosition /* polar coordinates */
 	double distance;
 	double horizontalDev; // perhaps not needed
 	double horizontalAngle;
-
 };
 
 
@@ -85,7 +84,7 @@ public:
 	std::atomic<ObjectPosition> yellowGate;
 	std::atomic_bool gateObstructed;
 	virtual void SetTargetGate(OBJECT gate) = 0;
-	virtual ObjectPosition GetTargetGate() = 0;
+	virtual ObjectPosition GetTargetGate() const = 0;
 
 
 };

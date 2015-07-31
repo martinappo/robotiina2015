@@ -13,12 +13,8 @@ public:
 	virtual void SetTargetGate(OBJECT gate) {
 		m_targetGate = gate;
 	};
-	virtual ObjectPosition GetTargetGate(){
-		if (m_targetGate == BLUE_GATE) return blueGate;
-		else if (m_targetGate == YELLOW_GATE) return yellowGate;
-		else { assert(false); return ObjectPosition(); }
-	};
-
+	virtual ObjectPosition GetTargetGate() const;
+	cv::Point2i Polar2Cartesian(ObjectPosition pos) const;
 private:
 	std::atomic_int m_targetGate;
 	IDisplay *m_pDisplay;

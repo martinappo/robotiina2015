@@ -338,6 +338,7 @@ ObjectPosition ObjectFinder::ConvertPixelToRealWorld(const cv::Point2i &point, c
 
 
 void ObjectFinder::WriteInfoOnScreen(const ObjectPosition &info){
+	return;
 	cv::Mat infoWindow(100, 250, CV_8UC3, cv::Scalar::all(0));
 	std::ostringstream oss;
 	oss << "Distance :" << info.distance;
