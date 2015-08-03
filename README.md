@@ -30,8 +30,8 @@ Robotex 2014 participant
  * sudo apt-get install libopencv-dev
  * sudo apt-get install libboost-all-dev
 * clone repro
- * git clone https://github.com/andresviikmaa/Robotiina
- * cd robotiina
+ * git clone https://github.com/martinappo/robotiina2015
+ * cd robotiina2015
 * run cmake .
 * run make
 * to start program execute ./robotiina
@@ -43,8 +43,7 @@ Robotex 2014 participant
  * sudo apt-get dist-upgrade
  * sudo rpi-update
  * reboot
-* And the stock gcc that gets installed is: 
-  * ii gcc 4:4.8.2-1 armhf GNU C compiler
+* check that gcc version > 4.8
 * Install OpenCV
  * http://www.pyimagesearch.com/2015/02/23/install-opencv-and-python-on-your-raspberry-pi-2-and-b/
 * Install Boost 1.55.0
