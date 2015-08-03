@@ -30,16 +30,16 @@ find_package( OpenCV REQUIRED )
 
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF) 
-find_package(Boost 1.54.0 COMPONENTS program_options system thread chrono date_time filesystem)
+find_package(Boost 1.55.0 COMPONENTS program_options system thread chrono date_time filesystem atomic)
 
 #if(Boost_FOUND)
 include_directories(${Boost_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 
 #endif()
 
-set(SOURCE_FILES Robotiina.cpp Camera.cpp FrontCameraVision.cpp ManualControl.cpp ConfigurableModule.cpp ComModule.cpp StillCamera.cpp Robot.cpp ObjectFinder.cpp ColorCalibrator.cpp AutoCalibrator.cpp WheelController.cpp CalibrationConfReader.cpp Dialog.cpp Wheel.cpp RemoteControl.cpp MouseFinder.cpp ComPortScanner.cpp CoilBoard.cpp RobotTracker.cpp ThreadedClass.cpp KalmanFilter.cpp VideoRecorder.cpp NewAutoPilot.cpp GateFinder.cpp BallFinder.cpp SoccerField.cpp)
+set(SOURCE_FILES Robotiina.cpp Camera.cpp FrontCameraVision.cpp MouseVision.cpp ManualControl.cpp ConfigurableModule.cpp ComModule.cpp StillCamera.cpp Robot.cpp ObjectFinder.cpp ColorCalibrator.cpp AutoCalibrator.cpp WheelController.cpp CalibrationConfReader.cpp Dialog.cpp Wheel.cpp RemoteControl.cpp ComPortScanner.cpp CoilBoard.cpp RobotTracker.cpp ThreadedClass.cpp KalmanFilter.cpp VideoRecorder.cpp NewAutoPilot.cpp GateFinder.cpp BallFinder.cpp SoccerField.cpp)
 add_executable(robotiina ${SOURCE_FILES})
-target_link_libraries( robotiina  ${OpenCV_LIBS} ${Boost_LIBRARIES} ${WINSOCK_LIB} ${WINSOCK2_LIB})
+target_link_libraries( robotiina  ${OpenCV_LIBS} ${Boost_LIBRARIES} ${WINSOCK_LIB} ${WINSOCK2_LIB} atomic)
 
 set(WHEELEMULATOR_FILES WheelEmulator.cpp)
 add_executable(wheelemulator ${WHEELEMULATOR_FILES})
