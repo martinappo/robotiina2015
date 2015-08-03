@@ -336,6 +336,9 @@ void Robot::Run()
 				createButton("Swap displays", '-', [this] {
 					m_bCam1Active = !m_bCam1Active;
 				});
+				createButton("Toggle main display on/off", '-', [this] {
+					m_bMainCamEnabled = !m_bMainCamEnabled;
+				});
 
 
 				STATE_BUTTON("(M)anual Control", 'm', STATE_MANUAL_CONTROL)

@@ -8,6 +8,7 @@
 Dialog::Dialog(const std::string &title, int flags/* = CV_WINDOW_AUTOSIZE*/) {
 
     m_title = title;
+	m_bMainCamEnabled = true;
     int baseLine;
     m_buttonHeight = cv::getTextSize("Ajig6", cv::FONT_HERSHEY_DUPLEX, 0.9, 1, &baseLine).height * 2;
 
@@ -36,6 +37,7 @@ Dialog::Dialog(const std::string &title, int flags/* = CV_WINDOW_AUTOSIZE*/) {
 
 };
 void Dialog::ShowImage(const cv::Mat &image, bool main) {
+	if (!m_bMainCamEnabled && main) return;
 	boost::mutex::scoped_lock lock(display_mutex); //allow one command at a time
 	image.copyTo(main ? cam1_area : cam2_area);
 	//	resize(image, cam_area, cv::Size(CAM_WIDTH, CAM_HEIGHT));//resize image
@@ -68,7 +70,7 @@ int Dialog::show(const cv::Mat &background) {
 	//cam_area.copyTo(display_roi);
 	cv::Mat main_roi = m_bCam1Active ? cam1_roi : cam2_roi;
 	cv::Mat sec_roi = !m_bCam1Active ? cam1_roi : cam2_roi;
-	if (cam1_area.size().height > 0) {
+	if (m_bMainCamEnabled && cam1_area.size().height > 0) {
 		resize(cam1_area, main_roi, main_roi.size());//resize image
 	}
 	if (cam2_area.size().height > 0) {

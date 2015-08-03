@@ -34,6 +34,7 @@ protected:
 	cv::Mat cam1_area, cam2_area;
 	void KeyPressed(int key);
 	bool m_bCam1Active = true;
+	std::atomic_bool m_bMainCamEnabled;
 private:
     bool m_close = false;
     std::string m_title;
@@ -41,5 +42,4 @@ private:
     int m_buttonHeight = 60; /* calculated automatically*/
 	boost::mutex click_mutex;
 	boost::mutex display_mutex;
-
 };
