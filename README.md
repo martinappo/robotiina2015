@@ -44,9 +44,7 @@ Robotex 2014 participant
  * sudo rpi-update
  * reboot
 * check that gcc version > 4.8
-* Install OpenCV
- * http://www.pyimagesearch.com/2015/02/23/install-opencv-and-python-on-your-raspberry-pi-2-and-b/
-* Install Boost 1.55.0
- * https://jeanleflambeur.wordpress.com/2014/06/07/compiling-boost-1-55-with-c11-support-on-the-raspberry-pi/comment-page-1/
- * Continue from "clone repro" on Linux instructions
+* follow linux instructions
+* To use camera make sure /dev/video0 is present
+ * "sudo modprobe bcm2835-v4l2" if driver not loaded
 
