@@ -129,10 +129,11 @@ void Robot::initCamera()
 {
 
 	std::cout << "Initializing camera... " << std::endl;
-	if (config.count("camera"))
+	camera = new Camera();
+	/*if (config.count("camera"))
 		camera = new Camera(config["camera"].as<std::string>());
 	else
-		camera = new Camera(0);
+		camera = new Camera(0);*/
 	std::cout << "Done" << std::endl;
 }
 
