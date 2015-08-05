@@ -38,6 +38,10 @@ Camera::Camera(int device)
 	frameSize = cv::Size((int)cap->get(CV_CAP_PROP_FRAME_WIDTH),    // Acquire input size
 		(int)cap->get(CV_CAP_PROP_FRAME_HEIGHT));
 	flip = false;
+
+	cap->set(CV_CAP_PROP_FPS, 60);
+	cap->set(CV_CAP_PROP_FRAME_WIDTH, 800);
+	cap->set(CV_CAP_PROP_FRAME_HEIGHT, 600);
 	/*
 	cap->set(CV_CAP_PROP_EXPOSURE, -5);
 	cap->set(CV_CAP_PROP_BRIGHTNESS, 0);
@@ -64,9 +68,9 @@ const cv::Mat &Camera::Capture(){
 	time = boost::posix_time::microsec_clock::local_time();
 	boost::posix_time::time_duration::tick_type dt = (time - lastCapture).total_milliseconds();
 	boost::posix_time::time_duration::tick_type dt2 = (time - lastCapture2).total_milliseconds();
-	if (dt < 24){
-		std::this_thread::sleep_for(std::chrono::milliseconds(12)); // limit fps to about 50fps
-	}
+	//if (dt < 24){
+	//	std::this_thread::sleep_for(std::chrono::milliseconds(12)); // limit fps to about 50fps
+	//}
 
 	if (dt2 > 1000) {
 		fps = 1000.0 * frames / dt2;
