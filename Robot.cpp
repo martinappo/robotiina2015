@@ -129,11 +129,13 @@ void Robot::initCamera()
 {
 
 	std::cout << "Initializing camera... " << std::endl;
-	camera = new Camera();
-	/*if (config.count("camera"))
-		camera = new Camera(config["camera"].as<std::string>());
+	if (config.count("camera"))
+		if (config["camera"].as<std::string>() == "ximea") 
+			camera = new Camera(CV_CAP_XIAPI);
+		else
+			camera = new Camera(config["camera"].as<std::string>());
 	else
-		camera = new Camera(0);*/
+		camera = new Camera(0);
 	std::cout << "Done" << std::endl;
 }
 
