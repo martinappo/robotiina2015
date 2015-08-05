@@ -2,7 +2,6 @@
 #include "types.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include <xiApi.h>
 
 class Camera: public ICamera
 {
@@ -17,10 +16,6 @@ private:
 	boost::posix_time::ptime lastCapture2;
 	boost::posix_time::ptime lastCapture;
 	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
-	bool usingXimea = false;
-	XI_IMG image;
-	HANDLE handle = NULL;
-	XI_RETURN stat = XI_OK;
 
 public:
     Camera(const std::string &device);
