@@ -9,7 +9,7 @@
 
 int main(int argc, char *argv[])
 {
-	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
+	/*boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
 
 	cv::VideoCapture *cap = new cv::VideoCapture(CV_CAP_XIAPI);
 	cv::Size frameSize = cv::Size((int)cap->get(CV_CAP_PROP_FRAME_WIDTH),    // Acquire input size
@@ -44,41 +44,32 @@ int main(int argc, char *argv[])
 			frames++;
 		}
 
+	}*/
+
+    boost::asio::io_service io;
+    Robot robotiina(io);
+//    RemoteControl sr(io, &robotiina);
+
+	try
+	{
+//           sr.Start();
+
+		robotiina.Launch(argc, argv);
+    }
+	catch (std::exception &e)
+	{
+		std::cout << "ups, " << e.what() << std::endl;
+		throw;
 	}
-//
-//
-//	if (!cap->isOpened())  // if not success, exit program
-//	{
-//		throw std::runtime_error("Camera is missing");
-//	}
-//	frameSize = cv::Size((int)cap->get(CV_CAP_PROP_FRAME_WIDTH),    // Acquire input size
-//		(int)cap->get(CV_CAP_PROP_FRAME_HEIGHT));
-//
-//
-//    boost::asio::io_service io;
-//    Robot robotiina(io);
-////    RemoteControl sr(io, &robotiina);
-//
-//	try
-//	{
-////           sr.Start();
-//
-//		robotiina.Launch(argc, argv);
-//    }
-//	catch (std::exception &e)
-//	{
-//		std::cout << "ups, " << e.what() << std::endl;
-//		throw;
-//	}
-//	catch (const std::string &e)
-//	{
-//		std::cout << "ups, " << e << std::endl;
-//	}
-//	catch (...)
-//	{
-//		std::cout << "ups, did not see that coming."<< std::endl;
-//	}
-////    sr.Stop();
+	catch (const std::string &e)
+	{
+		std::cout << "ups, " << e << std::endl;
+	}
+	catch (...)
+	{
+		std::cout << "ups, did not see that coming."<< std::endl;
+	}
+//    sr.Stop();
     return 0;
 
 }
