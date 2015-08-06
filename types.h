@@ -107,7 +107,7 @@ public:
 class ICamera
 {
 public:
-	virtual const cv::Mat & Capture() = 0;
+	virtual cv::Mat & Capture() = 0;
 	virtual cv::Size GetFrameSize() = 0;
 	virtual double GetFPS() = 0;
 };

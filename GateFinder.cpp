@@ -18,6 +18,8 @@ cv::Point2i GateFinder::LocateOnScreen(ThresholdedImages &HSVRanges, cv::Mat &fr
 	int growGateHeight = 1.2;
 	cv::Point2d center(-1, -1);
 	cv::Mat imgThresholded = HSVRanges[target]; // reference counted, I think
+	if (imgThresholded.rows == 0) return center;
+
 	cv::Mat dst(imgThresholded.rows, imgThresholded.cols, CV_8U, cv::Scalar::all(0));
 
 	cv::Scalar color(0, 0, 0);

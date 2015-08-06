@@ -37,9 +37,10 @@ public:
     Camera(const std::string &device);
 	Camera(int device);
 	Camera();
-    const cv::Mat & Capture();
+	cv::Mat & Capture();
     const cv::Mat & CaptureHSV();
     virtual ~Camera(){ 
+		WaitForStop();
 		cap->release();
 		delete cap;
 	}

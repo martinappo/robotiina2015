@@ -45,14 +45,14 @@ void FrontCameraVision::Run() {
 
 	}
 
-	frameBGR = m_pCamera->Capture();
+	auto frameSize = m_pCamera->GetFrameSize();
 
-	cv::Mat white(frameBGR.rows, frameBGR.cols, frameBGR.type(), cv::Scalar(255, 255, 255));
-	cv::Mat black(frameBGR.rows, frameBGR.cols, frameBGR.type(), cv::Scalar(40, 40, 40));
-	cv::Mat green(frameBGR.rows, frameBGR.cols, frameBGR.type(), cv::Scalar(21, 188, 80));
-	cv::Mat yellow(frameBGR.rows, frameBGR.cols, frameBGR.type(), cv::Scalar(61, 255, 244));
-	cv::Mat blue(frameBGR.rows, frameBGR.cols, frameBGR.type(), cv::Scalar(236, 137, 48));
-	cv::Mat orange(frameBGR.rows, frameBGR.cols, frameBGR.type(), cv::Scalar(48, 154, 236));
+	cv::Mat white(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(255, 255, 255));
+	cv::Mat black(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(40, 40, 40));
+	cv::Mat green(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(21, 188, 80));
+	cv::Mat yellow(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(61, 255, 244));
+	cv::Mat blue(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(236, 137, 48));
+	cv::Mat orange(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(48, 154, 236));
 
 	ObjectPosition borderDistance = { INT_MAX, 0, 0 };
 	bool notEnoughtGreen = false;
@@ -60,12 +60,11 @@ void FrontCameraVision::Run() {
 	bool somethingOnWay = false;
 
 	while (!stop_thread){
-		frameBGR = m_pCamera->Capture();
+		cv::Mat frameBGR = m_pCamera->Capture();
 
 		/**************************************************/
 		/*	STEP 1. Convert picture to HSV colorspace	  */
 		/**************************************************/
-
 		if (gaussianBlurEnabled) {
 			cv::GaussianBlur(frameBGR, frameBGR, cv::Size(3, 3), 4);
 		}
@@ -74,40 +73,41 @@ void FrontCameraVision::Run() {
 		/**************************************************/
 		/*	STEP 2. thresholding in parallel	          */
 		/**************************************************/
-		thresholder.Start(frameHSV, { BALL, BLUE_GATE, YELLOW_GATE, INNER_BORDER, OUTER_BORDER, FIELD });
-		thresholder.WaitForStop();
 
+		thresholder.Start(frameHSV, { BALL, BLUE_GATE, YELLOW_GATE/*, FIELD, INNER_BORDER, OUTER_BORDER, */ });
+		thresholder.WaitForStop();
 		/* STEP 2.2 cover own balls */
+		/*
 		std::vector<cv::Point2i> triangle;
-		triangle.push_back(cv::Point(100, frameBGR.rows - 50));
-		triangle.push_back(cv::Point(230, frameBGR.rows - 60));
-		triangle.push_back(cv::Point(240, frameBGR.rows));
-		triangle.push_back(cv::Point(0, frameBGR.rows));
+		triangle.push_back(cv::Point(100, frameSize.height - 50));
+		triangle.push_back(cv::Point(230, frameSize.height - 60));
+		triangle.push_back(cv::Point(240, frameSize.height));
+		triangle.push_back(cv::Point(0, frameSize.height));
 		cv::fillConvexPoly(thresholdedImages[BALL], triangle, cv::Scalar::all(0));
 		cv::fillConvexPoly(frameBGR, triangle, cv::Scalar(255, 0, 255));
 		triangle.clear();
-		triangle.push_back(cv::Point(frameBGR.cols - 100, frameBGR.rows - 50));
-		triangle.push_back(cv::Point(frameBGR.cols - 230, frameBGR.rows - 60));
-		triangle.push_back(cv::Point(frameBGR.cols - 240, frameBGR.rows));
-		triangle.push_back(cv::Point(frameBGR.cols - 0, frameBGR.rows));
+		triangle.push_back(cv::Point(frameSize.width - 100, frameSize.height - 50));
+		triangle.push_back(cv::Point(frameSize.width - 230, frameSize.height - 60));
+		triangle.push_back(cv::Point(frameSize.width - 240, frameSize.height));
+		triangle.push_back(cv::Point(frameSize.width - 0, frameSize.height));
 		cv::fillConvexPoly(thresholdedImages[BALL], triangle, cv::Scalar::all(0));
 		cv::fillConvexPoly(frameBGR, triangle, cv::Scalar(255, 0, 255));
-
+		*/
 		/**************************************************/
 		/*	STEP 3. check that path to gate is clean      */
 		/* this is done here, because finding contures	  */
 		/* corrupts thresholded imagees					  */
 		/**************************************************/
 		if (gateObstructionDetectionEnabled) {
-			cv::Mat selected(frameBGR.rows, frameBGR.cols, CV_8U, cv::Scalar::all(0));
-			cv::Mat mask(frameBGR.rows, frameBGR.cols, CV_8U, cv::Scalar::all(0));
-			cv::Mat	tmp(frameBGR.rows, frameBGR.cols, CV_8U, cv::Scalar::all(0));
-			//cv::line(mask, cv::Point(frameBGR.cols / 2, 200), cv::Point(frameBGR.cols / 2 - 40, frameBGR.rows - 100), cv::Scalar(255, 255, 255), 40);
-			//cv::line(mask, cv::Point(frameBGR.cols / 2, 200), cv::Point(frameBGR.cols / 2 + 40, frameBGR.rows - 100), cv::Scalar(255, 255, 255), 40);
+			cv::Mat selected(frameSize.height, frameSize.width, CV_8U, cv::Scalar::all(0));
+			cv::Mat mask(frameSize.height, frameSize.width, CV_8U, cv::Scalar::all(0));
+			cv::Mat	tmp(frameSize.height, frameSize.width, CV_8U, cv::Scalar::all(0));
+			//cv::line(mask, cv::Point(frameSize.width / 2, 200), cv::Point(frameSize.width / 2 - 40, frameSize.height - 100), cv::Scalar(255, 255, 255), 40);
+			//cv::line(mask, cv::Point(frameSize.width / 2, 200), cv::Point(frameSize.width / 2 + 40, frameSize.height - 100), cv::Scalar(255, 255, 255), 40);
 			std::vector<cv::Point2i> triangle;
-			triangle.push_back(cv::Point(frameBGR.cols / 2, 50));
-			triangle.push_back(cv::Point(frameBGR.cols / 2 - 80, frameBGR.rows - 100));
-			triangle.push_back(cv::Point(frameBGR.cols / 2 + 80, frameBGR.rows - 100));
+			triangle.push_back(cv::Point(frameSize.width / 2, 50));
+			triangle.push_back(cv::Point(frameSize.width / 2 - 80, frameSize.height - 100));
+			triangle.push_back(cv::Point(frameSize.width / 2 + 80, frameSize.height - 100));
 			cv::fillConvexPoly(mask, triangle, cv::Scalar::all(255));
 			tmp = 255 - (thresholdedImages[INNER_BORDER] + thresholdedImages[OUTER_BORDER] + thresholdedImages[FIELD]);
 			tmp.copyTo(selected, mask); // perhaps use field and inner border
@@ -126,8 +126,8 @@ void FrontCameraVision::Run() {
 		}
 		
 		if (borderDetectionEnabled) {
-			float y = finder.IsolateField(thresholdedImages, frameHSV, frameBGR, false, nightVisionEnabled);
-			finder.LocateCursor(frameBGR, cv::Point2i(frameBGR.cols / 2, y), BALL, borderDistance);
+			//float y = finder.IsolateField(thresholdedImages, frameHSV, frameBGR, false, nightVisionEnabled);
+			//finder.LocateCursor(frameBGR, cv::Point2i(frameSize.width / 2, y), BALL, borderDistance);
 		}
 		else {
 			borderDistance = { INT_MAX, 0, 0 };
@@ -142,9 +142,8 @@ void FrontCameraVision::Run() {
 		bool BlueGateFound = YelllowGateFinder.Locate(thresholdedImages, frameHSV, frameBGR, BLUE_GATE, blueGatePos);
 		bool YellowGateFound = BlueGateFinder.Locate(thresholdedImages, frameHSV, frameBGR, YELLOW_GATE, yellowGatePos);
 
-		bool ballFound = /*mouseControl != 1 ?*/
-			finder.Locate(thresholdedImages, frameHSV, frameBGR, BALL, ballPos)
-			/*: finder.LocateCursor(frameBGR, cv::Point2i(mouseX, mouseY), BALL, ballPos)*/;
+		bool ballFound = finder.Locate(thresholdedImages, frameHSV, frameBGR, BALL, ballPos);
+
 		m_pState->blueGate = blueGatePos;
 		m_pState->yellowGate = yellowGatePos;
 		m_pState->balls[0] = ballPos;

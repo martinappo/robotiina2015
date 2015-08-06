@@ -134,7 +134,7 @@ cv::Point2i BallFinder::LocateOnScreen(ThresholdedImages &HSVRanges, cv::Mat &fr
 
 bool BallFinder::validateBall(ThresholdedImages &HSVRanges, cv::Point2d endPoint, cv::Mat &frameHSV, cv::Mat &frameBGR)
 {
-
+	return true;
 	cv::Mat innerThresholded = HSVRanges[INNER_BORDER];
 	cv::Mat outerThresholded = HSVRanges[OUTER_BORDER];
 	cv::Mat fieldThresholded = HSVRanges[FIELD];

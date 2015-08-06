@@ -10,7 +10,7 @@ private:
 	cv::Mat frame;
 public:
 	StillCamera(const std::string &fileName);
-	const cv::Mat & Capture();
+	cv::Mat & Capture();
 	virtual ~StillCamera(){ }
 
 };

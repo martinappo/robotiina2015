@@ -11,7 +11,7 @@ protected:
 	IDisplay *m_pDisplay;
 	FieldState *m_pState;
 
-	cv::Mat frameBGR, frameHSV;
+	cv::Mat frameHSV;
 	HSVColorRangeMap objectThresholds;
 
 	bool gaussianBlurEnabled = false;

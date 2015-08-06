@@ -14,11 +14,11 @@ Camera::Camera(const std::string &device){
 
 	frameSize = cv::Size((int)cap->get(CV_CAP_PROP_FRAME_WIDTH),    // Acquire input size
 		(int)cap->get(CV_CAP_PROP_FRAME_HEIGHT));
-
+	/*
 	cap->set(CV_CAP_PROP_FPS, 60);
 	cap->set(CV_CAP_PROP_FRAME_WIDTH, 1280);
 	cap->set(CV_CAP_PROP_FRAME_HEIGHT, 720);
-
+	*/
 	/*
 	https://github.com/jaantti/Firestarter/blob/master/2014/run.sh
 	cap->set(CV_CAP_PROP_EXPOSURE, -5);
@@ -62,10 +62,17 @@ Camera::Camera(int device)
 
 }
 
-const cv::Mat &Camera::Capture(){
+cv::Mat &Camera::Capture(){
 #ifndef DOUBLE_BUFFERING
 	if (cap->isOpened()){
 		*cap >> frame;
+	}
+#else
+	if (bCaptureNextFrame) {
+		std::cout << "Requesting too fast, next frame not ready!" << std::endl;
+		while (bCaptureNextFrame){
+			std::this_thread::sleep_for(std::chrono::milliseconds(1)); 
+		}
 	}
 #endif
 	/*
@@ -79,7 +86,7 @@ const cv::Mat &Camera::Capture(){
     */
 	//time = boost::posix_time::microsec_clock::local_time();
 	//boost::posix_time::time_duration::tick_type dt = (time - lastCapture).total_milliseconds();
-	boost::posix_time::time_duration::tick_type dt2 = (time - lastCapture2).total_milliseconds();
+	//boost::posix_time::time_duration::tick_type dt2 = (time - lastCapture2).total_milliseconds();
 /*
 	if (dt < 24){
 		std::this_thread::sleep_for(std::chrono::milliseconds(12)); // limit fps to about 50fps
@@ -114,19 +121,17 @@ void Camera::Run(){
 			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			continue;
 		}
+		cv::Mat &nextFrame = bCaptureFrame1 ? frame1 : frame2;
+
+		*cap >> nextFrame;
+		if (nextFrame.size().height == 0) {
+			bCaptureNextFrame = true;
+			std::cout << "Invalid frame captured " << frame1.size() << std::endl;
+			continue;
+		}
+		m_pFrame = &nextFrame;
+		bCaptureFrame1 = !bCaptureFrame1;
 		bCaptureNextFrame = false;
-		if (bCaptureFrame1) {
-			*cap >> frame1;
-			m_pFrame = &frame1;
-			bCaptureFrame1 = !bCaptureFrame1;
-		}
-		else {
-			*cap >> frame2;
-			m_pFrame = &frame2;
-			bCaptureFrame1 = !bCaptureFrame1;
-
-		}
-
 
 	}
 }
