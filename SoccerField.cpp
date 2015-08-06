@@ -10,6 +10,7 @@ SoccerField::SoccerField(IDisplay *pDisplay) :m_pDisplay(pDisplay)
 
 SoccerField::~SoccerField()
 {
+	WaitForStop();
 }
 ObjectPosition SoccerField::GetTargetGate() const {
 	if (m_targetGate == BLUE_GATE) return blueGate;
