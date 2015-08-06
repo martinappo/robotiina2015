@@ -44,8 +44,8 @@ Camera::Camera(int device)
 	flip = false;
 
 	cap->set(CV_CAP_PROP_FPS, 60);
-	cap->set(CV_CAP_PROP_FRAME_WIDTH, 800);
-	cap->set(CV_CAP_PROP_FRAME_HEIGHT, 600);
+	//cap->set(CV_CAP_PROP_FRAME_WIDTH, 800);
+	//cap->set(CV_CAP_PROP_FRAME_HEIGHT, 600);
 	/*
 	cap->set(CV_CAP_PROP_EXPOSURE, -5);
 	cap->set(CV_CAP_PROP_BRIGHTNESS, 0);
@@ -53,6 +53,9 @@ Camera::Camera(int device)
 	cap->set(CV_CAP_PROP_SATURATION, 80);
 	cap->set(CV_CAP_PROP_CONTRAST, 5);
 	cap->set(CV_CAP_PROP_RECTIFICATION, 1);*/
+	// blank frame to show before capture starts
+	frame = cv::Mat(frameSize, CV_8UC3);
+	m_pFrame = &frame;
 #ifdef DOUBLE_BUFFERING
 	Start();
 #endif
