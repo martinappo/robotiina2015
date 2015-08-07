@@ -1,6 +1,7 @@
 #include "KalmanFilter.h"
 
 KalmanFilter::KalmanFilter(const cv::Point2i &startPoint){
+	/*!Error	32	error C2100: illegal indirection	j:\kood\github\robotiina2015\kalmanfilter.cpp	4	1	Robotiina
 	KF.transitionMatrix = *(cv::Mat_<float>(4, 4) << 1, 0, 1, 0, 
 													 0, 1, 0, 1, 
 													 0, 0, 1, 0, 
@@ -27,6 +28,7 @@ KalmanFilter::KalmanFilter(const cv::Point2i &startPoint){
 	setIdentity(KF.processNoiseCov, cv::Scalar::all(0.005));
 	setIdentity(KF.measurementNoiseCov, cv::Scalar::all(0.08));
 	setIdentity(KF.errorCovPost, cv::Scalar::all(1));
+	*/
 }
 
 cv::Point2i KalmanFilter::doFiltering(const cv::Point2i &point){

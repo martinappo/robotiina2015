@@ -2,7 +2,7 @@
 
 StillCamera::StillCamera(const std::string &fileName)
 {
-	_frame = cv::imread(fileName, CV_LOAD_IMAGE_COLOR);   // Read the file
+	//_frame = cv::imread(fileName, CV_LOAD_IMAGE_COLOR);   // Read the file
 }
 cv::Mat &StillCamera::Capture()
 {
