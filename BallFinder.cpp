@@ -19,6 +19,10 @@ cv::Point2i BallFinder::LocateOnScreen(ThresholdedImages &HSVRanges, cv::Mat &fr
 	int smallestBallArea = 4;
 	cv::Point2d center(-1, -1);
 	cv::Mat imgThresholded = HSVRanges[target]; // reference counted, I think
+	if (imgThresholded.rows == 0){
+		std::cout << "Image thresholding has failed" << std::endl;
+		return center;
+	}
 	cv::Mat dst(imgThresholded.rows, imgThresholded.cols, CV_8U, cv::Scalar::all(0));
 
 	std::vector<std::vector<cv::Point>> contours; // Vector for storing contour
