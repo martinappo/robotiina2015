@@ -1,8 +1,7 @@
 #include "KalmanFilter.h"
 
 KalmanFilter::KalmanFilter(const cv::Point2i &startPoint){
-	/*!Error	32	error C2100: illegal indirection	j:\kood\github\robotiina2015\kalmanfilter.cpp	4	1	Robotiina
-	KF.transitionMatrix = *(cv::Mat_<float>(4, 4) << 1, 0, 1, 0, 
+	KF.transitionMatrix = (cv::Mat_<float>(4, 4) << 1, 0, 1, 0, 
 													 0, 1, 0, 1, 
 													 0, 0, 1, 0, 
 													 0, 0, 0, 1);
@@ -25,16 +24,19 @@ KalmanFilter::KalmanFilter(const cv::Point2i &startPoint){
 
 
 	setIdentity(KF.measurementMatrix);
-	setIdentity(KF.processNoiseCov, cv::Scalar::all(0.005));
-	setIdentity(KF.measurementNoiseCov, cv::Scalar::all(0.08));
-	setIdentity(KF.errorCovPost, cv::Scalar::all(1));
-	*/
+	setIdentity(KF.processNoiseCov, cv::Scalar::all(0.5));
+	setIdentity(KF.measurementNoiseCov, cv::Scalar::all(0.5));
+	setIdentity(KF.errorCovPost, cv::Scalar::all(0.5));
 }
 
-cv::Point2i KalmanFilter::doFiltering(const cv::Point2i &point){
+cv::Point2i KalmanFilter::doFiltering(const cv::Point2i &point) {
 	// First predict, to update the internal statePre variable
 	cv::Mat prediction = KF.predict();
 	cv::Point predictPt(prediction.at<float>(0), prediction.at<float>(1));
+
+	if (point.x < 0 && point.y < 0) {
+		return predictPt;
+	}
 
 	//Get point
 	measurement(0) = point.x;
@@ -43,20 +45,9 @@ cv::Point2i KalmanFilter::doFiltering(const cv::Point2i &point){
 	//The update phase
 	estimated = KF.correct(measurement);
 	cv::Point statePt(estimated.at<float>(0), estimated.at<float>(1));
-	predictCount = 0;
 	return statePt;
 }
 
-cv::Point2i KalmanFilter::getPrediction(){
-	if (predictCount > 8) {
-		return cv::Point(-1,-1); // stop predicting
-	} else {
-		cv::Mat prediction = KF.predict();
-		cv::Point predictPt(prediction.at<float>(0), prediction.at<float>(1));
-		predictCount++;
-		return predictPt;	
-	}
-}
 
 void KalmanFilter::reset(const cv::Point2i &startPoint){
 	measurement(0) = startPoint.x;

@@ -92,7 +92,7 @@ cv::Point2i BallFinder::LocateOnScreen(ThresholdedImages &HSVRanges, cv::Mat &fr
 			}
 		}
 		//Comparing with prev result
-		else{
+		else {
 			double smallestDistance = 9999;
 
 			for (int i = 0; i < ball_indexes.size(); i++){
