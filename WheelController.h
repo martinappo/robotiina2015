@@ -49,6 +49,8 @@ public:
 	void DestroyWheels();
 	std::string GetDebugInfo();
 	void Run();
-
+	bool IsReal(){
+		return m_bPortsInitialized;
+	}
 
 };

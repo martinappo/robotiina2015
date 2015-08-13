@@ -487,12 +487,17 @@ void Robot::Run()
 		//subtitles << oss.str();
 		subtitles << "|" << autoPilot.GetDebugInfo();
 		subtitles << "|" << wheels->GetDebugInfo();
-		if (!wheelsPortsOk) {
-			subtitles << "|" << "WARNING: real wheels not connected!";
+		if (scanner->running) {
+			subtitles << "|" << "Please wait, Scanning Ports";
 		}
-		if (!coilBoardPortsOk) {
-			subtitles << "   " << "WARNING: coilgun not connected!";
-		}
+		else {
+			if (!wheels->IsReal()) {
+				subtitles << "|" << "WARNING: real wheels not connected!";
+			}
+			if (!coilBoardPortsOk) {
+				subtitles << "   " << "WARNING: coilgun not connected!";
+			}
+		} 
 
 		cv::putText(display, "fps: " + std::to_string(camera->GetFPS()), cv::Point(display.cols - 140, 20), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 		//assert(STATE_END_OF_GAME != state);

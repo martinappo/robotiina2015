@@ -144,12 +144,13 @@ bool ComPortScanner::ScanObject(const std::string &conf_file, std::vector<int> i
 }
 
 void ComPortScanner::Run() {
-	for (int i = 9; i < 20; i++) {
+	for (int i = 1; i < 20; i++) {
 		std::stringstream portNum;
 		portNum << prefix << i;
 		SimpleSerial * pPort = NULL;
 		CheckPort(portNum.str(), &pPort);
 	}
+	running = false;
 }
 
 int ComPortScanner::CheckPort(const std::string &portNum, /*out*/ SimpleSerial **ppPort)

@@ -15,7 +15,7 @@ private:
 	boost::asio::io_service &io_service;
 	int CheckPort(const std::string &port, /*out*/ SimpleSerial **pPort);
 	std::map<std::string, std::pair<int, SimpleSerial*>> m_mPorts; // port name => <id, open port>
-
+	//std::vector<std::tuple<const std::string, std::vector<int>, std::function<void()>>> m_vScanQueue;
 protected:
 	void Run();
 public:
