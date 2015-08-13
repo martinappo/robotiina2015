@@ -101,6 +101,8 @@ Robot::~Robot()
 	std::cout << "wheels " << wheels << std::endl;
 	if(wheels)
         delete wheels;
+	if (scanner)
+		delete scanner;
 }
 
 bool Robot::Launch(int argc, char* argv[])
@@ -108,8 +110,8 @@ bool Robot::Launch(int argc, char* argv[])
 	if (!ParseOptions(argc, argv)) return false;
 
 	// Compose robot from its parts
-
-	wheels = new WheelController();
+	scanner = new ComPortScanner(io);
+	wheels = new WheelController(scanner);
 	captureFrames = config.count("capture-frames") > 0;
 	coilBoardPortsOk = false;
 	wheelsPortsOk = false;
@@ -148,33 +150,12 @@ void Robot::initPorts()
 		wheelsPortsOk = false;
 	}
 	else {
-		std::cout << "Checking COM ports... " << std::endl;
-		ComPortScanner scanner;
-		if ((scanner.VerifyAll(io)) == false) {
-			std::cout << "Ports check failed, rescanning all ports" << std::endl;
-			scanner.Scan(io);
-		}
-		wheelsPortsOk = scanner.VerifyWheels(io);
-		coilBoardPortsOk = scanner.VerifyCoilboard(io);
 	}
 }
 
 void Robot::initWheels()
 {
-	if (wheelsPortsOk) {
-		std::cout << "Using real wheels" << std::endl;
-		try {
-			wheels->InitWheels(io);
-		}
-		catch (...) {
-			throw;
-		}
-	}
-	else {
-		std::cout << "WARNING: Using dummy wheels" << std::endl;
-		wheels->InitDummyWheels();
-	}
-	
+	wheels->Init();
 }
 
 void Robot::initCoilboard() {

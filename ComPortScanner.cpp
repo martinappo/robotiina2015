@@ -5,46 +5,22 @@
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/foreach.hpp>
 
-ComPortScanner::ComPortScanner()
+ComPortScanner::ComPortScanner(boost::asio::io_service &io) : io_service(io)
 {
 }
 
-bool ComPortScanner::VerifyObject(boost::asio::io_service &io_service, const std::string &conf_file, int id) 
+bool ComPortScanner::VerifyPort(const std::string &portNum, int id, /*out*/ SimpleSerial **pPort)
 {
-	bool ok = true;
-	boost::property_tree::ptree ports;
-	try {
-		std::cout << "conf/" << conf_file << ".ini"<<std::endl;
-		read_ini("conf/"+conf_file+".ini", ports);
-	}
-	catch (...) {
-		std::cout << "Error reading old port configuration: " << std::endl;
-		return false;
-	}
-
-	std::stringstream portNum;
-	std::string _id = std::to_string(id); // v.first;
-
-	try {
-		portNum << ports.get<std::string>(std::to_string(id));//(v.second).data();
-	}
-	catch (...)
-	{
-		std::cout << "ID: " << _id << " not found in conf file" << std::endl;
-		ok = false;
-	}
-
-	std::string id2 = CheckPort(io_service, portNum.str());
-	if (id2.empty()) {
-		ok = false;
-	}
-	
-	return ok;
+	if (running) return false; // port scanning in progress
+	int id2 = CheckPort(portNum, pPort);
+	return id == id2;
 }
 
 
 bool ComPortScanner::VerifyWheels(boost::asio::io_service &io_service, const std::string &conf_file)
 {
+	return true;
+	/*
 	bool ok = true;
 	boost::property_tree::ptree ports;
 
@@ -78,10 +54,13 @@ bool ComPortScanner::VerifyWheels(boost::asio::io_service &io_service, const std
 		}
 	}
 	return ok;
+	*/
 }
 
 bool ComPortScanner::VerifyCoilboard(boost::asio::io_service &io_service, const std::string &conf_file)
 {
+	return false;
+	/*
 	bool ok = true;
 	boost::property_tree::ptree ports;
 
@@ -110,22 +89,24 @@ bool ComPortScanner::VerifyCoilboard(boost::asio::io_service &io_service, const 
 	}
 
 	return ok;
+	*/
 }
 
 bool ComPortScanner::VerifyAll(boost::asio::io_service &io_service, const std::string &conf_file) {
 	return VerifyCoilboard(io_service, conf_file) && VerifyWheels(io_service, conf_file);
 }
 
-bool ComPortScanner::Scan(boost::asio::io_service &io_service)
+bool ComPortScanner::Scan()
 {
 //	std::map<short, std::string> portMap;
 	boost::property_tree::ptree ports;
 	for (int i = 0; i < 20; i++) {
 		std::stringstream portNum;
 		portNum << prefix << i;
-		std::string id = CheckPort(io_service, portNum.str());
-		if (!id.empty()) {
-			ports.put(id, portNum.str());
+		SimpleSerial * pPort = NULL;
+		int id = CheckPort(portNum.str(), &pPort);
+		if (id > 0) {
+			ports.put(std::to_string(id), portNum.str());
 		}
 	}
 	write_ini("conf/ports_new.ini", ports);
@@ -141,49 +122,62 @@ bool ComPortScanner::Scan(boost::asio::io_service &io_service)
 	return false;
 }
 
-bool ComPortScanner::ScanObject(boost::asio::io_service &io_service, const std::string &conf_file, int id)
+bool ComPortScanner::ScanObject(const std::string &conf_file, std::vector<int> ids)
 {
-//	std::map<short, std::string> portMap;
 	boost::property_tree::ptree ports;
-
-
-	bool ok = true;
-	for (int i = 0; i < 20; i++) {
-		std::stringstream portNum;
-		portNum << prefix << i;
-		std::string id = CheckPort(io_service, portNum.str());
-		if (!id.empty()) {
-			ports.put(id, portNum.str());
+	int found = 0;
+	for (auto id : ids){
+		for (auto port : m_mPorts) {
+			if (port.second.first == id){
+				found++;
+				ports.put(std::to_string(id), port.first);
+			}
 		}
 	}
-	if (true){
-		write_ini("conf/"+conf_file+"_new.ini", ports);
-	}
-	if (VerifyObject(io_service, conf_file+"_new", id)) {
-#ifdef WIN32
-		_unlink(("conf/"+conf_file+".ini").c_str());
-#else
-		unlink(("conf/"+conf_file+".ini").c_str());
-#endif
-		std::cout <<  ("conf/"+conf_file+".ini")<<std::endl;
-		std::cout << ("conf/"+conf_file+"_new.ini")<<std::endl;
-		rename(("conf/"+conf_file+"_new.ini").c_str(), ("conf/"+conf_file+".ini").c_str());
+	if (found == ids.size()) {
+		write_ini(conf_file, ports);
 		return true;
 	}
+	if (running) return false;
+	Start();
 	return false;
-
-
-
 }
 
-std::string ComPortScanner::CheckPort(boost::asio::io_service &io_service, const std::string &portNum)
+void ComPortScanner::Run() {
+	for (int i = 9; i < 20; i++) {
+		std::stringstream portNum;
+		portNum << prefix << i;
+		SimpleSerial * pPort = NULL;
+		CheckPort(portNum.str(), &pPort);
+	}
+}
+
+int ComPortScanner::CheckPort(const std::string &portNum, /*out*/ SimpleSerial **ppPort)
 {
-	try {
-		std::string id = "";
-		SimpleSerial port = SimpleSerial(io_service, portNum, 115200);
+	std::string id = "";
+	if (m_mPorts.find(portNum) != m_mPorts.end() && m_mPorts[portNum].second != NULL){
+		if (m_mPorts[portNum].first > 0){
+			*ppPort = m_mPorts[portNum].second;
+			return m_mPorts[portNum].first;
+		}//else
+	}
+	else {
+		try {
+			m_mPorts[portNum].second = new SimpleSerial(io_service, portNum, 115200);
+			m_mPorts[portNum].first = -1;
+		}
+		catch (std::runtime_error const&e) {
+			std::cout << "Port not accessible: " << portNum << ", error: " << e.what() << std::endl;
+			m_mPorts[portNum].second = NULL;
+			m_mPorts[portNum].first = -1;
+			return false;
+		}
+	}
+	
+		
 		for (int i = 0; i < 10; i++) {
-			port.writeString("?\n");
-			id = port.readLineAsync(1000);
+			m_mPorts[portNum].second->writeString("?\n");
+			id = m_mPorts[portNum].second->readLineAsync(1000);
 
 			std::cout << "Check result: " << portNum << " -> " << id << std::endl;
 			if (id == "discharged") continue;
@@ -195,16 +189,25 @@ std::string ComPortScanner::CheckPort(boost::asio::io_service &io_service, const
 
 			id = id.substr(4, 1);
 			std::cout << "Found port " << portNum << ", id: " << id << std::endl;
-			return id;
+			int _id = atoi(id.c_str());
+			m_mPorts[portNum].first = _id;
+			*ppPort = m_mPorts[portNum].second;
+			return _id;
 		}
-		if (id.empty()) throw std::runtime_error(("No ID received from port " + portNum).c_str());
-	}
-	catch (std::runtime_error const&e) {
-		std::cout << "Port not accessible: " << portNum << ", error: " << e.what() << std::endl;
-	}
-	return "";
+		if (id.empty()) {
+			std::cout << "No ID received from port " << portNum << std::endl;
+		}
+	*ppPort = NULL;
+	return 0;
 }
 
 ComPortScanner::~ComPortScanner()
 {
+	for (auto i : m_mPorts) {
+		if (i.second.second != NULL) {
+			delete i.second.second;
+		}
+		i.second.second = NULL;
+	}
+
 }

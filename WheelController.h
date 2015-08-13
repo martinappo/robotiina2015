@@ -5,28 +5,31 @@
 #include <boost/timer/timer.hpp>
 #include "ThreadedClass.h"
 #include <atomic>
+#include "ComPortScanner.h"
 
-class WheelController: public IWheelController,ThreadedClass {
+class WheelController: public IWheelController, ThreadedClass {
 private:
 	Speed targetSpeed; // velocity, heading, rotation
 	Speed actualSpeed; // velocity, heading, rotation.
 	Speed lastSpeed;
 	cv::Point3d robotPos = { 0, 0, 0 }; // x, y, rotation
-	BasicWheel * w_left;
-	BasicWheel * w_right;
-	BasicWheel * w_back;
+
 	boost::posix_time::ptime stallTime = boost::posix_time::microsec_clock::local_time() + boost::posix_time::seconds(60);
 	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
 	boost::posix_time::ptime lastStep = time;
 	boost::posix_time::ptime lastUpdate = time;
 	std::atomic_bool updateSpeed;
+	std::vector<std::pair<double, SimpleSerial*>> m_vWheels; // angle and pointer to serial port
+	ComPortScanner *m_pScanner;
+	std::atomic_bool m_bPortsInitialized;
+	int m_iWheelCount;
 protected:
-	cv::Point3d CalculateWheelSpeeds(double velocity, double direction, double rotate);
+	std::vector<double> CalculateWheelSpeeds(double velocity, double direction, double rotate);
 	void CalculateRobotSpeed(); // reverse calc
-	cv::Point3d GetWheelSpeeds();
+	std::vector<double> GetWheelSpeeds();
 public:
-	WheelController();
-	void InitWheels(boost::asio::io_service &io);
+	WheelController(ComPortScanner *pScanner,int iWheelCount = 3);
+	void Init();
 	void InitDummyWheels();
 	void Forward(int speed);
 	void rotateBack(int speed);

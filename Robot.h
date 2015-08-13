@@ -9,13 +9,14 @@ namespace po = boost::program_options;
 class ObjectFinder;
 class WheelController;
 class CoilGun;
-
+class ComPortScanner;
 
 class Robot : public Dialog {
 private:
 	po::variables_map config;
 
     ICamera *camera;
+	ComPortScanner *scanner;
     WheelController * wheels;
 	CoilGun *coilBoard;
 	bool coilBoardPortsOk;

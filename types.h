@@ -40,7 +40,7 @@ struct ObjectPosition /* polar coordinates */
 	double horizontalAngle;
 };
 
-
+/*
 enum WHEEL_ID {
 	ID_WHEEL_FRONT_1 = 1,
 	ID_WHEEL_FRONT_2 = 2,
@@ -48,7 +48,7 @@ enum WHEEL_ID {
 	ID_WHEEL_BACK_2 = 4,
 	WHEEL_COUNT
 };
-
+*/
 const int ID_COILGUN = 4;
 
 enum OBJECT
