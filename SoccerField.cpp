@@ -22,7 +22,6 @@ cv::Point2i SoccerField::Polar2Cartesian(ObjectPosition pos) const {
 	float y = pos.distance * cos(TAU*pos.horizontalAngle / 360) / 16;
 	float x = pos.distance * sin(TAU*pos.horizontalAngle / 360) / 16;
 	return cv::Point(320 + x, 240 - y);
-
 }
 
 void SoccerField::Run(){
@@ -35,9 +34,17 @@ void SoccerField::Run(){
 		_yellowGate = yellowGate;
 		green.copyTo(field);
 		cv::circle(field, cv::Point(320, 240), 14, cv::Scalar(133, 33, 55), 4);
-		if (_ball.distance > 0) {
-			cv::circle(field, Polar2Cartesian(_ball), 7, cv::Scalar(48, 154, 236), 4);
+
+		cv::Point2i filteredBallPos = cv::Point(-1, -1);
+		if (_ball.distance < 0) {
+			filteredBallPos = filter->doFiltering(filteredBallPos);
 		}
+		else {
+			filteredBallPos = filter->doFiltering(Polar2Cartesian(_ball));
+		}
+		 
+		cv::circle(field, filteredBallPos, 7, cv::Scalar(48, 154, 236), 4);
+
 		if (_blueGate.distance > 0) {
 			cv::circle(field, Polar2Cartesian(_blueGate), 14, cv::Scalar(236, 137, 48), 7);
 		}

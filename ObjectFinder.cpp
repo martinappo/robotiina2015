@@ -27,12 +27,9 @@ bool ObjectFinder::LocateCursor(cv::Mat &frameBGR, cv::Point2i cursor, OBJECT ta
 
 	cv::Scalar color(0, 0, 0);
 	cv::circle(frameBGR, cursor, 8, color, -1);
-	//std::cout << point << std::endl;
 	targetPos = ConvertPixelToRealWorld(cursor, cv::Point2i(frameBGR.cols, frameBGR.rows));
 	WriteInfoOnScreen(targetPos);
 	return true;
-
-
 }
 
 
@@ -42,6 +39,7 @@ bool ObjectFinder::Locate(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::M
 	cv::Scalar color2(255, 0, 255);
 	bool resetFilter = false;
 	point = LocateOnScreen(HSVRanges, frameHSV, frameBGR, target);
+	lastPosition = point;
 	/*
 	if (target == BALL){
 		point = LocateBallOnScreen(HSVRanges, frameHSV, frameBGR, target);
@@ -52,29 +50,7 @@ bool ObjectFinder::Locate(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::M
 		cv::circle(frameBGR, point, 8, color2, -1);
 	}
 	*/
-#ifdef KALMAN_FILTERING
-	if (point.x < -1 && point.y < -1){//If ball is not valid then no predicting
-		lastPosition = point;
-		resetFilter = true;
-		return false;
-	}
-	else if (point.x < 0 && point.y < 0){//If ball is suddenly lost then predict where it could be
-		point = filter->getPrediction();
-		lastPosition = point;
-		if (point.x < 0 && point.y < 0){
-			resetFilter = true;
-			return false;
-		}
-	}
-	else {//Ball is in frame
-		if (resetFilter){
-			resetFilter = false;
-			filter->reset(point);
-		}
-		point = filter->doFiltering(point);
-		lastPosition = point;
-	}
-#endif
+
 	//cv::circle(frameBGR, point, 8, color, -1);
 	//std::cout << point << std::endl;
 	targetPos = ConvertPixelToRealWorld(point, cv::Point2i(frameHSV.cols, frameHSV.rows));
