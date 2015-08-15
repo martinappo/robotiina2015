@@ -11,7 +11,7 @@ BallFinder::~BallFinder()
 }
 
 
-void BallFinder::PopulateBalls(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::Mat &frameBGR, OBJECT target, FieldState &fieldState) {
+void BallFinder::PopulateBalls(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::Mat &frameBGR, OBJECT target, FieldState *pFieldState) {
 	cv::Point2d notValidPosition = cv::Point2d(-1.0, -1.0);
 	
 	int smallestBallArea = 4;
@@ -27,8 +27,8 @@ void BallFinder::PopulateBalls(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, 
 	std::vector<std::vector<cv::Point>> contours; // Vector for storing contour
 	std::vector<cv::Vec4i> hierarchy;
 
-	cv::Scalar color(0, 0, 0);
-	cv::Scalar color2(255, 255, 255);
+	cv::Scalar blackColor(0, 0, 0);
+	cv::Scalar whiteColor(255, 255, 255);
 	cv::Scalar redColor(0, 0, 255);
 
 	findContours(imgThresholded, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE); // Find the contours in the image
@@ -37,8 +37,11 @@ void BallFinder::PopulateBalls(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, 
 		return;
 	}
 
+	pFieldState->resetBallsUpdateState();
+	int ballsUpdatedCount = 0;
 	for (int i = 0; i < contours.size(); i++)
 	{
+		if (ballsUpdatedCount > NUMBER_OF_BALLS) break;
 		int ballArea = cv::contourArea(contours[i], false);
 		if (ballArea >= smallestBallArea) {
 			cv::Moments M = cv::moments(contours[i]);
@@ -46,8 +49,22 @@ void BallFinder::PopulateBalls(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, 
 			int posX = M.m10 / M.m00;
 			cv::Rect bounding_rect = cv::boundingRect(contours[i]);
 			rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), redColor, 1, 8, 0);
-		
-			fieldState.balls[i].load().updateCoordinates(posX, posY);
+			//TODO: index balls and match the right BallPosition object and contour from frame
+			BallPosition currentBall = pFieldState->balls[ballsUpdatedCount].load();
+			currentBall.updateCoordinates(posX, posY);
+			currentBall.setIsUpdated(true);
+			ballsUpdatedCount++;
+		}
+	}
+
+	
+
+	if (ballsUpdatedCount < NUMBER_OF_BALLS) {
+		for (int i = 0; i < NUMBER_OF_BALLS; i++) {
+			BallPosition currentBall = pFieldState->balls[i].load();
+			if (!currentBall.isUpdated) {
+				currentBall.predictCoordinates();
+			}
 		}
 	}
 }

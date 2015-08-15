@@ -24,10 +24,9 @@ ObjectFinder::ObjectFinder()
 	};
 }
 bool ObjectFinder::LocateCursor(cv::Mat &frameBGR, cv::Point2i cursor, OBJECT target, ObjectPosition &targetPos){
-
 	cv::Scalar color(0, 0, 0);
 	cv::circle(frameBGR, cursor, 8, color, -1);
-	targetPos.updateCoordinates(cursor.x, cursor.y);
+	targetPos.updateCoordinates(cursor);
 	return true;
 }
 
@@ -52,7 +51,7 @@ bool ObjectFinder::Locate(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::M
 
 	//cv::circle(frameBGR, point, 8, color, -1);
 	//std::cout << point << std::endl;
-	targetPos = ConvertPixelToRealWorld(point, cv::Point2i(frameHSV.cols, frameHSV.rows));
+	targetPos.updateCoordinates(point);
 	return true;
 }
 

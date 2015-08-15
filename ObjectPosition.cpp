@@ -31,13 +31,15 @@ double ObjectPosition::angleBetween(const cv::Point2i &v1, const cv::Point2i &v2
 	return atan2(v2.y - v1.y, v2.x - v1.x) * 180.0 / CV_PI;
 }
 
-void updateCoordinates(int x, int y); // Takes raw coordinates of object from frame
-
 void ObjectPosition::updateCoordinates(int x, int y) {
 	rawPixelCoords = { x, y };
-	updateMetricCoords(x, y);
 	updatePolarCoords(x, y);
-	updateFieldPixelCoords(x,y);
+	updateFieldPixelCoords(x, y);
+	updateMetricCoords(x, y);
+}
+
+void ObjectPosition::updateCoordinates(cv::Point point) {
+	return updateCoordinates(point.x, point.y);
 }
 
 void ObjectPosition::updatePolarCoords(int x, int y) {

@@ -11,6 +11,7 @@ protected:
 public:
 	KalmanFilter(const cv::Point2i &startPoint);
 	cv::Point2i doFiltering(const cv::Point2i &point);
-	void reset(const cv::Point2i &point);
 	cv::Point2i getPrediction();
+	void reset(const cv::Point2i &point);
+	
 };

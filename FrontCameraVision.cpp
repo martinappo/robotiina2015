@@ -29,8 +29,8 @@ void FrontCameraVision::Run() {
 	ThresholdedImages thresholdedImages;
 	ImageThresholder thresholder(thresholdedImages, objectThresholds);
 	GateFinder BlueGateFinder;
-	GateFinder YelllowGateFinder;
-	BallFinder finder;
+	GateFinder YellowGateFinder;
+	BallFinder ballFinder;
 
 	try {
 		CalibrationConfReader calibrator;
@@ -138,14 +138,16 @@ void FrontCameraVision::Run() {
 		BallPosition ballPos;
 		//Cut out gate contour.	
 
-		bool BlueGateFound = YelllowGateFinder.Locate(thresholdedImages, frameHSV, frameBGR, BLUE_GATE, blueGatePos);
-		bool YellowGateFound = BlueGateFinder.Locate(thresholdedImages, frameHSV, frameBGR, YELLOW_GATE, yellowGatePos);
+		bool BlueGateFound = BlueGateFinder.Locate(thresholdedImages, frameHSV, frameBGR, BLUE_GATE, blueGatePos);
+		bool YellowGateFound = YellowGateFinder.Locate(thresholdedImages, frameHSV, frameBGR, YELLOW_GATE, yellowGatePos);
 
-		bool ballFound = finder.Locate(thresholdedImages, frameHSV, frameBGR, BALL, ballPos);
+		bool ballFound = ballFinder.Locate(thresholdedImages, frameHSV, frameBGR, BALL, ballPos);
+
+		m_pState->resetBallsUpdateState();
+		ballFinder.PopulateBalls(thresholdedImages, frameHSV, frameBGR, BALL, m_pState);
 
 		m_pState->blueGate = blueGatePos;
 		m_pState->yellowGate = yellowGatePos;
-		m_pState->balls[0] = ballPos;
 		m_pState->self.load().updateCoordinates(0,0);
 
 		/*
