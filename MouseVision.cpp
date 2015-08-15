@@ -24,7 +24,7 @@ MouseVision::~MouseVision()
 
 void MouseVision::Run(){
 	ObjectFinder finder;
-	ObjectPosition targetPos;
+	BallPosition targetPos;
 	while (!stop_thread){
 		cv::Scalar colorCircle(133, 33, 255);
 		frameBGR = m_pCamera->Capture();

@@ -91,8 +91,8 @@ void LocateBall::onEnter()
 NewDriveMode LocateBall::step(double dt)
 {
 	auto ballInTribbler = m_pCom->BallInTribbler();
-	auto ballInSight = m_pFieldState->balls[0].load().distance >= 0;
-	auto lastBallCount = cv::Point(1, 0);//newAutoPilot.lastBallCount;
+	auto ballInSight = m_pFieldState->balls[0].load().getDistance() >= 0;
+
 	
 	if (ballInTribbler) return DRIVEMODE_LOCATE_GATE;
 	if (ballInSight) return DRIVEMODE_DRIVE_TO_BALL;
@@ -102,7 +102,7 @@ NewDriveMode LocateBall::step(double dt)
 
 	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
 	boost::posix_time::time_duration::tick_type rotateDuration = (time - rotateStart).total_milliseconds();
-	int dir = lastBallCount.x > lastBallCount.y ? 1 : -1;
+	int dir = 1;
  
  		   
 	if (rotateDuration < 5700){
@@ -154,56 +154,55 @@ NewDriveMode DriveToHome::step(double dt)
 void DriveToBall::onEnter()
 {
 	DriveInstruction::onEnter();
-	//newAutoPilot.lastBallCount = newAutoPilot.ballCount;
 	m_pCom->Drive(0, 0, 0);
 	std::chrono::milliseconds dura(200);
 	std::this_thread::sleep_for(dura);
 	m_pCom->ToggleTribbler(false);
-	start = m_pFieldState->balls[0].load();
+	start = m_pFieldState->balls[0];
 	//Desired distance
-	target = { 350, 0, 0 };
+	target = ObjectPosition(cv::Point2i{350,0});
 }
 
 NewDriveMode DriveToBall::step(double dt)
 {
 	ObjectPosition lastBallLocation = m_pFieldState->balls[0].load();
-	if (lastBallLocation.distance < 0) return DRIVEMODE_LOCATE_BALL;
+	if (lastBallLocation.getDistance() < 0) return DRIVEMODE_LOCATE_BALL;
 	if (m_pCom->BallInTribbler()) return DRIVEMODE_LOCATE_GATE;
 
 	//auto &lastBallLocation = newAutoPilot.lastBallLocation;
 
-	if(lastBallLocation.distance < target.distance+50){
+	if(lastBallLocation.getDistance()  < target.getDistance() +50){
 		m_pCom->ToggleTribbler(true);
 	}
 	else{
 		m_pCom->ToggleTribbler(false);
 	}
 	//Ball is close and center
-	if ((lastBallLocation.distance < target.distance) && abs(lastBallLocation.horizontalDev) <= 13) {
+	if ((lastBallLocation.getDistance()  < target.getDistance()) && abs(lastBallLocation.getAngle()) <= 13) {
 		m_pCom->ToggleTribbler(true);
 		return DRIVEMODE_CATCH_BALL;
 	} 
 	//Ball is close and not center
-	else if (lastBallLocation.distance < target.distance){
-		rotate = abs(lastBallLocation.horizontalAngle) * 0.4 + 5;
+	else if (lastBallLocation.getDistance() < target.getDistance()){
+		rotate = abs(lastBallLocation.getAngle()) * 0.4 + 5;
 
 		//std::cout << "rotate: " << rotate << std::endl;
 		//m_pCom->Rotate(lastBallLocation.horizontalAngle < 0, rotate);
-		m_pCom->Drive(10, 0, lastBallLocation.horizontalAngle < 0 ? rotate : -rotate);
+		m_pCom->Drive(10, 0, lastBallLocation.getAngle() < 0 ? rotate : -rotate);
 		m_pCom->ToggleTribbler(true);
 	}
 	//Ball is far away
 	else {
-		rotate = abs(lastBallLocation.horizontalAngle) * 0.4 +3;
+		rotate = abs(lastBallLocation.getAngle()) * 0.4 +3;
 		//rotate = 0;
 		//speed calculation
-		if (lastBallLocation.distance > 700){
+		if (lastBallLocation.getDistance() > 700){
 			speed = 150;
 		}
 		else{
-			speed = lastBallLocation.distance * 0.29 - 94;
+			speed = lastBallLocation.getDistance() * 0.29 - 94;
 		}
-		m_pCom->Drive(speed, -lastBallLocation.horizontalAngle, lastBallLocation.horizontalAngle < 0?rotate:-rotate);
+		m_pCom->Drive(speed, -lastBallLocation.getAngle(), lastBallLocation.getAngle() < 0?rotate:-rotate);
 	}
 	return DRIVEMODE_DRIVE_TO_BALL;
 }
@@ -234,11 +233,11 @@ NewDriveMode CatchBall::step(double dt)
 		return DRIVEMODE_LOCATE_BALL;
 	}
 	else {
-		double rotate = abs(lastBallLocation.horizontalAngle) * 0.4 + 5;
+		double rotate = abs(lastBallLocation.getAngle()) * 0.4 + 5;
 
 		//std::cout << "rotate: " << rotate << std::endl;
 		//m_pCom->Rotate(lastBallLocation.horizontalAngle < 0, rotate);
-		m_pCom->Drive(50, 0, lastBallLocation.horizontalAngle < 0 ? rotate : -rotate);
+		m_pCom->Drive(50, 0, lastBallLocation.getAngle() < 0 ? rotate : -rotate);
 		//newAutoPilot.m_pCom->Drive(40, 0, 0);
 		//double shake = 10 * sign(sin(1 * (time - actionStart).total_milliseconds()));
 		//newAutoPilot.m_pCom->Drive(40, 0, shake);
@@ -251,7 +250,7 @@ NewDriveMode CatchBall::step(double dt)
 NewDriveMode LocateGate::step(double dt)
 {
 	ObjectPosition lastGateLocation = m_pFieldState->GetTargetGate();
-	bool gateInSight = lastGateLocation.distance > 0;
+	bool gateInSight = lastGateLocation.getDistance() > 0;
 	bool sightObstructed = m_pFieldState->gateObstructed;
 
 	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
@@ -267,7 +266,7 @@ NewDriveMode LocateGate::step(double dt)
 	
 	//int s = sign((int)lastGateLocation.horizontalAngle);
 
-	m_pCom->Drive(0, 0, (lastGateLocation.horizontalAngle < 0? 1:-1)*30);
+	m_pCom->Drive(0, 0, (lastGateLocation.getAngle() < 0? 1:-1)*30);
 	
 	return DRIVEMODE_LOCATE_GATE;
 }
@@ -276,7 +275,7 @@ NewDriveMode AimGate::step(double dt)
 {
 
 	ObjectPosition lastGateLocation = m_pFieldState->GetTargetGate();
-	bool gateInSight = lastGateLocation.distance > 0;
+	bool gateInSight = lastGateLocation.getDistance() > 0;
 	bool sightObstructed = m_pFieldState->gateObstructed;
 
 
@@ -286,10 +285,10 @@ NewDriveMode AimGate::step(double dt)
 	if ((boost::posix_time::microsec_clock::local_time() - actionStart).total_milliseconds() > 5000) {
 		return DRIVEMODE_KICK;
 	}
-	int dir = sign(lastGateLocation.horizontalAngle);
+	int dir = sign(lastGateLocation.getAngle());
 
 	//Turn robot to gate
-	if (abs(lastGateLocation.horizontalDev) < 30) {
+	if (abs(lastGateLocation.getAngle()) < 30) {
 		if (sightObstructed) { //then move sideways away from gate
 			//std::cout << sightObstructed << std::endl;
 			m_pCom->Drive(45, 90, 0);
@@ -303,8 +302,8 @@ NewDriveMode AimGate::step(double dt)
 	else {
 		//rotate calculation for gate
 		//int rotate = abs(lastGateLocation.horizontalAngle) * 0.4 + 3; // +3 makes no sense we should aim straight
-		int rotate = (abs(lastGateLocation.horizontalAngle) * 0.4 + 6); // should we rotate oposite way?
-		m_pCom->Drive(0,0, (lastGateLocation.horizontalAngle < 0 ? 1 : -1) * rotate); 
+		int rotate = (abs(lastGateLocation.getAngle()) * 0.4 + 6); // should we rotate oposite way?
+		m_pCom->Drive(0,0, (lastGateLocation.getAngle() < 0 ? 1 : -1) * rotate);
 	}
 	return DRIVEMODE_AIM_GATE;
 
@@ -405,33 +404,6 @@ std::string NewAutoPilot::GetDebugInfo(){
 
 	return oss.str();
 }
-
-void NewAutoPilot::WriteInfoOnScreen(){
-	cv::Mat infoWindow(140, 250, CV_8UC3, cv::Scalar::all(0));
-	std::ostringstream oss;
-	oss << "State: " << curDriveMode->second->name;
-	//std::cout << oss.str() << std::endl;
-	cv::putText(infoWindow, oss.str(), cv::Point(20, 20), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-	//std::cout << oss.str() << std::endl;
-	oss.str("");
-	/*
-	oss << "Ball visible: " << (ballInSight ? "yes" : "no");
-	cv::putText(infoWindow, oss.str(), cv::Point(20, 50), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-	//std::cout << oss.str() << std::endl;
-	oss.str("");
-	oss << "Gate Visible: " << (gateInSight ? "yes" : "no");
-	cv::putText(infoWindow, oss.str(), cv::Point(20, 80), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-	//std::cout << oss.str() << std::endl;
-	oss.str("");
-	oss << "Ball in tribbler: " << (ballInTribbler ? "yes" : "no");
-	cv::putText(infoWindow, oss.str(), cv::Point(20, 110), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-	//std::cout << oss.str() << std::endl;
-	*/
-	cv::imshow("NewAutoPilot", infoWindow);
-	cv::waitKey(1);
-	return;
-}
-
 
 
 NewAutoPilot::~NewAutoPilot()

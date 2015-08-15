@@ -3,6 +3,7 @@
 #include "types.h"
 #include <boost/thread/mutex.hpp>
 #include "KalmanFilter.h"
+#include "FieldState.h"
 
 class SoccerField :
 	public ThreadedClass, public FieldState

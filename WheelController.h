@@ -6,7 +6,7 @@
 #include "ThreadedClass.h"
 #include <atomic>
 
-class WheelController: public IWheelController,ThreadedClass {
+class WheelController : public IWheelController, ThreadedClass {
 private:
 	Speed targetSpeed; // velocity, heading, rotation
 	Speed actualSpeed; // velocity, heading, rotation.

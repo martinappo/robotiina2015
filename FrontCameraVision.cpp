@@ -4,7 +4,7 @@
 #include "BallFinder.h"
 #include "AutoCalibrator.h"
 
-FrontCameraVision::FrontCameraVision(ICamera * pCamera, IDisplay *pDisplay, FieldState *pFieldState) : ConfigurableModule("FrontCameraVision")
+FrontCameraVision::FrontCameraVision(ICamera *pCamera, IDisplay *pDisplay, FieldState *pFieldState) : ConfigurableModule("FrontCameraVision")
 {
 	m_pCamera = pCamera;
 	m_pDisplay = pDisplay;
@@ -17,8 +17,6 @@ FrontCameraVision::FrontCameraVision(ICamera * pCamera, IDisplay *pDisplay, Fiel
 	ADD_BOOL_SETTING(nightVisionEnabled);
 	LoadSettings();
 	Start();
-
-
 }
 
 
@@ -54,7 +52,7 @@ void FrontCameraVision::Run() {
 	cv::Mat blue(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(236, 137, 48));
 	cv::Mat orange(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(48, 154, 236));
 
-	ObjectPosition borderDistance = { INT_MAX, 0, 0 };
+	ObjectPosition borderDistance = {0,0};
 	bool notEnoughtGreen = false;
 	int mouseControl = 0;
 	bool somethingOnWay = false;
@@ -130,13 +128,14 @@ void FrontCameraVision::Run() {
 			//finder.LocateCursor(frameBGR, cv::Point2i(frameSize.width / 2, y), BALL, borderDistance);
 		}
 		else {
-			borderDistance = { INT_MAX, 0, 0 };
+			borderDistance.setDistance(INT_MAX);
 		};
 
 		/**************************************************/
 		/* STEP 4. extract closest ball and gate positions*/
 		/**************************************************/
-		ObjectPosition ballPos, blueGatePos, yellowGatePos;
+		ObjectPosition blueGatePos, yellowGatePos;
+		BallPosition ballPos;
 		//Cut out gate contour.	
 
 		bool BlueGateFound = YelllowGateFinder.Locate(thresholdedImages, frameHSV, frameBGR, BLUE_GATE, blueGatePos);
@@ -147,7 +146,8 @@ void FrontCameraVision::Run() {
 		m_pState->blueGate = blueGatePos;
 		m_pState->yellowGate = yellowGatePos;
 		m_pState->balls[0] = ballPos;
-		m_pState->self = { 0, 0, 0 };
+		m_pState->self.load().updateCoordinates(0,0);
+
 		/*
 		ObjectPosition *targetGatePos = 0;
 		if (targetGate == BLUE_GATE && BlueGateFound) targetGatePos = &blueGatePos;
@@ -172,8 +172,6 @@ void FrontCameraVision::Run() {
 			notEnoughtGreen = countNonZero(thresholdedImages[FIELD]) < 640 * 120;
 			somethingOnWay |= notEnoughtGreen;
 		}
-		// step 6.9
-		cv::Point2i ballCount(finder.ballCountLeft, finder.ballCountRight);
 
 		m_pDisplay->ShowImage(frameBGR);
 		//TODO: update state

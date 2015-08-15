@@ -1,6 +1,7 @@
 #pragma once
 #include "types.h"
 #include "ThreadedClass.h"
+#include "FieldState.h"
 
 class MouseVision :
 	public IVisionModule, public IUIEventListener, public ThreadedClass

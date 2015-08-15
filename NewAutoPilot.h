@@ -3,6 +3,7 @@
 #include <boost/thread/mutex.hpp>
 #include <atomic>
 #include "ThreadedClass.h"
+#include "FieldState.h"
 
 
 enum NewDriveMode {
@@ -194,7 +195,6 @@ protected:
 	NewDriveMode RecoverCrash();
 	*/
 	void Step();
-	void WriteInfoOnScreen();
 public:
 	NewAutoPilot(ICommunicationModule *pComModule, FieldState *pState);
 	//void UpdateState(ObjectPosition *ballLocation, ObjectPosition *gateLocation, bool ballInTribbler, bool sightObstructed, bool somethingOnWay, int borderDistance, cv::Point2i ballCount);
