@@ -143,7 +143,6 @@ void FrontCameraVision::Run() {
 
 		bool ballFound = ballFinder.Locate(thresholdedImages, frameHSV, frameBGR, BALL, ballPos);
 
-		m_pState->resetBallsUpdateState();
 		ballFinder.PopulateBalls(thresholdedImages, frameHSV, frameBGR, BALL, m_pState);
 
 		m_pState->blueGate = blueGatePos;

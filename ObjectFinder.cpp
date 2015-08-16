@@ -23,7 +23,7 @@ ObjectFinder::ObjectFinder()
 		write_ini("conf/camera.ini", pt);
 	};
 }
-bool ObjectFinder::LocateCursor(cv::Mat &frameBGR, cv::Point2i cursor, OBJECT target, ObjectPosition &targetPos){
+bool ObjectFinder::LocateCursor(cv::Mat &frameBGR, cv::Point2i cursor, OBJECT target, BallPosition &targetPos){
 	cv::Scalar color(0, 0, 0);
 	cv::circle(frameBGR, cursor, 8, color, -1);
 	targetPos.updateCoordinates(cursor);
