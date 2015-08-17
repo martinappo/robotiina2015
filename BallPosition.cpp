@@ -1,8 +1,5 @@
 #include "BallPosition.h"
 
-BallPosition::BallPosition() noexcept
-{
-}
 
 BallPosition::~BallPosition()
 {

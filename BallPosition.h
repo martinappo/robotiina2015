@@ -6,7 +6,11 @@
 class BallPosition : public ObjectPosition
 {
 public:
-	BallPosition() noexcept;
+#ifdef WIN32
+	BallPosition() {};
+#else
+	BallPosition() noexcept{};
+#endif
 	virtual ~BallPosition();
 	int id;
 	bool isValid;
