@@ -13,7 +13,7 @@ public:
 	bool isUpdated;
 	void predictCoordinates();
 	virtual void updateFieldPixelCoords(int x, int y);
-	void BallPosition::setIsUpdated(bool updated);
+	void setIsUpdated(bool updated);
 private:
 	KalmanFilter* filter = new KalmanFilter(cv::Point2i(400, 400));
 };
