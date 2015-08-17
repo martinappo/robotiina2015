@@ -72,7 +72,7 @@ void VideoRecorder::RecordFrame(const cv::Mat &frame, const std::string subtitle
 #else
 	
 	std::string f = std::to_string(frameCounter);
-	padTo(f,20);
+	padTo(f,16);
 	std::string frameName = fileName + "/" + f + ".jpg";
 	std::replace(frameName.begin(), frameName.end(), ':', '.');
 	cv::imwrite(frameName, frame);

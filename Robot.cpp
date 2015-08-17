@@ -244,13 +244,13 @@ void Robot::Run()
 #define RECORD_AFTER_PROCESSING
 #ifdef RECORD_AFTER_PROCESSING
 		if (captureFrames) {
-			videoRecorder.RecordFrame(display, subtitles.str());
+			videoRecorder.RecordFrame(cam1_area, subtitles.str());
 		}
 #endif
 		
 #ifndef RECORD_AFTER_PROCESSING
 		if (captureFrames) {
-			videoRecorder.RecordFrame(display, subtitles.str());
+			videoRecorder.RecordFrame(cam1_area, subtitles.str());
 		}
 #endif
 
