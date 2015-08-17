@@ -19,7 +19,6 @@ private:
 public:
 	RobotTracker(WheelController *wheels);
 	void Run();
-	void WriteInfoOnScreen(cv::Point3d acutual_speed, cv::Point3d target_speed, cv::Point3d acceleration, double dt);
 	~RobotTracker();
 };
 

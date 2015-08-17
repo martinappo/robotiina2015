@@ -2,6 +2,7 @@
 #include "types.h"
 #include "ThreadedClass.h"
 #include "ConfigurableModule.h"
+#include "FieldState.h"
 
 class FrontCameraVision :
 	public ConfigurableModule, public IVisionModule, public ThreadedClass

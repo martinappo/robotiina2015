@@ -11,129 +11,62 @@ BallFinder::~BallFinder()
 }
 
 
-cv::Point2i BallFinder::LocateOnScreen(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::Mat &frameBGR, OBJECT target) {
+void BallFinder::PopulateBalls(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::Mat &frameBGR, OBJECT target, FieldState *pFieldState) {
 	cv::Point2d notValidPosition = cv::Point2d(-1.0, -1.0);
-	ballCountLeft=0;
-	ballCountRight=0;
 	
 	int smallestBallArea = 4;
 	cv::Point2d center(-1, -1);
+
 	cv::Mat imgThresholded = HSVRanges[target]; // reference counted, I think
 	if (imgThresholded.rows == 0){
 		std::cout << "Image thresholding has failed" << std::endl;
-		return center;
+		return;
 	}
 	cv::Mat dst(imgThresholded.rows, imgThresholded.cols, CV_8U, cv::Scalar::all(0));
 
 	std::vector<std::vector<cv::Point>> contours; // Vector for storing contour
 	std::vector<cv::Vec4i> hierarchy;
 
-	cv::Scalar color(0, 0, 0);
-	cv::Scalar color2(255, 255, 255);
-	cv::Scalar color3(0, 0, 255);
+	cv::Scalar blackColor(0, 0, 0);
+	cv::Scalar whiteColor(255, 255, 255);
+	cv::Scalar redColor(0, 0, 255);
 
 	findContours(imgThresholded, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE); // Find the contours in the image
 
 	if (contours.size() == 0){ //if no contours found
-		return center;
+		return;
 	}
-	//the geater the closest
-	double ball_distance = 0;
-	double ball_shift = 0;
-	double closest_distance = 0;
-	std::vector<std::pair<int, int> > ball_indexes;
-	for (int i = 0; i < contours.size(); i++) // iterate through each contour.
+
+	pFieldState->resetBallsUpdateState();
+	int ballsUpdatedCount = 0;
+	for (int i = 0; i < contours.size(); i++)
 	{
-		int area = cv::contourArea(contours[i], false);
-		if (area < smallestBallArea){ //validate ball's size
-			ball_distance = 0;
-		}
-		else{
+		if (ballsUpdatedCount > NUMBER_OF_BALLS) break;
+		int ballArea = cv::contourArea(contours[i], false);
+		if (ballArea >= smallestBallArea) {
 			cv::Moments M = cv::moments(contours[i]);
-			ball_distance = M.m01 / M.m00;
-			ball_shift = M.m10 / M.m00;
-			ball_indexes.push_back(std::make_pair(ball_distance, i));
-			//if (ball_distance > 200) {
-				if (ball_shift < 320) ballCountLeft++;
-				if (ball_shift > 320) ballCountRight++;			
-			//}
-			
-	cv::Rect bounding_rect = cv::boundingRect(contours[i]);
-	rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), color3, 1, 8, 0);
-			
+			int posY = M.m01 / M.m00;
+			int posX = M.m10 / M.m00;
+			cv::Rect bounding_rect = cv::boundingRect(contours[i]);
+			rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), redColor, 1, 8, 0);
+			//TODO: index balls and match the right BallPosition object and contour from frame
+			BallPosition currentBall = pFieldState->balls[ballsUpdatedCount].load();
+			currentBall.updateCoordinates(posX, posY);
+			currentBall.setIsUpdated(true);
+			pFieldState->balls[ballsUpdatedCount].store(currentBall);
+			ballsUpdatedCount++;
 		}
 	}
-
-	if (ball_indexes.empty()){
-		return center;
+	
+	if (ballsUpdatedCount < NUMBER_OF_BALLS) {
+		for (int i = 0; i <= NUMBER_OF_BALLS; i++) {
+			BallPosition currentBall = pFieldState->balls[i].load();
+			if (!currentBall.isUpdated) {
+				currentBall.predictCoordinates();
+				pFieldState->balls[i].store(currentBall);
+			}
+		}
 	}
-
-	int closest_ball_index = 0;
-	cv::Point2d closestBall = cv::Point2d(-1, -1);
-	std::sort(ball_indexes.begin(), ball_indexes.end());
-	while (!ball_indexes.empty()){
-		//If there is nothing to compare with
-		closest_ball_index = ball_indexes.back().second;
-		//Choosing new ball
-		if (lastPosition.x < 0 && lastPosition.y < 0){
-			if (contours.size() > closest_ball_index){
-				cv::Moments M = cv::moments(contours[closest_ball_index]);
-				closestBall = cv::Point2d(M.m10 / M.m00, M.m01 / M.m00);
-			}
-			else {
-				assert(false);
-			}
-			//If we found not valid ball
-			if (cv::norm(closestBall - notValidPosition) < 100 && notValidPosition.x > 0 && notValidPosition.y > 0){
-				return cv::Point2i(-2, -2);
-			}
-			else{
-				notValidPosition = cv::Point2i(-1, -1); //reset variable
-			}
-		}
-		//Comparing with prev result
-		else {
-			double smallestDistance = 9999;
-
-			for (int i = 0; i < ball_indexes.size(); i++){
-				cv::Moments M = cv::moments(contours[ball_indexes[i].second]);
-				center = cv::Point2d(M.m10 / M.m00, M.m01 / M.m00);
-				double distance = cv::norm(center - lastPosition);
-				if (smallestDistance > distance){
-					smallestDistance = distance;
-					closestBall = center;
-				}
-			}
-			//distance between found ball and chosen ball
-			if (smallestDistance > 609){
-				return cv::Point2d(-1, -1);
-			}
-
-		}
-		/*
-		//VALIDATE BALL
-		//For ball validation, drawed contour should cover balls shadow.
-		int thickness = (int)ceil(cv::contourArea(contours[closest_ball_index], false) / 50);
-		thickness = std::min(100, std::max(thickness, 12));
-		drawContours(HSVRanges[OUTER_BORDER], contours, closest_ball_index, color, thickness, 8, hierarchy);
-		drawContours(HSVRanges[OUTER_BORDER], contours, closest_ball_index, color, -5, 8, hierarchy);
-		drawContours(frameBGR, contours, closest_ball_index, color, thickness, 8, hierarchy);
-		drawContours(frameBGR, contours, closest_ball_index, color, -5, 8, hierarchy);
-		*/
-		bool valid = validateBall(HSVRanges, closestBall, frameHSV, frameBGR);
-		if (!valid){
-			notValidPosition = closestBall;
-			cv::circle(frameBGR, closestBall, 5, cv::Scalar(100, 0, 225), 3); //not valid ball is purple
-		}
-		else{
-			cv::circle(frameBGR, closestBall, 12, cv::Scalar(225, 225, 225), 2); //valid ball is white
-			return	closestBall;
-		}
-		ball_indexes.pop_back();
-	}
-	//If there is not valid ball
-	return cv::Point2i(-2, -2);
-
 }
 
 bool BallFinder::validateBall(ThresholdedImages &HSVRanges, cv::Point2d endPoint, cv::Mat &frameHSV, cv::Mat &frameBGR)

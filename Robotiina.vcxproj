@@ -91,6 +91,7 @@
   <ItemGroup>
     <ClInclude Include="autocalibrator.h" />
     <ClInclude Include="BallFinder.h" />
+    <ClInclude Include="BallPosition.h" />
     <ClInclude Include="blockingreader.h" />
     <ClInclude Include="calibrationconfreader.h" />
     <ClInclude Include="camera.h" />
@@ -100,7 +101,9 @@
     <ClInclude Include="ConfigurableModule.h" />
     <ClInclude Include="ComModule.h" />
     <ClInclude Include="dialog.h" />
+    <ClInclude Include="FieldState.h" />
     <ClInclude Include="MouseVision.h" />
+    <ClInclude Include="ObjectPosition.h" />
     <ClInclude Include="SoccerField.h" />
     <ClInclude Include="FrontCameraVision.h" />
     <ClInclude Include="GateFinder.h" />
@@ -123,6 +126,7 @@
   <ItemGroup>
     <ClCompile Include="autocalibrator.cpp" />
     <ClCompile Include="BallFinder.cpp" />
+    <ClCompile Include="BallPosition.cpp" />
     <ClCompile Include="calibrationconfreader.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="coilBoard.cpp" />
@@ -131,7 +135,9 @@
     <ClCompile Include="ConfigurableModule.cpp" />
     <ClCompile Include="ComModule.cpp" />
     <ClCompile Include="dialog.cpp" />
+    <ClCompile Include="FieldState.cpp" />
     <ClCompile Include="MouseVision.cpp" />
+    <ClCompile Include="ObjectPosition.cpp" />
     <ClCompile Include="SoccerField.cpp" />
     <ClCompile Include="FrontCameraVision.cpp" />
     <ClCompile Include="GateFinder.cpp" />

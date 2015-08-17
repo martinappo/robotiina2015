@@ -23,12 +23,10 @@ ObjectFinder::ObjectFinder()
 		write_ini("conf/camera.ini", pt);
 	};
 }
-bool ObjectFinder::LocateCursor(cv::Mat &frameBGR, cv::Point2i cursor, OBJECT target, ObjectPosition &targetPos){
-
+bool ObjectFinder::LocateCursor(cv::Mat &frameBGR, cv::Point2i cursor, OBJECT target, BallPosition &targetPos){
 	cv::Scalar color(0, 0, 0);
 	cv::circle(frameBGR, cursor, 8, color, -1);
-	targetPos = ConvertPixelToRealWorld(cursor, cv::Point2i(frameBGR.cols, frameBGR.rows));
-	WriteInfoOnScreen(targetPos);
+	targetPos.updateCoordinates(cursor);
 	return true;
 }
 
@@ -53,8 +51,7 @@ bool ObjectFinder::Locate(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::M
 
 	//cv::circle(frameBGR, point, 8, color, -1);
 	//std::cout << point << std::endl;
-	targetPos = ConvertPixelToRealWorld(point, cv::Point2i(frameHSV.cols, frameHSV.rows));
-	WriteInfoOnScreen(targetPos);
+	targetPos.updateCoordinates(point);
 	return true;
 }
 
@@ -291,7 +288,7 @@ void ObjectFinder::IsolateFieldOld(ThresholdedImages &HSVRanges, cv::Mat &frameH
 ObjectPosition ObjectFinder::ConvertPixelToRealWorld(const cv::Point2i &point, const cv::Point2i &frame_size)
 {
 	if (!(point.y >= 0 && point.x >= 0 && point.y < frame_size.y && point.x < frame_size.x)){//If there is no object found
-		return{ -1, -1, -1 };
+		return { -1, -1 };
 	}
 		
 
@@ -303,32 +300,8 @@ ObjectPosition ObjectFinder::ConvertPixelToRealWorld(const cv::Point2i &point, c
 	double hor_space = tan(Hfov)*distance;
 	double HorizontalDev = (hor_space * (point.x - center.x) / center.x);
 	double Hor_angle = atan(HorizontalDev / distance)* 180/PI;
-	/*
-	if (Hor_angle > 0){
-		Hor_angle = 360 - Hor_angle;
-	}
-	Hor_angle = abs(Hor_angle);
-	*/
-	return{ distance, HorizontalDev, Hor_angle };
-}
 
-
-void ObjectFinder::WriteInfoOnScreen(const ObjectPosition &info){
-	return;
-	cv::Mat infoWindow(100, 250, CV_8UC3, cv::Scalar::all(0));
-	std::ostringstream oss;
-	oss << "Distance :" << info.distance;
-	cv::putText(infoWindow, oss.str(), cv::Point(20, 20), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-	oss.str("");
-	oss << "Horizontal Dev :" << info.horizontalDev;
-	cv::putText(infoWindow, oss.str(), cv::Point(20, 50), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-	oss.str("");
-	oss << "Horizontal angle :" << info.horizontalAngle;
-	cv::putText(infoWindow, oss.str(), cv::Point(20, 80), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-	cv::namedWindow("Info Window");
-	cv::imshow("Info Window", infoWindow);
-	cv::waitKey(1); // draw window
-	return;
+	return { distance, Hor_angle };
 }
 
 

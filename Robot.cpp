@@ -203,7 +203,7 @@ void Robot::Run()
 	}
 	*/
 	/* Field state */
-	SoccerField field(this);
+	SoccerField field(this, camera->GetFrameSize());
 
 	/* Vision modules */
 	FrontCameraVision visionModule(camera, this, &field);
@@ -221,11 +221,7 @@ void Robot::Run()
 
 	//RobotTracker tracker(wheels);
 
-
-	
 	std::stringstream subtitles;
-
-
 
 	VideoRecorder videoRecorder("videos/", 30, display.size());
 
@@ -504,25 +500,28 @@ void Robot::Run()
 		cv::putText(display, "state: " + STATE_LABELS[state], cv::Point(display.cols - 140, 40), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 		ObjectPosition ballPos = field.balls[0];
 		ObjectPosition targetGatePos = field.GetTargetGate();
-		cv::putText(display, std::string("Ball:") + (ballPos.distance > 0 ? "yes" : "no"), cv::Point(display.cols - 140, 60), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-		cv::putText(display, std::string("Gate:") + (targetGatePos.distance >0 ? "yes" : "no"), cv::Point(display.cols - 140, 80), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
+		cv::putText(display, std::string("Ball:") + (ballPos.getDistance() > 0 ? "yes" : "no"), cv::Point(display.cols - 140, 60), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
+		cv::putText(display, std::string("Gate:") + (targetGatePos.getDistance() >0 ? "yes" : "no"), cv::Point(display.cols - 140, 80), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 		
 		cv::putText(display, std::string("Trib:") + (coilBoard->BallInTribbler() ? "yes" : "no"), cv::Point(display.cols - 140, 100), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 		cv::putText(display, std::string("Sight:") + (field.gateObstructed ? "obst" : "free"), cv::Point(display.cols - 140, 120), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 		//cv::putText(display, std::string("OnWay:") + (somethingOnWay ? "yes" : "no"), cv::Point(display.cols - 140, 140), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 		
-		cv::putText(display, "Ball" , cv::Point(display.cols - 140, 180), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-		cv::putText(display, "dist: " + std::to_string(ballPos.distance), cv::Point(display.cols - 140, 200), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-		cv::putText(display, "angle :" + std::to_string(ballPos.horizontalAngle), cv::Point(display.cols - 140, 220), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-		cv::putText(display, "dev: " + std::to_string(ballPos.horizontalDev), cv::Point(display.cols - 140, 240), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
+		for (int i = 0; i < NUMBER_OF_BALLS; i++) {
+			BallPosition ball = field.balls[i].load();
+			cv::Point ballCoords = ball.pixelCoordsForField;
+			cv::putText(display, std::string("Ball") + std::to_string(i) + ": "+ std::to_string(ball.getAngle()) + " : " + std::to_string(ballCoords.y), cv::Point(display.cols - 250, i * 15 + 10), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.5, cv::Scalar(255, 255, 255));
+		}
+
+		cv::putText(display, "dist: " + std::to_string(ballPos.getDistance()), cv::Point(display.cols - 140, 200), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
+		cv::putText(display, "angle :" + std::to_string(ballPos.getAngle()), cv::Point(display.cols - 140, 220), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 
 		//cv::putText(display, "border: " + std::to_string(borderDistance.distance), cv::Point(display.cols - 140, 280), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 
-		if (targetGatePos.distance > 0) {
+		if (targetGatePos.getDistance() > 0) {
 			cv::putText(display, "Gate" ,  cv::Point(display.cols - 140, 320), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-			cv::putText(display, "dist: " + std::to_string(targetGatePos.distance), cv::Point(display.cols - 140, 340), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-			cv::putText(display, "angle: " + std::to_string(targetGatePos.horizontalAngle), cv::Point(display.cols - 140, 360), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-			cv::putText(display, "dev: " + std::to_string(targetGatePos.horizontalDev), cv::Point(display.cols - 140, 380), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
+			cv::putText(display, "dist: " + std::to_string(targetGatePos.getDistance()), cv::Point(display.cols - 140, 340), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
+			cv::putText(display, "angle: " + std::to_string(targetGatePos.getAngle()), cv::Point(display.cols - 140, 360), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 		}
 		else {
 			cv::putText(display, "Gate - N/A", cv::Point(display.cols - 140, 320), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));

@@ -33,22 +33,6 @@ struct Speed
 	double rotation;
 };
 
-struct ObjectPosition /* polar coordinates */
-{
-	double distance;
-	double horizontalDev; // perhaps not needed
-	double horizontalAngle;
-};
-
-/*
-enum WHEEL_ID {
-	ID_WHEEL_FRONT_1 = 1,
-	ID_WHEEL_FRONT_2 = 2,
-	ID_WHEEL_BACK_1 = 3,
-	ID_WHEEL_BACK_2 = 4,
-	WHEEL_COUNT
-};
-*/
 const int ID_COILGUN = 4;
 
 enum OBJECT
@@ -76,19 +60,13 @@ enum STATE
 	STATE_END_OF_GAME /* leave this last*/
 };
 
-class FieldState {
+class IObjectPosition {
 public:
-	std::atomic<ObjectPosition> self; // our robot distance from center and rotation
-	std::atomic<ObjectPosition> balls[NUMBER_OF_BALLS];// all others are distance from self and heading to it
-	std::atomic<ObjectPosition> blueGate;
-	std::atomic<ObjectPosition> yellowGate;
-	std::atomic_bool gateObstructed;
-	virtual void SetTargetGate(OBJECT gate) = 0;
-	virtual ObjectPosition GetTargetGate() const = 0;
-
-
+	virtual void updateCoordinates(int x, int y) = 0; // Takes raw coordinates of object from frame
+	virtual void updatePolarCoords(int x, int y) = 0;
+	virtual void updateMetricCoords(int x, int y) = 0;
+	virtual void updateFieldPixelCoords(int x, int y) = 0;
 };
-
 
 class IUIEventListener {
 public:

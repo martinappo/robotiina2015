@@ -69,7 +69,7 @@ cv::Mat &Camera::Capture(){
 	}
 #else
 	if (bCaptureNextFrame) {
-		std::cout << "Requesting too fast, next frame not ready!" << std::endl;
+	//	std::cout << "Requesting too fast, next frame not ready!" << std::endl;
 		while (bCaptureNextFrame){
 			std::this_thread::sleep_for(std::chrono::milliseconds(1)); 
 		}

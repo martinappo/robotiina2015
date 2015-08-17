@@ -36,8 +36,6 @@ void RobotTracker::Run()
 		lastSpeed.y = cos(direction* PI / 180.0)* velocity + rotate,
 		lastSpeed.z = rotate;
 		*/
-		//WriteInfoOnScreen(current_speed, target_speed, acceleration, dt);
-
 		lastStep = time;
 		//lastSpeed = current_speed;
 
@@ -53,47 +51,4 @@ RobotTracker::~RobotTracker()
 	stop_thread = true;
 	threads.join_all();
 }
-
-void RobotTracker::WriteInfoOnScreen(cv::Point3d acutual_speed, cv::Point3d target_speed, cv::Point3d acceleration, double dt){
-	cv::Mat infoWindow(150, 450, CV_8UC3, cv::Scalar::all(0));
-	std::ostringstream oss;
-	oss << "velocity :" << target_speed.x;
-	cv::putText(infoWindow, oss.str(), cv::Point(20, 20), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-	std::cout<<oss.str()<<std::endl;oss.str("");
-	oss << "direction :" << target_speed.y;
-	cv::putText(infoWindow, oss.str(), cv::Point(20, 50), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-	std::cout<<oss.str()<<std::endl;oss.str("");
-	oss << "rotate :" << target_speed.z;
-	cv::putText(infoWindow, oss.str(), cv::Point(20, 80), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-	std::cout<<oss.str()<<std::endl;
-	oss.str("");
-	oss << "" << acutual_speed.x;
-	cv::putText(infoWindow, oss.str(), cv::Point(220, 20), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-	oss.str("");
-	oss << "" << acutual_speed.y;
-	cv::putText(infoWindow, oss.str(), cv::Point(220, 50), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-	oss.str("");
-	oss << "" << acutual_speed.z;
-	cv::putText(infoWindow, oss.str(), cv::Point(220, 80), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-
-	oss.str("");
-	oss << "" << acceleration.x;
-	cv::putText(infoWindow, oss.str(), cv::Point(320, 20), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-	oss.str("");
-	oss << "" << acceleration.y;
-	cv::putText(infoWindow, oss.str(), cv::Point(320, 50), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-	oss.str("");
-	oss << "" << acceleration.z;
-	cv::putText(infoWindow, oss.str(), cv::Point(320, 80), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-
-	oss.str("");
-	oss << "dt :" << dt;
-	cv::putText(infoWindow, oss.str(), cv::Point(20,110), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-
-
-	//cv::imshow("RobotTracker", infoWindow);
-	//cv::waitKey(1);
-	return;
-}
-
 

@@ -1,6 +1,7 @@
 #pragma  once
 #include "types.h"
 #include <opencv2/opencv.hpp>
+#include "FieldState.h"
 
 
 class ObjectFinder {
@@ -9,8 +10,6 @@ protected:
 //	virtual cv::Point2i LocateBallOnScreen(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::Mat &frameBGR, OBJECT target);
 	virtual cv::Point2i LocateOnScreen(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::Mat &frameBGR, OBJECT target) { return{ 0, 0 }; };
 private:
-	void WriteInfoOnScreen(const ObjectPosition &info);
-
 	//Vars
 	double Hfov = 35.21;
 	double Vfov = 21.65; //half of cameras vertical field of view (degrees)
@@ -25,6 +24,5 @@ public:
 	int IsolateField(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::Mat &frameBGR, bool detectBothBorders = false, bool nightVision = false);
 	virtual void IsolateFieldOld(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::Mat &frameBGR);
 	virtual ~ObjectFinder(){ }
-	bool LocateCursor(cv::Mat &frameBGR, cv::Point2i cursor, OBJECT target, ObjectPosition &targetPos);
-
+	bool LocateCursor(cv::Mat &frameBGR, cv::Point2i cursor, OBJECT target, BallPosition &targetPos);
 };
