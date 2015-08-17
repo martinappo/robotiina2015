@@ -1,9 +1,12 @@
 #include "types.h"
-#include <ppl.h>
+
 #define EDSIZE 24
 #define ERODESIZE 10
-#define IMAGETHRESHOLDER_PARALLEL_FOR
-
+//#define IMAGETHRESHOLDER_PARALLEL_FOR
+#define IMAGETHRESHOLDER_PARALLEL_THREADS
+#ifdef IMAGETHRESHOLDER_PARALLEL_FOR
+#include <ppl.h>
+#endif 
 class ImageThresholder : public ThreadedClass
 {
 protected:

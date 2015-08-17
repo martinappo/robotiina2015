@@ -31,7 +31,7 @@ protected:
 	void Start() {
 		bCaptureFrame1 = true;
 		bCaptureNextFrame = true;
-		__super::Start();
+		ThreadedClass::Start();
 	}
 public:
     Camera(const std::string &device);
