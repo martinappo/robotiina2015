@@ -6,7 +6,7 @@
 class BallPosition : public ObjectPosition
 {
 public:
-	BallPosition();
+	BallPosition() noexcept;
 	virtual ~BallPosition();
 	int id;
 	bool isValid;

@@ -207,6 +207,7 @@ void Robot::Run()
 
 	/* Vision modules */
 	FrontCameraVision visionModule(camera, this, &field);
+	//AutoCalibrator visionModule(camera, this);
 	MouseVision mouseVision(camera, this, &field);
 
 	AutoCalibrator calibrator(camera, this);
@@ -224,7 +225,6 @@ void Robot::Run()
 	std::stringstream subtitles;
 
 	VideoRecorder videoRecorder("videos/", 30, display.size());
-
 	while (true)
     {
 		time = boost::posix_time::microsec_clock::local_time();

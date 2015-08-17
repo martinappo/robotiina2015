@@ -9,9 +9,9 @@ ObjectPosition::ObjectPosition(cv::Point2i polarCoords) {
 	this->polarMetricCoords = polarCoords;
 }
 
-ObjectPosition::ObjectPosition() {
-
-}
+//ObjectPosition::ObjectPosition() {
+//
+//}
 
 ObjectPosition::~ObjectPosition() {};
 

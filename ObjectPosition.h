@@ -4,7 +4,10 @@
 class ObjectPosition : public IObjectPosition
 {
 public:
-	ObjectPosition();
+	ObjectPosition() noexcept {};
+	ObjectPosition(const ObjectPosition &old) {
+	// Copy old to this
+	};
 	ObjectPosition(int distance, int angle);
 	ObjectPosition(cv::Point2i polarCoords);
 	virtual ~ObjectPosition();
