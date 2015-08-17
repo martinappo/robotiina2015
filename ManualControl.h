@@ -10,7 +10,6 @@ public:
 	virtual ~ManualControl();
 
 	void Run();
-
 protected:
 	ICommunicationModule *m_pComModule;
 };

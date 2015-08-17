@@ -11,9 +11,14 @@
 WheelController::WheelController(ComPortScanner *pScanner, int iWheelCount/* = 3*/) : ThreadedClass("WheelController")
 , m_pScanner(pScanner), m_iWheelCount(iWheelCount)
 {
-	for (auto i = 0; i < m_iWheelCount; i++) {
-		m_vWheels.push_back(std::make_pair<double, SimpleSerial*>(i / m_iWheelCount, NULL));
+	if (iWheelCount == 3) {
+		m_vWheels.push_back(std::make_pair<double, SimpleSerial*>(150, NULL));
+		m_vWheels.push_back(std::make_pair<double, SimpleSerial*>(30, NULL));
+		m_vWheels.push_back(std::make_pair<double, SimpleSerial*>(270, NULL));
 	}
+//	for (auto i = 0; i < iWheelCount; i++) {
+//		m_vWheels.push_back(std::make_pair<double, SimpleSerial*>((double)i / m_iWheelCount, NULL));
+//	}
 	targetSpeed = { 0, 0, 0 };
 	m_bPortsInitialized = false;
 	Start();
@@ -128,7 +133,7 @@ std::vector<double> WheelController::CalculateWheelSpeeds(double velocity, doubl
 	std::vector<double> speeds = std::vector<double>(m_iWheelCount);
 
 	for (auto i = 0; i < m_iWheelCount; i++) {
-		speeds[i] = velocity * cos(m_vWheels[i].first - direction* PI / 180.0) + rotate;
+		speeds[i] = velocity * cos((m_vWheels[i].first - direction)* PI / 180.0) + rotate;
 	}
 	/*
 	return cv::Point3d(

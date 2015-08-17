@@ -46,7 +46,7 @@ public:
 	const Speed & GetTargetSpeed();
 	bool IsStalled();
 	bool HasError();
-	~WheelController();
+	virtual ~WheelController();
 	void DestroyWheels();
 	std::string GetDebugInfo();
 	void Run();
