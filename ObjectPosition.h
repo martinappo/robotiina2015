@@ -4,10 +4,11 @@
 class ObjectPosition : public IObjectPosition
 {
 public:
+#ifdef WIN32
+	ObjectPosition() {};
+#else
 	ObjectPosition() noexcept {};
-	ObjectPosition(const ObjectPosition &old) {
-	// Copy old to this
-	};
+#endif
 	ObjectPosition(int distance, int angle);
 	ObjectPosition(cv::Point2i polarCoords);
 	virtual ~ObjectPosition();
