@@ -15,7 +15,7 @@ void ThreadedClass::Start()
 };
 void ThreadedClass::WaitForStop()
 {
-	//std::cout << "Stoping thread: " << name << std::endl;
+	std::cout << "Stoping thread: " << name << std::endl;
 	stop_thread = true;
 	threads.join_all();
 	running = false;

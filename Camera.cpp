@@ -14,6 +14,7 @@ Camera::Camera(const std::string &device){
 
 	frameSize = cv::Size((int)cap->get(CV_CAP_PROP_FRAME_WIDTH),    // Acquire input size
 		(int)cap->get(CV_CAP_PROP_FRAME_HEIGHT));
+	
 	/*
 	cap->set(CV_CAP_PROP_FPS, 60);
 	cap->set(CV_CAP_PROP_FRAME_WIDTH, 1280);
@@ -70,7 +71,7 @@ cv::Mat &Camera::Capture(){
 #else
 	if (bCaptureNextFrame) {
 	//	std::cout << "Requesting too fast, next frame not ready!" << std::endl;
-		while (bCaptureNextFrame){
+		while (bCaptureNextFrame && !stop_thread){
 			std::this_thread::sleep_for(std::chrono::milliseconds(1)); 
 		}
 	}
@@ -123,10 +124,14 @@ void Camera::Run(){
 		}
 		cv::Mat &nextFrame = bCaptureFrame1 ? frame1 : frame2;
 
-		*cap >> nextFrame;
+		if (cap->isOpened()) {
+			*cap >> nextFrame;
+		}
+
 		if (nextFrame.size().height == 0) {
 			bCaptureNextFrame = true;
 			std::cout << "Invalid frame captured " << frame1.size() << std::endl;
+			stop_thread = true;
 			continue;
 		}
 		m_pFrame = &nextFrame;
