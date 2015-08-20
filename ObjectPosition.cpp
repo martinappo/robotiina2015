@@ -9,10 +9,6 @@ ObjectPosition::ObjectPosition(cv::Point2i polarCoords) {
 	this->polarMetricCoords = polarCoords;
 }
 
-//ObjectPosition::ObjectPosition() {
-//
-//}
-
 ObjectPosition::~ObjectPosition() {};
 
 int ObjectPosition::getDistance() {
@@ -25,6 +21,42 @@ void ObjectPosition::setDistance(int distance) {
 
 int ObjectPosition::getAngle() {
 	return polarMetricCoords.y;
+}
+
+void ObjectPosition::updateCoordinates(int x, int y, cv::Point robotFieldCoords) {
+	this->rawPixelCoords = { x, y };
+	updatePolarCoords();
+	updateFieldCoords(robotFieldCoords);
+}
+
+void ObjectPosition::updateCoordinates(cv::Point point, cv::Point robotFieldCoords) {
+	return updateCoordinates(point.x, point.y, robotFieldCoords);
+}
+
+void ObjectPosition::updatePolarCoords() {
+	updatePolarCoords(rawPixelCoords);
+}
+
+void ObjectPosition::updatePolarCoords(int x, int y) {
+	updatePolarCoords(cv::Point(x, y));
+}
+
+void ObjectPosition::updatePolarCoords(cv::Point rawCoords) {
+	cv::Point centerOfFrame = { frameSize.height / 2, frameSize.width / 2 };
+	int distanceInPixels = cv::norm(rawCoords - centerOfFrame);
+	//TODO: get value from lookuptable not randomly
+	int distanceInCm = 270 * distanceInPixels / (frameSize.height / 2 + 1);
+	int angle = angleBetween(rawCoords, centerOfFrame, { frameSize.height, frameSize.width / 2 });
+	this->polarMetricCoords = { distanceInCm, angle };
+}
+
+
+void ObjectPosition::updateFieldCoords(cv::Point robotFieldCoords) {
+	int fieldY = getDistance() * cos(TAU*getAngle() / 360);
+	int fieldX = getDistance() * sin(TAU*getAngle() / 360);
+
+	cv::Point filteredCoords = cv::Point(fieldX, fieldY);//filter->doFiltering(cv::Point(fieldX, fieldY));
+	fieldCoords = { robotFieldCoords.x + filteredCoords.x, robotFieldCoords.y + filteredCoords.y };
 }
 
 double ObjectPosition::angleBetween(const cv::Point2i &a, const cv::Point2i &b, const cv::Point2i &c) {
@@ -40,42 +72,6 @@ double ObjectPosition::angleBetween(const cv::Point2i &a, const cv::Point2i &b, 
 		return 360 + alphaDeg;
 	}
 	return alphaDeg;
-}
-
-
-void ObjectPosition::updateCoordinates(int x, int y) {
-	this->rawPixelCoords = { x, y };
-	updatePolarCoords(x, y);
-	updateFieldPixelCoords(x, y);
-	updateMetricCoords(x, y);
-}
-
-void ObjectPosition::updateCoordinates(cv::Point point) {
-	return updateCoordinates(point.x, point.y);
-}
-
-void ObjectPosition::updatePolarCoords(int x, int y) {
-	cv::Point centerOfFrame = { frameSize.height / 2, frameSize.width / 2 };
-	int distanceInPixels = cv::norm(rawPixelCoords - centerOfFrame);
-	//TODO: get value from lookuptable not randomly
-	int distanceInCm = 500 * distanceInPixels / (frameSize.height / 2 + 1);
-	int angle = angleBetween(rawPixelCoords, centerOfFrame, { frameSize.height, frameSize.width / 2 });
-	this->polarMetricCoords = { distanceInCm, angle };
-	this->polarPixelCoords = { distanceInPixels, angle };
-}
-
-void ObjectPosition::updateMetricCoords(int x, int y) {
-	//TODO: get value relative to field not to robot
-	int metricX = 500 * pixelCoordsForField.x / (frameSize.height / 2 + 1);
-	int metricY = 500 * pixelCoordsForField.y / (frameSize.height / 2 + 1);
-	this->metricCoords = { metricX, metricY };
-}
-
-void ObjectPosition::updateFieldPixelCoords(int x, int y) {
-	//TODO: get value relative to field not to robot
-	int fieldY = polarPixelCoords.x * cos(TAU*getAngle() / 180);
-	int fieldX = polarPixelCoords.x * sin(TAU*getAngle() / 180);
-	this->pixelCoordsForField = { 320 + fieldX, 240 + fieldY };
 }
 
 

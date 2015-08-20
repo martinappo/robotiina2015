@@ -96,7 +96,6 @@ cv::Point2i GateFinder::LocateOnScreen(ThresholdedImages &HSVRanges, cv::Mat &fr
 
 	}
 
-	//std::cout << "-----------------" << std::endl;
 	// find out lowest line
 	return center;
 }

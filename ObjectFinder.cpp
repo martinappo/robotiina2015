@@ -26,32 +26,15 @@ ObjectFinder::ObjectFinder()
 bool ObjectFinder::LocateCursor(cv::Mat &frameBGR, cv::Point2i cursor, OBJECT target, BallPosition &targetPos){
 	cv::Scalar color(0, 0, 0);
 	cv::circle(frameBGR, cursor, 8, color, -1);
-	targetPos.updateCoordinates(cursor);
+	targetPos.updateCoordinates(cursor, cv::Point(250, 155));
 	return true;
 }
 
 
 bool ObjectFinder::Locate(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::Mat &frameBGR, OBJECT target, ObjectPosition &targetPos) {
-	cv::Point2i point(-1, -1);
-	cv::Scalar color(0, 0, 0);
-	cv::Scalar color2(255, 0, 255);
-	bool resetFilter = false;
-	point = LocateOnScreen(HSVRanges, frameHSV, frameBGR, target);
+	cv::Point2i point = LocateOnScreen(HSVRanges, frameHSV, frameBGR, target);
 	lastPosition = point;
-	/*
-	if (target == BALL){
-		point = LocateBallOnScreen(HSVRanges, frameHSV, frameBGR, target);
-		color = cv::Scalar(0, 225, 225);
-	}
-	else{
-		point = LocateGateOnScreen(HSVRanges, frameHSV, frameBGR, target);
-		cv::circle(frameBGR, point, 8, color2, -1);
-	}
-	*/
-
-	//cv::circle(frameBGR, point, 8, color, -1);
-	//std::cout << point << std::endl;
-	targetPos.updateCoordinates(point);
+	targetPos.updateCoordinates(point, cv::Point(250, 155)); //Updating only polar coords right now. Robot coords needed for field coords update.
 	return true;
 }
 

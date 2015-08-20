@@ -522,8 +522,7 @@ void Robot::Run()
 		
 		for (int i = 0; i < NUMBER_OF_BALLS; i++) {
 			BallPosition ball = field.balls[i].load();
-			cv::Point ballCoords = ball.pixelCoordsForField;
-			cv::putText(display, std::string("Ball") + std::to_string(i) + ": "+ std::to_string(ball.getAngle()) + " : " + std::to_string(ballCoords.y), cv::Point(display.cols - 250, i * 15 + 10), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.5, cv::Scalar(255, 255, 255));
+			cv::putText(display, std::string("Ball") + std::to_string(i) + ": "+ std::to_string(ball.getAngle()) + " : " + std::to_string(ball.getDistance()), cv::Point(display.cols - 250, i * 15 + 10), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.5, cv::Scalar(255, 255, 255));
 		}
 
 		cv::putText(display, "dist: " + std::to_string(ballPos.getDistance()), cv::Point(display.cols - 140, 200), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));

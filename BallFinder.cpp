@@ -11,7 +11,7 @@ BallFinder::~BallFinder()
 }
 
 
-void BallFinder::PopulateBalls(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::Mat &frameBGR, OBJECT target, FieldState *pFieldState) {
+void BallFinder::populateBalls(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::Mat &frameBGR, OBJECT target, FieldState *pFieldState) {
 	cv::Point2d notValidPosition = cv::Point2d(-1.0, -1.0);
 	
 	int smallestBallArea = 4;
@@ -51,7 +51,7 @@ void BallFinder::PopulateBalls(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, 
 			rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), redColor, 1, 8, 0);
 			//TODO: index balls and match the right BallPosition object and contour from frame
 			BallPosition currentBall = pFieldState->balls[ballsUpdatedCount].load();
-			currentBall.updateCoordinates(posX, posY);
+			currentBall.updateCoordinates(posX, posY, pFieldState->self.load().fieldCoords);
 			currentBall.setIsUpdated(true);
 			pFieldState->balls[ballsUpdatedCount].store(currentBall);
 			ballsUpdatedCount++;
