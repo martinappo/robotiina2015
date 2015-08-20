@@ -4,23 +4,25 @@
 #include <thread>
 #define DOUBLE_BUFFERING
 
-Camera::Camera(const std::string &device){
-
+Camera::Camera(const std::string &device) {
 	cap = new cv::VideoCapture(device.c_str());
 	if (!cap->isOpened())  // if not success, exit program
     {
 		throw std::runtime_error("Camera not found");
     }
 
-	frameSize = cv::Size((int)cap->get(CV_CAP_PROP_FRAME_WIDTH),    // Acquire input size
-		(int)cap->get(CV_CAP_PROP_FRAME_HEIGHT));
 	frameCount = cap->get(CV_CAP_PROP_FRAME_COUNT);
 	m_pFrame = &frame1;
 
 	if (frameCount == 1) { // image
 		*cap >> frame;
+		frameSize = cv::Size(frame.size());
 		return;
 	}
+	frameSize = cv::Size((int)cap->get(CV_CAP_PROP_FRAME_WIDTH),    // Acquire input size
+		(int)cap->get(CV_CAP_PROP_FRAME_HEIGHT));
+
+
 	/*
 	cap->set(CV_CAP_PROP_FPS, 60);
 	cap->set(CV_CAP_PROP_FRAME_WIDTH, 1280);
@@ -49,7 +51,6 @@ Camera::Camera(int device)
 	frameSize = cv::Size((int)cap->get(CV_CAP_PROP_FRAME_WIDTH),    // Acquire input size
 		(int)cap->get(CV_CAP_PROP_FRAME_HEIGHT));
 	flip = false;
-
 	frameCount = cap->get(CV_CAP_PROP_FRAME_COUNT);
 
 	cap->set(CV_CAP_PROP_FPS, 60);
