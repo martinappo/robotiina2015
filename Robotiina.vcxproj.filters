@@ -92,6 +92,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ImageThresholder.cpp">
+	  <Filter>VisionModule</Filter>
+	</ClCompile>
+    <ClCompile Include="DistanceCalibrator.cpp">
       <Filter>VisionModule</Filter>
     </ClCompile>
   </ItemGroup>
@@ -193,6 +196,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FieldState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DistanceCalibrator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

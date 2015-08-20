@@ -101,6 +101,7 @@
     <ClInclude Include="ConfigurableModule.h" />
     <ClInclude Include="ComModule.h" />
     <ClInclude Include="dialog.h" />
+    <ClInclude Include="DistanceCalibrator.h" />
     <ClInclude Include="FieldState.h" />
     <ClInclude Include="MouseVision.h" />
     <ClInclude Include="ObjectPosition.h" />
@@ -135,6 +136,7 @@
     <ClCompile Include="ConfigurableModule.cpp" />
     <ClCompile Include="ComModule.cpp" />
     <ClCompile Include="dialog.cpp" />
+    <ClCompile Include="DistanceCalibrator.cpp" />
     <ClCompile Include="FieldState.cpp" />
     <ClCompile Include="ImageThresholder.cpp" />
     <ClCompile Include="MouseVision.cpp" />

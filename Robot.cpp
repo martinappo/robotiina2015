@@ -1,5 +1,7 @@
 #include "Robot.h"
 #include "AutoCalibrator.h"
+#include "DistanceCalibrator.h"
+
 
 #include "Camera.h"
 #include "StillCamera.h"
@@ -67,6 +69,7 @@ std::pair<STATE, std::string> states[] = {
 	std::pair<STATE, std::string>(STATE_SELECT_GATE, "Select Gate"),
 	std::pair<STATE, std::string>(STATE_DANCE, "Dance"),
 	std::pair<STATE, std::string>(STATE_MOUSE_VISION, "Mouse Vision"),
+	std::pair<STATE, std::string>(STATE_DISTANCE_CALIBRATE, "dist"),
 	//	std::pair<STATE, std::string>(STATE_END_OF_GAME, "End of Game") // this is intentionally left out
 
 };
@@ -215,6 +218,8 @@ void Robot::Run()
 
 	AutoCalibrator calibrator(camera, this);
 
+	DistanceCalibrator distanceCalibrator(camera, this);
+
 	/* Communication modules */
 	ComModule comModule(wheels, coilBoard);
 
@@ -327,6 +332,7 @@ void Robot::Run()
 				STATE_BUTTON("(M)anual Control", 'm', STATE_MANUAL_CONTROL)
 				STATE_BUTTON("M(o)use vision", 'o', STATE_MOUSE_VISION)
 				STATE_BUTTON("Test CoilGun", '-', STATE_TEST_COILGUN)
+				STATE_BUTTON("(D)istance calibration", 'd', STATE_DISTANCE_CALIBRATE)
 				STATE_BUTTON("Test Autopilot", '-', STATE_TEST)
 				STATE_BUTTON("E(x)it", 27, STATE_END_OF_GAME)
 			END_DIALOG
@@ -368,8 +374,12 @@ void Robot::Run()
 				STATE_BUTTON("BACK", 8, STATE_NONE)
 			END_DIALOG
 		}
-		
-		else if (STATE_SELECT_GATE == state) {
+		else if (state = STATE_DISTANCE_CALIBRATE){			
+			START_DIALOG
+			distanceCalibrator.distanceCalibrationRunning = true;
+			STATE_BUTTON("BACK", 8, STATE_NONE)
+			END_DIALOG 
+		}else if (STATE_SELECT_GATE == state) {
 			START_DIALOG
 				createButton(OBJECT_LABELS[BLUE_GATE], '-', [&field, this]{
 				field.SetTargetGate(BLUE_GATE);
@@ -459,7 +469,7 @@ void Robot::Run()
 			
 //			autoPilot->UpdateState(ballFound ? &ballPos : NULL, targetGatePos, sightObstructed);
 			
-        }
+		}
 		else if (STATE_TEST == state) {
 			START_DIALOG
 				autoPilot.enableTestMode(true);
