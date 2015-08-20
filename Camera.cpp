@@ -14,7 +14,13 @@ Camera::Camera(const std::string &device){
 
 	frameSize = cv::Size((int)cap->get(CV_CAP_PROP_FRAME_WIDTH),    // Acquire input size
 		(int)cap->get(CV_CAP_PROP_FRAME_HEIGHT));
-	
+	frameCount = cap->get(CV_CAP_PROP_FRAME_COUNT);
+	m_pFrame = &frame1;
+
+	if (frameCount == 1) { // image
+		*cap >> frame;
+		return;
+	}
 	/*
 	cap->set(CV_CAP_PROP_FPS, 60);
 	cap->set(CV_CAP_PROP_FRAME_WIDTH, 1280);
@@ -44,6 +50,8 @@ Camera::Camera(int device)
 		(int)cap->get(CV_CAP_PROP_FRAME_HEIGHT));
 	flip = false;
 
+	frameCount = cap->get(CV_CAP_PROP_FRAME_COUNT);
+
 	cap->set(CV_CAP_PROP_FPS, 60);
 	//cap->set(CV_CAP_PROP_FRAME_WIDTH, 800);
 	//cap->set(CV_CAP_PROP_FRAME_HEIGHT, 600);
@@ -64,52 +72,36 @@ Camera::Camera(int device)
 }
 
 cv::Mat &Camera::Capture(){
-#ifndef DOUBLE_BUFFERING
-	if (cap->isOpened()){
-		*cap >> frame;
-	}
-#else
-	if (bCaptureNextFrame) {
-	//	std::cout << "Requesting too fast, next frame not ready!" << std::endl;
-		while (bCaptureNextFrame && !stop_thread){
-			std::this_thread::sleep_for(std::chrono::milliseconds(1)); 
-		}
-	}
-#endif
-	/*
-	if (frame.size().height > 0) {
-		frame.copyTo(lastframe);
-	}
-	if (flip)
-		cv::flip(lastframe, buffer, -1);
-	else
-		lastframe.copyTo(buffer);
-    */
-	//time = boost::posix_time::microsec_clock::local_time();
-	//boost::posix_time::time_duration::tick_type dt = (time - lastCapture).total_milliseconds();
-	//boost::posix_time::time_duration::tick_type dt2 = (time - lastCapture2).total_milliseconds();
-/*
-	if (dt < 24){
-		std::this_thread::sleep_for(std::chrono::milliseconds(12)); // limit fps to about 50fps
-	}
-*/
-	if (frames > 10) {
-		time = boost::posix_time::microsec_clock::local_time();
-		boost::posix_time::time_duration::tick_type dt2 = (time - lastCapture2).total_milliseconds();
-		fps = 1000.0 * frames / dt2;
-		lastCapture2 = time;
-		frames = 0;
+	if (frameCount == 1) { // image
+		frame.copyTo(*m_pFrame); // return clean copy  
 	}
 	else {
-		frames++;
-	}
-	bCaptureNextFrame = true;
-#ifdef DOUBLE_BUFFERING
-	return *m_pFrame;
+#ifndef DOUBLE_BUFFERING
+		if (cap->isOpened()){
+			*cap >> *m_pFrame;
+		}
 #else
-	//lastCapture = time;
-	return frame;
+		if (bCaptureNextFrame) {
+			//	std::cout << "Requesting too fast, next frame not ready!" << std::endl;
+			while (bCaptureNextFrame && !stop_thread){
+				std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			}
+		}
 #endif
+	}
+		if (frames > 10) {
+			time = boost::posix_time::microsec_clock::local_time();
+			boost::posix_time::time_duration::tick_type dt2 = (time - lastCapture2).total_milliseconds();
+			fps = 1000.0 * frames / dt2;
+			lastCapture2 = time;
+			frames = 0;
+		}
+		else {
+			frames++;
+		}
+		bCaptureNextFrame = true;
+	
+	return *m_pFrame;
 }
 const cv::Mat &Camera::CaptureHSV() {
     cvtColor(frame, buffer, cv::COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
@@ -117,6 +109,7 @@ const cv::Mat &Camera::CaptureHSV() {
 }
 
 void Camera::Run(){
+	frameCounter = 0;
 	while (!stop_thread) {
 		if (!bCaptureNextFrame) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -126,12 +119,21 @@ void Camera::Run(){
 
 		if (cap->isOpened()) {
 			*cap >> nextFrame;
+			frameCounter++;
 		}
+		else {
+			bCaptureNextFrame = false;
+		}
+		if (frameCounter == frameCount){ //restartVideo
+			frameCounter = 0;
+			cap->set(CV_CAP_PROP_POS_FRAMES, 0);
+			continue;
 
+		}
 		if (nextFrame.size().height == 0) {
+			cap->set(CV_CAP_PROP_POS_FRAMES, 0);
 			bCaptureNextFrame = true;
 			std::cout << "Invalid frame captured " << frame1.size() << std::endl;
-			stop_thread = true;
 			continue;
 		}
 		m_pFrame = &nextFrame;

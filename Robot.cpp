@@ -110,7 +110,10 @@ bool Robot::Launch(int argc, char* argv[])
 	if (!ParseOptions(argc, argv)) return false;
 
 	// Compose robot from its parts
-	scanner = new ComPortScanner(io);
+
+	if (config.count("skip-ports") == 0) {
+		scanner = new ComPortScanner(io);
+	}
 	wheels = new WheelController(scanner);
 	captureFrames = config.count("capture-frames") > 0;
 	coilBoardPortsOk = false;
@@ -483,7 +486,7 @@ void Robot::Run()
 		//subtitles << oss.str();
 		subtitles << "|" << autoPilot.GetDebugInfo();
 		subtitles << "|" << wheels->GetDebugInfo();
-		if (scanner->running) {
+		if (scanner && scanner->running) {
 			subtitles << "|" << "Please wait, Scanning Ports";
 		}
 		else {

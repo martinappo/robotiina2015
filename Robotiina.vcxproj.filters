@@ -13,9 +13,6 @@
     <ClCompile Include="RobotTracker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ThreadedClass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="autocalibrator.cpp">
       <Filter>VisionModule</Filter>
     </ClCompile>
@@ -90,6 +87,12 @@
     </ClCompile>
     <ClCompile Include="FieldState.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadedClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageThresholder.cpp">
+      <Filter>VisionModule</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

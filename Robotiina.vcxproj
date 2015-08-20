@@ -136,6 +136,7 @@
     <ClCompile Include="ComModule.cpp" />
     <ClCompile Include="dialog.cpp" />
     <ClCompile Include="FieldState.cpp" />
+    <ClCompile Include="ImageThresholder.cpp" />
     <ClCompile Include="MouseVision.cpp" />
     <ClCompile Include="ObjectPosition.cpp" />
     <ClCompile Include="SoccerField.cpp" />

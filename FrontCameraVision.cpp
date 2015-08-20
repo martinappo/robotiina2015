@@ -27,10 +27,6 @@ FrontCameraVision::~FrontCameraVision()
 
 void FrontCameraVision::Run() {
 	ThresholdedImages thresholdedImages;
-	ImageThresholder thresholder(thresholdedImages, objectThresholds);
-	GateFinder BlueGateFinder;
-	GateFinder YellowGateFinder;
-	BallFinder ballFinder;
 
 	try {
 		CalibrationConfReader calibrator;
@@ -42,6 +38,10 @@ void FrontCameraVision::Run() {
 		std::cout << "Calibration data is missing!" << std::endl;
 
 	}
+	ImageThresholder thresholder(thresholdedImages, objectThresholds);
+	GateFinder BlueGateFinder;
+	GateFinder YellowGateFinder;
+	BallFinder ballFinder;
 
 	auto frameSize = m_pCamera->GetFrameSize();
 
@@ -73,7 +73,7 @@ void FrontCameraVision::Run() {
 		/**************************************************/
 
 		thresholder.Start(frameHSV, { BALL, BLUE_GATE, YELLOW_GATE/*, FIELD, INNER_BORDER, OUTER_BORDER, */ });
-		thresholder.WaitForStop();
+		//thresholder.WaitForStop();
 		/* STEP 2.2 cover own balls */
 		/*
 		std::vector<cv::Point2i> triangle;

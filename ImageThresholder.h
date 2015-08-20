@@ -1,62 +1,26 @@
 #include "types.h"
+#include "ThreadedClass.h"
 
-#define EDSIZE 24
-#define ERODESIZE 10
-//#define IMAGETHRESHOLDER_PARALLEL_FOR
-#define IMAGETHRESHOLDER_PARALLEL_THREADS
-#ifdef IMAGETHRESHOLDER_PARALLEL_FOR
-#include <ppl.h>
-#endif 
+
 class ImageThresholder : public ThreadedClass
 {
 protected:
 	ThresholdedImages &thresholdedImages;
 	HSVColorRangeMap &objectMap;
+	cv::Mat frame;
 public:
-	void Start(cv::Mat &frameHSV, std::vector<OBJECT> objectList) {
-#if defined(IMAGETHRESHOLDER_PARALLEL_FOR)
-		concurrency::parallel_for_each(begin(objectList), end(objectList), [&frameHSV, this](OBJECT object) {
-			auto r = objectMap[object];
-			inRange(frameHSV, cv::Scalar(r.hue.low, r.sat.low, r.val.low), cv::Scalar(r.hue.high, r.sat.high, r.val.high), thresholdedImages[object]);
-		});
-#elif defined(IMAGETHRESHOLDER_PARALLEL_THREADS)
-		for (auto &object : objectList) {
-			threads.create_thread([&frameHSV, object, this]{
-				auto r = objectMap[object];
-				do {
-					inRange(frameHSV, cv::Scalar(r.hue.low, r.sat.low, r.val.low), cv::Scalar(r.hue.high, r.sat.high, r.val.high), thresholdedImages[object]);
-				} while (thresholdedImages[object].size().height == 0);
-			});
-		}
-#else
-		for (auto &object : objectList) {
-			auto r = objectMap[object];
-			inRange(frameHSV, cv::Scalar(r.hue.low, r.sat.low, r.val.low), cv::Scalar(r.hue.high, r.sat.high, r.val.high), thresholdedImages[object]);
-		}
-#endif
-		/*
-		if (object == BLUE_GATE || object == YELLOW_GATE) {
-			cv::erode(thresholdedImages[object],thresholdedImages[object],elemErode2);
-		}
-		cv::dilate(thresholdedImages[object],thresholdedImages[object],elemErode2);
+	void Start(cv::Mat &frameHSV, std::vector<OBJECT> objectList);
 
-*/
-	}
+	ImageThresholder(ThresholdedImages &images, HSVColorRangeMap &objectMap);
+	~ImageThresholder();
 
-	ImageThresholder(ThresholdedImages &images, HSVColorRangeMap &objectMap) : ThreadedClass("ImageThresholder"), thresholdedImages(images), objectMap(objectMap){
-	
-    elemDilate = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(EDSIZE,EDSIZE)); //millega hiljem erode ja dilatet teha
-    elemErode = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(EDSIZE+6,EDSIZE+6));
-    elemErode2 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(ERODESIZE,ERODESIZE));
-	
-	};
-	~ImageThresholder(){};
-
-	void Run(){};
+	void Run() {};
+	void Run2(OBJECT object);
 private:
     cv::Mat elemDilate;
     cv::Mat elemErode;
     cv::Mat elemErode2;
+	std::atomic_int m_iWorkersInProgress;
 
 };
 
