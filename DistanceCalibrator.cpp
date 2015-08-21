@@ -26,17 +26,25 @@ double DistanceCalibrator::calculateDistance(double centreX, double centreY, dou
 
 void DistanceCalibrator::mouseClicked(int x, int y, int flags) {
 	//std::cout << x << ", " << y << "--" << frame_size.x / 2 << ", " <<frame_size.y / 2 <<"  " << counter << "  dist: " << calculateDistance(frame_size.x / 2, frame_size.y / 2, x, y) << std::endl;
-	counter--;
-	if (counter == 0){
-		counter = DistanceCalibrator::counterValue;
+	counter = counter + DistanceCalibrator::DISTANCE_CALIBRATOR_STEP;
+	std::ostringstream distance, value;
+	distance << calculateDistance(frame_size.x / 2, frame_size.y / 2, x, y);
+	value << counter;
+	std::string distanceString = distance.str();
+	std::string valueString = value.str();
+	pt.put(valueString, distanceString);
+
+	if (counter == VIEWING_DISTANCE){
 		distanceCalibrationRunning = false;
+		boost::property_tree::write_ini("distance_conf.ini", pt);
 	}
 	return;
 }
 
 void DistanceCalibrator::start(){
 	distanceCalibrationRunning = true;
-	counter = DistanceCalibrator::counterValue;
+	counter = 0;
+	pt.clear();
 	m_pDisplay->AddEventListener(this);
 }
 
@@ -46,7 +54,6 @@ void DistanceCalibrator::removeListener(){
 }
 
 DistanceCalibrator::~DistanceCalibrator(){
-	m_pDisplay->RemoveEventListener(this);
-	distanceCalibrationRunning = false;
+	removeListener();
 }
 

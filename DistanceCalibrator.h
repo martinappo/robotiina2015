@@ -2,6 +2,7 @@
 #include "ThreadedClass.h"
 //#include "ConfigurableModule.h"
 #include "ColorCalibrator.h"
+#include <boost/property_tree/ptree.hpp>
 #include <atomic>
 
 class DistanceCalibrator :  public IUIEventListener{
@@ -15,6 +16,8 @@ public:
 	static double calculateDistance(double centreX, double centreY, double x, double y);
 	void start();
 	void removeListener();
+	const static int VIEWING_DISTANCE = 210;
+	const static int DISTANCE_CALIBRATOR_STEP = 10;
 
 protected:
 	cv::Mat bestLabels, clustered, centers;
@@ -24,6 +27,6 @@ protected:
 
 private:
 	cv::Point frame_size;
-	int counterValue = 5;
-	int counter = counterValue;
+	int counter;
+	boost::property_tree::ptree pt;
 };
