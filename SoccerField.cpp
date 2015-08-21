@@ -4,6 +4,7 @@
 
 SoccerField::SoccerField(IDisplay *pDisplay, cv::Size frameSize) :m_pDisplay(pDisplay)
 {
+	this->self = RobotPosition(this->yellowGate, this->blueGate, cv::Point(214, 180));
 	initBalls(frameSize);
 	Start();
 }

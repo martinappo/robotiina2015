@@ -43,10 +43,14 @@ void FrontCameraVision::Run() {
 	GateFinder yellowGateFinder;
 	BallFinder ballFinder;
 
-	GatePosition blueGatePos(BLUE_GATE);
-	GatePosition yellowGatePos(YELLOW_GATE);
-
 	auto frameSize = m_pCamera->GetFrameSize();
+
+	GatePosition blueGatePos(BLUE_GATE);
+	blueGatePos.frameSize = frameSize;
+	GatePosition yellowGatePos(YELLOW_GATE);
+	yellowGatePos.frameSize = frameSize;
+
+	
 
 	cv::Mat white(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(255, 255, 255));
 	cv::Mat black(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(40, 40, 40));

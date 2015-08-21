@@ -522,22 +522,20 @@ void Robot::Run()
 		
 		for (int i = 0; i < NUMBER_OF_BALLS; i++) {
 			BallPosition ball = field.balls[i].load();
-			cv::putText(display, std::string("Ball") + std::to_string(i) + ": "+ std::to_string(ball.getAngle()) + " : " + std::to_string(ball.getDistance()), cv::Point(display.cols - 250, i * 15 + 10), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.5, cv::Scalar(255, 255, 255));
+			cv::putText(display, std::string("Ball") + std::to_string(i) + ": "+ std::to_string(ball.fieldCoords.x) + " : " + std::to_string(ball.fieldCoords.y), cv::Point(display.cols - 250, i * 15 + 10), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.5, cv::Scalar(255, 255, 255));
 		}
 
-		cv::putText(display, "dist: " + std::to_string(ballPos.getDistance()), cv::Point(display.cols - 140, 200), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-		cv::putText(display, "angle :" + std::to_string(ballPos.getAngle()), cv::Point(display.cols - 140, 220), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
+		cv::putText(display, "robot: " + std::to_string(field.self.load().fieldCoords.x) + " " + std::to_string(field.self.load().fieldCoords.y), cv::Point(display.cols - 140, 200), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
+
 
 		//cv::putText(display, "border: " + std::to_string(borderDistance.distance), cv::Point(display.cols - 140, 280), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 
-		if (targetGatePos.getDistance() > 0) {
+
 			cv::putText(display, "Gate" ,  cv::Point(display.cols - 140, 320), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-			cv::putText(display, "dist: " + std::to_string(targetGatePos.getDistance()), cv::Point(display.cols - 140, 340), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
+			cv::putText(display, "dist: " + std::to_string(field.yellowGate.load().polarMetricCoords.x) + " " + std::to_string(field.yellowGate.load().polarMetricCoords.y), cv::Point(display.cols - 140, 340), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 			cv::putText(display, "angle: " + std::to_string(targetGatePos.getAngle()), cv::Point(display.cols - 140, 360), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-		}
-		else {
-			cv::putText(display, "Gate - N/A", cv::Point(display.cols - 140, 320), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-		}
+		
+
 		
 		//TODO: fix putText newline thing
 		std::vector<std::string> subtitles2;

@@ -23,10 +23,10 @@ ObjectFinder::ObjectFinder()
 		write_ini("conf/camera.ini", pt);
 	};
 }
-bool ObjectFinder::LocateCursor(cv::Mat &frameBGR, cv::Point2i cursor, OBJECT target, BallPosition &targetPos){
+bool ObjectFinder::LocateCursor(cv::Mat &frameBGR, cv::Point2i cursor, OBJECT target, BallPosition &targetPos, cv::Point robotCoords){
 	cv::Scalar color(0, 0, 0);
 	cv::circle(frameBGR, cursor, 8, color, -1);
-	targetPos.updateCoordinates(cursor, cv::Point(250, 155));
+	targetPos.updateCoordinates(cursor, robotCoords);
 	return true;
 }
 

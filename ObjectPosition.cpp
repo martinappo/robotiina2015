@@ -24,6 +24,7 @@ int ObjectPosition::getAngle() {
 }
 
 void ObjectPosition::updateCoordinates(int x, int y, cv::Point robotFieldCoords) {
+	lastFieldCoords = fieldCoords;
 	this->rawPixelCoords = { x, y };
 	updatePolarCoords();
 	updateFieldCoords(robotFieldCoords);

@@ -11,12 +11,12 @@ public:
 #else
 	RobotPosition() {}noexcept;
 #endif
-	RobotPosition(GatePosition yellowGate, GatePosition blueGate);
-	RobotPosition(int x, int y);
+	RobotPosition(GatePosition yellowGate, GatePosition blueGate, cv::Point initialCoords = cv::Point(0,0));
 	virtual ~RobotPosition();
 	virtual void updatePolarCoords();
 	virtual void updateFieldCoords(GatePosition yellowGate, GatePosition blueGate);
 	virtual void updateCoordinates(GatePosition yellowGate, GatePosition blueGate);
 private:
 	void initPolarCoordinates();
+	std::pair<cv::Point, cv::Point> intersectionOfTwoCircles(cv::Point circle1center, double circle1Rad, cv::Point circle2center, double circle2Rad);
 };

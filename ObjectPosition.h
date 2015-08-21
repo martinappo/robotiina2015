@@ -28,6 +28,7 @@ public:
 protected:
 	virtual void updatePolarCoords();
 	virtual void updateFieldCoords(cv::Point robotFieldCoords);
+	cv::Point2i lastFieldCoords;
 private:
 	cv::Point2i center = { frameSize.width / 2, frameSize.height / 2};
 	double angleBetween(const cv::Point2i &p1, const cv::Point2i &p2, const cv::Point2i &p3);
