@@ -9,7 +9,6 @@ DistanceCalibrator::DistanceCalibrator(ICamera * pCamera, IDisplay *pDisplay){
 	m_pCamera = pCamera;
 	m_pDisplay = pDisplay;
 	frame_size = m_pCamera->GetFrameSize();
-	pDisplay->AddEventListener(this);
 };
 
 bool DistanceCalibrator::OnMouseEvent(int event, float x, float y, int flags) {
@@ -35,6 +34,19 @@ void DistanceCalibrator::mouseClicked(int x, int y, int flags) {
 	return;
 }
 
+void DistanceCalibrator::start(){
+	distanceCalibrationRunning = true;
+	counter = DistanceCalibrator::counterValue;
+	m_pDisplay->AddEventListener(this);
+}
+
+void DistanceCalibrator::removeListener(){
+	m_pDisplay->RemoveEventListener(this);
+	distanceCalibrationRunning = false;
+}
+
 DistanceCalibrator::~DistanceCalibrator(){
 	m_pDisplay->RemoveEventListener(this);
+	distanceCalibrationRunning = false;
 }
+

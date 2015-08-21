@@ -9,10 +9,12 @@ class DistanceCalibrator :  public IUIEventListener{
 public:
 	DistanceCalibrator(ICamera * pCamera, IDisplay *pDisplay);
 
-	~DistanceCalibrator();
-	virtual bool OnMouseEvent(int event, float x, float y, int flags);
 	bool distanceCalibrationRunning = false;
-	double calculateDistance(double centreX, double centreY, double x, double y);
+	~DistanceCalibrator();
+	virtual bool OnMouseEvent(int event, float x, float y, int flags);	
+	static double calculateDistance(double centreX, double centreY, double x, double y);
+	void start();
+	void removeListener();
 
 protected:
 	cv::Mat bestLabels, clustered, centers;

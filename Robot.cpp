@@ -286,6 +286,7 @@ void Robot::Run()
 				autoPilot.Enable(false);
 				manualControl.Enable(false);
 				autoPilot.enableTestMode(false);
+				distanceCalibrator.removeListener();
 				wheels->Stop();
 				STATE_BUTTON("(A)utoCalibrate objects", 'a', STATE_AUTOCALIBRATE)
 				//STATE_BUTTON("(M)anualCalibrate objects", STATE_CALIBRATE)
@@ -358,7 +359,6 @@ void Robot::Run()
 				visionModule.Enable(false);
 				calibrator.Enable(false);
 				mouseVision.Enable(true);
-			
 			STATE_BUTTON("BACK", 8, STATE_NONE)
 				END_DIALOG
 		}
@@ -374,10 +374,10 @@ void Robot::Run()
 				STATE_BUTTON("BACK", 8, STATE_NONE)
 			END_DIALOG
 		}
-		else if (state = STATE_DISTANCE_CALIBRATE){			
+		else if (state == STATE_DISTANCE_CALIBRATE){			
 			START_DIALOG
-			distanceCalibrator.distanceCalibrationRunning = true;
-			STATE_BUTTON("BACK", 8, STATE_NONE)
+				distanceCalibrator.start();
+				STATE_BUTTON("BACK", 8, STATE_NONE)
 			END_DIALOG 
 		}else if (STATE_SELECT_GATE == state) {
 			START_DIALOG
