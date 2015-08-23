@@ -39,11 +39,18 @@ void FrontCameraVision::Run() {
 
 	}
 	ImageThresholder thresholder(thresholdedImages, objectThresholds);
-	GateFinder BlueGateFinder;
-	GateFinder YellowGateFinder;
+	GateFinder blueGateFinder;
+	GateFinder yellowGateFinder;
 	BallFinder ballFinder;
 
 	auto frameSize = m_pCamera->GetFrameSize();
+
+	GatePosition blueGatePos(BLUE_GATE);
+	blueGatePos.frameSize = frameSize;
+	GatePosition yellowGatePos(YELLOW_GATE);
+	yellowGatePos.frameSize = frameSize;
+
+	
 
 	cv::Mat white(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(255, 255, 255));
 	cv::Mat black(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(40, 40, 40));
@@ -73,24 +80,7 @@ void FrontCameraVision::Run() {
 		/**************************************************/
 
 		thresholder.Start(frameHSV, { BALL, BLUE_GATE, YELLOW_GATE/*, FIELD, INNER_BORDER, OUTER_BORDER, */ });
-		//thresholder.WaitForStop();
-		/* STEP 2.2 cover own balls */
-		/*
-		std::vector<cv::Point2i> triangle;
-		triangle.push_back(cv::Point(100, frameSize.height - 50));
-		triangle.push_back(cv::Point(230, frameSize.height - 60));
-		triangle.push_back(cv::Point(240, frameSize.height));
-		triangle.push_back(cv::Point(0, frameSize.height));
-		cv::fillConvexPoly(thresholdedImages[BALL], triangle, cv::Scalar::all(0));
-		cv::fillConvexPoly(frameBGR, triangle, cv::Scalar(255, 0, 255));
-		triangle.clear();
-		triangle.push_back(cv::Point(frameSize.width - 100, frameSize.height - 50));
-		triangle.push_back(cv::Point(frameSize.width - 230, frameSize.height - 60));
-		triangle.push_back(cv::Point(frameSize.width - 240, frameSize.height));
-		triangle.push_back(cv::Point(frameSize.width - 0, frameSize.height));
-		cv::fillConvexPoly(thresholdedImages[BALL], triangle, cv::Scalar::all(0));
-		cv::fillConvexPoly(frameBGR, triangle, cv::Scalar(255, 0, 255));
-		*/
+
 		/**************************************************/
 		/*	STEP 3. check that path to gate is clean      */
 		/* this is done here, because finding contures	  */
@@ -134,20 +124,20 @@ void FrontCameraVision::Run() {
 		/**************************************************/
 		/* STEP 4. extract closest ball and gate positions*/
 		/**************************************************/
-		ObjectPosition blueGatePos, yellowGatePos;
-		BallPosition ballPos;
+
 		//Cut out gate contour.	
 
-		bool BlueGateFound = BlueGateFinder.Locate(thresholdedImages, frameHSV, frameBGR, BLUE_GATE, blueGatePos);
-		bool YellowGateFound = YellowGateFinder.Locate(thresholdedImages, frameHSV, frameBGR, YELLOW_GATE, yellowGatePos);
+		bool BlueGateFound = blueGateFinder.Locate(thresholdedImages, frameHSV, frameBGR, BLUE_GATE, blueGatePos);
+		bool YellowGateFound = yellowGateFinder.Locate(thresholdedImages, frameHSV, frameBGR, YELLOW_GATE, yellowGatePos);
 
-		bool ballFound = ballFinder.Locate(thresholdedImages, frameHSV, frameBGR, BALL, ballPos);
+		ballFinder.populateBalls(thresholdedImages, frameHSV, frameBGR, BALL, m_pState);
 
-		ballFinder.PopulateBalls(thresholdedImages, frameHSV, frameBGR, BALL, m_pState);
+		m_pState->blueGate.store(blueGatePos);
+		m_pState->yellowGate.store(yellowGatePos);
 
-		m_pState->blueGate = blueGatePos;
-		m_pState->yellowGate = yellowGatePos;
-		m_pState->self.load().updateCoordinates(0,0);
+		RobotPosition rb = m_pState->self.load();
+		rb.updateCoordinates(yellowGatePos, blueGatePos);
+		m_pState->self.store(rb);
 
 		/*
 		ObjectPosition *targetGatePos = 0;

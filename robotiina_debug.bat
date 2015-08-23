@@ -1,1 +1,1 @@
-Debug\robotiina.exe --camera ommi_videos\testvid2.mp4 --locate_cursor x
+Debug\robotiina.exe --camera ommi_videos\testimg.png --locate_cursor x

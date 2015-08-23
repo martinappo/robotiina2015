@@ -24,5 +24,5 @@ public:
 	int IsolateField(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::Mat &frameBGR, bool detectBothBorders = false, bool nightVision = false);
 	virtual void IsolateFieldOld(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::Mat &frameBGR);
 	virtual ~ObjectFinder(){ }
-	bool LocateCursor(cv::Mat &frameBGR, cv::Point2i cursor, OBJECT target, BallPosition &targetPos);
+	bool LocateCursor(cv::Mat &frameBGR, cv::Point2i cursor, OBJECT target, BallPosition &targetPos, cv::Point robotCoords);
 };

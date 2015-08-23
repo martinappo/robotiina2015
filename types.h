@@ -64,10 +64,11 @@ enum STATE
 
 class IObjectPosition {
 public:
-	virtual void updateCoordinates(int x, int y) = 0; // Takes raw coordinates of object from frame
+	virtual void updateCoordinates(int x, int y, cv::Point robotFieldCoords) = 0; // Takes raw coordinates of object from frame
 	virtual void updatePolarCoords(int x, int y) = 0;
-	virtual void updateMetricCoords(int x, int y) = 0;
-	virtual void updateFieldPixelCoords(int x, int y) = 0;
+protected:
+	virtual void updatePolarCoords() = 0; //Relative to robot
+	virtual void updateFieldCoords(cv::Point robotFieldCoords) = 0; //Relative to field
 };
 
 class IUIEventListener {

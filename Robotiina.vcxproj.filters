@@ -92,10 +92,16 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ImageThresholder.cpp">
-	  <Filter>VisionModule</Filter>
-	</ClCompile>
+      <Filter>VisionModule</Filter>
+    </ClCompile>
     <ClCompile Include="DistanceCalibrator.cpp">
       <Filter>VisionModule</Filter>
+    </ClCompile>
+    <ClCompile Include="GatePosition.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RobotPosition.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -199,6 +205,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DistanceCalibrator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GatePosition.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RobotPosition.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
