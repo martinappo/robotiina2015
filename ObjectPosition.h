@@ -15,9 +15,11 @@ public:
 	int getDistance();
 	void setDistance(int distance);
 	int getAngle();
+	int getAngleToRobot();
+	int robotAngle;
 
-	virtual void updateCoordinates(int x, int y, cv::Point robotFieldCoords); // Takes raw coordinates of object from frame
-	virtual void updateCoordinates(cv::Point point, cv::Point robotFieldCoords);
+	virtual void updateCoordinates(int x, int y, cv::Point robotFieldCoords, int robotAngle); // Takes raw coordinates of object from frame
+	virtual void updateCoordinates(cv::Point point, cv::Point robotFieldCoords, int robotAngle);
 	virtual void updatePolarCoords(int x, int y);
 	virtual void updatePolarCoords(cv::Point point);
 

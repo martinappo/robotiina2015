@@ -64,7 +64,7 @@ enum STATE
 
 class IObjectPosition {
 public:
-	virtual void updateCoordinates(int x, int y, cv::Point robotFieldCoords) = 0; // Takes raw coordinates of object from frame
+	virtual void updateCoordinates(int x, int y, cv::Point robotFieldCoords, int robotAngle) = 0; // Takes raw coordinates of object from frame
 	virtual void updatePolarCoords(int x, int y) = 0;
 protected:
 	virtual void updatePolarCoords() = 0; //Relative to robot

@@ -73,7 +73,7 @@ cv::Point2i GateFinder::LocateOnScreen(ThresholdedImages &HSVRanges, cv::Mat &fr
 	}
 */
 	cv::Scalar color4(255, 0, 0);
-	
+	/*
 
 	cv::RotatedRect bounding_rect2 = cv::minAreaRect(contours[largest_contour_index]);
 	cv::Point2f rect_points[4]; bounding_rect2.points(rect_points);
@@ -95,6 +95,7 @@ cv::Point2i GateFinder::LocateOnScreen(ThresholdedImages &HSVRanges, cv::Mat &fr
 		}
 
 	}
+	*/
 
 	// find out lowest line
 	return center;

@@ -532,9 +532,8 @@ void Robot::Run()
 		//cv::putText(display, "border: " + std::to_string(borderDistance.distance), cv::Point(display.cols - 140, 280), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 
 
-			cv::putText(display, "Gate" ,  cv::Point(display.cols - 140, 320), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-			cv::putText(display, "dist: " + std::to_string(field.yellowGate.load().polarMetricCoords.x) + " " + std::to_string(field.yellowGate.load().polarMetricCoords.y), cv::Point(display.cols - 140, 340), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-			cv::putText(display, "angle: " + std::to_string(targetGatePos.getAngle()), cv::Point(display.cols - 140, 360), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
+		cv::putText(display, "Yellow Gate" ,  cv::Point(display.cols - 140, 320), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
+		cv::putText(display, "(dist / angle): " + std::to_string(field.yellowGate.load().getDistance()) + " / " + std::to_string(field.yellowGate.load().getAngle()), cv::Point(display.cols - 140, 340), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 		
 
 		

@@ -16,6 +16,6 @@ public:
 	int id;
 
 	virtual void updateFieldCoords();
-	virtual void GatePosition::updateCoordinates(int x, int y, cv::Point dummy);
-	virtual void GatePosition::updateCoordinates(cv::Point rawCoords, cv::Point dummy);
+	virtual void GatePosition::updateCoordinates(int x, int y);
+	virtual void GatePosition::updateCoordinates(cv::Point rawCoords);
 };

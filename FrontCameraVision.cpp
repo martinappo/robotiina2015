@@ -103,15 +103,7 @@ void FrontCameraVision::Run() {
 			//sightObstructed = countNonZero(selected) > 10;
 		}
 		
-		// copy thresholded images before they are destroyed
-		if (nightVisionEnabled) {
-			green.copyTo(frameBGR, thresholdedImages[FIELD]);
-			white.copyTo(frameBGR, thresholdedImages[INNER_BORDER]);
-			black.copyTo(frameBGR, thresholdedImages[OUTER_BORDER]);
-			orange.copyTo(frameBGR, thresholdedImages[BALL]);
-			yellow.copyTo(frameBGR, thresholdedImages[YELLOW_GATE]);
-			blue.copyTo(frameBGR, thresholdedImages[BLUE_GATE]);
-		}
+
 		
 		if (borderDetectionEnabled) {
 			//float y = finder.IsolateField(thresholdedImages, frameHSV, frameBGR, false, nightVisionEnabled);
@@ -125,19 +117,23 @@ void FrontCameraVision::Run() {
 		/* STEP 4. extract closest ball and gate positions*/
 		/**************************************************/
 
-		//Cut out gate contour.	
-
-		bool BlueGateFound = blueGateFinder.Locate(thresholdedImages, frameHSV, frameBGR, BLUE_GATE, blueGatePos);
-		bool YellowGateFound = yellowGateFinder.Locate(thresholdedImages, frameHSV, frameBGR, YELLOW_GATE, yellowGatePos);
-
-		ballFinder.populateBalls(thresholdedImages, frameHSV, frameBGR, BALL, m_pState);
-
-		m_pState->blueGate.store(blueGatePos);
-		m_pState->yellowGate.store(yellowGatePos);
-
+		//Robot pos
 		RobotPosition rb = m_pState->self.load();
 		rb.updateCoordinates(yellowGatePos, blueGatePos);
 		m_pState->self.store(rb);
+
+		//Blue gate pos
+		cv::Point2i blueGatePoint = blueGateFinder.LocateOnScreen(thresholdedImages, frameHSV, frameBGR, BLUE_GATE);
+		blueGatePos.updateCoordinates(blueGatePoint);
+		m_pState->blueGate.store(blueGatePos);
+
+		//Yellow gate pos
+		cv::Point2i yellowGatePoint = yellowGateFinder.LocateOnScreen(thresholdedImages, frameHSV, frameBGR, YELLOW_GATE);
+		yellowGatePos.updateCoordinates(yellowGatePoint);
+		m_pState->yellowGate.store(yellowGatePos);
+
+		//Balls pos
+		ballFinder.populateBalls(thresholdedImages, frameHSV, frameBGR, BALL, m_pState);
 
 		/*
 		ObjectPosition *targetGatePos = 0;
@@ -162,6 +158,16 @@ void FrontCameraVision::Run() {
 		if (greenAreaDetectionEnabled) {
 			notEnoughtGreen = countNonZero(thresholdedImages[FIELD]) < 640 * 120;
 			somethingOnWay |= notEnoughtGreen;
+		}
+
+		// copy thresholded images before they are destroyed
+		if (nightVisionEnabled) {
+			green.copyTo(frameBGR, thresholdedImages[FIELD]);
+			white.copyTo(frameBGR, thresholdedImages[INNER_BORDER]);
+			black.copyTo(frameBGR, thresholdedImages[OUTER_BORDER]);
+			orange.copyTo(frameBGR, thresholdedImages[BALL]);
+			yellow.copyTo(frameBGR, thresholdedImages[YELLOW_GATE]);
+			blue.copyTo(frameBGR, thresholdedImages[BLUE_GATE]);
 		}
 
 		m_pDisplay->ShowImage(frameBGR);
