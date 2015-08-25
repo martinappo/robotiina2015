@@ -1,6 +1,7 @@
 #include "Robot.h"
 #include "AutoCalibrator.h"
 #include "DistanceCalibrator.h"
+#include "DistanceCalculator.h"
 
 
 #include "Camera.h"

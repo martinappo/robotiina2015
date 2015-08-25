@@ -103,6 +103,9 @@
     <ClCompile Include="RobotPosition.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DistanceCalculator.cpp">
+      <Filter>VisionModule</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dialog.h">
@@ -212,6 +215,9 @@
     </ClInclude>
     <ClInclude Include="RobotPosition.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DistanceCalculator.h">
+      <Filter>VisionModule</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

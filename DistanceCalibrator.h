@@ -18,6 +18,7 @@ public:
 	void removeListener();
 	const static int VIEWING_DISTANCE = 210;
 	const static int DISTANCE_CALIBRATOR_STEP = 10;
+	const static int CONF_SIZE = VIEWING_DISTANCE / DISTANCE_CALIBRATOR_STEP;
 
 protected:
 	cv::Mat bestLabels, clustered, centers;
