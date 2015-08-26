@@ -9,7 +9,7 @@ public:
 #ifdef WIN32
 	RobotPosition();
 #else
-	RobotPosition() {}noexcept;
+	RobotPosition() noexcept {};
 #endif
 	RobotPosition(GatePosition yellowGate, GatePosition blueGate, cv::Point initialCoords = cv::Point(0,0));
 	virtual ~RobotPosition();
