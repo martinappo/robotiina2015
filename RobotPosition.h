@@ -7,9 +7,13 @@ class RobotPosition : public ObjectPosition
 {
 public:
 #ifdef WIN32
-	RobotPosition();
+	RobotPosition() {
+		this->polarMetricCoords = cv::Point(0, 0);
+	};
 #else
-	RobotPosition() noexcept {};
+	RobotPosition() noexcept {
+		this->polarMetricCoords = cv::Point(0, 0);
+	};
 #endif
 	RobotPosition(GatePosition yellowGate, GatePosition blueGate, cv::Point initialCoords = cv::Point(0,0));
 	virtual ~RobotPosition();
