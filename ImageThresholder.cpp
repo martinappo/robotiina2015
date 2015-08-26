@@ -51,7 +51,7 @@ void ImageThresholder::Start(cv::Mat &frameHSV, std::vector<OBJECT> objectList) 
 	frame = frameHSV;
 	int mask = 0;
 	for (auto &object : objectList) {
-		std::cout << "mask " << (1 << object) << " " <<( mask | (1 << object)) << std::endl;
+		//std::cout << "mask " << (1 << object) << " " <<( mask | (1 << object)) << std::endl;
 		mask = mask | (1 << object);
 	}
 	m_iWorkersInProgress = mask;
