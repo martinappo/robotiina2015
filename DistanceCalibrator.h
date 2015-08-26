@@ -19,6 +19,8 @@ public:
 	const static int VIEWING_DISTANCE = 210;
 	const static int DISTANCE_CALIBRATOR_STEP = 10;
 	const static int CONF_SIZE = VIEWING_DISTANCE / DISTANCE_CALIBRATOR_STEP;
+	std::string counterValue;
+	
 
 protected:
 	cv::Mat bestLabels, clustered, centers;
@@ -28,6 +30,6 @@ protected:
 
 private:
 	cv::Point frame_size;
-	int counter;
 	boost::property_tree::ptree pt;
+	int counter;
 };

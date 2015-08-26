@@ -9,6 +9,7 @@ DistanceCalibrator::DistanceCalibrator(ICamera * pCamera, IDisplay *pDisplay){
 	m_pCamera = pCamera;
 	m_pDisplay = pDisplay;
 	frame_size = m_pCamera->GetFrameSize();
+	counterValue = "NA";
 };
 
 bool DistanceCalibrator::OnMouseEvent(int event, float x, float y, int flags) {
@@ -33,7 +34,8 @@ void DistanceCalibrator::mouseClicked(int x, int y, int flags) {
 	std::string distanceString = distance.str();
 	std::string valueString = value.str();
 	pt.put(valueString, distanceString);
-
+	counterValue = valueString;
+	std::cout << counter << std::endl;
 	if (counter == VIEWING_DISTANCE){
 		distanceCalibrationRunning = false;
 		boost::property_tree::write_ini("distance_conf.ini", pt);
@@ -42,6 +44,7 @@ void DistanceCalibrator::mouseClicked(int x, int y, int flags) {
 }
 
 void DistanceCalibrator::start(){
+	counterValue = "NA";
 	distanceCalibrationRunning = true;
 	counter = 0;
 	pt.clear();
