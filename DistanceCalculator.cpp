@@ -15,7 +15,7 @@ void DistanceCalculator::loadConf(){
 	try{
 		read_ini("distance_conf.ini", pt);
 		int confKey = DistanceCalibrator::DISTANCE_CALIBRATOR_STEP;
-		for (int i = 0; i <= DistanceCalibrator::CONF_SIZE; i++){
+		for (int i = 0; i < DistanceCalibrator::CONF_SIZE; i++){
 			std::ostringstream key;
 			key << confKey;
 			realDistances[i] = confKey;
