@@ -1,3 +1,4 @@
+#pragma once
 #include "DistanceCalibrator.h"
 
 class DistanceCalculator{
