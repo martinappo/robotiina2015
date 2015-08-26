@@ -12,7 +12,7 @@ class Camera: public ICamera, public ThreadedClass
 		RETURN_FRAME2
 	};
 private:
-    cv::Mat frame, frame1, frame2, lastframe, buffer;
+    cv::Mat frame, frame1, frame2, lastframe, buffer, frame_roi;
 	std::atomic_bool bCaptureNextFrame;
 	std::atomic_bool bCaptureFrame1;
 	cv::Mat* m_pFrame = &frame1;

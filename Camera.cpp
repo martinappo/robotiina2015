@@ -19,8 +19,17 @@ Camera::Camera(const std::string &device) {
 		frameSize = cv::Size(frame.size());
 		return;
 	}
+
+	//väiksemaks lõigatud frame'i suurus
+//	frameSize = cv::Size(960,    // Acquire input size
+//		960);
+
 	frameSize = cv::Size((int)cap->get(CV_CAP_PROP_FRAME_WIDTH),    // Acquire input size
 		(int)cap->get(CV_CAP_PROP_FRAME_HEIGHT));
+
+	std::cout << frameSize.width << ", " << frameSize.height << std::endl;
+
+
 
 
 	/*
@@ -137,6 +146,30 @@ void Camera::Run(){
 			std::cout << "Invalid frame captured " << frame1.size() << std::endl;
 			continue;
 		}
+		
+		//maskimine koos pildi väiksemaks lõikamisega
+		/*
+		frame_roi = nextFrame(cv::Rect(175, 60, frameSize.width, frameSize.height));
+		std::cout << frame_roi.rows << ", " << frame_roi.cols << std::endl;
+		cv::Mat maskedImage;
+		cv::Mat mask(frame_roi.rows, frame_roi.cols, CV_8U, cv::Scalar::all(0));
+		mask.setTo(cv::Scalar(0, 0, 0));
+		int radius = frame_roi.rows / 2;
+		cv::circle(mask, cv::Point(radius, radius), radius, cv::Scalar(255, 255, 255), -1, 8, 0);
+		frame_roi.copyTo(maskedImage, mask);
+		cv::imshow("test pilt", maskedImage);
+		cv::waitKey(1);
+		*/
+
+		//maskimine
+		cv::Mat maskedImage(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(255,0,255));
+		cv::Mat mask(frameSize.height, frameSize.width, CV_8U, cv::Scalar::all(0));
+
+		cv::circle(mask, cv::Point((frameSize.width / 2) + 10, (frameSize.height / 2) + 20), 480, cv::Scalar(255, 255, 255), -1, 8, 0);
+		nextFrame.copyTo(maskedImage, mask);
+//		cv::imshow("test pilt", maskedImage);
+//		cv::waitKey(1);
+
 		m_pFrame = &nextFrame;
 		bCaptureFrame1 = !bCaptureFrame1;
 		bCaptureNextFrame = false;
