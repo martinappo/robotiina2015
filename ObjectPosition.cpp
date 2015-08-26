@@ -1,5 +1,6 @@
 #include "ObjectPosition.h"
 
+
 ObjectPosition::ObjectPosition(int distance, int angle) {
 	this->polarMetricCoords.x = distance;
 	this->polarMetricCoords.y = angle;
@@ -49,9 +50,7 @@ void ObjectPosition::updatePolarCoords(int x, int y) {
 
 void ObjectPosition::updatePolarCoords(cv::Point rawCoords) {
 	cv::Point centerOfFrame = { frameSize.height / 2, frameSize.width / 2 };
-	int distanceInPixels = cv::norm(rawCoords - centerOfFrame);
-	//TODO: get value from lookuptable not randomly
-	int distanceInCm = 270 * distanceInPixels / (frameSize.height / 2 + 1);
+	int distanceInCm = mDistanceCalculator.getDistance(rawCoords.x, rawCoords.y);
 	int angle = angleBetween(rawCoords, centerOfFrame, { frameSize.height, frameSize.width / 2 });
 	this->polarMetricCoords = { distanceInCm, angle };
 }

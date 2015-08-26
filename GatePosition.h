@@ -8,7 +8,7 @@ public:
 #ifdef WIN32
 	GatePosition() {};
 #else
-	GatePosition() {}noexcept;
+	GatePosition() noexcept {};
 #endif
 	GatePosition(int x, int y); //Values relative to field and in cm
 	GatePosition(OBJECT gate);
@@ -16,6 +16,7 @@ public:
 	int id;
 
 	virtual void updateFieldCoords();
-	virtual void GatePosition::updateCoordinates(int x, int y);
-	virtual void GatePosition::updateCoordinates(cv::Point rawCoords);
+	virtual void updateCoordinates(int x, int y);
+	virtual void updateCoordinates(cv::Point rawCoords);
+
 };

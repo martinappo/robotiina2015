@@ -1,10 +1,10 @@
 #include "RobotPosition.h"
 
-RobotPosition::RobotPosition() {
-	this->polarMetricCoords = cv::Point(0, 0);
-}
+//RobotPosition::RobotPosition() {
+//	this->polarMetricCoords = cv::Point(0, 0);
+//} 
 
-RobotPosition::RobotPosition(GatePosition yellowGate, GatePosition blueGate, cv::Point initialCoords) {
+RobotPosition::RobotPosition(GatePosition yellowGate, GatePosition blueGate, cv::Point initialCoords){
 	this->polarMetricCoords = cv::Point(0, 0);
 	this->fieldCoords = initialCoords;
 	updateCoordinates(yellowGate, blueGate);

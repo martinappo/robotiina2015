@@ -54,3 +54,4 @@ videos/*
 *.h~
 test_images/
 Release/
+distance_conf.ini
