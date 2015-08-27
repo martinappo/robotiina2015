@@ -380,6 +380,8 @@ void Robot::Run()
 				distanceCalibrator.start();
 				STATE_BUTTON("BACK", 8, STATE_NONE)
 			END_DIALOG 
+			cv::putText(display, "Last calibrated distance:", cv::Point(display.cols - 250, 220), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
+			cv::putText(display, distanceCalibrator.counterValue, cv::Point(display.cols - 250, 240), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 		}else if (STATE_SELECT_GATE == state) {
 			START_DIALOG
 				createButton(OBJECT_LABELS[BLUE_GATE], '-', [&field, this]{

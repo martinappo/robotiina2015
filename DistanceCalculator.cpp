@@ -2,9 +2,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 
-DistanceCalculator::DistanceCalculator(int centerX, int centerY){
-	mCenterX = centerX;
-	mCenterY = centerY;
+DistanceCalculator::DistanceCalculator(){
 	loadConf();
 }
 
@@ -25,8 +23,8 @@ void DistanceCalculator::loadConf(){
 	catch (...){};
 }
 
-int DistanceCalculator::getDistance(int x, int y){
-	double dist = DistanceCalibrator::calculateDistance(DistanceCalculator::mCenterX, DistanceCalculator::mCenterY, x, y);
+int DistanceCalculator::getDistance(int centerX, int centerY, int x, int y){
+	double dist = DistanceCalibrator::calculateDistance(centerX, centerY, x, y);
 	double minDif = 9999999999999999999;
 	int index = 0;
 	for (int i = 0; i < DistanceCalibrator::CONF_SIZE; i++){
