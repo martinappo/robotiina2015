@@ -16,6 +16,7 @@ RobotPosition::~RobotPosition()
 
 void RobotPosition::updateCoordinates(GatePosition yellowGate, GatePosition blueGate) {
 	lastFieldCoords = fieldCoords;
+	this->robotAngle = yellowGate.getAngle();
 	updateFieldCoords(yellowGate, blueGate);
 }
 
@@ -77,4 +78,8 @@ std::pair<cv::Point, cv::Point> RobotPosition::intersectionOfTwoCircles(cv::Poin
 	possible2.y = p.y + (h / distance) * (circle2center.x - circle1center.x);
 
 	return std::pair<cv::Point, cv::Point>(possible1, possible2);
+}
+
+int RobotPosition::getAngle() {
+	return robotAngle;
 }

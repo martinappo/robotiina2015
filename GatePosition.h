@@ -16,6 +16,7 @@ public:
 	int id;
 
 	virtual void updateFieldCoords();
-	virtual void updateCoordinates(int x, int y, cv::Point dummy);
-	virtual void updateCoordinates(cv::Point rawCoords, cv::Point dummy);
+	virtual void updateCoordinates(int x, int y);
+	virtual void updateCoordinates(cv::Point rawCoords);
+
 };

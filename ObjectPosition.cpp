@@ -24,15 +24,20 @@ int ObjectPosition::getAngle() {
 	return polarMetricCoords.y;
 }
 
-void ObjectPosition::updateCoordinates(int x, int y, cv::Point robotFieldCoords) {
+int ObjectPosition::getAngleToRobot() {
+	return getAngle() + robotAngle;
+}
+
+void ObjectPosition::updateCoordinates(int x, int y, cv::Point robotFieldCoords, int robotAngle) {
+	this->robotAngle = robotAngle;
 	lastFieldCoords = fieldCoords;
 	this->rawPixelCoords = { x, y };
 	updatePolarCoords();
 	updateFieldCoords(robotFieldCoords);
 }
 
-void ObjectPosition::updateCoordinates(cv::Point point, cv::Point robotFieldCoords) {
-	return updateCoordinates(point.x, point.y, robotFieldCoords);
+void ObjectPosition::updateCoordinates(cv::Point point, cv::Point robotFieldCoords, int robotAngle) {
+	return updateCoordinates(point.x, point.y, robotFieldCoords, robotAngle);
 }
 
 void ObjectPosition::updatePolarCoords() {
@@ -52,11 +57,12 @@ void ObjectPosition::updatePolarCoords(cv::Point rawCoords) {
 
 
 void ObjectPosition::updateFieldCoords(cv::Point robotFieldCoords) {
-	int fieldY = getDistance() * cos(TAU*getAngle() / 360);
-	int fieldX = getDistance() * sin(TAU*getAngle() / 360);
-
+	cv::Point centerOfFrame = { frameSize.height / 2, frameSize.width / 2 };
+	int fieldY = getDistance() * cos(TAU*getAngleToRobot() / 360);
+	int fieldX = getDistance() * sin(TAU*getAngleToRobot() / 360);
 	cv::Point filteredCoords = cv::Point(fieldX, fieldY);//filter->doFiltering(cv::Point(fieldX, fieldY));
 	fieldCoords = { robotFieldCoords.x + filteredCoords.x, robotFieldCoords.y + filteredCoords.y };
+	
 }
 
 double ObjectPosition::angleBetween(const cv::Point2i &a, const cv::Point2i &b, const cv::Point2i &c) {

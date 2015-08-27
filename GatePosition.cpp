@@ -23,17 +23,19 @@ GatePosition::~GatePosition()
 {
 }
 
-void GatePosition::updateCoordinates(int x, int y, cv::Point dummy) {
+void GatePosition::updateCoordinates(int x, int y) {
 	this->rawPixelCoords = { x, y };
 	updatePolarCoords();
 	//Coordinates relative to field are fixed for gates so we are not updating them
 }
 
-void GatePosition::updateCoordinates(cv::Point rawCoords, cv::Point dummy) {
+void GatePosition::updateCoordinates(cv::Point rawCoords) {
 	this->rawPixelCoords = rawCoords;
 	updatePolarCoords();
 	//Coordinates relative to field are fixed for gates so we are not updating them
 }
+
+
 
 void GatePosition::updateFieldCoords() {
 	//no

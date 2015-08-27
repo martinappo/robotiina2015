@@ -25,7 +25,7 @@ MouseVision::~MouseVision()
 void MouseVision::Run(){
 	ObjectFinder finder;
 	BallPosition ballPos = m_pState->balls[0].load();
-	cv::Point robotPos = m_pState->self.load().fieldCoords;
+	RobotPosition robotPos = m_pState->self.load();
 	while (!stop_thread){
 		cv::Scalar colorCircle(133, 33, 255);
 		frameBGR = m_pCamera->Capture();

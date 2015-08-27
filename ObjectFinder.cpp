@@ -23,18 +23,18 @@ ObjectFinder::ObjectFinder()
 		write_ini("conf/camera.ini", pt);
 	};
 }
-bool ObjectFinder::LocateCursor(cv::Mat &frameBGR, cv::Point2i cursor, OBJECT target, BallPosition &targetPos, cv::Point robotCoords){
+bool ObjectFinder::LocateCursor(cv::Mat &frameBGR, cv::Point2i cursor, OBJECT target, BallPosition &targetPos, RobotPosition robotPos){
 	cv::Scalar color(0, 0, 0);
 	cv::circle(frameBGR, cursor, 8, color, -1);
-	targetPos.updateCoordinates(cursor, robotCoords);
+	targetPos.updateCoordinates(cursor, robotPos.fieldCoords, robotPos.getAngle());
 	return true;
 }
 
 
-bool ObjectFinder::Locate(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::Mat &frameBGR, OBJECT target, ObjectPosition &targetPos) {
+bool ObjectFinder::Locate(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::Mat &frameBGR, OBJECT target, ObjectPosition &targetPos, RobotPosition robotPos) {
 	cv::Point2i point = LocateOnScreen(HSVRanges, frameHSV, frameBGR, target);
 	lastPosition = point;
-	targetPos.updateCoordinates(point, cv::Point(250, 155)); //Updating only polar coords right now. Robot coords needed for field coords update.
+	targetPos.updateCoordinates(point, robotPos.fieldCoords, robotPos.getAngle());
 	return true;
 }
 
@@ -267,24 +267,4 @@ void ObjectFinder::IsolateFieldOld(ThresholdedImages &HSVRanges, cv::Mat &frameH
 
 
 }
-
-ObjectPosition ObjectFinder::ConvertPixelToRealWorld(const cv::Point2i &point, const cv::Point2i &frame_size)
-{
-	if (!(point.y >= 0 && point.x >= 0 && point.y < frame_size.y && point.x < frame_size.x)){//If there is no object found
-		return { -1, -1 };
-	}
-		
-
-	const cv::Point2d center (frame_size.x / 2.0, frame_size.y / 2.0);
-	//Calculating distance
-	double angle = (Vfov * (point.y - center.y) / center.y) + CamAngleDev;
-	double distance = CamHeight / tan(angle * PI / 180);
-	//Calculating horizontal deviation
-	double hor_space = tan(Hfov)*distance;
-	double HorizontalDev = (hor_space * (point.x - center.x) / center.x);
-	double Hor_angle = atan(HorizontalDev / distance)* 180/PI;
-
-	return { distance, Hor_angle };
-}
-
 
