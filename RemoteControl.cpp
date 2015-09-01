@@ -3,41 +3,60 @@
 #include "RemoteControl.h"
 #include <sstream>
 #include <iostream>
+#include <boost/algorithm/string.hpp>
 
 using boost::asio::ip::udp;
-RemoteControl::RemoteControl(boost::asio::io_service &io, Robot * robot) :io(io), robot(robot)
+RemoteControl::RemoteControl(boost::asio::io_service &io, ICommunicationModule *pComModule) :io(io), m_pComModule(pComModule)
 , socket(io, udp::endpoint(udp::v4(), 10004)) 
 {
 
 }
 
-void RemoteControl::Start()
-{
-    stop = false;
-
-    threads.create_thread(boost::bind(&RemoteControl::loop, this));
-
-}
-
-void RemoteControl::Stop()
-{
-    std::cout << "Stoping Remote control " << std::endl;
-    stop = true;
-    socket.close();
-    threads.join_all();
-    std::cout << "Remote control stoped" << std::endl;
-}
 
 std::string RemoteControl::respond(const std::string &query)
 {
-    return robot->ExecuteRemoteCommand(query.substr(0, query.find('#')));
+	std::string command(query.substr(0, query.find('#')));
+	std::cout << "Remote control got command: " << command << std::endl;
+
+	return RemoteControl::ExecuteRemoteCommand(command);
 }
 
-void RemoteControl::loop()
-{
+std::string RemoteControl::ExecuteRemoteCommand(const std::string &command){
+	std::stringstream response;
+	//boost::mutex::scoped_lock lock(remote_mutex); //allow one command at a time
+	std::vector<std::string> tokens;
+	boost::split(tokens, command, boost::is_any_of(";"));
+	std::string query = tokens[0];
+	/*
+	STATE s = (STATE)GetState();
+	if (query == "status") response << s;
+	else if (query == "remote") SetState(STATE_REMOTE_CONTROL);
+	else if (query == "cont") SetState(STATE_RUN);
+	else if (query == "reset") SetState(STATE_NONE);
+	else if (query == "exit") SetState(STATE_END_OF_GAME);
+	else if (STATE_REMOTE_CONTROL == s) {*/
+		if (query == "drive" && tokens.size() == 3) {
+			int speed = atoi(tokens[1].c_str());
+			double direction = atof(tokens[2].c_str());
+			m_pComModule->Drive(speed, direction, 0);
+		}
+		else if (query == "rdrive" && tokens.size() == 4) {
+			int speed = atoi(tokens[1].c_str());
+			double direction = atof(tokens[2].c_str());
+			int rotate = atoi(tokens[3].c_str());
+			m_pComModule->Drive(speed, direction, rotate);
+		}
 
-try {
-    while (!stop)
+	//}
+		response << "ok: " << command;
+	return response.str();
+}
+
+void RemoteControl::Run()
+{
+	std::cout << "Remote control is starting " << std::endl;
+	try {
+	while (!stop_thread)
     {
         boost::array<char, 1024> recv_buf;
         udp::endpoint remote_endpoint;
@@ -47,7 +66,7 @@ try {
 
 		if (error && error != boost::asio::error::message_size) {
 			std::cout << "Remote control is terminating: " << error.message() << std::endl;
-			stop = true;
+			stop_thread = true;
 			return; // throw boost::system::system_error(error);
 		}
 
@@ -60,6 +79,8 @@ try {
 } catch(...){
      std::cout << "Remote control is terminating" << std::endl;
 }
+	std::cout << "Remote control is exiting " << std::endl;
+
 }
 
 

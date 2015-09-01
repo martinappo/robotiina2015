@@ -100,7 +100,7 @@ bool ComPortScanner::Scan()
 {
 //	std::map<short, std::string> portMap;
 	boost::property_tree::ptree ports;
-	for (int i = 0; i < 20; i++) {
+	for (int i = 0; i < 40; i++) {
 		std::stringstream portNum;
 		portNum << prefix << i;
 		SimpleSerial * pPort = NULL;
@@ -144,7 +144,7 @@ bool ComPortScanner::ScanObject(const std::string &conf_file, std::vector<int> i
 }
 
 void ComPortScanner::Run() {
-	for (int i = 0; i < 20; i++) {
+	for (int i = 0; i < 40; i++) {
 		if (stop_thread) break;
 		std::stringstream portNum;
 		portNum << prefix << i;

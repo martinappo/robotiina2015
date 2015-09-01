@@ -54,6 +54,5 @@ public:
 		last_state = (STATE)state;
         state = new_state;
     }
-    std::string ExecuteRemoteCommand(const std::string &command);
 
 };

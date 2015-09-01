@@ -16,18 +16,19 @@
 #include <chrono>
 #include <thread>
 #include <map>
-#include <boost/algorithm/string.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/timer/timer.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/posix_time/posix_time_io.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
 #include "NewAutoPilot.h"
 #include "RobotTracker.h"
 #include "VideoRecorder.h"
 #include "FrontCameraVision.h"
 #include "ComModule.h"
 #include "ManualControl.h"
+#include "RemoteControl.h"
 #include "SoccerField.h"
 #include "MouseVision.h"
 
@@ -228,6 +229,7 @@ void Robot::Run()
 	NewAutoPilot autoPilot(&comModule, &field);
 
 	ManualControl manualControl(&comModule);
+	RemoteControl remoteControl(io, &comModule);
 
 	//RobotTracker tracker(wheels);
 
@@ -286,6 +288,7 @@ void Robot::Run()
 				visionModule.Enable(true);
 				autoPilot.Enable(false);
 				manualControl.Enable(false);
+				remoteControl.Enable(false);
 				autoPilot.enableTestMode(false);
 				distanceCalibrator.removeListener();
 				wheels->Stop();
@@ -301,7 +304,7 @@ void Robot::Run()
 			*/
 			//				STATE_BUTTON("(D)ance", STATE_DANCE)
 				//STATE_BUTTON("(D)ance", STATE_DANCE)
-				//STATE_BUTTON("(R)emote Control", STATE_REMOTE_CONTROL)
+				STATE_BUTTON("(R)emote Control", 'r', STATE_REMOTE_CONTROL)
 				createButton(std::string("Save video: ") + (captureFrames ? "on" : "off"), 'v', [this, &captureDir, &time, &videoRecorder]{
 					if (this->captureFrames) {
 						// save old video
@@ -409,13 +412,19 @@ void Robot::Run()
 		else if (STATE_MANUAL_CONTROL == state) {
 			START_DIALOG
 				IConfigurableModule *pModule = static_cast<IConfigurableModule*>(&manualControl);
-				for (auto setting : pModule->GetSettings()){
-					createButton(setting.first + ": " + std::get<0>(setting.second)(), std::get<0>(setting.second)()[0], [this, setting]{
-						std::get<1>(setting.second)();
-						this->last_state = STATE_END_OF_GAME; // force dialog redraw
-					});
-				}
-				STATE_BUTTON("BACK", 8,STATE_NONE)
+			for (auto setting : pModule->GetSettings()){
+				createButton(setting.first + ": " + std::get<0>(setting.second)(), std::get<0>(setting.second)()[0], [this, setting]{
+					std::get<1>(setting.second)();
+					this->last_state = STATE_END_OF_GAME; // force dialog redraw
+				});
+			}
+			STATE_BUTTON("BACK", 8, STATE_NONE)
+			END_DIALOG
+		}
+		else if (STATE_REMOTE_CONTROL == state) {
+			START_DIALOG;
+			remoteControl.Enable(true);
+			STATE_BUTTON("BACK", 8, STATE_NONE);
 			END_DIALOG
 		}
 		else if (STATE_LAUNCH == state) {
@@ -582,35 +591,6 @@ void Robot::Run()
 
 }
 
-
-std::string Robot::ExecuteRemoteCommand(const std::string &command){
-    std::stringstream response;
-    boost::mutex::scoped_lock lock(remote_mutex); //allow one command at a time
-    std::vector<std::string> tokens;
-    boost::split(tokens, command, boost::is_any_of(";"));
-    std::string query = tokens[0];
-    STATE s = (STATE)GetState();
-    if(query == "status") response << s;
-    else if(query == "remote") SetState(STATE_REMOTE_CONTROL);
-    else if(query == "cont") SetState(STATE_RUN);
-    else if(query == "reset") SetState(STATE_NONE);
-    else if(query == "exit") SetState(STATE_END_OF_GAME);
-    else if (STATE_REMOTE_CONTROL == s) {
-        if (query == "drive" && tokens.size() == 3) {
-            int speed = atoi(tokens[1].c_str());
-			double direction = atof(tokens[2].c_str());
-            wheels->Drive(speed, direction,0);
-		}
-		else if (query == "rdrive" && tokens.size() == 4) {
-			int speed = atoi(tokens[1].c_str());
-			double direction = atof(tokens[2].c_str());
-			int rotate = atoi(tokens[3].c_str());
-			wheels->DriveRotate(speed, direction, rotate);
-		}
-
-    }
-    return response.str();
-}
 
 bool Robot::ParseOptions(int argc, char* argv[])
 {
