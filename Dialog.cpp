@@ -1,9 +1,9 @@
 #include "Dialog.h"
-#define WINDOW_WIDTH 1280
-#define WINDOW_HEIGHT 720
+#define WINDOW_WIDTH 976
+#define WINDOW_HEIGHT 840
 
-#define CAM_WIDTH 1024
-#define CAM_HEIGHT 600
+#define CAM_WIDTH 720
+#define CAM_HEIGHT 720
 
 Dialog::Dialog(const std::string &title, int flags/* = CV_WINDOW_AUTOSIZE*/) {
 
