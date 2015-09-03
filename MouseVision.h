@@ -11,8 +11,8 @@ public:
 	virtual ~MouseVision();
 	virtual bool OnMouseEvent(int event, float x, float y, int flags){
 		if (!running) return false;
-		this->x = x * frame_size.x;
-		this->y = y * frame_size.y;
+		this->x = (int)(x * frame_size.x);
+		this->y = (int)(y * frame_size.y);
 		return false;
 	}
 protected:

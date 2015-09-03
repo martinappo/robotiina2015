@@ -118,7 +118,7 @@ HSVColorRange AutoCalibrator::GetObjectThresholds (int index, const std::string 
 bool AutoCalibrator::OnMouseEvent(int event, float x, float y, int flags) {
 	if (!running || screenshot_mode != GET_THRESHOLD) return false;
 	if (event == cv::EVENT_LBUTTONUP && x < 1.0 && y < 1.0) {
-		mouseClicked(x*frame_size.x, y*frame_size.y, flags);
+		mouseClicked((int)(x*frame_size.x), (int)(y*frame_size.y), flags);
 	}
 	if (event == cv::EVENT_RBUTTONUP) {
 		SaveConf(this->name);
@@ -149,8 +149,8 @@ void AutoCalibrator::mouseClicked(int x, int y, int flags) {
 	std::sort(sat.begin(), sat.end());
 	std::sort(val.begin(), val.end());
 
-	int min_index = hue.size() * 0.05;
-	int max_index = hue.size() * 0.95;
+	int min_index = (int)(hue.size() * 0.05);
+	int max_index = (int)(hue.size() * 0.95);
 
 	if ((flags & cv::EVENT_FLAG_CTRLKEY)) {
 		range.hue.low = std::min(range.hue.low, hue[min_index]);

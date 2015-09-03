@@ -59,8 +59,8 @@ std::pair<cv::Point, cv::Point> RobotPosition::intersectionOfTwoCircles(cv::Poin
 	//Calculate point p, where the line through the circle intersection points crosses the line between the circle centers.  
 	cv::Point p;
 
-	p.x = circle1center.x + (a / distance) * (circle2center.x - circle1center.x);
-	p.y = circle1center.y + (a / distance) * (circle2center.y - circle1center.y);
+	p.x = (int)(circle1center.x + (a / distance) * (circle2center.x - circle1center.x));
+	p.y = (int)(circle1center.y + (a / distance) * (circle2center.y - circle1center.y));
 
 	// if has only one intersection point
 	if (distance == circle1Rad + circle2Rad) {
@@ -71,11 +71,11 @@ std::pair<cv::Point, cv::Point> RobotPosition::intersectionOfTwoCircles(cv::Poin
 	cv::Point possible1;
 	cv::Point possible2;
 
-	possible1.x = p.x + (h / distance) * (circle2center.y - circle1center.y);
-	possible1.y = p.y - (h / distance) * (circle2center.x - circle1center.x);
+	possible1.x = (int)(p.x + (h / distance) * (circle2center.y - circle1center.y));
+	possible1.y = (int)(p.y - (h / distance) * (circle2center.x - circle1center.x));
 
-	possible2.x = p.x - (h / distance) * (circle2center.y - circle1center.y);
-	possible2.y = p.y + (h / distance) * (circle2center.x - circle1center.x);
+	possible2.x = (int)(p.x - (h / distance) * (circle2center.y - circle1center.y));
+	possible2.y = (int)(p.y + (h / distance) * (circle2center.x - circle1center.x));
 
 	return std::pair<cv::Point, cv::Point>(possible1, possible2);
 }

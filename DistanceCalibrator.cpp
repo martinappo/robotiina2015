@@ -14,7 +14,7 @@ DistanceCalibrator::DistanceCalibrator(ICamera * pCamera, IDisplay *pDisplay){
 
 bool DistanceCalibrator::OnMouseEvent(int event, float x, float y, int flags) {
 	if (event == cv::EVENT_LBUTTONUP && x < 1.0 && y < 1.0 && (x > 0.2 || y > 0.2) && distanceCalibrationRunning) {
-		mouseClicked(x*frame_size.x, y*frame_size.y, flags);
+		mouseClicked((int)(x*frame_size.x), (int)(y*frame_size.y), flags);
 		return true;
 	}
 	return false;

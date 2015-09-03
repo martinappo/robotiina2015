@@ -15,7 +15,7 @@ extern void drawLine(cv::Mat & img, cv::Mat & img2, cv::Vec4f line, int thicknes
 
 cv::Point2i GateFinder::LocateOnScreen(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::Mat &frameBGR, OBJECT target) {
 	int smallestGateArea = 1000;
-	int growGateHeight = 1.2;
+	double growGateHeight = 1.2;
 	cv::Point2d center(-1, -1);
 	cv::Mat imgThresholded = HSVRanges[target]; // reference counted, I think
 	if (imgThresholded.rows == 0) return center;
@@ -55,7 +55,7 @@ cv::Point2i GateFinder::LocateOnScreen(ThresholdedImages &HSVRanges, cv::Mat &fr
 	//find center
 	if (contours.size() > largest_contour_index){
 		cv::Moments M = cv::moments(contours[largest_contour_index]);
-		center = cv::Point2i(M.m10 / M.m00, M.m01 / M.m00);
+		center = cv::Point2i((int)(M.m10 / M.m00), (int)(M.m01 / M.m00));
 	}
 	else {
 		assert(false);

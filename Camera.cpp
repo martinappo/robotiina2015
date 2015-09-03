@@ -11,7 +11,7 @@ Camera::Camera(const std::string &device) {
 		throw std::runtime_error("Camera not found");
     }
 
-	frameCount = cap->get(CV_CAP_PROP_FRAME_COUNT);
+	frameCount = (int)(cap->get(CV_CAP_PROP_FRAME_COUNT));
 	m_pFrame = &frame1;
 
 	if (frameCount == 1) { // image
@@ -62,7 +62,7 @@ Camera::Camera(int device)
 	frameSize = cv::Size((int)cap->get(CV_CAP_PROP_FRAME_WIDTH),    // Acquire input size
 		(int)cap->get(CV_CAP_PROP_FRAME_HEIGHT));
 	flip = false;
-	frameCount = cap->get(CV_CAP_PROP_FRAME_COUNT);
+	frameCount = (int)(cap->get(CV_CAP_PROP_FRAME_COUNT));
 
 	cap->set(CV_CAP_PROP_FPS, 60);
 	//cap->set(CV_CAP_PROP_FRAME_WIDTH, 800);

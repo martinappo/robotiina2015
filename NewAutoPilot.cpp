@@ -302,7 +302,7 @@ NewDriveMode AimGate::step(double dt)
 	else {
 		//rotate calculation for gate
 		//int rotate = abs(lastGateLocation.horizontalAngle) * 0.4 + 3; // +3 makes no sense we should aim straight
-		int rotate = (abs(lastGateLocation.getAngle()) * 0.4 + 6); // should we rotate oposite way?
+		int rotate = (int)((abs(lastGateLocation.getAngle()) * 0.4 + 6)); // should we rotate oposite way?
 		m_pCom->Drive(0,0, (lastGateLocation.getAngle() < 0 ? 1 : -1) * rotate);
 	}
 	return DRIVEMODE_AIM_GATE;
@@ -370,7 +370,7 @@ void NewAutoPilot::Run()
 		else {
 			boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
 			boost::posix_time::time_duration::tick_type dt = (time - lastStep).total_milliseconds();
-			newMode = curDriveMode->second->step( dt);
+			newMode = curDriveMode->second->step(double(dt));
 		}
 		auto old = curDriveMode;
 		

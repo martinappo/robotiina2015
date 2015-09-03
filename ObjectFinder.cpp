@@ -44,12 +44,12 @@ void drawLine(cv::Mat & img, cv::Mat & img2, cv::Vec4f line, int thickness, CvSc
 	double theMult = std::max(img.cols, img.rows);
 	// calculate start point
 	cv::Point startPoint;
-	startPoint.x = line[2] - theMult*line[0];// x0
-	startPoint.y = line[3] - theMult*line[1];// y0
+	startPoint.x = (int)(line[2] - theMult*line[0]);// x0
+	startPoint.y = (int)(line[3] - theMult*line[1]);// y0
 	// calculate end point
 	cv::Point endPoint;
-	endPoint.x = line[2] + theMult*line[0];//x[1]
-	endPoint.y = line[3] + theMult*line[1];//y[1]
+	endPoint.x = (int)(line[2] + theMult*line[0]);//x[1]
+	endPoint.y = (int)(line[3] + theMult*line[1]);//y[1]
 
 	// draw overlay of bottom lines on image
 	cv::clipLine(cv::Size(img.cols, img.rows), startPoint, endPoint);
@@ -93,7 +93,7 @@ int ObjectFinder::IsolateField(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, 
 
 	cv::Vec4f newLine1;
 	cv::Vec4f newLine2;
-	float distance = INT_MAX;
+	float distance = (float)(INT_MAX);
 	//Canny(HSVRanges[OUTER_BORDER], HSVRanges[OUTER_BORDER], 50, 200, 3);
 	//cv::imshow("aaa", HSVRanges[OUTER_BORDER]);
 	cv::HoughLinesP(HSVRanges[OUTER_BORDER], lines2, 1, CV_PI / 180, 80, 30, 10);
@@ -109,7 +109,7 @@ int ObjectFinder::IsolateField(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, 
 			drawLine(frameBGR, HSVRanges[BALL], newLine2, 1, cv::Scalar(255 * (1 + 0.3), 0, 0), nightVision);
 			distance = std::min(distance, newLine2[3] - (frameHSV.cols / 2)*newLine2[1]);
 		}
-		return distance;
+		return (int)(distance);
 	}
 	cv::HoughLinesP(HSVRanges[INNER_BORDER], lines, 1, CV_PI / 180, 50, 50, 10);
 //	cv::HoughLinesP(HSVRanges[INNER_BORDER] + HSVRanges[FIELD], lines, 1, CV_PI / 180, 50, 50, 10);
@@ -135,7 +135,7 @@ int ObjectFinder::IsolateField(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, 
 		}
 	}
 
-	return distance;
+	return (int)(distance);
 
 
 }

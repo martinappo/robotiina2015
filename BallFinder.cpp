@@ -39,14 +39,14 @@ void BallFinder::populateBalls(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, 
 
 	pFieldState->resetBallsUpdateState();
 	int ballsUpdatedCount = 0;
-	for (int i = 0; i < contours.size(); i++)
+	for (unsigned int i = 0; i < contours.size(); i++)
 	{
 		if (ballsUpdatedCount > NUMBER_OF_BALLS) break;
-		int ballArea = cv::contourArea(contours[i], false);
+		int ballArea = (int)(cv::contourArea(contours[i], false));
 		if (ballArea >= smallestBallArea) {
 			cv::Moments M = cv::moments(contours[i]);
-			int posY = M.m01 / M.m00;
-			int posX = M.m10 / M.m00;
+			int posY = (int)(M.m01 / M.m00);
+			int posX = (int)(M.m10 / M.m00);
 			cv::Rect bounding_rect = cv::boundingRect(contours[i]);
 			rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), redColor, 1, 8, 0);
 			//TODO: index balls and match the right BallPosition object and contour from frame
@@ -95,7 +95,7 @@ bool BallFinder::validateBall(ThresholdedImages &HSVRanges, cv::Point2d endPoint
 		bool Vinrange = false;
 		bool firstFound = false;
 		bool fieldFound = false;
-		iterator = cv::LineIterator{ frameHSV, cv::Point(startPoint.x + alterIterator, startPoint.y), cv::Point(endPoint.x + alterIterator, endPoint.y), 8 };
+		iterator = cv::LineIterator{ frameHSV, cv::Point((int)(startPoint.x + alterIterator, startPoint.y)), cv::Point((int)(endPoint.x + alterIterator, endPoint.y)), 8 };
 		for (int i = 0; i < iterator.count; i++, ++iterator)
 		{
 			if (state == "inner"){

@@ -51,15 +51,15 @@ void ObjectPosition::updatePolarCoords(int x, int y) {
 void ObjectPosition::updatePolarCoords(cv::Point rawCoords) {
 	cv::Point centerOfFrame = { frameSize.height / 2, frameSize.width / 2 };
 	int distanceInCm = mDistanceCalculator.getDistance(centerOfFrame.x, centerOfFrame.y, rawCoords.x, rawCoords.y);
-	int angle = angleBetween(rawCoords, centerOfFrame, { frameSize.height, frameSize.width / 2 });
+	int angle = (int)(angleBetween(rawCoords, centerOfFrame, { frameSize.height, frameSize.width / 2 }));
 	this->polarMetricCoords = { distanceInCm, angle };
 }
 
 
 void ObjectPosition::updateFieldCoords(cv::Point robotFieldCoords) {
 	cv::Point centerOfFrame = { frameSize.height / 2, frameSize.width / 2 };
-	int fieldY = getDistance() * cos(TAU*getAngleToRobot() / 360);
-	int fieldX = getDistance() * sin(TAU*getAngleToRobot() / 360);
+	int fieldY = (int)(getDistance() * cos(TAU*getAngleToRobot() / 360));
+	int fieldX = (int)(getDistance() * sin(TAU*getAngleToRobot() / 360));
 	cv::Point filteredCoords = cv::Point(fieldX, fieldY);//filter->doFiltering(cv::Point(fieldX, fieldY));
 	fieldCoords = { robotFieldCoords.x + filteredCoords.x, robotFieldCoords.y + filteredCoords.y };
 	

@@ -25,7 +25,7 @@ void DistanceCalculator::loadConf(){
 
 int DistanceCalculator::getDistance(int centerX, int centerY, int x, int y){
 	double dist = DistanceCalibrator::calculateDistance(centerX, centerY, x, y);
-	double minDif = 9999999999999999999;
+	double minDif = INT_MAX;
 	int index = 0;
 	for (int i = 0; i < DistanceCalibrator::CONF_SIZE; i++){
 		double dif = std::abs(references[i] - dist);

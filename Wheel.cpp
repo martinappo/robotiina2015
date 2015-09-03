@@ -100,7 +100,7 @@ void SoftwareWheel::UpdateSpeed()
 		;// still stalled
 	}
 	else {
-		actual_speed += acc * dt;
+		actual_speed += (int)(acc * dt);
 	}
 };
 

@@ -99,7 +99,7 @@ void Dialog::KeyPressed(int key){
 
 void Dialog::mouseClicked(int x, int y) {
 	boost::mutex::scoped_lock lock(click_mutex); //allow one command at a time
-	int index = round((float)y / m_buttonHeight) - 1;
+	unsigned int index = (int)(round((float)y / m_buttonHeight) - 1);
     if (index < m_buttons.size()){
         auto button = m_buttons[index];
 		std::get<2>(button)();
