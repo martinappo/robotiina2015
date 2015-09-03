@@ -83,17 +83,22 @@ public:
 
 class IDisplay {
 public:
+	virtual int createButton(const std::string& bar_name, char shortcut, std::function<void()> const &) = 0;
+	virtual int Draw() = 0;
+	virtual void clearButtons() = 0;
 	virtual void ShowImage(const cv::Mat &image, bool main = true) = 0;
 	virtual void AddEventListener(IUIEventListener *pEventListener) = 0;
 	virtual void RemoveEventListener(IUIEventListener *pEventListener) = 0;
+	virtual void putText(const std::string &text, cv::Point pos, double fontScale, cv::Scalar color) = 0;
 };
 
 class ICamera
 {
 public:
-	virtual cv::Mat & Capture() = 0;
-	virtual cv::Size GetFrameSize() = 0;
+	virtual cv::Mat & Capture(bool bFullFrame = false) = 0;
+	virtual cv::Size GetFrameSize(bool bFullFrame = false) = 0;
 	virtual double GetFPS() = 0;
+	virtual cv::Mat & GetLastFrame(bool bFullFrame = false) = 0;
 };
 
 //maybe use std::vector instead

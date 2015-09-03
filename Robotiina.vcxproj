@@ -108,6 +108,7 @@
     <ClInclude Include="MouseVision.h" />
     <ClInclude Include="ObjectPosition.h" />
     <ClInclude Include="RobotPosition.h" />
+    <ClInclude Include="Simple-WebSocket-Server\server_ws.hpp" />
     <ClInclude Include="SoccerField.h" />
     <ClInclude Include="FrontCameraVision.h" />
     <ClInclude Include="GateFinder.h" />
@@ -124,6 +125,7 @@
     <ClInclude Include="ThreadedClass.h" />
     <ClInclude Include="types.h" />
     <ClInclude Include="VideoRecorder.h" />
+    <ClInclude Include="WebUI.h" />
     <ClInclude Include="wheel.h" />
     <ClInclude Include="wheelcontroller.h" />
   </ItemGroup>
@@ -161,6 +163,7 @@
     <ClCompile Include="stillcamera.cpp" />
     <ClCompile Include="ThreadedClass.cpp" />
     <ClCompile Include="VideoRecorder.cpp" />
+    <ClCompile Include="WebUI.cpp" />
     <ClCompile Include="wheel.cpp" />
     <ClCompile Include="wheelcontroller.cpp" />
   </ItemGroup>

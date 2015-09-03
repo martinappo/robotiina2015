@@ -59,8 +59,14 @@ void Dialog::ClearDisplay() {
 //	boost::mutex::scoped_lock lock(mutex); //allow one command at a time
 //	display_empty.copyTo(display);
 }
+void Dialog::putText(const std::string &text, cv::Point pos, double fontScale, cv::Scalar color) {
+	if (pos.x < 0) pos.x = display.size().width - pos.x;
+	if (pos.y < 0) pos.y = display.size().height - pos.y;
+	cv::putText(display, text, pos, cv::FONT_HERSHEY_DUPLEX, fontScale, color);
+}
 
-int Dialog::show(const cv::Mat &background) {
+
+int Dialog::Draw() {
 	boost::mutex::scoped_lock lock(click_mutex); //allow one command at a time
 	//cv::Mat image;
 	//background.copyTo(image);

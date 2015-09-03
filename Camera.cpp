@@ -83,8 +83,11 @@ Camera::Camera(int device)
 
 }
 
-cv::Mat &Camera::Capture(){
-	if (frameCount == 1) { // image
+cv::Mat &Camera::GetLastFrame(bool bFullFrame){
+	return *m_pFrame;
+}
+cv::Mat &Camera::Capture(bool bFullFrame){
+		if (frameCount == 1) { // image
 		frame.copyTo(*m_pFrame); // return clean copy  
 	}
 	else {

@@ -11,7 +11,7 @@ class WheelController;
 class CoilGun;
 class ComPortScanner;
 
-class Robot : public Dialog {
+class Robot {
 private:
 	po::variables_map config;
 
@@ -19,6 +19,7 @@ private:
 	ComPortScanner *scanner;
     WheelController * wheels;
 	CoilGun *coilBoard;
+	IDisplay *m_pDisplay;
 	bool coilBoardPortsOk;
 	bool wheelsPortsOk;
 

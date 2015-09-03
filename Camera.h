@@ -38,14 +38,15 @@ public:
     Camera(const std::string &device);
 	Camera(int device);
 	Camera();
-	cv::Mat & Capture();
-    const cv::Mat & CaptureHSV();
+	cv::Mat & Capture(bool bFullFrame = false);
+	cv::Mat & GetLastFrame(bool bFullFrame = false);
+	const cv::Mat & CaptureHSV();
     virtual ~Camera(){ 
 		WaitForStop();
 		cap->release();
 		delete cap;
 	}
-	virtual cv::Size GetFrameSize(){
+	virtual cv::Size GetFrameSize(bool bFullFrame = false){
 		return frameSize;
 	};
 	virtual double GetFPS() {
