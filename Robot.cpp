@@ -109,8 +109,8 @@ Robot::~Robot()
         delete wheels;
 	if (scanner)
 		delete scanner;
-	if (m_pDisplay)
-		delete m_pDisplay;
+//	if (m_pDisplay)
+//		delete m_pDisplay;
 }
 
 bool Robot::Launch(int argc, char* argv[])

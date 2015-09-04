@@ -12,30 +12,18 @@ Dialog::Dialog(const std::string &title, int flags/* = CV_WINDOW_AUTOSIZE*/) {
     int baseLine;
     m_buttonHeight = cv::getTextSize("Ajig6", cv::FONT_HERSHEY_DUPLEX, 0.9, 1, &baseLine).height * 2;
 
-	cv::namedWindow(m_title, CV_WINDOW_AUTOSIZE);
-	//cvSetWindowProperty(m_title.c_str(), CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
-	cv::moveWindow(m_title, 0, 0);
-	cv::setMouseCallback(m_title, [](int event, int x, int y, int flags, void* self) {
-		for (auto pListener : ((Dialog*)self)->m_EventListeners){
-			if (pListener->OnMouseEvent(event, (float)x/CAM_WIDTH, (float)y/CAM_HEIGHT, flags)) {
-				return; // event was handled
-			}
-		}
-
-		((Dialog*)self)->mouseX = x;
-		((Dialog*)self)->mouseY = y;
-		if (event == cv::EVENT_LBUTTONUP){
-			((Dialog*)self)->mouseClicked(x, y);
-		}
-	}, this);
 
 	display_empty = cv::Mat(WINDOW_HEIGHT, WINDOW_WIDTH, CV_8UC3, cv::Scalar(0));
 	display = cv::Mat(WINDOW_HEIGHT, WINDOW_WIDTH, CV_8UC3);
 	cam1_roi = display(cv::Rect(0, 0, CAM_WIDTH, CAM_HEIGHT)); // region of interest
 	cam2_roi = display(cv::Rect(CAM_WIDTH, CAM_HEIGHT - 160, WINDOW_WIDTH - CAM_WIDTH, 160));
 	//cam_area = cv::Mat(CAM_HEIGHT, CAM_WIDTH, CV_8UC3);
+	Start();
 
 };
+Dialog::~Dialog(){
+	WaitForStop();
+}
 void Dialog::ShowImage(const cv::Mat &image, bool main) {
 	if (!m_bMainCamEnabled && main) return;
 	boost::mutex::scoped_lock lock(display_mutex); //allow one command at a time
@@ -114,10 +102,33 @@ void Dialog::mouseClicked(int x, int y) {
 
 }
 void Dialog::Run(){
+	cv::namedWindow(m_title, CV_WINDOW_AUTOSIZE);
+	//cvSetWindowProperty(m_title.c_str(), CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+	cv::moveWindow(m_title, 0, 0);
+	cv::setMouseCallback(m_title, [](int event, int x, int y, int flags, void* self) {
+		for (auto pListener : ((Dialog*)self)->m_EventListeners){
+			if (pListener->OnMouseEvent(event, (float)x / CAM_WIDTH, (float)y / CAM_HEIGHT, flags)) {
+				return; // event was handled
+			}
+		}
+
+		((Dialog*)self)->mouseX = x;
+		((Dialog*)self)->mouseY = y;
+		if (event == cv::EVENT_LBUTTONUP){
+			((Dialog*)self)->mouseClicked(x, y);
+		}
+	}, this);
+
 	while (!stop_thread) {
-		Draw();
-		int key = cv::waitKey(10);
-		KeyPressed(key);
+		try {
+			Draw();
+			int key = cv::waitKey(10);
+			KeyPressed(key);
+		}
+		catch (std::exception &e) {
+			std::cout << "Dialog::Run, error: " << e.what() << std::endl;
+		}
 		//std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
+	cv::waitKey(0);
 }
