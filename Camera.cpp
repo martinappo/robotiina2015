@@ -7,32 +7,43 @@
 Camera::Camera(const std::string &device) {
 	cap = new cv::VideoCapture(device.c_str());
 	if (!cap->isOpened())  // if not success, exit program
-    {
+	{
 		throw std::runtime_error("Camera not found");
-    }
-
+	}
+	Init();
+}
+void Camera::Init() {
 	frameCount = (int)(cap->get(CV_CAP_PROP_FRAME_COUNT));
 	m_pFrame = &frame1;
 
-	if (frameCount == 1) { // image
-		*cap >> frame;
-		frameSize = cv::Size(frame.size());
-		return;
-	}
+	*cap >> frame;
+	frameSize = cv::Size(frame.size());
 
-	//väiksemaks lõigatud frame'i suurus
-	frameSize = cv::Size(960, 960);   // Acquire input size
+	frame.copyTo(frame1);
+	frame.copyTo(frame2);
+
+	auto _roi = roi;
+
+	if (frame.cols < roi.br().y || frame.rows < roi.br().x) {
+		_roi = cv::Rect(0, 0, frameSize.width, frameSize.height);
+		std::cout << "Camera ROI [" << roi << "] is bigger than frame size [" << frameSize << "], using full frame" << std::endl;
+	}
+	frame1_roi = frame1(_roi);
+	frame2_roi = frame2(_roi);
 
 
 //	frameSize = cv::Size((int)cap->get(CV_CAP_PROP_FRAME_WIDTH),    // Acquire input size
 //		(int)cap->get(CV_CAP_PROP_FRAME_HEIGHT));
-	maskedImage = cv::Mat(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(255, 0, 255));
-	mask = cv::Mat(frameSize.height, frameSize.width, CV_8U, cv::Scalar::all(0));
-	int radius = frameSize.height / 2;
+
+	maskedImage = cv::Mat(_roi.height, _roi.width, CV_8UC3, cv::Scalar(255, 0, 255));
+	mask = cv::Mat(_roi.height, _roi.width, CV_8U, cv::Scalar::all(0));
+	int radius = _roi.height / 2;
 	cv::circle(mask, cv::Point(radius, radius), radius, cv::Scalar(255, 255, 255), -1, 8, 0);
 
 
-
+	if (frameCount == 1) { // image
+		return;
+	}
 
 	/*
 	cap->set(CV_CAP_PROP_FPS, 60);
@@ -59,33 +70,14 @@ Camera::Camera(int device)
 	{
 		throw std::runtime_error("Camera is missing");
 	}
-	frameSize = cv::Size((int)cap->get(CV_CAP_PROP_FRAME_WIDTH),    // Acquire input size
-		(int)cap->get(CV_CAP_PROP_FRAME_HEIGHT));
-	flip = false;
-	frameCount = (int)(cap->get(CV_CAP_PROP_FRAME_COUNT));
-
-	cap->set(CV_CAP_PROP_FPS, 60);
-	//cap->set(CV_CAP_PROP_FRAME_WIDTH, 800);
-	//cap->set(CV_CAP_PROP_FRAME_HEIGHT, 600);
-	/*
-	cap->set(CV_CAP_PROP_EXPOSURE, -5);
-	cap->set(CV_CAP_PROP_BRIGHTNESS, 0);
-	cap->set(CV_CAP_PROP_HUE, 0);
-	cap->set(CV_CAP_PROP_SATURATION, 80);
-	cap->set(CV_CAP_PROP_CONTRAST, 5);
-	cap->set(CV_CAP_PROP_RECTIFICATION, 1);*/
-	// blank frame to show before capture starts
-	frame = cv::Mat(frameSize, CV_8UC3);
-	m_pFrame = &frame;
-#ifdef DOUBLE_BUFFERING
-	Start();
-#endif
+	Init();
 
 }
 
 cv::Mat &Camera::Capture(){
 	if (frameCount == 1) { // image
-		frame.copyTo(*m_pFrame); // return clean copy  
+		frame.copyTo(frame1); // return clean copy
+		return frame1_roi;
 	}
 	else {
 #ifndef DOUBLE_BUFFERING
@@ -128,6 +120,7 @@ void Camera::Run(){
 			continue;
 		}
 		cv::Mat &nextFrame = bCaptureFrame1 ? frame1 : frame2;
+		cv::Mat &nextRoi = bCaptureFrame1 ? frame1_roi : frame2_roi;
 
 		if (cap->isOpened()) {
 			*cap >> nextFrame;
@@ -148,13 +141,15 @@ void Camera::Run(){
 			std::cout << "Invalid frame captured " << frame1.size() << std::endl;
 			continue;
 		}
-		
+
+
 		//maskimine koos pildi väiksemaks lõikamisega
 		
-		frame_roi = nextFrame(cv::Rect(175, 60, frameSize.width, frameSize.height));
-		frame_roi.copyTo(maskedImage, mask);
+		//frame_roi = nextFrame(cv::Rect(175, 60, frameSize.width, frameSize.height));
+		nextRoi.copyTo(maskedImage, mask);
 
 		m_pFrame = &maskedImage;
+		//m_pFrame = &nextRoi; // without mask
 		bCaptureFrame1 = !bCaptureFrame1;
 		bCaptureNextFrame = false;
 

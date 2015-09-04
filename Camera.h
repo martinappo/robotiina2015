@@ -12,12 +12,13 @@ class Camera: public ICamera, public ThreadedClass
 		RETURN_FRAME2
 	};
 private:
-    cv::Mat frame, frame1, frame2, lastframe, buffer, frame_roi, maskedImage, mask;
+    cv::Mat frame, frame1, frame2, lastframe, buffer, frame_roi, frame1_roi, frame2_roi, maskedImage, mask;
 	std::atomic_bool bCaptureNextFrame;
 	std::atomic_bool bCaptureFrame1;
 	cv::Mat* m_pFrame = &frame1;
 	cv::VideoCapture *cap;
 	cv::Size frameSize;
+	cv::Rect roi = cv::Rect(175, 60, 960, 960);
 	bool flip = false;
 	double fps;
 	int frames = 0;
@@ -38,6 +39,7 @@ public:
     Camera(const std::string &device);
 	Camera(int device);
 	Camera();
+	void Init();
 	cv::Mat & Capture();
     const cv::Mat & CaptureHSV();
     virtual ~Camera(){ 
@@ -46,7 +48,7 @@ public:
 		delete cap;
 	}
 	virtual cv::Size GetFrameSize(){
-		return frameSize;
+		return true ? roi.br() : frameSize;
 	};
 	virtual double GetFPS() {
 		return fps;
