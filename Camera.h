@@ -48,7 +48,7 @@ public:
 		delete cap;
 	}
 	virtual cv::Size GetFrameSize(){
-		return true ? roi.br() : frameSize;
+		return true ? cv::Size(roi.width, roi.height) : frameSize;
 	};
 	virtual double GetFPS() {
 		return fps;
