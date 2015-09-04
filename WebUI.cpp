@@ -1,7 +1,7 @@
 #include "WebUI.h"
 
 
-WebUI::WebUI(unsigned short port) : wsServer(port, 2)
+WebUI::WebUI(unsigned short port) //: wsServer(port, 2)
 {
 }
 

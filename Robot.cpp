@@ -580,7 +580,7 @@ void Robot::Run()
 		cv::Scalar colorCircle(133, 33, 55);
 		cv::circle(display, center, 60, colorCircle, 2);
 		*/
-		m_pDisplay->Draw();
+		//m_pDisplay->Draw();
 		/*
 		int key = cv::waitKey(1);
 		if (key != -1) {

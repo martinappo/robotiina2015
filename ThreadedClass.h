@@ -1,6 +1,8 @@
 #pragma once
 #include <boost/thread/thread.hpp>
 #include <boost/atomic.hpp>
+#include <chrono>
+#include <thread>
 
 class ThreadedClass
 {

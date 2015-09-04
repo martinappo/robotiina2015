@@ -113,3 +113,11 @@ void Dialog::mouseClicked(int x, int y) {
     }
 
 }
+void Dialog::Run(){
+	while (!stop_thread) {
+		Draw();
+		int key = cv::waitKey(10);
+		KeyPressed(key);
+		//std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	}
+}

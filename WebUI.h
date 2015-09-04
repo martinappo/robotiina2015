@@ -1,12 +1,12 @@
 #pragma once
 #include "types.h"
-#include "Simple-WebSocket-Server\server_ws.hpp"
+//#include "Simple-WebSocket-Server\server_ws.hpp"
 
 class WebUI :
 	public IDisplay
 {
 protected:
-	SimpleWeb::SocketServer<SimpleWeb::WS> wsServer;
+//	SimpleWeb::SocketServer<SimpleWeb::WS> wsServer;
 public:
 	WebUI(unsigned short port);
 	virtual ~WebUI();
