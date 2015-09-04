@@ -50,9 +50,8 @@ public:
 		cap->release();
 		delete cap;
 	}
-
 	virtual cv::Size GetFrameSize(bool bFullFrame = false){
-		return !bFullFrame ? roi.br() : frameSize;
+		return !bFullFrame ? cv::Size(roi.width, roi.height) : frameSize;
 	};
 	virtual double GetFPS() {
 		return fps;
