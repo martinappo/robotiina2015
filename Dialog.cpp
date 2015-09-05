@@ -48,9 +48,13 @@ void Dialog::ClearDisplay() {
 //	display_empty.copyTo(display);
 }
 void Dialog::putText(const std::string &text, cv::Point pos, double fontScale, cv::Scalar color) {
-	if (pos.x < 0) pos.x = display.size().width - pos.x;
-	if (pos.y < 0) pos.y = display.size().height - pos.y;
-	cv::putText(display, text, pos, cv::FONT_HERSHEY_DUPLEX, fontScale, color);
+	//boost::mutex::scoped_lock lock(click_mutex); //allow one command at a time
+
+	if (pos.x < 0) pos.x = display.size().width + pos.x;
+	if (pos.y < 0) pos.y = display.size().height + pos.y;
+	std::string key = std::to_string(pos.x) + "_" + std::to_string(pos.y);
+	m_texts[key] = std::make_tuple(pos, text, fontScale, color);
+	//cv::putText(display, text, pos, cv::FONT_HERSHEY_DUPLEX, fontScale, color);
 }
 
 
@@ -76,6 +80,11 @@ int Dialog::Draw() {
 		cv::putText(display, std::get<0>(button), cv::Point(30, (++i)*m_buttonHeight), cv::FONT_HERSHEY_DUPLEX, 0.9, cv::Scalar(255, 255, 255));
 
     }
+	for (const auto& text : m_texts) {
+		cv::putText(display, std::get<1>(text.second), std::get<0>(text.second), cv::FONT_HERSHEY_DUPLEX, std::get<2>(text.second), std::get<3>(text.second));
+
+	}
+
 	cv::imshow(m_title, display);
 	display_empty.copyTo(display);
 

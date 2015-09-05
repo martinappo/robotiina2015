@@ -543,7 +543,7 @@ void Robot::Run()
 		
 		for (int i = 0; i < NUMBER_OF_BALLS; i++) {
 			BallPosition ball = field.balls[i].load();
-			m_pDisplay->putText( std::string("Ball") + std::to_string(i) + ": "+ std::to_string(ball.fieldCoords.x) + " : " + std::to_string(ball.fieldCoords.y), cv::Point(-250, i * 15 + 10), 0.5, cv::Scalar(255, 255, 255));
+			m_pDisplay->putText( std::string("Ball") + std::to_string(i) + ": "+ std::to_string(ball.fieldCoords.x) + " : " + std::to_string(ball.fieldCoords.y), cv::Point(-250, i * 15 + 10), 0.3, cv::Scalar(255, 255, 255));
 		}
 
 		m_pDisplay->putText( "robot: " + std::to_string(field.self.load().fieldCoords.x) + " " + std::to_string(field.self.load().fieldCoords.y), cv::Point(-140, 200), 0.5, cv::Scalar(255, 255, 255));
