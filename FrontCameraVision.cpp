@@ -102,9 +102,9 @@ void FrontCameraVision::Run() {
 			thresholdedImages[SIGHT_MASK] = selected;
 			//sightObstructed = countNonZero(selected) > 10;
 		}
-		
 
-		
+
+
 		if (borderDetectionEnabled) {
 			//float y = finder.IsolateField(thresholdedImages, frameHSV, frameBGR, false, nightVisionEnabled);
 			//finder.LocateCursor(frameBGR, cv::Point2i(frameSize.width / 2, y), BALL, borderDistance);
@@ -116,21 +116,25 @@ void FrontCameraVision::Run() {
 		/**************************************************/
 		/* STEP 4. extract closest ball and gate positions*/
 		/**************************************************/
-
-		//Robot pos
-		m_pState->self.updateCoordinates(yellowGatePos, blueGatePos);
-
 		//Blue gate pos
 		cv::Point2i blueGatePoint = blueGateFinder.LocateOnScreen(thresholdedImages, frameHSV, frameBGR, BLUE_GATE);
-		m_pState->blueGate.updateCoordinates(blueGatePoint);
-
 		//Yellow gate pos
 		cv::Point2i yellowGatePoint = yellowGateFinder.LocateOnScreen(thresholdedImages, frameHSV, frameBGR, YELLOW_GATE);
-		m_pState->yellowGate.updateCoordinates(yellowGatePoint);
 
-		//Balls pos
-		ballFinder.populateBalls(thresholdedImages, frameHSV, frameBGR, BALL, m_pState);
+		//update state, lock state until done
+		{
+			FieldStateLock state(m_pState);
 
+			state->blueGate.updateCoordinates(blueGatePoint);
+
+			state->yellowGate.updateCoordinates(yellowGatePoint);
+
+			//Robot pos (is updated from gates)
+			state->self.updateCoordinates();
+
+			//Balls pos
+			ballFinder.populateBalls(thresholdedImages, frameHSV, frameBGR, BALL, m_pState);
+		}
 		/*
 		ObjectPosition *targetGatePos = 0;
 		if (targetGate == BLUE_GATE && BlueGateFound) targetGatePos = &blueGatePos;
@@ -167,6 +171,5 @@ void FrontCameraVision::Run() {
 		}
 
 		m_pDisplay->ShowImage(frameBGR);
-		//TODO: update state
 	}
 }

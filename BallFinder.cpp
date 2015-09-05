@@ -61,7 +61,7 @@ void BallFinder::populateBalls(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, 
 		for (int i = 0; i <= NUMBER_OF_BALLS; i++) {
 			BallPosition &currentBall = pFieldState->balls[i];
 			if (!currentBall.isUpdated) {
-				currentBall.predictCoordinates();
+				//currentBall.predictCoordinates();
 			}
 		}
 	}

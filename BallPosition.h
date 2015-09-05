@@ -6,15 +6,11 @@
 class BallPosition : public ObjectPosition
 {
 public:
-#ifdef WIN32
 	BallPosition() {};
-#else
-	BallPosition() noexcept{};
-#endif
 	virtual ~BallPosition();
 	int id;
 	bool isValid;
-	bool isUpdated;
+	std::atomic_bool isUpdated;
 	void predictCoordinates();
 	void setIsUpdated(bool updated);
 private:

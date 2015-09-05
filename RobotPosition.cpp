@@ -4,23 +4,24 @@
 //	this->polarMetricCoords = cv::Point(0, 0);
 //} 
 
-RobotPosition::RobotPosition(GatePosition yellowGate, GatePosition blueGate, cv::Point initialCoords){
+RobotPosition::RobotPosition(GatePosition &yellowGate, GatePosition &blueGate, cv::Point initialCoords):
+	yellowGate(yellowGate), blueGate(blueGate) {
 	this->polarMetricCoords = cv::Point(0, 0);
 	this->fieldCoords = initialCoords;
-	updateCoordinates(yellowGate, blueGate);
+	updateCoordinates();
 }
 
 RobotPosition::~RobotPosition()
 {
 }
 
-void RobotPosition::updateCoordinates(GatePosition yellowGate, GatePosition blueGate) {
+void RobotPosition::updateCoordinates() {
 	lastFieldCoords = fieldCoords;
 	this->robotAngle = yellowGate.getAngle();
-	updateFieldCoords(yellowGate, blueGate);
+	updateFieldCoords();
 }
 
-void RobotPosition::updateFieldCoords(GatePosition yellowGate, GatePosition blueGate) {
+void RobotPosition::updateFieldCoords() {
 	std::pair<cv::Point, cv::Point> possiblePoints = intersectionOfTwoCircles(yellowGate.fieldCoords, 
 																			  yellowGate.getDistance(), 
 																			  blueGate.fieldCoords, 

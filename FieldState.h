@@ -7,12 +7,32 @@
 
 class FieldState {
 public:
-	RobotPosition self; //Robot distance on field
+	FieldState();
+	virtual ~FieldState();
 	BallPosition balls[NUMBER_OF_BALLS]; //All others are distance from self and heading to it
 	GatePosition blueGate;
 	GatePosition yellowGate;
+	RobotPosition self; //Robot distance on field
 	std::atomic_bool gateObstructed;
 	virtual void SetTargetGate(OBJECT gate) = 0;
-	virtual ObjectPosition GetTargetGate() const = 0;
+	virtual GatePosition &GetTargetGate() = 0;
 	void resetBallsUpdateState();
+	virtual void Lock() = 0;
+	virtual void UnLock() = 0;
+};
+
+class FieldStateLock{
+public:
+	FieldStateLock(FieldState * pFieldState){
+		m_pState = pFieldState;
+		m_pState->Lock();
+	}
+	~FieldStateLock(){
+		m_pState->UnLock();
+	}
+	FieldState * operator ->(){
+		return m_pState;
+	}
+private:
+	FieldState * m_pState;
 };

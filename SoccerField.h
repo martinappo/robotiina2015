@@ -15,8 +15,10 @@ public:
 	virtual void SetTargetGate(OBJECT gate) {
 		m_targetGate = gate;
 	};
-	virtual ObjectPosition GetTargetGate() const;
+	virtual GatePosition &GetTargetGate();
 	void initBalls(cv::Size frameSize);
+	void Lock(){};
+	void UnLock(){};
 private:
 	std::atomic_int m_targetGate;
 	IDisplay *m_pDisplay;

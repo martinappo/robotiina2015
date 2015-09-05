@@ -4,7 +4,7 @@
 
 SoccerField::SoccerField(IDisplay *pDisplay, cv::Size frameSize) :m_pDisplay(pDisplay)
 {
-	this->self = RobotPosition(this->yellowGate, this->blueGate, cv::Point(214, 180));
+	//this->self = RobotPosition(this->yellowGate, this->blueGate, cv::Point(214, 180));
 	initBalls(frameSize);
 	Start();
 }
@@ -14,10 +14,11 @@ SoccerField::~SoccerField()
 {
 	WaitForStop();
 }
-ObjectPosition SoccerField::GetTargetGate() const {
+
+GatePosition & SoccerField::GetTargetGate() {
 	if (m_targetGate == BLUE_GATE) return blueGate;
 	else if (m_targetGate == YELLOW_GATE) return yellowGate;
-	else { return { -1, 0 }; }
+	else return blueGate; // { return{ -1, 0 }; }
 };
 
 void SoccerField::initBalls(cv::Size frameSize) {

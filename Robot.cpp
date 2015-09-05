@@ -523,8 +523,8 @@ void Robot::Run()
 		cv::putText(display, "fps: " + std::to_string(camera->GetFPS()), cv::Point(display.cols - 140, 20), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 		//assert(STATE_END_OF_GAME != state);
 		cv::putText(display, "state: " + STATE_LABELS[state], cv::Point(display.cols - 140, 40), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-		ObjectPosition ballPos = field.balls[0];
-		ObjectPosition targetGatePos = field.GetTargetGate();
+		auto ballPos = field.balls[0];
+		auto targetGatePos = field.GetTargetGate();
 		cv::putText(display, std::string("Ball:") + (ballPos.getDistance() > 0 ? "yes" : "no"), cv::Point(display.cols - 140, 60), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 		cv::putText(display, std::string("Gate:") + (targetGatePos.getDistance() >0 ? "yes" : "no"), cv::Point(display.cols - 140, 80), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 		
