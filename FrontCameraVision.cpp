@@ -118,19 +118,15 @@ void FrontCameraVision::Run() {
 		/**************************************************/
 
 		//Robot pos
-		RobotPosition rb = m_pState->self.load();
-		rb.updateCoordinates(yellowGatePos, blueGatePos);
-		m_pState->self.store(rb);
+		m_pState->self.updateCoordinates(yellowGatePos, blueGatePos);
 
 		//Blue gate pos
 		cv::Point2i blueGatePoint = blueGateFinder.LocateOnScreen(thresholdedImages, frameHSV, frameBGR, BLUE_GATE);
-		blueGatePos.updateCoordinates(blueGatePoint);
-		m_pState->blueGate.store(blueGatePos);
+		m_pState->blueGate.updateCoordinates(blueGatePoint);
 
 		//Yellow gate pos
 		cv::Point2i yellowGatePoint = yellowGateFinder.LocateOnScreen(thresholdedImages, frameHSV, frameBGR, YELLOW_GATE);
-		yellowGatePos.updateCoordinates(yellowGatePoint);
-		m_pState->yellowGate.store(yellowGatePos);
+		m_pState->yellowGate.updateCoordinates(yellowGatePoint);
 
 		//Balls pos
 		ballFinder.populateBalls(thresholdedImages, frameHSV, frameBGR, BALL, m_pState);

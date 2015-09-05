@@ -91,7 +91,7 @@ void LocateBall::onEnter()
 NewDriveMode LocateBall::step(double dt)
 {
 	auto ballInTribbler = m_pCom->BallInTribbler();
-	auto ballInSight = m_pFieldState->balls[0].load().getDistance() >= 0;
+	auto ballInSight = m_pFieldState->balls[0].getDistance() >= 0;
 
 	
 	if (ballInTribbler) return DRIVEMODE_LOCATE_GATE;
@@ -165,7 +165,7 @@ void DriveToBall::onEnter()
 
 NewDriveMode DriveToBall::step(double dt)
 {
-	ObjectPosition lastBallLocation = m_pFieldState->balls[0].load();
+	ObjectPosition &lastBallLocation = m_pFieldState->balls[0];
 	if (lastBallLocation.getDistance() < 0) return DRIVEMODE_LOCATE_BALL;
 	if (m_pCom->BallInTribbler()) return DRIVEMODE_LOCATE_GATE;
 
@@ -223,7 +223,7 @@ NewDriveMode CatchBall::step(double dt)
 {
 	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
 	boost::posix_time::time_duration::tick_type catchDuration = (time - catchStart).total_milliseconds();
-	ObjectPosition lastBallLocation = m_pFieldState->balls[0].load();
+	ObjectPosition &lastBallLocation = m_pFieldState->balls[0];
 
 	//std::cout << catchDuration << std::endl;
 	if (m_pCom->BallInTribbler()) {

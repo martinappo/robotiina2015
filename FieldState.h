@@ -7,10 +7,10 @@
 
 class FieldState {
 public:
-	std::atomic<RobotPosition> self; //Robot distance on field
-	std::atomic<BallPosition> balls[NUMBER_OF_BALLS]; //All others are distance from self and heading to it
-	std::atomic<GatePosition> blueGate;
-	std::atomic<GatePosition> yellowGate;
+	RobotPosition self; //Robot distance on field
+	BallPosition balls[NUMBER_OF_BALLS]; //All others are distance from self and heading to it
+	GatePosition blueGate;
+	GatePosition yellowGate;
 	std::atomic_bool gateObstructed;
 	virtual void SetTargetGate(OBJECT gate) = 0;
 	virtual ObjectPosition GetTargetGate() const = 0;
