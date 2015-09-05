@@ -6,7 +6,8 @@
 #define ERODESIZE 10
 
 //#define IMAGETHRESHOLDER_PARALLEL_FOR
-#define IMAGETHRESHOLDER_PARALLEL_THREADS
+//#define IMAGETHRESHOLDER_PARALLEL_THREADS
+#define IMAGETHRESHOLDER_PARALLEL_INRANGE
 
 #ifdef IMAGETHRESHOLDER_PARALLEL_FOR
 #include <ppl.h>
@@ -69,6 +70,8 @@ void ImageThresholder::Start(cv::Mat &frameHSV, std::vector<OBJECT> objectList) 
 			});
 		}
 	*/
+#elif defined(IMAGETHRESHOLDER_PARALLEL_INRANGE)
+	#error add code here
 #else
 		for (auto &object : objectList) {
 			auto r = objectMap[object];
