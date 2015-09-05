@@ -42,6 +42,7 @@ private:
     bool m_close = false;
     std::string m_title;
 	std::vector<std::tuple<std::string, int, std::function<void()>>> m_buttons;
+	std::map<std::string, std::tuple<cv::Point, std::string, double, cv::Scalar>> m_texts;
     int m_buttonHeight = 60; /* calculated automatically*/
 	boost::mutex click_mutex;
 	boost::mutex display_mutex;
