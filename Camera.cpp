@@ -22,22 +22,22 @@ void Camera::Init() {
 	frame.copyTo(frame1);
 	frame.copyTo(frame2);
 
-	auto _roi = roi;
+	//auto _roi = roi;
 
 	if (frame.cols < roi.br().y || frame.rows < roi.br().x) {
-		_roi = cv::Rect(0, 0, frameSize.width, frameSize.height);
+		roi = cv::Rect(0, 0, frameSize.width, frameSize.height);
 		std::cout << "Camera ROI [" << roi << "] is bigger than frame size [" << frameSize << "], using full frame" << std::endl;
 	}
-	frame1_roi = frame1(_roi);
-	frame2_roi = frame2(_roi);
+	frame1_roi = frame1(roi);
+	frame2_roi = frame2(roi);
 
 
 //	frameSize = cv::Size((int)cap->get(CV_CAP_PROP_FRAME_WIDTH),    // Acquire input size
 //		(int)cap->get(CV_CAP_PROP_FRAME_HEIGHT));
 
-	maskedImage = cv::Mat(_roi.height, _roi.width, CV_8UC3, cv::Scalar(255, 0, 255));
-	mask = cv::Mat(_roi.height, _roi.width, CV_8U, cv::Scalar::all(0));
-	int radius = _roi.height / 2;
+	maskedImage = cv::Mat(roi.height, roi.width, CV_8UC3, cv::Scalar(255, 0, 255));
+	mask = cv::Mat(roi.height, roi.width, CV_8U, cv::Scalar::all(0));
+	int radius = roi.height / 2;
 	cv::circle(mask, cv::Point(radius, radius), radius, cv::Scalar(255, 255, 255), -1, 8, 0);
 
 
