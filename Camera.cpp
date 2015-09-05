@@ -14,7 +14,6 @@ Camera::Camera(const std::string &device) {
 }
 void Camera::Init() {
 	frameCount = (int)(cap->get(CV_CAP_PROP_FRAME_COUNT));
-	m_pFrame = &frame1;
 
 	*cap >> frame;
 	frameSize = cv::Size(frame.size());
@@ -25,8 +24,9 @@ void Camera::Init() {
 	//auto _roi = roi;
 
 	if (frame.cols < roi.br().y || frame.rows < roi.br().x) {
+		auto _roi = roi;
 		roi = cv::Rect(0, 0, frameSize.width, frameSize.height);
-		std::cout << "Camera ROI [" << roi << "] is bigger than frame size [" << frameSize << "], using full frame" << std::endl;
+		std::cout << "Camera ROI [" << _roi << "] is bigger than frame size [" << frameSize << "], using full frame" << std::endl;
 	}
 	frame1_roi = frame1(roi);
 	frame2_roi = frame2(roi);
@@ -77,7 +77,7 @@ Camera::Camera(int device)
 cv::Mat &Camera::Capture(){
 	if (frameCount == 1) { // image
 		frame.copyTo(frame1); // return clean copy
-		return frame1_roi;
+		//return frame1_roi;
 	}
 	else {
 #ifndef DOUBLE_BUFFERING
@@ -105,7 +105,9 @@ cv::Mat &Camera::Capture(){
 		}
 		bCaptureNextFrame = true;
 	
-	return *m_pFrame;
+		m_pFrame->copyTo(maskedImage, mask);
+
+		return maskedImage;
 }
 const cv::Mat &Camera::CaptureHSV() {
     cvtColor(frame, buffer, cv::COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
@@ -146,10 +148,7 @@ void Camera::Run(){
 		//maskimine koos pildi väiksemaks lõikamisega
 		
 		//frame_roi = nextFrame(cv::Rect(175, 60, frameSize.width, frameSize.height));
-		nextRoi.copyTo(maskedImage, mask);
-
-		m_pFrame = &maskedImage;
-		//m_pFrame = &nextRoi; // without mask
+		m_pFrame = &nextRoi; // without mask
 		bCaptureFrame1 = !bCaptureFrame1;
 		bCaptureNextFrame = false;
 
