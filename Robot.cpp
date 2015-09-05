@@ -523,8 +523,8 @@ void Robot::Run()
 		cv::putText(display, "fps: " + std::to_string(camera->GetFPS()), cv::Point(display.cols - 140, 20), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 		//assert(STATE_END_OF_GAME != state);
 		cv::putText(display, "state: " + STATE_LABELS[state], cv::Point(display.cols - 140, 40), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-		ObjectPosition ballPos = field.balls[0];
-		ObjectPosition targetGatePos = field.GetTargetGate();
+		auto ballPos = field.balls[0];
+		auto targetGatePos = field.GetTargetGate();
 		cv::putText(display, std::string("Ball:") + (ballPos.getDistance() > 0 ? "yes" : "no"), cv::Point(display.cols - 140, 60), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 		cv::putText(display, std::string("Gate:") + (targetGatePos.getDistance() >0 ? "yes" : "no"), cv::Point(display.cols - 140, 80), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 		
@@ -533,18 +533,18 @@ void Robot::Run()
 		//cv::putText(display, std::string("OnWay:") + (somethingOnWay ? "yes" : "no"), cv::Point(display.cols - 140, 140), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 		
 		for (int i = 0; i < NUMBER_OF_BALLS; i++) {
-			BallPosition ball = field.balls[i].load();
+			BallPosition &ball = field.balls[i];
 			cv::putText(display, std::string("Ball") + std::to_string(i) + ": "+ std::to_string(ball.fieldCoords.x) + " : " + std::to_string(ball.fieldCoords.y), cv::Point(display.cols - 250, i * 15 + 10), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.5, cv::Scalar(255, 255, 255));
 		}
 
-		cv::putText(display, "robot: " + std::to_string(field.self.load().fieldCoords.x) + " " + std::to_string(field.self.load().fieldCoords.y), cv::Point(display.cols - 140, 200), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
+		cv::putText(display, "robot: " + std::to_string(field.self.fieldCoords.x) + " " + std::to_string(field.self.fieldCoords.y), cv::Point(display.cols - 140, 200), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 
 
 		//cv::putText(display, "border: " + std::to_string(borderDistance.distance), cv::Point(display.cols - 140, 280), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 
 
 		cv::putText(display, "Yellow Gate" ,  cv::Point(display.cols - 140, 320), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-		cv::putText(display, "(dist / angle): " + std::to_string(field.yellowGate.load().getDistance()) + " / " + std::to_string(field.yellowGate.load().getAngle()), cv::Point(display.cols - 140, 340), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
+		cv::putText(display, "(dist / angle): " + std::to_string(field.yellowGate.getDistance()) + " / " + std::to_string(field.yellowGate.getAngle()), cv::Point(display.cols - 140, 340), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 		
 
 		

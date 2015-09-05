@@ -5,11 +5,8 @@
 class ObjectPosition : public IObjectPosition
 {
 public:
-#ifdef WIN32
-	ObjectPosition() {};
-#else
-	ObjectPosition() noexcept {};
-#endif
+	ObjectPosition(){};
+	//ObjectPosition(const ObjectPosition& that) = delete; // disable copy positions
 	ObjectPosition(int distance, int angle);
 	ObjectPosition(cv::Point2i polarCoords);
 	virtual ~ObjectPosition();

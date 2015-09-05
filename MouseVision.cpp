@@ -24,14 +24,14 @@ MouseVision::~MouseVision()
 
 void MouseVision::Run(){
 	ObjectFinder finder;
-	BallPosition ballPos = m_pState->balls[0].load();
-	RobotPosition robotPos = m_pState->self.load();
+	BallPosition &ballPos = m_pState->balls[0];
+	RobotPosition &robotPos = m_pState->self;
 	while (!stop_thread){
 		cv::Scalar colorCircle(133, 33, 255);
 		frameBGR = m_pCamera->Capture();
 		frameBGR.copyTo(display);
 		finder.LocateCursor(display, cv::Point(x, y), BALL, ballPos, robotPos);
-		m_pState->balls[0].store(ballPos);
+		//m_pState->balls[0].store(ballPos);
 		m_pDisplay->ShowImage(display);
 		std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	}
