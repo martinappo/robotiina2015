@@ -8,7 +8,7 @@
 * No time to add QT support to OpenCV, have to make our own buttons (and dialogs)
 * */
 
-class Dialog : public ThreadedClass, public IDisplay {
+class Dialog : public IDisplay, public ThreadedClass {
 public:
     Dialog(const std::string &m_Title, int flags = CV_WINDOW_AUTOSIZE);
 	int createButton(const std::string& bar_name, char shortcut, std::function<void()> const &);
@@ -25,7 +25,7 @@ public:
 	std::vector<IUIEventListener*> m_EventListeners;
 	virtual void putText(const std::string &text, cv::Point pos, double fontScale, cv::Scalar color);
 	void Run();
-	~Dialog();
+	virtual ~Dialog();
 protected:
     void mouseClicked(int x, int y);
 	std::atomic_int mouseX;
