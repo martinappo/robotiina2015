@@ -23,7 +23,7 @@ void Camera::Init() {
 
 	//auto _roi = roi;
 
-	if (frame.cols < roi.br().y || frame.rows < roi.br().x) {
+	if (frame.cols < roi.height || frame.rows < roi.width) {
 		auto _roi = roi;
 		roi = cv::Rect(0, 0, frameSize.width, frameSize.height);
 		std::cout << "Camera ROI [" << _roi << "] is bigger than frame size [" << frameSize << "], using full frame" << std::endl;
