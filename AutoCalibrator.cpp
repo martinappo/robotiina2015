@@ -16,57 +16,11 @@ AutoCalibrator::AutoCalibrator(ICamera * pCamera, IDisplay *pDisplay)
 
 //	reset();
 };
-bool AutoCalibrator::LoadFrame()
+void AutoCalibrator::LoadFrame()
 {
-	if(screenshot_mode != LIVE_FEED) return false;
-
+	if(screenshot_mode != LIVE_FEED) return;
+	frameBGR.copyTo(image);
 	screenshot_mode = GRAB_FRAME;
-	/*
-	{
-		boost::mutex::scoped_lock lock(mutex); //allow one command at a time
-		white.copyTo(display);
-	}
-	*/
-	// lock mutex
-	//image.copyTo(this->image, mask);
-//	m_pDisplay->ShowImage(white);
-    //ColorCalibrator::LoadImage(image);
-    //float data[6][3] = {{1, 0, 0/*blue*/}, {0, 0, 1 /* orange*/}, {1 ,1, 0 /* yellow*/}, {0,1, 0}/*green*/, {1,1,1}, {0,0,0}};
-	//bestLabels = cv::Mat(6, 3, CV_32F, &data); //BGR
-	cv::Mat thumb(frame_size.y / 2, frame_size.x / 2, CV_8U, cv::Scalar::all(0));
-	{
-		//boost::mutex::scoped_lock lock(mutex); //allow one command at a time
-		resize(frameBGR, thumb, thumb.size());//resize image
-		//if (frames == 0){
-		//	frameBGR.copyTo(image);
-		//}
-	}
-	cv::Mat roi;
-	if (frames ==	0) {
-		roi = image(cv::Rect(0, 0, frame_size.x / 2, frame_size.y / 2));
-	}
-	else if (frames == 1) {
-		roi = image(cv::Rect(frame_size.x/2, 0, frame_size.x/2, frame_size.y / 2));
-	}
-	else if (frames == 2) {
-		roi = image(cv::Rect(0, frame_size.y/2, frame_size.x / 2, frame_size.y/2));
-	}
-	else if (frames == 3) {
-		roi = image(cv::Rect(frame_size.x/2,  frame_size.y/2, frame_size.x/2, frame_size.y/2));
-	}
-	thumb.copyTo(roi);
-	frames++;
-	//cv::imshow("mosaic", image); //show the thresholded image
-	if (frames >= max_image_count) {
-		//cv::imshow("mosaic", image); //show the thresholded image
-		//DetectThresholds(32);
-		//screenshot_mode = CALIBRATION;
-		//screenshot_mode = false;
-
-		return true;
-	}
-	//screenshot_mode = true;
-	return false;
 };
 
 HSVColorRange AutoCalibrator::GetObjectThresholds (int index, const std::string &name)
@@ -204,24 +158,19 @@ void AutoCalibrator::Run() {
 		else if(screenshot_mode == GRAB_FRAME){
 			m_pDisplay->ShowImage(white);
 			std::this_thread::sleep_for(std::chrono::milliseconds(150)); 
-			image.copyTo(display);
+			frameBGR.copyTo(display);
 			m_pDisplay->ShowImage(display);
 			std::this_thread::sleep_for(std::chrono::milliseconds(1600)); 
-			if (frames < max_image_count) {
-				screenshot_mode = LIVE_FEED;
-			}
-			else {
-				screenshot_mode = CALIBRATION;
-				//image.copyTo(display);
-				cv::putText(display, "Please wait, clustering", cv::Point(200, 220), cv::FONT_HERSHEY_DUPLEX, 0.9, cv::Scalar(23, 40, 245));
-				m_pDisplay->ShowImage(display);
 
-				DetectThresholds(32);
-				screenshot_mode = THRESHOLDING;
-				//clustered.copyTo(display);
-				m_pDisplay->ShowImage(display);
+			screenshot_mode = CALIBRATION;
+			//image.copyTo(display);
+			cv::putText(display, "Please wait, clustering", cv::Point(200, 220), cv::FONT_HERSHEY_DUPLEX, 0.9, cv::Scalar(23, 40, 245));
+			m_pDisplay->ShowImage(display);
 
-			}
+			DetectThresholds(32);
+			screenshot_mode = THRESHOLDING;
+			//clustered.copyTo(display);
+			m_pDisplay->ShowImage(display);
 		}
 		else if (screenshot_mode == THRESHOLDING) {
 			m_pDisplay->ShowImage(clustered);
