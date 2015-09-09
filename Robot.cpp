@@ -350,10 +350,8 @@ void Robot::Run()
 				calibrator.Enable(true);
 				calibrator.reset();
 				createButton("Take a screenshot", '-',[this, &calibrator]{
-					if (calibrator.LoadFrame()) {
-						this->SetState(STATE_CALIBRATE);
-					};
-
+					calibrator.LoadFrame();
+					this->SetState(STATE_CALIBRATE);
 				});
 			STATE_BUTTON("BACK", 8,STATE_NONE)
 			END_DIALOG
