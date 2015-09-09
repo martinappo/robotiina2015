@@ -6,7 +6,7 @@ class ObjectPosition : public IObjectPosition
 {
 public:
 	ObjectPosition(){};
-	//ObjectPosition(const ObjectPosition& that) = delete; // disable copy positions
+	ObjectPosition(const ObjectPosition& that) = delete; // disable copy positions
 	ObjectPosition(int distance, int angle);
 	ObjectPosition(cv::Point2i polarCoords);
 	virtual ~ObjectPosition();
