@@ -115,7 +115,6 @@ const cv::Mat &Camera::CaptureHSV() {
 }
 
 void Camera::Run(){
-	frameCounter = 0;
 	while (!stop_thread) {
 		if (!bCaptureNextFrame) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -126,13 +125,11 @@ void Camera::Run(){
 
 		if (cap->isOpened()) {
 			*cap >> nextFrame;
-			frameCounter++;
 		}
 		else {
 			bCaptureNextFrame = false;
 		}
-		if (frameCounter == frameCount){ //restartVideo
-			frameCounter = 0;
+		if (cap->get(CV_CAP_PROP_POS_FRAMES) == frameCount){ //restartVideo
 			cap->set(CV_CAP_PROP_POS_FRAMES, 0);
 			continue;
 
