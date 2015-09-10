@@ -17,7 +17,7 @@ RobotPosition::~RobotPosition()
 
 void RobotPosition::updateCoordinates() {
 	lastFieldCoords = fieldCoords;
-	this->robotAngle = yellowGate.getAngle();
+	this->robotAngle = getRobotDirection(yellowGate.getDistance(), yellowGate.getAngle(), blueGate.getDistance(), blueGate.getAngle());
 	updateFieldCoords();
 }
 
@@ -26,14 +26,26 @@ void RobotPosition::updateFieldCoords() {
 																			  yellowGate.getDistance(), 
 																			  blueGate.fieldCoords, 
 																			  blueGate.getDistance());
-	double possiblePointDistance1 = cv::norm(possiblePoints.first - lastFieldCoords);
+	if (isRobotAboveCenterLine(yellowGate.getAngle(), blueGate.getAngle())){
+		if (possiblePoints.first.y > 155){
+			this->fieldCoords = possiblePoints.first;
+		}else
+			this->fieldCoords = possiblePoints.second;
+	}
+	else {
+		if (possiblePoints.first.y < 155){
+			this->fieldCoords = possiblePoints.first;
+		}else
+			this->fieldCoords = possiblePoints.second;
+	}
+	/*double possiblePointDistance1 = cv::norm(possiblePoints.first - lastFieldCoords);
 	double possiblePointDistance2 = cv::norm(possiblePoints.second - lastFieldCoords);
 	if (possiblePointDistance1 < possiblePointDistance2) {
 		this->fieldCoords = possiblePoints.first;
 	}
 	else {
 		this->fieldCoords = possiblePoints.second;
-	}
+	}*/
 }
 
 void RobotPosition::updatePolarCoords() {
@@ -83,4 +95,23 @@ std::pair<cv::Point, cv::Point> RobotPosition::intersectionOfTwoCircles(cv::Poin
 
 int RobotPosition::getAngle() {
 	return robotAngle;
+}
+
+bool RobotPosition::isRobotAboveCenterLine(int yellowGoalAngle, int blueGoalAngle){
+
+	int yellowToBlue = blueGoalAngle - yellowGoalAngle;
+	if (yellowToBlue < 0)
+		yellowToBlue += 360;
+	int blueToYellow = yellowGoalAngle - blueGoalAngle;
+	if (blueToYellow < 0)
+		blueToYellow += 360;
+
+	if (yellowToBlue < blueToYellow)
+		return false;
+	return true;
+}
+
+//bluegoal 0 degrees, yellow 180 degrees
+int RobotPosition::getRobotDirection(int yellowGoalDist, int yellowGoalAngle, int blueGoalDist, int blueGoalAngle){
+	return blueGoalAngle + acos((blueGoalDist * blueGoalDist + 500 * 500 - yellowGoalDist * yellowGoalDist) / 2 * 500 * blueGoalDist) + isRobotAboveCenterLine(yellowGoalAngle, blueGoalAngle) ? 0 : -360;
 }

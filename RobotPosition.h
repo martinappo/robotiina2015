@@ -16,4 +16,6 @@ private:
 	GatePosition & yellowGate, & blueGate; // use references that point somewhere
 	void initPolarCoordinates();
 	std::pair<cv::Point, cv::Point> intersectionOfTwoCircles(cv::Point circle1center, double circle1Rad, cv::Point circle2center, double circle2Rad);
+	bool isRobotAboveCenterLine(int yellowGoalAngle, int blueGoalAngle);
+	int getRobotDirection(int yellowGoalDist, int yellowGoalAngle, int blueGoalDist, int blueGoalAngle);
 };
