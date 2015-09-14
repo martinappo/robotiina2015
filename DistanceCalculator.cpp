@@ -24,7 +24,7 @@ void DistanceCalculator::loadConf(){
 	catch (...){};
 }
 
-int DistanceCalculator::getDistance(int centerX, int centerY, int x, int y){
+double DistanceCalculator::getDistance(int centerX, int centerY, int x, int y){
 	double dist = DistanceCalibrator::calculateDistance(centerX, centerY, x, y);
 	double minDif = INT_MAX;
 	int index = 0;
@@ -35,5 +35,6 @@ int DistanceCalculator::getDistance(int centerX, int centerY, int x, int y){
 			minDif = dif;
 		}
 	}
-	return realDistances[index];
+	return realDistances[index]*1.3;
+#error get rid of this magic number
 }

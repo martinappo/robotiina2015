@@ -44,23 +44,27 @@ void SoccerField::Run(){
 			cv::circle(field, blueGate.fieldCoords + cv::Point(250,150), 14, cv::Scalar(236, 137, 48), 7);
 			cv::circle(field, blueGate.fieldCoords + cv::Point(250, 150), blueGate.polarMetricCoords.x, cv::Scalar(236, 137, 48), 2);
 			cv::line(field, blueGate.fieldCoords + cv::Point(250, 150),
-				cv::Point((double)blueGate.polarMetricCoords.x*cos(blueGate.polarMetricCoords.y/360*TAU),
-				(double)blueGate.polarMetricCoords.x*sin(blueGate.polarMetricCoords.y / 360 * TAU)
-					) + cv::Point(250, 150)
+				cv::Point(0,0)- cv::Point((double)blueGate.polarMetricCoords.x*sin(blueGate.polarMetricCoords.y/360*TAU),
+				(double)blueGate.polarMetricCoords.x*cos(blueGate.polarMetricCoords.y / 360 * TAU)
+				) + blueGate.fieldCoords + cv::Point(250, 150)
 				, cv::Scalar(236, 137, 48));
 
 		}
-		std::cout << blueGate.polarMetricCoords.x << ", " << blueGate.polarMetricCoords.y << ", " << (double)blueGate.polarMetricCoords.x*cos(blueGate.polarMetricCoords.y / 360 * TAU) << " <==> ";
-		std::cout << yellowGate.polarMetricCoords.x << ", " << yellowGate.polarMetricCoords.y << ", " << (double)yellowGate.polarMetricCoords.x*cos(yellowGate.polarMetricCoords.y / 360 * TAU) << std::endl;
+		std::cout << blueGate.polarMetricCoords.x << ", " << blueGate.polarMetricCoords.y << ", " 
+			<< blueGate.polarMetricCoords.x*cos(blueGate.polarMetricCoords.y / 360 * TAU) << ", "
+			<< blueGate.polarMetricCoords.x*sin(blueGate.polarMetricCoords.y / 360 * TAU) << " <==> ";
+		std::cout << yellowGate.polarMetricCoords.x << ", " << yellowGate.polarMetricCoords.y << ", " 
+			<< yellowGate.polarMetricCoords.x*cos(yellowGate.polarMetricCoords.y / 360 * TAU) << ", "
+			<< yellowGate.polarMetricCoords.x*sin(yellowGate.polarMetricCoords.y / 360 * TAU) << std::endl;
 
 		if (yellowGate.getDistance() > 0) {
 			cv::circle(field, yellowGate.fieldCoords + cv::Point(250, 150), 14, cv::Scalar(61, 255, 244), 7);
 			cv::circle(field, yellowGate.fieldCoords + cv::Point(250, 150), yellowGate.polarMetricCoords.x, cv::Scalar(61, 255, 244), 2);
 			
 			cv::line(field, yellowGate.fieldCoords + cv::Point(250, 150),
-				cv::Point(yellowGate.polarMetricCoords.x*cos(yellowGate.polarMetricCoords.y / 360 * TAU),
+				cv::Point(0, 0) - cv::Point(yellowGate.polarMetricCoords.x*cos(yellowGate.polarMetricCoords.y / 360 * TAU),
 				yellowGate.polarMetricCoords.x*sin(yellowGate.polarMetricCoords.y / 360 * TAU)
-				) + cv::Point(250, 150)
+				) + yellowGate.fieldCoords + cv::Point(250, 150)
 				, cv::Scalar(61, 255, 244), 3);
 			
 		}

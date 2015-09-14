@@ -4,7 +4,7 @@
 class DistanceCalculator{
 public:
 	DistanceCalculator();
-	int getDistance(int centerX, int centerY, int x, int y);
+	double getDistance(int centerX, int centerY, int x, int y);
 
 private:
 	void loadConf();
