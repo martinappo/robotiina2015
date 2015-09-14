@@ -93,16 +93,16 @@ std::pair<cv::Point, cv::Point> RobotPosition::intersectionOfTwoCircles(cv::Poin
 	return std::pair<cv::Point, cv::Point>(possible1, possible2);
 }
 
-int RobotPosition::getAngle() {
+double RobotPosition::getAngle() {
 	return robotAngle;
 }
 
-bool RobotPosition::isRobotAboveCenterLine(int yellowGoalAngle, int blueGoalAngle){
+bool RobotPosition::isRobotAboveCenterLine(double yellowGoalAngle, double blueGoalAngle){
 
-	int yellowToBlue = blueGoalAngle - yellowGoalAngle;
+	double yellowToBlue = blueGoalAngle - yellowGoalAngle;
 	if (yellowToBlue < 0)
 		yellowToBlue += 360;
-	int blueToYellow = yellowGoalAngle - blueGoalAngle;
+	double blueToYellow = yellowGoalAngle - blueGoalAngle;
 	if (blueToYellow < 0)
 		blueToYellow += 360;
 
@@ -112,9 +112,9 @@ bool RobotPosition::isRobotAboveCenterLine(int yellowGoalAngle, int blueGoalAngl
 }
 
 //bluegoal 0 degrees, yellow 180 degrees
-int RobotPosition::getRobotDirection(int yellowGoalDist, int yellowGoalAngle, int blueGoalDist, int blueGoalAngle){
-	float gamma = (blueGoalDist * blueGoalDist + 500.0 * 500.0 - (500 - blueGoalDist) * (500 - blueGoalDist)) / (2.0 * 500.0 * blueGoalDist);
-	float mAcos = acos(gamma);
+double RobotPosition::getRobotDirection(double yellowGoalDist, double yellowGoalAngle, double blueGoalDist, double blueGoalAngle){
+	double gamma = (blueGoalDist * blueGoalDist + 500.0 * 500.0 - (500 - blueGoalDist) * (500 - blueGoalDist)) / (2.0 * 500.0 * blueGoalDist);
+	double mAcos = acos(gamma);
 	int dir = mAcos + isRobotAboveCenterLine(yellowGoalAngle, blueGoalAngle) ? 0 : -360;
 	return blueGoalAngle + dir;
 }

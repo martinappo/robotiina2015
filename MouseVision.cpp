@@ -24,14 +24,20 @@ MouseVision::~MouseVision()
 
 void MouseVision::Run(){
 	ObjectFinder finder;
-	BallPosition &ballPos = m_pState->balls[0];
+	ObjectPosition mousePos;
 	RobotPosition &robotPos = m_pState->self;
 	while (!stop_thread){
 		cv::Scalar colorCircle(133, 33, 255);
 		frameBGR = m_pCamera->Capture();
+		cv::Scalar color(0, 0, 0);
+		cv::circle(frameBGR, cv::Point(x, y), 8, colorCircle, -1);
+		//cv::circle(frameBGR, cv::Point(frameBGR.cols - x, frameBGR.rows - y), 8, color, -1);
+
 		frameBGR.copyTo(display);
-		finder.LocateCursor(display, cv::Point(x, y), BALL, ballPos, robotPos);
-		//m_pState->balls[0].store(ballPos);
+		m_pState->blueGate.updateCoordinates(cv::Point(x, y));
+		//m_pState->yellowGate.updateCoordinates(cv::Point(frameBGR.cols - x, frameBGR.rows - y));
+		m_pState->self.updateCoordinates();
+		//ballFinder.populateBalls(thresholdedImages, frameHSV, frameBGR, BALL, m_pState);
 		m_pDisplay->ShowImage(display);
 		std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	}

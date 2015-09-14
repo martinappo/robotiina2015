@@ -10,11 +10,11 @@ public:
 	ObjectPosition(int distance, int angle);
 	ObjectPosition(cv::Point2i polarCoords);
 	virtual ~ObjectPosition();
-	int getDistance();
+	double getDistance();
 	void setDistance(int distance);
-	int getAngle();
-	int getAngleToRobot();
-	int robotAngle;
+	double getAngle();
+	double getAngleToRobot();
+	double robotAngle;
 	void setFrameSize(cv::Size frameSize);
 
 	virtual void updateCoordinates(int x, int y, cv::Point robotFieldCoords, int robotAngle); // Takes raw coordinates of object from frame
@@ -24,7 +24,7 @@ public:
 
 	cv::Point2i fieldCoords; // (x, y) Coordinates to display objects on field by, relative to field
 	cv::Point2i rawPixelCoords; // (x, y) Raw from frame
-	cv::Point2i polarMetricCoords;      // (distance, angle) Relative to robot
+	cv::Point2d polarMetricCoords;      // (distance, angle) Relative to robot
 	
 protected:
 	virtual void updatePolarCoords();
