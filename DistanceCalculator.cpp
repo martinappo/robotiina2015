@@ -18,6 +18,7 @@ void DistanceCalculator::loadConf(){
 			key << confKey;
 			realDistances[i] = confKey;
 			references[i] = pt.get<double>(key.str()); 
+			confKey += DistanceCalibrator::DISTANCE_CALIBRATOR_STEP;
 		}
 	}
 	catch (...){};

@@ -45,10 +45,9 @@ void FrontCameraVision::Run() {
 
 	auto frameSize = m_pCamera->GetFrameSize();
 
-	GatePosition blueGatePos(BLUE_GATE);
-	blueGatePos.frameSize = frameSize;
-	GatePosition yellowGatePos(YELLOW_GATE);
-	yellowGatePos.frameSize = frameSize;
+
+	m_pState->blueGate.setFrameSize(frameSize);
+	m_pState->yellowGate.setFrameSize(frameSize);
 
 	
 

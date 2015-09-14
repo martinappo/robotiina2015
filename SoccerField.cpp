@@ -4,7 +4,7 @@
 
 SoccerField::SoccerField(IDisplay *pDisplay, cv::Size frameSize) :m_pDisplay(pDisplay)
 {
-	//this->self = RobotPosition(this->yellowGate, this->blueGate, cv::Point(214, 180));
+	this->self.setFrameSize(frameSize);
 	initBalls(frameSize);
 	Start();
 }
@@ -23,7 +23,7 @@ GatePosition & SoccerField::GetTargetGate() {
 
 void SoccerField::initBalls(cv::Size frameSize) {
 	for (int i = 0; i < NUMBER_OF_BALLS; i++) {
-		balls[i].frameSize = frameSize;
+		balls[i].setFrameSize(frameSize);
 	}
 }
 

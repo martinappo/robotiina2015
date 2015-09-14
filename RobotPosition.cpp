@@ -113,5 +113,8 @@ bool RobotPosition::isRobotAboveCenterLine(int yellowGoalAngle, int blueGoalAngl
 
 //bluegoal 0 degrees, yellow 180 degrees
 int RobotPosition::getRobotDirection(int yellowGoalDist, int yellowGoalAngle, int blueGoalDist, int blueGoalAngle){
-	return blueGoalAngle + acos((blueGoalDist * blueGoalDist + 500 * 500 - yellowGoalDist * yellowGoalDist) / 2 * 500 * blueGoalDist) + isRobotAboveCenterLine(yellowGoalAngle, blueGoalAngle) ? 0 : -360;
+	float gamma = (blueGoalDist * blueGoalDist + 500.0 * 500.0 - (500 - blueGoalDist) * (500 - blueGoalDist)) / (2.0 * 500.0 * blueGoalDist);
+	float mAcos = acos(gamma);
+	int dir = mAcos + isRobotAboveCenterLine(yellowGoalAngle, blueGoalAngle) ? 0 : -360;
+	return blueGoalAngle + dir;
 }
