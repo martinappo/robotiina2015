@@ -35,6 +35,6 @@ double DistanceCalculator::getDistance(int centerX, int centerY, int x, int y){
 			minDif = dif;
 		}
 	}
-	return realDistances[index]*1.3;
-#error get rid of this magic number
+	return realDistances[index]*4;
+//#error get rid of this magic number
 }
