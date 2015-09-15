@@ -32,7 +32,7 @@ double DistanceCalculator::getDistance(int centerX, int centerY, int x, int y){
 		if (references[i] > dist) {
 			double how_far_between_two_steps = (dist - references[i - 1]) / (references[i] - references[i - 1]);
 			double realdist = realDistances[i - 1] + (realDistances[i] - realDistances[i - 1])*how_far_between_two_steps;
-			std::cout << "distance " << dist << " -> " << realdist << std::endl;
+			//std::cout << "distance " << dist << " -> " << realdist << std::endl;
 			return 4*realdist;
 		}
 		/*

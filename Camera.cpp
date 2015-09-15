@@ -129,7 +129,7 @@ void Camera::Run(){
 		else {
 			bCaptureNextFrame = false;
 		}
-		if (cap->get(CV_CAP_PROP_POS_FRAMES) == frameCount){ //restartVideo
+		if (cap->get(CV_CAP_PROP_POS_FRAMES) >= frameCount){ //restartVideo
 			cap->set(CV_CAP_PROP_POS_FRAMES, 0);
 			continue;
 
