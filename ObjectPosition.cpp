@@ -32,7 +32,7 @@ double ObjectPosition::getAngleToRobot() {
 	return getAngle() + robotAngle;
 }
 
-void ObjectPosition::updateCoordinates(int x, int y, cv::Point robotFieldCoords, int robotAngle) {
+void ObjectPosition::updateCoordinates(int x, int y, cv::Point robotFieldCoords, double robotAngle) {
 	this->robotAngle = robotAngle;
 	lastFieldCoords = fieldCoords;
 	this->rawPixelCoords = { x, y };
@@ -40,7 +40,7 @@ void ObjectPosition::updateCoordinates(int x, int y, cv::Point robotFieldCoords,
 	updateFieldCoords(robotFieldCoords);
 }
 
-void ObjectPosition::updateCoordinates(cv::Point point, cv::Point robotFieldCoords, int robotAngle) {
+void ObjectPosition::updateCoordinates(cv::Point point, cv::Point robotFieldCoords, double robotAngle) {
 	return updateCoordinates(point.x, point.y, robotFieldCoords, robotAngle);
 }
 

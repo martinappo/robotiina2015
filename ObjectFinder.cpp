@@ -23,13 +23,6 @@ ObjectFinder::ObjectFinder()
 		write_ini("conf/camera.ini", pt);
 	};
 }
-bool ObjectFinder::LocateCursor(cv::Mat &frameBGR, cv::Point2i cursor, OBJECT target, BallPosition &targetPos, RobotPosition &robotPos){
-	cv::Scalar color(0, 0, 0);
-	cv::circle(frameBGR, cursor, 8, color, -1);
-	targetPos.updateCoordinates(cursor, robotPos.fieldCoords, robotPos.getAngle());
-	return true;
-}
-
 
 bool ObjectFinder::Locate(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::Mat &frameBGR, OBJECT target, ObjectPosition &targetPos, RobotPosition &robotPos) {
 	cv::Point2i point = LocateOnScreen(HSVRanges, frameHSV, frameBGR, target);
