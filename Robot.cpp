@@ -9,6 +9,7 @@
 #include "WheelController.h"
 #include "CoilBoard.h"
 #include "Dialog.h"
+#include "WebUI.h"
 #include "Wheel.h"
 #include "ComPortScanner.h"
 
@@ -33,11 +34,11 @@
 #include "MouseVision.h"
 
 #define STATE_BUTTON(name, shortcut, new_state) \
-createButton(std::string("") + name, shortcut, [&](){ this->SetState(new_state); });
+m_pDisplay->createButton(std::string("") + name, shortcut, [&](){ this->SetState(new_state); });
 #define BUTTON(name, shortcut, function_body) \
-createButton(name, shortcut, [&]() function_body);
+m_pDisplay->createButton(name, shortcut, [&]() function_body);
 #define START_DIALOG if (state != last_state) { \
-clearButtons();
+m_pDisplay->clearButtons();
 #define END_DIALOG } \
 last_state = (STATE)state; 
 
@@ -86,7 +87,7 @@ void dance_step(float time, float &move1, float &move2) {
 
 /* END DANCE MOVES */
 
-Robot::Robot(boost::asio::io_service &io) : Dialog("Robotiina"), io(io), camera(0), wheels(0), coilBoard(0)
+Robot::Robot(boost::asio::io_service &io) : io(io), camera(0), wheels(0), coilBoard(0)
 {
 	
 	last_state = STATE_END_OF_GAME;
@@ -108,13 +109,21 @@ Robot::~Robot()
         delete wheels;
 	if (scanner)
 		delete scanner;
+//	if (m_pDisplay)
+//		delete m_pDisplay;
 }
 
 bool Robot::Launch(int argc, char* argv[])
 {
 	if (!ParseOptions(argc, argv)) return false;
 
+	initCamera();
+	cv::Size winSize(0, 0);
 	// Compose robot from its parts
+	if (config.count("webui") == 0)
+		m_pDisplay = new Dialog("Robotiina", winSize, camera->GetFrameSize());
+	else 
+		m_pDisplay = new WebUI(8080);
 
 	if (config.count("skip-ports") == 0) {
 		scanner = new ComPortScanner(io);
@@ -124,7 +133,6 @@ bool Robot::Launch(int argc, char* argv[])
 	coilBoardPortsOk = false;
 	wheelsPortsOk = false;
 
-	initCamera();
 	initPorts();
 	initWheels();
 	initCoilboard();
@@ -211,16 +219,16 @@ void Robot::Run()
 	}
 	*/
 	/* Field state */
-	SoccerField field(this, camera->GetFrameSize());
+	SoccerField field(m_pDisplay, camera->GetFrameSize());
 
 	/* Vision modules */
-	FrontCameraVision visionModule(camera, this, &field);
+	FrontCameraVision visionModule(camera, m_pDisplay, &field);
 	//AutoCalibrator visionModule(camera, this);
-	MouseVision mouseVision(camera, this, &field);
+	MouseVision mouseVision(camera, m_pDisplay, &field);
 
-	AutoCalibrator calibrator(camera, this);
+	AutoCalibrator calibrator(camera, m_pDisplay);
 
-	DistanceCalibrator distanceCalibrator(camera, this);
+	DistanceCalibrator distanceCalibrator(camera, m_pDisplay);
 
 	/* Communication modules */
 	ComModule comModule(wheels, coilBoard);
@@ -235,7 +243,7 @@ void Robot::Run()
 
 	std::stringstream subtitles;
 
-	VideoRecorder videoRecorder("videos/", 30, display.size());
+	VideoRecorder videoRecorder("videos/", 30, camera->GetFrameSize(true));
 	while (true)
     {
 		time = boost::posix_time::microsec_clock::local_time();
@@ -251,7 +259,7 @@ void Robot::Run()
 #define RECORD_AFTER_PROCESSING
 #ifdef RECORD_AFTER_PROCESSING
 		if (captureFrames) {
-			videoRecorder.RecordFrame(cam1_area, subtitles.str());
+			videoRecorder.RecordFrame(camera->GetLastFrame(true), subtitles.str());
 		}
 #endif
 		
@@ -305,7 +313,7 @@ void Robot::Run()
 			//				STATE_BUTTON("(D)ance", STATE_DANCE)
 				//STATE_BUTTON("(D)ance", STATE_DANCE)
 				STATE_BUTTON("(R)emote Control", 'r', STATE_REMOTE_CONTROL)
-				createButton(std::string("Save video: ") + (captureFrames ? "on" : "off"), 'v', [this, &captureDir, &time, &videoRecorder]{
+				m_pDisplay->createButton(std::string("Save video: ") + (captureFrames ? "on" : "off"), 'v', [this, &captureDir, &time, &videoRecorder]{
 					if (this->captureFrames) {
 						// save old video
 					}
@@ -316,22 +324,24 @@ void Robot::Run()
 					this->last_state = STATE_END_OF_GAME; // force dialog redraw
 				});
 				STATE_BUTTON("(S)ettings", 's', STATE_SETTINGS)
-				createButton("Reinit wheels", '-', [this] {
+					m_pDisplay->createButton("Reinit wheels", '-', [this] {
 					initPorts();
 					initWheels();
 					this->last_state = STATE_END_OF_GAME; // force dialog redraw
 				});
-				createButton("Reinit coilboard", '-', [this] {
+				m_pDisplay->createButton("Reinit coilboard", '-', [this] {
 					initPorts();
 					initCoilboard();
 					this->last_state = STATE_END_OF_GAME; // force dialog redraw
 				});
-				createButton("Swap displays", '-', [this] {
-					m_bCam1Active = !m_bCam1Active;
+				
+				m_pDisplay->createButton("Swap displays", '-', [this] {
+					m_pDisplay->SwapDisplays();
 				});
-				createButton("Toggle main display on/off", '-', [this] {
-					m_bMainCamEnabled = !m_bMainCamEnabled;
+				m_pDisplay->createButton("Toggle main display on/off", '-', [this] {
+					m_pDisplay->ToggleDisplay();
 				});
+
 
 
 				STATE_BUTTON("(M)anual Control", 'm', STATE_MANUAL_CONTROL)
@@ -349,7 +359,7 @@ void Robot::Run()
 				mouseVision.Enable(false);
 				calibrator.Enable(true);
 				calibrator.reset();
-				createButton("Take a screenshot", '-',[this, &calibrator]{
+				m_pDisplay->createButton("Take a screenshot", '-', [this, &calibrator]{
 					calibrator.LoadFrame();
 					this->SetState(STATE_CALIBRATE);
 				});
@@ -369,7 +379,7 @@ void Robot::Run()
 			START_DIALOG
 				for (int i = 0; i < NUMBER_OF_OBJECTS; i++) {
 					// objectThresholds[(OBJECT) i] = calibrator->GetObjectThresholds(i, OBJECT_LABELS[(OBJECT) i]);
-					createButton(OBJECT_LABELS[(OBJECT)i], '-', [this, i, &calibrator]{
+				m_pDisplay->createButton(OBJECT_LABELS[(OBJECT)i], '-', [this, i, &calibrator]{
 						/*this->objectThresholds[(OBJECT)i] =*/ calibrator.GetObjectThresholds(i, OBJECT_LABELS[(OBJECT)i]);
 					});
 				}
@@ -381,15 +391,15 @@ void Robot::Run()
 				distanceCalibrator.start();
 				STATE_BUTTON("BACK", 8, STATE_NONE)
 			END_DIALOG 
-			cv::putText(display, "Last calibrated distance:", cv::Point(display.cols - 250, 220), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-			cv::putText(display, distanceCalibrator.counterValue, cv::Point(display.cols - 250, 240), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
+			m_pDisplay->putText("Last calibrated distance:", cv::Point(-250, 220), 0.5, cv::Scalar(255, 255, 255));
+			m_pDisplay->putText(distanceCalibrator.counterValue, cv::Point(-250, 240), 0.5, cv::Scalar(255, 255, 255));
 		}else if (STATE_SELECT_GATE == state) {
 			START_DIALOG
-				createButton(OBJECT_LABELS[BLUE_GATE], '-', [&field, this]{
+				m_pDisplay->createButton(OBJECT_LABELS[BLUE_GATE], '-', [&field, this]{
 				field.SetTargetGate(BLUE_GATE);
 				this->SetState(STATE_NONE);
 			});
-			createButton(OBJECT_LABELS[YELLOW_GATE], '-', [&field, this]{
+			m_pDisplay->createButton(OBJECT_LABELS[YELLOW_GATE], '-', [&field, this]{
 				field.SetTargetGate(YELLOW_GATE);
 				this->SetState(STATE_NONE);
 			});
@@ -399,7 +409,7 @@ void Robot::Run()
 			START_DIALOG
 				IConfigurableModule *pModule = static_cast<IConfigurableModule*>(&visionModule);
 				for (auto setting : pModule->GetSettings()){
-					createButton(setting.first + ": " + std::get<0>(setting.second)(), '-', [this, setting]{
+					m_pDisplay->createButton(setting.first + ": " + std::get<0>(setting.second)(), '-', [this, setting]{
 						std::get<1>(setting.second)();
 						this->last_state = STATE_END_OF_GAME; // force dialog redraw
 					});
@@ -411,7 +421,7 @@ void Robot::Run()
 			START_DIALOG
 				IConfigurableModule *pModule = static_cast<IConfigurableModule*>(&manualControl);
 			for (auto setting : pModule->GetSettings()){
-				createButton(setting.first + ": " + std::get<0>(setting.second)(), std::get<0>(setting.second)()[0], [this, setting]{
+				m_pDisplay->createButton(setting.first + ": " + std::get<0>(setting.second)(), std::get<0>(setting.second)()[0], [this, setting]{
 					std::get<1>(setting.second)();
 					this->last_state = STATE_END_OF_GAME; // force dialog redraw
 				});
@@ -453,7 +463,7 @@ void Robot::Run()
 		}
 		else if (STATE_RUN == state) {
 			START_DIALOG
-				createButton(std::string("Save video: ") + (captureFrames ? "on" : "off"), '-', [this, &captureDir, &time, &videoRecorder]{
+				m_pDisplay->createButton(std::string("Save video: ") + (captureFrames ? "on" : "off"), '-', [this, &captureDir, &time, &videoRecorder]{
 					if (this->captureFrames) {
 						// save old video
 					}
@@ -484,7 +494,7 @@ void Robot::Run()
 			START_DIALOG
 				autoPilot.enableTestMode(true);
 				for (const auto d : autoPilot.driveModes) {
-					createButton(d.second->name, '-',[this, &autoPilot, d]{
+					m_pDisplay->createButton(d.second->name, '-', [this, &autoPilot, d]{
 						autoPilot.setTestMode(d.first);
 					});
 				}
@@ -495,8 +505,8 @@ void Robot::Run()
 			float move1, move2;
 			dance_step(((float)(time - epoch).total_milliseconds()), move1, move2);
 			wheels->Drive(move1, move2,0);
-			//cv::putText(frameBGR, "move1:" + std::to_string(move1), cv::Point(frameBGR.cols - 140, 120), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-			//cv::putText(frameBGR, "move2:" + std::to_string(move2), cv::Point(frameBGR.cols - 140, 140), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
+			//cv::putText(frameBGR, "move1:" + std::to_string(move1), cv::Point(frameBGR.cols - 140, 120), 0.5, cv::Scalar(255, 255, 255));
+			//cv::putText(frameBGR, "move2:" + std::to_string(move2), cv::Point(frameBGR.cols - 140, 140), 0.5, cv::Scalar(255, 255, 255));
 		}
 		else if (STATE_END_OF_GAME == state) {
 			break;
@@ -518,32 +528,34 @@ void Robot::Run()
 			}
 		} 
 
-		cv::putText(display, "fps: " + std::to_string(camera->GetFPS()), cv::Point(display.cols - 140, 20), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putText( "fps: " + std::to_string(camera->GetFPS()), cv::Point(-140, 20), 0.5, cv::Scalar(255, 255, 255));
 		//assert(STATE_END_OF_GAME != state);
-		cv::putText(display, "state: " + STATE_LABELS[state], cv::Point(display.cols - 140, 40), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-		
+		m_pDisplay->putText( "state: " + STATE_LABELS[state], cv::Point(-140, 40), 0.5, cv::Scalar(255, 255, 255));
 		auto &ballPos = field.balls[0];
 		auto &targetGatePos = field.GetTargetGate();
-		cv::putText(display, std::string("Ball:") + (field.balls[0].getDistance() > 0 ? "yes" : "no"), cv::Point(display.cols - 140, 60), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-		cv::putText(display, std::string("Gate:") + (targetGatePos.getDistance() >0 ? "yes" : "no"), cv::Point(display.cols - 140, 80), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putText( std::string("Ball:") + (ballPos.getDistance() > 0 ? "yes" : "no"), cv::Point(-140, 60), 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putText( std::string("Gate:") + (targetGatePos.getDistance() >0 ? "yes" : "no"), cv::Point(-140, 80), 0.5, cv::Scalar(255, 255, 255));
+
 		
-		cv::putText(display, std::string("Trib:") + (coilBoard->BallInTribbler() ? "yes" : "no"), cv::Point(display.cols - 140, 100), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-		cv::putText(display, std::string("Sight:") + (field.gateObstructed ? "obst" : "free"), cv::Point(display.cols - 140, 120), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-		//cv::putText(display, std::string("OnWay:") + (somethingOnWay ? "yes" : "no"), cv::Point(display.cols - 140, 140), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putText( std::string("Trib:") + (coilBoard->BallInTribbler() ? "yes" : "no"), cv::Point(-140, 100), 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putText( std::string("Sight:") + (field.gateObstructed ? "obst" : "free"), cv::Point(-140, 120), 0.5, cv::Scalar(255, 255, 255));
+		//m_pDisplay->putText( std::string("OnWay:") + (somethingOnWay ? "yes" : "no"), cv::Point(-140, 140), 0.5, cv::Scalar(255, 255, 255));
 		
 		for (int i = 0; i < NUMBER_OF_BALLS; i++) {
+
 			BallPosition &ball = field.balls[i];
-			cv::putText(display, std::string("Ball") + std::to_string(i) + ": "+ std::to_string(ball.fieldCoords.x) + " : " + std::to_string(ball.fieldCoords.y), cv::Point(display.cols - 250, i * 15 + 10), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.5, cv::Scalar(255, 255, 255));
+			m_pDisplay->putText( std::string("Ball") + std::to_string(i) + ": "+ std::to_string(ball.fieldCoords.x) + " : " + std::to_string(ball.fieldCoords.y), cv::Point(-250, i * 15 + 10), 0.3, cv::Scalar(255, 255, 255));
 		}
 
-		cv::putText(display, "robot: " + std::to_string(field.self.fieldCoords.x) + " " + std::to_string(field.self.fieldCoords.y), cv::Point(display.cols - 140, 200), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putText( "robot: " + std::to_string(field.self.fieldCoords.x) + " " + std::to_string(field.self.fieldCoords.y), cv::Point(-140, 200), 0.5, cv::Scalar(255, 255, 255));
 
 
-		//cv::putText(display, "border: " + std::to_string(borderDistance.distance), cv::Point(display.cols - 140, 280), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
+		//m_pDisplay->putText( "border: " + std::to_string(borderDistance.distance), cv::Point(-140, 280), 0.5, cv::Scalar(255, 255, 255));
 
 
-		cv::putText(display, "Yellow Gate" ,  cv::Point(display.cols - 140, 320), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
-		cv::putText(display, "(dist / angle): " + std::to_string(field.yellowGate.getDistance()) + " / " + std::to_string(field.yellowGate.getAngle()), cv::Point(display.cols - 140, 340), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putText( "Yellow Gate" ,  cv::Point(-140, 320), 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putText( "(dist / angle): " + std::to_string(field.yellowGate.getDistance()) + " / " + std::to_string(field.yellowGate.getAngle()), cv::Point(-140, 340), 0.5, cv::Scalar(255, 255, 255));
+
 		
 
 		
@@ -556,12 +568,12 @@ void Robot::Run()
 		int j = 0;
 		for (auto s : subtitles2) {
 			if (s.empty()) s = " "; // opencv 3 crashes on empty string
-			cv::putText(display, s, cv::Point(10, display.rows - 150 + j), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
+			m_pDisplay->putText( s, cv::Point(10, -150 + j), 0.5, cv::Scalar(255, 255, 255));
 			j += 20;
 		}
 
 		/* robot tracker */
-		cv::Point2i center(display.cols - 100, 200);
+		cv::Point2i center(-100, 200);
 		double velocity = 0, direction = 0, rotate = 0;
 		auto speed = wheels->GetTargetSpeed();
 
@@ -570,7 +582,8 @@ void Robot::Run()
 		cv::Scalar colorCircle(133, 33, 55);
 		cv::circle(display, center, 60, colorCircle, 2);
 		*/
-		show(display);
+		//m_pDisplay->Draw();
+		/*
 		int key = cv::waitKey(1);
 		if (key != -1) {
 			KeyPressed(key);
@@ -579,6 +592,7 @@ void Robot::Run()
 			std::cout << "exiting program" << std::endl;
 			break;
 		}
+		*/
 //		frames++;
 
     }

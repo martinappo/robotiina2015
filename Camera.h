@@ -39,16 +39,19 @@ public:
     Camera(const std::string &device);
 	Camera(int device);
 	Camera();
+
+	cv::Mat & Capture(bool bFullFrame = false);
+	cv::Mat & GetLastFrame(bool bFullFrame = false);
+	const cv::Mat & CaptureHSV();
 	void Init();
-	cv::Mat & Capture();
-    const cv::Mat & CaptureHSV();
+
     virtual ~Camera(){ 
 		WaitForStop();
 		cap->release();
 		delete cap;
 	}
-	virtual cv::Size GetFrameSize(){
-		return true ? cv::Size(roi.width, roi.height) : frameSize;
+	virtual cv::Size GetFrameSize(bool bFullFrame = false){
+		return !bFullFrame ? cv::Size(roi.width, roi.height) : frameSize;
 	};
 	virtual double GetFPS() {
 		return fps;
