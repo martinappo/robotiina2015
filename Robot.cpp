@@ -359,10 +359,8 @@ void Robot::Run()
 				calibrator.Enable(true);
 				calibrator.reset();
 				m_pDisplay->createButton("Take a screenshot", '-', [this, &calibrator]{
-					if (calibrator.LoadFrame()) {
-						this->SetState(STATE_CALIBRATE);
-					};
-
+					calibrator.LoadFrame();
+					this->SetState(STATE_CALIBRATE);
 				});
 			STATE_BUTTON("BACK", 8,STATE_NONE)
 			END_DIALOG
@@ -532,28 +530,31 @@ void Robot::Run()
 		m_pDisplay->putText( "fps: " + std::to_string(camera->GetFPS()), cv::Point(-140, 20), 0.5, cv::Scalar(255, 255, 255));
 		//assert(STATE_END_OF_GAME != state);
 		m_pDisplay->putText( "state: " + STATE_LABELS[state], cv::Point(-140, 40), 0.5, cv::Scalar(255, 255, 255));
-		ObjectPosition ballPos = field.balls[0];
-		ObjectPosition targetGatePos = field.GetTargetGate();
+		auto &ballPos = field.balls[0];
+		auto &targetGatePos = field.GetTargetGate();
 		m_pDisplay->putText( std::string("Ball:") + (ballPos.getDistance() > 0 ? "yes" : "no"), cv::Point(-140, 60), 0.5, cv::Scalar(255, 255, 255));
 		m_pDisplay->putText( std::string("Gate:") + (targetGatePos.getDistance() >0 ? "yes" : "no"), cv::Point(-140, 80), 0.5, cv::Scalar(255, 255, 255));
+
 		
 		m_pDisplay->putText( std::string("Trib:") + (coilBoard->BallInTribbler() ? "yes" : "no"), cv::Point(-140, 100), 0.5, cv::Scalar(255, 255, 255));
 		m_pDisplay->putText( std::string("Sight:") + (field.gateObstructed ? "obst" : "free"), cv::Point(-140, 120), 0.5, cv::Scalar(255, 255, 255));
 		//m_pDisplay->putText( std::string("OnWay:") + (somethingOnWay ? "yes" : "no"), cv::Point(-140, 140), 0.5, cv::Scalar(255, 255, 255));
 		
 		for (int i = 0; i < NUMBER_OF_BALLS; i++) {
-			BallPosition ball = field.balls[i].load();
+
+			BallPosition &ball = field.balls[i];
 			m_pDisplay->putText( std::string("Ball") + std::to_string(i) + ": "+ std::to_string(ball.fieldCoords.x) + " : " + std::to_string(ball.fieldCoords.y), cv::Point(-250, i * 15 + 10), 0.3, cv::Scalar(255, 255, 255));
 		}
 
-		m_pDisplay->putText( "robot: " + std::to_string(field.self.load().fieldCoords.x) + " " + std::to_string(field.self.load().fieldCoords.y), cv::Point(-140, 200), 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putText( "robot: " + std::to_string(field.self.fieldCoords.x) + " " + std::to_string(field.self.fieldCoords.y), cv::Point(-140, 200), 0.5, cv::Scalar(255, 255, 255));
 
 
 		//m_pDisplay->putText( "border: " + std::to_string(borderDistance.distance), cv::Point(-140, 280), 0.5, cv::Scalar(255, 255, 255));
 
 
 		m_pDisplay->putText( "Yellow Gate" ,  cv::Point(-140, 320), 0.5, cv::Scalar(255, 255, 255));
-		m_pDisplay->putText( "(dist / angle): " + std::to_string(field.yellowGate.load().getDistance()) + " / " + std::to_string(field.yellowGate.load().getAngle()), cv::Point(-140, 340), 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putText( "(dist / angle): " + std::to_string(field.yellowGate.getDistance()) + " / " + std::to_string(field.yellowGate.getAngle()), cv::Point(-140, 340), 0.5, cv::Scalar(255, 255, 255));
+
 		
 
 		

@@ -12,7 +12,7 @@ ObjectPosition::ObjectPosition(cv::Point2i polarCoords) {
 
 ObjectPosition::~ObjectPosition() {};
 
-int ObjectPosition::getDistance() {
+double ObjectPosition::getDistance() {
 	return polarMetricCoords.x;
 }
 
@@ -20,11 +20,15 @@ void ObjectPosition::setDistance(int distance) {
 	this->polarMetricCoords.x = distance;
 }
 
-int ObjectPosition::getAngle() {
+void ObjectPosition::setFrameSize(cv::Size frameSize) {
+	this->frameSize = frameSize;
+}
+
+double ObjectPosition::getAngle() {
 	return polarMetricCoords.y;
 }
 
-int ObjectPosition::getAngleToRobot() {
+double ObjectPosition::getAngleToRobot() {
 	return getAngle() + robotAngle;
 }
 
@@ -49,10 +53,11 @@ void ObjectPosition::updatePolarCoords(int x, int y) {
 }
 
 void ObjectPosition::updatePolarCoords(cv::Point rawCoords) {
-	cv::Point centerOfFrame = { frameSize.height / 2, frameSize.width / 2 };
-	int distanceInCm = mDistanceCalculator.getDistance(centerOfFrame.x, centerOfFrame.y, rawCoords.x, rawCoords.y);
-	int angle = (int)(angleBetween(rawCoords, centerOfFrame, { frameSize.height, frameSize.width / 2 }));
-	this->polarMetricCoords = { distanceInCm, angle };
+	cv::Point centerOfFrame = { frameSize.width / 2, frameSize.height / 2 };
+	double distanceInCm = mDistanceCalculator.getDistance(centerOfFrame.x, centerOfFrame.y, rawCoords.x, rawCoords.y);
+	double angle = (angleBetween(rawCoords, centerOfFrame, { frameSize.width / 2, 0 }));
+	
+	this->polarMetricCoords = { distanceInCm, angle};
 }
 
 
@@ -75,9 +80,11 @@ double ObjectPosition::angleBetween(const cv::Point2i &a, const cv::Point2i &b, 
 	double alpha = atan2(cross, dot);
 	double alphaDeg = floor(alpha * 180. / CV_PI + 0.5);
 	if (alphaDeg < 0) {
-		return 360 + alphaDeg;
+		return 360 - alphaDeg;
 	}
-	return alphaDeg;
+	else {
+		return alphaDeg;
+	}
 }
 
 

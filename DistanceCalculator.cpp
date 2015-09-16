@@ -18,21 +18,31 @@ void DistanceCalculator::loadConf(){
 			key << confKey;
 			realDistances[i] = confKey;
 			references[i] = pt.get<double>(key.str()); 
+			confKey += DistanceCalibrator::DISTANCE_CALIBRATOR_STEP;
 		}
 	}
 	catch (...){};
 }
 
-int DistanceCalculator::getDistance(int centerX, int centerY, int x, int y){
+double DistanceCalculator::getDistance(int centerX, int centerY, int x, int y){
 	double dist = DistanceCalibrator::calculateDistance(centerX, centerY, x, y);
 	double minDif = INT_MAX;
 	int index = 0;
-	for (int i = 0; i < DistanceCalibrator::CONF_SIZE; i++){
+	for (int i = 1; i < DistanceCalibrator::CONF_SIZE; i++){
+		if (references[i] > dist) {
+			double how_far_between_two_steps = (dist - references[i - 1]) / (references[i] - references[i - 1]);
+			double realdist = realDistances[i - 1] + (realDistances[i] - realDistances[i - 1])*how_far_between_two_steps;
+			//std::cout << "distance " << dist << " -> " << realdist << std::endl;
+			return 4*realdist;
+		}
+		/*
 		double dif = std::abs(references[i] - dist);
 		if (dif < minDif){
 			index = i;
 			minDif = dif;
 		}
+		*/
 	}
-	return realDistances[index];
+	return realDistances[index]*4;
+//#error get rid of this magic number
 }

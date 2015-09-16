@@ -16,7 +16,7 @@ class AutoCalibrator : public ColorCalibrator,
 
 public:
 	AutoCalibrator(ICamera * pCamera, IDisplay *pDisplay);
-	bool LoadFrame();
+	void LoadFrame();
 	void reset() { 
 		boost::mutex::scoped_lock lock(mutex); //allow one command at a time
 		resize(white, image, frame_size);
@@ -46,8 +46,7 @@ protected:
 
 private:
     bool done;
-	std::string name;
-	int max_image_count = 4;
+	std::string object_name;
 	cv::Point frame_size;
 	boost::mutex mutex;
 	std::atomic_int screenshot_mode;

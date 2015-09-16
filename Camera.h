@@ -26,7 +26,7 @@ private:
 	boost::posix_time::ptime lastCapture2;
 	boost::posix_time::ptime lastCapture;
 	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
-	int frameCount, frameCounter;
+	int frameCount;
 
 protected:
 	void Run();

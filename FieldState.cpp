@@ -1,7 +1,13 @@
 #include "FieldState.h"
 
+FieldState::FieldState() :yellowGate(YELLOW_GATE), blueGate(BLUE_GATE), self(yellowGate, blueGate, cv::Point(0, 0)){
+};
+FieldState::~FieldState(){
+
+}
+
 void FieldState::resetBallsUpdateState() {
 	for (int i = 0; i < NUMBER_OF_BALLS; i++) {
-		balls[i].load().setIsUpdated(false);
+		balls[i].setIsUpdated(false);
 	}
 }

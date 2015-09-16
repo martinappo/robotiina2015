@@ -4,35 +4,48 @@
 //	this->polarMetricCoords = cv::Point(0, 0);
 //} 
 
-RobotPosition::RobotPosition(GatePosition yellowGate, GatePosition blueGate, cv::Point initialCoords){
+RobotPosition::RobotPosition(GatePosition &yellowGate, GatePosition &blueGate, cv::Point initialCoords):
+	yellowGate(yellowGate), blueGate(blueGate) {
 	this->polarMetricCoords = cv::Point(0, 0);
 	this->fieldCoords = initialCoords;
-	updateCoordinates(yellowGate, blueGate);
+	updateCoordinates();
 }
 
 RobotPosition::~RobotPosition()
 {
 }
 
-void RobotPosition::updateCoordinates(GatePosition yellowGate, GatePosition blueGate) {
+void RobotPosition::updateCoordinates() {
 	lastFieldCoords = fieldCoords;
-	this->robotAngle = yellowGate.getAngle();
-	updateFieldCoords(yellowGate, blueGate);
+	this->robotAngle = getRobotDirection(yellowGate.getDistance(), yellowGate.getAngle(), blueGate.getDistance(), blueGate.getAngle());
+	updateFieldCoords();
 }
 
-void RobotPosition::updateFieldCoords(GatePosition yellowGate, GatePosition blueGate) {
+void RobotPosition::updateFieldCoords() {
 	std::pair<cv::Point, cv::Point> possiblePoints = intersectionOfTwoCircles(yellowGate.fieldCoords, 
 																			  yellowGate.getDistance(), 
 																			  blueGate.fieldCoords, 
 																			  blueGate.getDistance());
-	double possiblePointDistance1 = cv::norm(possiblePoints.first - lastFieldCoords);
+	if (isRobotAboveCenterLine(yellowGate.getAngle(), blueGate.getAngle())){
+		if (possiblePoints.first.y > 155){
+			this->fieldCoords = possiblePoints.first;
+		}else
+			this->fieldCoords = possiblePoints.second;
+	}
+	else {
+		if (possiblePoints.first.y < 155){
+			this->fieldCoords = possiblePoints.first;
+		}else
+			this->fieldCoords = possiblePoints.second;
+	}
+	/*double possiblePointDistance1 = cv::norm(possiblePoints.first - lastFieldCoords);
 	double possiblePointDistance2 = cv::norm(possiblePoints.second - lastFieldCoords);
 	if (possiblePointDistance1 < possiblePointDistance2) {
 		this->fieldCoords = possiblePoints.first;
 	}
 	else {
 		this->fieldCoords = possiblePoints.second;
-	}
+	}*/
 }
 
 void RobotPosition::updatePolarCoords() {
@@ -80,6 +93,28 @@ std::pair<cv::Point, cv::Point> RobotPosition::intersectionOfTwoCircles(cv::Poin
 	return std::pair<cv::Point, cv::Point>(possible1, possible2);
 }
 
-int RobotPosition::getAngle() {
+double RobotPosition::getAngle() {
 	return robotAngle;
+}
+
+bool RobotPosition::isRobotAboveCenterLine(double yellowGoalAngle, double blueGoalAngle){
+
+	double yellowToBlue = blueGoalAngle - yellowGoalAngle;
+	if (yellowToBlue < 0)
+		yellowToBlue += 360;
+	double blueToYellow = yellowGoalAngle - blueGoalAngle;
+	if (blueToYellow < 0)
+		blueToYellow += 360;
+
+	if (yellowToBlue < blueToYellow)
+		return false;
+	return true;
+}
+
+//bluegoal 0 degrees, yellow 180 degrees
+double RobotPosition::getRobotDirection(double yellowGoalDist, double yellowGoalAngle, double blueGoalDist, double blueGoalAngle){
+	double gamma = (blueGoalDist * blueGoalDist + 500.0 * 500.0 - (500 - blueGoalDist) * (500 - blueGoalDist)) / (2.0 * 500.0 * blueGoalDist);
+	double mAcos = acos(gamma);
+	int dir = mAcos + isRobotAboveCenterLine(yellowGoalAngle, blueGoalAngle) ? 0 : -360;
+	return blueGoalAngle + dir;
 }

@@ -7,12 +7,12 @@ GatePosition::GatePosition(int x, int y) {
 
 GatePosition::GatePosition(OBJECT gate) {
 	if (gate == YELLOW_GATE) {
-		this->polarMetricCoords = cv::Point(0, 155);
-		this->fieldCoords = cv::Point(0, 155);
+		this->polarMetricCoords = cv::Point(-250, 0);
+		this->fieldCoords = cv::Point(-250, 0);
 	}
 	else if (gate == BLUE_GATE) {
-		this->polarMetricCoords = cv::Point(500, 155);
-		this->fieldCoords = cv::Point(500, 155);
+		this->polarMetricCoords = cv::Point(250, 0);
+		this->fieldCoords = cv::Point(250, 0);
 	}
 	else {
 		throw std::runtime_error("Gate must be either BLUE_GATE or YELLOW_GATE");
