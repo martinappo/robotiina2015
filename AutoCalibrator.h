@@ -46,7 +46,7 @@ protected:
 
 private:
     bool done;
-	std::string name;
+	std::string object_name;
 	cv::Point frame_size;
 	boost::mutex mutex;
 	std::atomic_int screenshot_mode;

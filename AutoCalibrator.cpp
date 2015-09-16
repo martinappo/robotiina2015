@@ -25,7 +25,6 @@ void AutoCalibrator::LoadFrame()
 
 HSVColorRange AutoCalibrator::GetObjectThresholds (int index, const std::string &name)
 {
-	screenshot_mode = GET_THRESHOLD;
 	clustered.copyTo(display);
 
 	try {
@@ -33,7 +32,9 @@ HSVColorRange AutoCalibrator::GetObjectThresholds (int index, const std::string 
 	}
 	catch (...) {
 	}
-	this->name = name;
+	// order important, change name before state 
+	this->object_name = name;
+	screenshot_mode = GET_THRESHOLD;
 	return range;
 
 
@@ -64,7 +65,7 @@ HSVColorRange AutoCalibrator::GetObjectThresholds (int index, const std::string 
     }
     cvDestroyWindow(name.c_str());
 	*/
-    SaveConf(name);
+    SaveConf(object_name);
 	screenshot_mode = THRESHOLDING;
     return range;
 
@@ -75,7 +76,7 @@ bool AutoCalibrator::OnMouseEvent(int event, float x, float y, int flags) {
 		mouseClicked((int)(x*frame_size.x), (int)(y*frame_size.y), flags);
 	}
 	if (event == cv::EVENT_RBUTTONUP) {
-		SaveConf(this->name);
+		SaveConf(this->object_name);
 		screenshot_mode = THRESHOLDING;
 	}
 	return true;
@@ -137,7 +138,7 @@ void AutoCalibrator::mouseClicked(int x, int y, int flags) {
     //cv::imshow("auto thresholded 3", clustered); //show the thresholded image
 
 	//cv::imshow("original", image); //show the thresholded image
-	//cv::imshow(this->name.c_str(), selected); //show the thresholded image
+	//cv::imshow(this->object_name.c_str(), selected); //show the thresholded image
 
 }
 AutoCalibrator::~AutoCalibrator(){
@@ -176,7 +177,7 @@ void AutoCalibrator::Run() {
 			m_pDisplay->ShowImage(clustered);
 		}
 		else if (screenshot_mode == GET_THRESHOLD) {
-			cv::putText(display, name, cv::Point(250, 220), cv::FONT_HERSHEY_DUPLEX, 1, cv::Scalar(23, 67, 245));
+			cv::putText(display, object_name, cv::Point(250, 220), cv::FONT_HERSHEY_DUPLEX, 1, cv::Scalar(23, 67, 245));
 			cv::putText(display, "(ctrl +) click to select pixels, right click back", cv::Point(190, 320), cv::FONT_HERSHEY_DUPLEX, 0.3, cv::Scalar(23, 67, 245));
 			m_pDisplay->ShowImage(display);
 
