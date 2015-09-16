@@ -1,22 +1,64 @@
 #include "Dialog.h"
+/*
 #define WINDOW_WIDTH 976
 #define WINDOW_HEIGHT 840
 
 #define CAM_WIDTH 720
 #define CAM_HEIGHT 720
+*/
+Dialog::Dialog(const std::string &title, const cv::Size &ptWindowSize, const cv::Size &ptCamSize, int flags/* = CV_WINDOW_AUTOSIZE*/)
+	: windowSize(ptWindowSize), camSize(ptCamSize)
+{
+	if (camSize != cv::Size(0, 0) && windowSize == cv::Size(0, 0)) {
+		windowSize = camSize + cv::Size(160, 160);
+	}
+	else if (camSize == cv::Size(0, 0) && windowSize != cv::Size(0, 0)) {
+		this->camSize = windowSize - cv::Size(160, 160);
 
-Dialog::Dialog(const std::string &title, int flags/* = CV_WINDOW_AUTOSIZE*/) {
-
+	}
+	else if (camSize == cv::Size(0, 0) && windowSize == cv::Size(0, 0)){
+		this->windowSize = cv::Size(960, 600);
+		this->camSize = windowSize - cv::Size(160, 160);
+	}
+	if (camSize.width > windowSize.width) {
+		camSize.width = windowSize.width - 160;
+	}
+	if (camSize.height > windowSize.height) {
+		camSize.height = windowSize.height - 160;
+	}
+	fontScale = (double)windowSize.height / 1024;
     m_title = title;
 	m_bMainCamEnabled = true;
     int baseLine;
-    m_buttonHeight = cv::getTextSize("Ajig6", cv::FONT_HERSHEY_DUPLEX, 0.9, 1, &baseLine).height * 2;
 
+	m_buttonHeight = cv::getTextSize("Ajig6", cv::FONT_HERSHEY_DUPLEX, fontScale, 1, &baseLine).height * 2;
 
-	display_empty = cv::Mat(WINDOW_HEIGHT, WINDOW_WIDTH, CV_8UC3, cv::Scalar(0));
-	display = cv::Mat(WINDOW_HEIGHT, WINDOW_WIDTH, CV_8UC3);
-	cam1_roi = display(cv::Rect(0, 0, CAM_WIDTH, CAM_HEIGHT)); // region of interest
-	cam2_roi = display(cv::Rect(CAM_WIDTH, CAM_HEIGHT - 160, WINDOW_WIDTH - CAM_WIDTH, 160));
+	/*
+    m_buttonHeight = cv::getTextSize("Ajig6", cv::FONT_HERSHEY_DUPLEX, fontScale, 1, &baseLine).height * 2;
+	
+	cv::namedWindow(m_title, CV_WINDOW_AUTOSIZE);
+	//cvSetWindowProperty(m_title.c_str(), CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+	cv::moveWindow(m_title, 0, 0);
+	cv::setMouseCallback(m_title, [](int event, int x, int y, int flags, void* self) {
+		for (auto pListener : ((Dialog*)self)->m_EventListeners){
+			if (pListener->OnMouseEvent(event, (float)x / ((Dialog*)self)->camSize.x, (float)y / ((Dialog*)self)->camSize.y, flags)) {
+				return; // event was handled
+			}
+		}
+
+		((Dialog*)self)->mouseX = x;
+		((Dialog*)self)->mouseY = y;
+		if (event == cv::EVENT_LBUTTONUP){
+			((Dialog*)self)->mouseClicked(x, y);
+		}
+	}, this);
+*/
+
+	display_empty = cv::Mat(windowSize, CV_8UC3, cv::Scalar(0));
+	display = cv::Mat(windowSize, CV_8UC3, cv::Scalar(0));
+	cam1_roi = display(cv::Rect(0, 0, camSize.width, camSize.height)); // region of interest
+	std::cout << windowSize << (camSize - cv::Size(0, 160)) << " -> " << (windowSize - cv::Size(0, 160)) << std::endl;
+	cam2_roi = display(cv::Rect(camSize - cv::Size(0, 160), cv::Size(160, 160)));
 	//cam_area = cv::Mat(CAM_HEIGHT, CAM_WIDTH, CV_8UC3);
 	Start();
 
@@ -48,7 +90,7 @@ void Dialog::ClearDisplay() {
 //	display_empty.copyTo(display);
 }
 void Dialog::putText(const std::string &text, cv::Point pos, double fontScale, cv::Scalar color) {
-	//boost::mutex::scoped_lock lock(click_mutex); //allow one command at a time
+	boost::mutex::scoped_lock lock(click_mutex); //allow one command at a time
 
 	if (pos.x < 0) pos.x = display.size().width + pos.x;
 	if (pos.y < 0) pos.y = display.size().height + pos.y;
@@ -77,7 +119,7 @@ int Dialog::Draw() {
 
     int i = 0;
     for (const auto& button : m_buttons) {
-		cv::putText(display, std::get<0>(button), cv::Point(30, (++i)*m_buttonHeight), cv::FONT_HERSHEY_DUPLEX, 0.9, cv::Scalar(255, 255, 255));
+		cv::putText(display, std::get<0>(button), cv::Point(30, (++i)*m_buttonHeight), cv::FONT_HERSHEY_DUPLEX, fontScale, cv::Scalar(255, 255, 255));
 
     }
 	for (const auto& text : m_texts) {
@@ -116,7 +158,7 @@ void Dialog::Run(){
 	cv::moveWindow(m_title, 0, 0);
 	cv::setMouseCallback(m_title, [](int event, int x, int y, int flags, void* self) {
 		for (auto pListener : ((Dialog*)self)->m_EventListeners){
-			if (pListener->OnMouseEvent(event, (float)x / CAM_WIDTH, (float)y / CAM_HEIGHT, flags)) {
+			if (pListener->OnMouseEvent(event, (float)x / ((Dialog*)self)->camSize.width, (float)y / ((Dialog*)self)->camSize.height, flags)) {
 				return; // event was handled
 			}
 		}

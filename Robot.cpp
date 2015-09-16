@@ -117,9 +117,11 @@ bool Robot::Launch(int argc, char* argv[])
 {
 	if (!ParseOptions(argc, argv)) return false;
 
+	initCamera();
+	cv::Size winSize(0, 0);
 	// Compose robot from its parts
 	if (config.count("webui") == 0)
-		m_pDisplay = new Dialog("Robotiina");
+		m_pDisplay = new Dialog("Robotiina", winSize, camera->GetFrameSize());
 	else 
 		m_pDisplay = new WebUI(8080);
 
@@ -131,7 +133,6 @@ bool Robot::Launch(int argc, char* argv[])
 	coilBoardPortsOk = false;
 	wheelsPortsOk = false;
 
-	initCamera();
 	initPorts();
 	initWheels();
 	initCoilboard();
@@ -333,14 +334,14 @@ void Robot::Run()
 					initCoilboard();
 					this->last_state = STATE_END_OF_GAME; // force dialog redraw
 				});
-				/*
-				createButton("Swap displays", '-', [this] {
-					m_bCam1Active = !m_bCam1Active;
+				
+				m_pDisplay->createButton("Swap displays", '-', [this] {
+					m_pDisplay->SwapDisplays();
 				});
-				createButton("Toggle main display on/off", '-', [this] {
-					m_bMainCamEnabled = !m_bMainCamEnabled;
+				m_pDisplay->createButton("Toggle main display on/off", '-', [this] {
+					m_pDisplay->ToggleDisplay();
 				});
-				*/
+
 
 
 				STATE_BUTTON("(M)anual Control", 'm', STATE_MANUAL_CONTROL)

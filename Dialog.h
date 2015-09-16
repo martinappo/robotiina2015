@@ -10,7 +10,7 @@
 
 class Dialog : public IDisplay, public ThreadedClass {
 public:
-    Dialog(const std::string &m_Title, int flags = CV_WINDOW_AUTOSIZE);
+	Dialog(const std::string &m_Title, const cv::Size &windowSize = cv::Size(0, 0), const cv::Size &camSize = cv::Size(0, 0), int flags = CV_WINDOW_AUTOSIZE);
 	int createButton(const std::string& bar_name, char shortcut, std::function<void()> const &);
 	int Draw();
 	void clearButtons();
@@ -26,6 +26,13 @@ public:
 	virtual void putText(const std::string &text, cv::Point pos, double fontScale, cv::Scalar color);
 	void Run();
 	virtual ~Dialog();
+	virtual void SwapDisplays(){
+		m_bCam1Active = !m_bCam1Active;
+	};
+	virtual void ToggleDisplay(){
+		m_bMainCamEnabled = !m_bMainCamEnabled;
+	};
+
 protected:
     void mouseClicked(int x, int y);
 	std::atomic_int mouseX;
@@ -38,6 +45,7 @@ protected:
 	void KeyPressed(int key);
 	bool m_bCam1Active = true;
 	std::atomic_bool m_bMainCamEnabled;
+	cv::Size windowSize, camSize;
 private:
     bool m_close = false;
     std::string m_title;
@@ -46,4 +54,5 @@ private:
     int m_buttonHeight = 60; /* calculated automatically*/
 	boost::mutex click_mutex;
 	boost::mutex display_mutex;
+	double fontScale;
 };
