@@ -1,23 +1,43 @@
 #include "Dialog.h"
+/*
 #define WINDOW_WIDTH 976
 #define WINDOW_HEIGHT 840
 
 #define CAM_WIDTH 720
 #define CAM_HEIGHT 720
+*/
+Dialog::Dialog(const std::string &title, const cv::Point &ptWindowSize, const cv::Point &ptCamSize, int flags/* = CV_WINDOW_AUTOSIZE*/) 
+	: windowSize(ptWindowSize), camSize(ptCamSize)
+{
+	if (camSize != cv::Point(0, 0) && windowSize == cv::Point(0, 0)) {
+		windowSize = camSize + cv::Point(160,160);
+	}
+	else if (camSize == cv::Point(0, 0) && windowSize != cv::Point(0, 0)) {
+		this->camSize = windowSize - cv::Point(160, 160);
 
-Dialog::Dialog(const std::string &title, int flags/* = CV_WINDOW_AUTOSIZE*/) {
-
+	}
+	else if (camSize == cv::Point(0, 0) && windowSize == cv::Point(0, 0)){
+		this->windowSize = cv::Point(960, 600);
+		this->camSize = windowSize - cv::Point(160, 160);
+	}
+	if (camSize.x > windowSize.x) {
+		camSize.x = windowSize.x - 160;
+	}
+	if (camSize.y > windowSize.y) {
+		camSize.y = windowSize.y - 160;
+	}
+	fontScale = (double)windowSize.y / 1024;
     m_title = title;
 	m_bMainCamEnabled = true;
     int baseLine;
-    m_buttonHeight = cv::getTextSize("Ajig6", cv::FONT_HERSHEY_DUPLEX, 0.9, 1, &baseLine).height * 2;
-
+    m_buttonHeight = cv::getTextSize("Ajig6", cv::FONT_HERSHEY_DUPLEX, fontScale, 1, &baseLine).height * 2;
+	
 	cv::namedWindow(m_title, CV_WINDOW_AUTOSIZE);
 	//cvSetWindowProperty(m_title.c_str(), CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
 	cv::moveWindow(m_title, 0, 0);
 	cv::setMouseCallback(m_title, [](int event, int x, int y, int flags, void* self) {
 		for (auto pListener : ((Dialog*)self)->m_EventListeners){
-			if (pListener->OnMouseEvent(event, (float)x/CAM_WIDTH, (float)y/CAM_HEIGHT, flags)) {
+			if (pListener->OnMouseEvent(event, (float)x / ((Dialog*)self)->camSize.x, (float)y / ((Dialog*)self)->camSize.y, flags)) {
 				return; // event was handled
 			}
 		}
@@ -29,10 +49,10 @@ Dialog::Dialog(const std::string &title, int flags/* = CV_WINDOW_AUTOSIZE*/) {
 		}
 	}, this);
 
-	display_empty = cv::Mat(WINDOW_HEIGHT, WINDOW_WIDTH, CV_8UC3, cv::Scalar(0));
-	display = cv::Mat(WINDOW_HEIGHT, WINDOW_WIDTH, CV_8UC3);
-	cam1_roi = display(cv::Rect(0, 0, CAM_WIDTH, CAM_HEIGHT)); // region of interest
-	cam2_roi = display(cv::Rect(CAM_WIDTH, CAM_HEIGHT - 160, WINDOW_WIDTH - CAM_WIDTH, 160));
+	display_empty = cv::Mat(windowSize, CV_8UC3, cv::Scalar(0));
+	display = cv::Mat(windowSize, CV_8UC3, cv::Scalar(0));
+	cam1_roi = display(cv::Rect(0, 0, camSize.x, camSize.y)); // region of interest
+	cam2_roi = display(cv::Rect(camSize - cv::Point(0, 160), windowSize - cv::Point(0, 160)));
 	//cam_area = cv::Mat(CAM_HEIGHT, CAM_WIDTH, CV_8UC3);
 
 };
@@ -79,7 +99,7 @@ int Dialog::show(const cv::Mat &background) {
 
     int i = 0;
     for (const auto& button : m_buttons) {
-		cv::putText(display, std::get<0>(button), cv::Point(30, (++i)*m_buttonHeight), cv::FONT_HERSHEY_DUPLEX, 0.9, cv::Scalar(255, 255, 255));
+		cv::putText(display, std::get<0>(button), cv::Point(30, (++i)*m_buttonHeight), cv::FONT_HERSHEY_DUPLEX, fontScale, cv::Scalar(255, 255, 255));
 
     }
 	cv::imshow(m_title, display);

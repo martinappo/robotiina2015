@@ -9,7 +9,7 @@
 
 class Dialog: public IDisplay {
 public:
-    Dialog(const std::string &m_Title, int flags = CV_WINDOW_AUTOSIZE);
+	Dialog(const std::string &m_Title, const cv::Point &windowSize = cv::Point(0, 0), const cv::Point &camSize = cv::Point(0, 0), int flags = CV_WINDOW_AUTOSIZE);
 	int createButton(const std::string& bar_name, char shortcut, std::function<void()> const &);
     int show(const cv::Mat &background);
 	void clearButtons();
@@ -35,6 +35,7 @@ protected:
 	void KeyPressed(int key);
 	bool m_bCam1Active = true;
 	std::atomic_bool m_bMainCamEnabled;
+	cv::Point windowSize, camSize;
 private:
     bool m_close = false;
     std::string m_title;
@@ -42,4 +43,5 @@ private:
     int m_buttonHeight = 60; /* calculated automatically*/
 	boost::mutex click_mutex;
 	boost::mutex display_mutex;
+	double fontScale;
 };
