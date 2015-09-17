@@ -119,6 +119,13 @@ bool Robot::Launch(int argc, char* argv[])
 
 	initCamera();
 	cv::Size winSize(0, 0);
+	if (config.count("app-size")) {
+		std::vector<std::string> tokens;
+		boost::split(tokens, config["app-size"].as<std::string>(), boost::is_any_of("x"));
+		winSize.width = atoi(tokens[0].c_str());
+		winSize.height = atoi(tokens[1].c_str());
+
+	}
 	// Compose robot from its parts
 	if (config.count("webui") == 0)
 		m_pDisplay = new Dialog("Robotiina", winSize, camera->GetFrameSize());
@@ -611,6 +618,7 @@ bool Robot::ParseOptions(int argc, char* argv[])
 	desc.add_options()
 		("help", "produce help message")
 		("camera", po::value<std::string>(), "set camera index or path")
+		("app-size", po::value<std::string>(), "main window size: width x height")
 		("locate_cursor", "find cursor instead of ball")
 		("skip-ports", "skip ALL COM port checks")
 		("skip-missing-ports", "skip missing COM ports")

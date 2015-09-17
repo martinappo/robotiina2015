@@ -6,25 +6,15 @@
 #define CAM_WIDTH 720
 #define CAM_HEIGHT 720
 */
+
 Dialog::Dialog(const std::string &title, const cv::Size &ptWindowSize, const cv::Size &ptCamSize, int flags/* = CV_WINDOW_AUTOSIZE*/)
 	: windowSize(ptWindowSize), camSize(ptCamSize)
 {
-	if (camSize != cv::Size(0, 0) && windowSize == cv::Size(0, 0)) {
-		windowSize = camSize + cv::Size(160, 160);
-	}
-	else if (camSize == cv::Size(0, 0) && windowSize != cv::Size(0, 0)) {
-		this->camSize = windowSize - cv::Size(160, 160);
-
-	}
-	else if (camSize == cv::Size(0, 0) && windowSize == cv::Size(0, 0)){
-		this->windowSize = cv::Size(960, 600);
-		this->camSize = windowSize - cv::Size(160, 160);
-	}
-	if (camSize.width > windowSize.width) {
-		camSize.width = windowSize.width - 160;
-	}
-	if (camSize.height > windowSize.height) {
-		camSize.height = windowSize.height - 160;
+	if (windowSize != cv::Size(0, 0)) {
+		camSize = cv::Size((double)windowSize.width * 0.7, (double)windowSize.height * 0.7);
+	} 
+	else {
+		windowSize = cv::Size((double)camSize.width / 0.7, (double)camSize.height / 0.7);
 	}
 	fontScale = (double)windowSize.height / 1024;
     m_title = title;
@@ -57,8 +47,7 @@ Dialog::Dialog(const std::string &title, const cv::Size &ptWindowSize, const cv:
 	display_empty = cv::Mat(windowSize, CV_8UC3, cv::Scalar(0));
 	display = cv::Mat(windowSize, CV_8UC3, cv::Scalar(0));
 	cam1_roi = display(cv::Rect(0, 0, camSize.width, camSize.height)); // region of interest
-	std::cout << windowSize << (camSize - cv::Size(0, 160)) << " -> " << (windowSize - cv::Size(0, 160)) << std::endl;
-	cam2_roi = display(cv::Rect(camSize - cv::Size(0, 160), cv::Size(160, 160)));
+	cam2_roi = display(cv::Rect(camSize - cv::Size(0, windowSize.height - camSize.height), windowSize - camSize));
 	//cam_area = cv::Mat(CAM_HEIGHT, CAM_WIDTH, CV_8UC3);
 	Start();
 
