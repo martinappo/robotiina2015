@@ -82,7 +82,7 @@ void FrontCameraVision::Run() {
 		/*	STEP 2. thresholding in parallel	          */
 		/**************************************************/
 
-		thresholder.Start(frameHSV, { BALL, BLUE_GATE, YELLOW_GATE, FIELD, INNER_BORDER, OUTER_BORDER });
+		thresholder.Start(frameHSV, { BALL, BLUE_GATE, YELLOW_GATE/*, FIELD, INNER_BORDER, OUTER_BORDER*/ });
 
 		/**************************************************/
 		/*	STEP 3. check that path to gate is clean      */
@@ -173,6 +173,6 @@ void FrontCameraVision::Run() {
 			blue.copyTo(frameBGR, thresholdedImages[BLUE_GATE]);
 		}
 
-		m_pDisplay->ShowImage(frameHSV);
+		m_pDisplay->ShowImage(frameBGR);
 	}
 }

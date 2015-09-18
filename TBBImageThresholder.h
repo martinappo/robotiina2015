@@ -1,6 +1,6 @@
 #pragma once
 #include "types.h"
-
+//#define USE_INRANGE
 class TBBImageThresholder :
 	public ImageThresholder, public cv::ParallelLoopBody
 {
@@ -34,6 +34,7 @@ public:
 		for (int i = range.start; i < range.end; i++)
 		{
 
+#ifndef USE_INRANGE
 			for (int j = (frameHSV.cols*frameHSV.rows * 3 / diff)*i, k = (frameHSV.cols*frameHSV.rows / diff)*i; j < (frameHSV.cols*frameHSV.rows * 3 / diff)*(i + 1); j += 3, k++) {
 				//if (j % 2) continue;
 				int h = frameHSV.data[j];
@@ -56,7 +57,7 @@ public:
 			}
 
 
-			/*
+#else // use inRange
 			cv::Mat in(frameHSV, cv::Rect(0, (frameHSV.rows / diff)*i,
 			frameHSV.cols, frameHSV.rows / diff));
 
@@ -66,7 +67,7 @@ public:
 					thresholdedImages[object].cols, thresholdedImages[object].rows / diff));
 				inRange(in, cv::Scalar(r.hue.low, r.sat.low, r.val.low), cv::Scalar(r.hue.high, r.sat.high, r.val.high), out);
 			}
-			*/
+#endif
 		}
 	}
 protected:
