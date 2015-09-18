@@ -2,6 +2,7 @@
 #include "SimpleImageThresholder.h"
 #include "ThreadedImageThresholder.h"
 #include "ParallelImageThresholder.h"
+#include "TBBImageThresholder.h"
 #include "GateFinder.h"
 #include "BallFinder.h"
 #include "AutoCalibrator.h"
@@ -40,7 +41,7 @@ void FrontCameraVision::Run() {
 		std::cout << "Calibration data is missing!" << std::endl;
 
 	}
-	ParallelImageThresholder thresholder(thresholdedImages, objectThresholds);
+	TBBImageThresholder thresholder(thresholdedImages, objectThresholds);
 	GateFinder blueGateFinder;
 	GateFinder yellowGateFinder;
 	BallFinder ballFinder;
@@ -172,6 +173,6 @@ void FrontCameraVision::Run() {
 			blue.copyTo(frameBGR, thresholdedImages[BLUE_GATE]);
 		}
 
-		m_pDisplay->ShowImage(frameBGR);
+		m_pDisplay->ShowImage(frameHSV);
 	}
 }

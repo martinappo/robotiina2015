@@ -123,6 +123,7 @@
     <ClInclude Include="RobotTracker.h" />
     <ClInclude Include="simpleserial.h" />
     <ClInclude Include="stillcamera.h" />
+    <ClInclude Include="TBBImageThresholder.h" />
     <ClInclude Include="ThreadedClass.h" />
     <ClInclude Include="ThreadedImageThresholder.h" />
     <ClInclude Include="types.h" />
