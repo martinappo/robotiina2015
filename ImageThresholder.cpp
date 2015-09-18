@@ -72,28 +72,32 @@ void ImageThresholder::Start(cv::Mat &frameHSV, std::vector<OBJECT> objectList) 
 	*/
 #elif defined(IMAGETHRESHOLDER_PARALLEL_INRANGE)
 	for (auto &object : objectList) {
-		auto r = objectMap[object];
 		thresholdedImages[object] = cv::Mat(frameHSV.rows, frameHSV.cols, CV_8U, cv::Scalar::all(0));
-		int lhue = r.hue.low;
-		int hhue = r.hue.high;
-		int lsat = r.sat.low;
-		int hsat = r.sat.high;
-		int lval = r.val.low;
-		int hval = r.val.high;
-		for (int row = 0; row < frameHSV.rows; ++row) {
-			uchar * p_src = frameHSV.ptr(row);
-			uchar * p_dst = thresholdedImages[object].ptr(row);
-			for (int col = 0; col < frameHSV.cols; ++col) {
-				int srcH = *p_src++;
-				int srcS = *p_src++;
-				int srcV = *p_src++;
-
+	}
+	std::map<OBJECT, uchar*> pMap;
+	for (int row = 0; row < frameHSV.rows; ++row) {
+		uchar * p_src = frameHSV.ptr(row);
+		for (auto &object : objectList) {
+			pMap[object] = thresholdedImages[object].ptr(row);
+		}
+		for (int col = 0; col < frameHSV.cols; ++col) {
+			int srcH = *p_src++;
+			int srcS = *p_src++;
+			int srcV = *p_src++;
+			for (auto &object : objectList) {
+				auto r = objectMap[object];
+				int lhue = r.hue.low;
+				int hhue = r.hue.high;
+				int lsat = r.sat.low;
+				int hsat = r.sat.high;
+				int lval = r.val.low;
+				int hval = r.val.high;
 				if (srcH >= lhue && srcH <= hhue &&
 					srcS >= lsat && srcS <= hsat &&
 					srcV >= lval && srcV <= hval) {
-					*p_dst = 255;
+					*(pMap[object]) = 255;
 				}
-				*p_dst++;
+				(*pMap[object])++;
 			}
 		}
 		/*
