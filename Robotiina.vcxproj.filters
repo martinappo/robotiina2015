@@ -219,6 +219,15 @@
     <ClInclude Include="DistanceCalculator.h">
       <Filter>VisionModule</Filter>
     </ClInclude>
+    <ClInclude Include="SimpleImageThresholder.h">
+      <Filter>ImageThresholders</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadedImageThresholder.h">
+      <Filter>ImageThresholders</Filter>
+    </ClInclude>
+    <ClInclude Include="ParallelImageThresholder.h">
+      <Filter>ImageThresholders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -240,6 +249,9 @@
     </Filter>
     <Filter Include="ComModule">
       <UniqueIdentifier>{3a5a7f6d-3c34-4499-bc65-5878a73f7087}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ImageThresholders">
+      <UniqueIdentifier>{fe018a00-0133-4b69-b118-7f70139aed08}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

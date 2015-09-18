@@ -7,14 +7,14 @@
 #define ERODESIZE 10
 
 //#define IMAGETHRESHOLDER_PARALLEL_FOR
-//#define IMAGETHRESHOLDER_PARALLEL_THREADS
-#define IMAGETHRESHOLDER_PARALLEL_INRANGE
+#define IMAGETHRESHOLDER_PARALLEL_THREADS
+//#define IMAGETHRESHOLDER_PARALLEL_INRANGE
 
 #ifdef IMAGETHRESHOLDER_PARALLEL_FOR
 #include <ppl.h>
 #endif 
 
-ImageThresholder::ImageThresholder(ThresholdedImages &images, HSVColorRangeMap &objectMap) : ThreadedClass("ImageThresholder"), thresholdedImages(images), objectMap(objectMap)
+ImageThresholderOld::ImageThresholderOld(ThresholdedImages &images, HSVColorRangeMap &objectMap) : ThreadedClass("ImageThresholderOld"), thresholdedImages(images), objectMap(objectMap)
 {
 	stop_thread = false;
 	running = false;
@@ -23,8 +23,8 @@ ImageThresholder::ImageThresholder(ThresholdedImages &images, HSVColorRangeMap &
 #if defined(IMAGETHRESHOLDER_PARALLEL_THREADS)
 	for (auto objectRange : objectMap) {
 		auto object = objectRange.first;
-		//threads.create_thread(boost::bind(&ImageThresholder::Run2, this, objectRange.first));
-		threads.add_thread(new boost::thread(&ImageThresholder::Run2, this, objectRange.first));
+		//threads.create_thread(boost::bind(&ImageThresholderOld::Run2, this, objectRange.first));
+		threads.add_thread(new boost::thread(&ImageThresholderOld::Run2, this, objectRange.first));
 
 	}
 #endif
@@ -35,12 +35,12 @@ ImageThresholder::ImageThresholder(ThresholdedImages &images, HSVColorRangeMap &
 
 };
 
-ImageThresholder::~ImageThresholder(){
+ImageThresholderOld::~ImageThresholderOld(){
 	WaitForStop();
 };
 
 
-void ImageThresholder::Start(cv::Mat &frameHSV, std::vector<OBJECT> objectList) {
+void ImageThresholderOld::Start(cv::Mat &frameHSV, std::vector<OBJECT> objectList) {
 #if defined(IMAGETHRESHOLDER_PARALLEL_FOR)
 		concurrency::parallel_for_each(begin(objectList), end(objectList), [&frameHSV, this](OBJECT object) {
 			auto r = objectMap[object];
@@ -115,7 +115,7 @@ void ImageThresholder::Start(cv::Mat &frameHSV, std::vector<OBJECT> objectList) 
 	}
 
 
-void  ImageThresholder::Run2(OBJECT object){
+void  ImageThresholderOld::Run2(OBJECT object){
 	while (!stop_thread) {
 		if (m_iWorkersInProgress & (1 << object)) {
 			auto r = objectMap[object];

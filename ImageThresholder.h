@@ -2,7 +2,7 @@
 #include "ThreadedClass.h"
 
 
-class ImageThresholder : public ThreadedClass
+class ImageThresholderOld : public ThreadedClass, cv::ParallelLoopBody
 {
 protected:
 	ThresholdedImages &thresholdedImages;
@@ -11,8 +11,8 @@ protected:
 public:
 	void Start(cv::Mat &frameHSV, std::vector<OBJECT> objectList);
 
-	ImageThresholder(ThresholdedImages &images, HSVColorRangeMap &objectMap);
-	~ImageThresholder();
+	ImageThresholderOld(ThresholdedImages &images, HSVColorRangeMap &objectMap);
+	~ImageThresholderOld();
 
 	void Run() {};
 	void Run2(OBJECT object);
