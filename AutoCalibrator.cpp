@@ -68,10 +68,10 @@ HSVColorRange AutoCalibrator::GetObjectThresholds (int index, const std::string 
     return range;
 
 };
-bool AutoCalibrator::OnMouseEvent(int event, float x, float y, int flags) {
+bool AutoCalibrator::OnMouseEvent(int event, float x, float y, int flags, bool bMainArea) {
 	if (!running || screenshot_mode != GET_THRESHOLD) return false;
-	if (event == cv::EVENT_LBUTTONUP && x < 1.0 && y < 1.0) {
-		mouseClicked((int)(x*frame_size.x), (int)(y*frame_size.y), flags);
+	if (event == cv::EVENT_LBUTTONUP && bMainArea) {
+		mouseClicked(x, y, flags);
 	}
 	if (event == cv::EVENT_RBUTTONUP) {
 		SaveConf(this->object_name);

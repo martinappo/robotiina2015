@@ -9,7 +9,7 @@ class MouseVision :
 public:
 	MouseVision(ICamera * pCamera, IDisplay *pDisplay, FieldState *pFieldState);
 	virtual ~MouseVision();
-	virtual bool OnMouseEvent(int event, float x, float y, int flags){
+	virtual bool OnMouseEvent(int event, float x, float y, int flags, bool bMainArea){
 		if (!running) return false;
 		this->x = (int)(x * frame_size.x);
 		this->y = (int)(y * frame_size.y);

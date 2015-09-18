@@ -77,7 +77,7 @@ protected:
 class IUIEventListener {
 public:
 	// xy coordinates are from 0...1.0...
-	virtual bool OnMouseEvent(int event, float x, float y, int flags) { return false; };
+	virtual bool OnMouseEvent(int event, float x, float y, int flags, bool bMainArea) { return false; };
 	virtual void OnKeyPress(char key) {};
 };
 
@@ -102,6 +102,7 @@ public:
 	virtual cv::Size GetFrameSize(bool bFullFrame = false) = 0;
 	virtual double GetFPS() = 0;
 	virtual cv::Mat & GetLastFrame(bool bFullFrame = false) = 0;
+	virtual void TogglePlay() = 0;
 };
 
 //maybe use std::vector instead

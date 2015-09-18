@@ -13,6 +13,7 @@ Camera::Camera(const std::string &device) {
 	Init();
 }
 void Camera::Init() {
+	paused = false;
 	frameCount = (int)(cap->get(CV_CAP_PROP_FRAME_COUNT));
 
 	*cap >> frame;
@@ -23,7 +24,7 @@ void Camera::Init() {
 
 	//auto _roi = roi;
 
-	if (frame.cols < roi.height || frame.rows < roi.width) {
+	if (frame.cols < roi.br().y || frame.rows < roi.br().x) {
 		auto _roi = roi;
 		roi = cv::Rect(0, 0, frameSize.width, frameSize.height);
 		std::cout << "Camera ROI [" << _roi << "] is bigger than frame size [" << frameSize << "], using full frame" << std::endl;
@@ -122,7 +123,7 @@ const cv::Mat &Camera::CaptureHSV() {
 
 void Camera::Run(){
 	while (!stop_thread) {
-		if (!bCaptureNextFrame) {
+		if (!bCaptureNextFrame || paused) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			continue;
 		}

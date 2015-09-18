@@ -305,7 +305,7 @@ void Robot::Run()
 				manualControl.Enable(false);
 				remoteControl.Enable(false);
 				autoPilot.enableTestMode(false);
-				distanceCalibrator.removeListener();
+				distanceCalibrator.Enable(false);
 				wheels->Stop();
 				STATE_BUTTON("(A)utoCalibrate objects", 'a', STATE_AUTOCALIBRATE)
 				//STATE_BUTTON("(M)anualCalibrate objects", STATE_CALIBRATE)
@@ -347,6 +347,9 @@ void Robot::Run()
 				});
 				m_pDisplay->createButton("Toggle main display on/off", '-', [this] {
 					m_pDisplay->ToggleDisplay();
+				});
+				m_pDisplay->createButton("Pause/Play video", 'f', [this] {
+					camera->TogglePlay();
 				});
 
 
@@ -395,11 +398,10 @@ void Robot::Run()
 		}
 		else if (state == STATE_DISTANCE_CALIBRATE){			
 			START_DIALOG
-				distanceCalibrator.start();
+				distanceCalibrator.Enable(true);
 				STATE_BUTTON("BACK", 8, STATE_NONE)
 			END_DIALOG 
-			m_pDisplay->putText("Last calibrated distance:", cv::Point(-250, 220), 0.5, cv::Scalar(255, 255, 255));
-			m_pDisplay->putText(distanceCalibrator.counterValue, cv::Point(-250, 240), 0.5, cv::Scalar(255, 255, 255));
+			m_pDisplay->putText(distanceCalibrator.message, cv::Point(250, 220), 0.5, cv::Scalar(0, 0, 255));
 		}else if (STATE_SELECT_GATE == state) {
 			START_DIALOG
 				m_pDisplay->createButton(OBJECT_LABELS[BLUE_GATE], '-', [&field, this]{
@@ -560,8 +562,10 @@ void Robot::Run()
 		//m_pDisplay->putText( "border: " + std::to_string(borderDistance.distance), cv::Point(-140, 280), 0.5, cv::Scalar(255, 255, 255));
 
 
-		m_pDisplay->putText( "Yellow Gate" ,  cv::Point(-140, 320), 0.5, cv::Scalar(255, 255, 255));
-		m_pDisplay->putText( "(dist / angle): " + std::to_string(field.yellowGate.getDistance()) + " / " + std::to_string(field.yellowGate.getAngle()), cv::Point(-140, 340), 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putText("Blue Gate", cv::Point(-240, 320), 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putText("(dist / angle): " + std::to_string((int)field.blueGate.getDistance()) + " / " + std::to_string(field.blueGate.getAngle()), cv::Point(-240, 340), 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putText("Yellow Gate", cv::Point(-240, 360), 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putText("(dist / angle): " + std::to_string((int)field.yellowGate.getDistance()) + " / " + std::to_string(field.yellowGate.getAngle()), cv::Point(-240, 380), 0.5, cv::Scalar(255, 255, 255));
 
 		
 

@@ -146,8 +146,26 @@ void Dialog::Run(){
 	//cvSetWindowProperty(m_title.c_str(), CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
 	cv::moveWindow(m_title, 0, 0);
 	cv::setMouseCallback(m_title, [](int event, int x, int y, int flags, void* self) {
+		bool bMainArea = x < ((Dialog*)self)->camSize.width && y < ((Dialog*)self)->camSize.height;
+		cv::Point scaled;
+		cv::Point offset;
+		cv::Size size;
+		cv::Size target;
+
+		if (bMainArea) {
+			((Dialog*)self)->cam1_roi.locateROI(size, offset);
+			size = ((Dialog*)self)->cam1_roi.size();
+			target = ((Dialog*)self)->cam1_area.size();
+		}
+		else {
+			((Dialog*)self)->cam2_roi.locateROI(size, offset);
+			size = ((Dialog*)self)->cam2_roi.size();
+			target = ((Dialog*)self)->cam2_area.size();
+		}
+		scaled.x = (double)(x - offset.x) / size.width * target.width;
+		scaled.y = (double)(y - offset.y) / size.height * target.height;
 		for (auto pListener : ((Dialog*)self)->m_EventListeners){
-			if (pListener->OnMouseEvent(event, (float)x / ((Dialog*)self)->camSize.width, (float)y / ((Dialog*)self)->camSize.height, flags)) {
+			if (pListener->OnMouseEvent(event, scaled.x, scaled.y, flags, bMainArea)) {
 				return; // event was handled
 			}
 		}

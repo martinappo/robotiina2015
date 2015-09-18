@@ -55,7 +55,7 @@ void ObjectPosition::updatePolarCoords(int x, int y) {
 void ObjectPosition::updatePolarCoords(cv::Point rawCoords) {
 	cv::Point centerOfFrame = { frameSize.width / 2, frameSize.height / 2 };
 	double distanceInCm = mDistanceCalculator.getDistance(centerOfFrame.x, centerOfFrame.y, rawCoords.x, rawCoords.y);
-	double angle = (angleBetween(rawCoords, centerOfFrame, { frameSize.width / 2, 0 }));
+	double angle = (angleBetween(rawCoords - centerOfFrame, { 0, -frameSize.height/2 }));
 	
 	this->polarMetricCoords = { distanceInCm, angle};
 }
@@ -70,21 +70,12 @@ void ObjectPosition::updateFieldCoords(cv::Point robotFieldCoords) {
 	
 }
 
-double ObjectPosition::angleBetween(const cv::Point2i &a, const cv::Point2i &b, const cv::Point2i &c) {
-	cv::Point2i ab = { b.x - a.x, b.y - a.y };
-	cv::Point2i cb = { b.x - c.x, b.y - c.y };
+double ObjectPosition::angleBetween(const cv::Point2i &a, const cv::Point2i &b) {
 
-	double dot = (ab.x * cb.x + ab.y * cb.y); // dot product
-	double cross = (ab.x * cb.y - ab.y * cb.x); // cross product
-
-	double alpha = atan2(cross, dot);
-	double alphaDeg = floor(alpha * 180. / CV_PI + 0.5);
-	if (alphaDeg < 0) {
-		return 360 - alphaDeg;
-	}
-	else {
-		return alphaDeg;
-	}
+	double alpha = atan2(a.y, a.x) - atan2(b.y, b.x);
+	double alphaDeg = alpha * 180. / CV_PI;
+	if (alphaDeg < 0) alphaDeg += 360;
+	return alphaDeg;
 }
 
 

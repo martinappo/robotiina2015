@@ -33,7 +33,7 @@ protected:
 private:
 	cv::Size frameSize;
 	cv::Point2i center = { frameSize.width / 2, frameSize.height / 2};
-	double angleBetween(const cv::Point2i &p1, const cv::Point2i &p2, const cv::Point2i &p3);
+	double angleBetween(const cv::Point2i &p1, const cv::Point2i &p2);
 	DistanceCalculator mDistanceCalculator = DistanceCalculator();
 
 };

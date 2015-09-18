@@ -53,7 +53,7 @@ void SoccerField::Run(){
 			cv::circle(field, blueGate.fieldCoords + c, 14, cv::Scalar(236, 137, 48), 7);
 			cv::circle(field, blueGate.fieldCoords + c, blueGate.polarMetricCoords.x, cv::Scalar(236, 137, 48), 2);
 			cv::line(field, blueGate.fieldCoords + c,
-				cv::Point(0,0)- cv::Point(blueGate.polarMetricCoords.x*sin(blueGate.polarMetricCoords.y/360*TAU),
+				cv::Point(blueGate.polarMetricCoords.x*sin(blueGate.polarMetricCoords.y/360*TAU),
 										blueGate.polarMetricCoords.x*cos(blueGate.polarMetricCoords.y / 360 * TAU)
 				) + blueGate.fieldCoords + c
 				, cv::Scalar(236, 137, 48),3);
@@ -72,8 +72,8 @@ void SoccerField::Run(){
 			cv::circle(field, yellowGate.fieldCoords + c, yellowGate.polarMetricCoords.x, cv::Scalar(61, 255, 244), 2);
 			
 			cv::line(field, yellowGate.fieldCoords + c,
-				cv::Point(0, 0) - cv::Point(yellowGate.polarMetricCoords.x*cos(yellowGate.polarMetricCoords.y / 360 * TAU),
-				yellowGate.polarMetricCoords.x*sin(yellowGate.polarMetricCoords.y / 360 * TAU)
+				 cv::Point(-yellowGate.polarMetricCoords.x*sin(yellowGate.polarMetricCoords.y / 360 * TAU),
+				yellowGate.polarMetricCoords.x*cos(yellowGate.polarMetricCoords.y / 360 * TAU)
 				) + yellowGate.fieldCoords + c
 				, cv::Scalar(61, 255, 244), 3);
 			

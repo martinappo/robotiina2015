@@ -35,16 +35,18 @@ protected:
 		bCaptureNextFrame = true;
 		ThreadedClass::Start();
 	}
+	std::atomic_bool paused;
 public:
     Camera(const std::string &device);
 	Camera(int device);
 	Camera();
-
 	cv::Mat & Capture(bool bFullFrame = false);
 	cv::Mat & GetLastFrame(bool bFullFrame = false);
 	const cv::Mat & CaptureHSV();
 	void Init();
-
+	virtual void TogglePlay(){
+		paused = !paused;
+	};
     virtual ~Camera(){ 
 		WaitForStop();
 		cap->release();
