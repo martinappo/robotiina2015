@@ -1,6 +1,7 @@
 #include "ImageThresholder.h"
 #include <chrono>
 #include <thread>
+#include <algorithm>  
 
 #define EDSIZE 24
 #define ERODESIZE 10
@@ -71,48 +72,33 @@ void ImageThresholder::Start(cv::Mat &frameHSV, std::vector<OBJECT> objectList) 
 		}
 	*/
 #elif defined(IMAGETHRESHOLDER_PARALLEL_INRANGE)
-	for (auto &object : objectList) {
-		thresholdedImages[object] = cv::Mat(frameHSV.rows, frameHSV.cols, CV_8U, cv::Scalar::all(0));
+
+	auto &rb = objectMap[BALL];
+	auto &rbg = objectMap[BLUE_GATE];
+	auto &ryg = objectMap[YELLOW_GATE];
+
+	for (int i = 0; i < frameHSV.cols*frameHSV.rows * 3; i += 3) { 
+		int h = frameHSV.data[i];
+		int s = frameHSV.data[i + 1];
+		int v = frameHSV.data[i + 2];
+
+
+
+		bool ball = (rb.hue.low < h) && (rb.hue.high > h) && (rb.sat.low < s) && (rb.sat.high > s) && (rb.val.low < v) && (rb.val.high > v);
+		bool blue = (rbg.hue.low < h) && (rbg.hue.high > h) && (rbg.sat.low < s) && (rbg.sat.high > s) && (rbg.val.low < v) && (rbg.val.high > v);
+		bool yellow = (ryg.hue.low < h) && (ryg.hue.high > h) && (ryg.sat.low < s) && (ryg.sat.high > s) && (ryg.val.low < v) && (ryg.val.high > v);
+
+		frameHSV.data[i] = ball ? 255 : 0;
+		frameHSV.data[i + 1] = blue ? 255 : 0;
+		frameHSV.data[i + 2] = yellow ? 255 : 0;
+
+
 	}
-	std::map<OBJECT, uchar*> pMap;
-	for (int row = 0; row < frameHSV.rows; ++row) {
-		uchar * p_src = frameHSV.ptr(row);
-		for (auto &object : objectList) {
-			pMap[object] = thresholdedImages[object].ptr(row);
-		}
-		for (int col = 0; col < frameHSV.cols; ++col) {
-			int srcH = *p_src++;
-			int srcS = *p_src++;
-			int srcV = *p_src++;
-			for (auto &object : objectList) {
-				auto r = objectMap[object];
-				int lhue = r.hue.low;
-				int hhue = r.hue.high;
-				int lsat = r.sat.low;
-				int hsat = r.sat.high;
-				int lval = r.val.low;
-				int hval = r.val.high;
-				if (srcH >= lhue && srcH <= hhue &&
-					srcS >= lsat && srcS <= hsat &&
-					srcV >= lval && srcV <= hval) {
-					*(pMap[object]) = 255;
-				}
-				(*pMap[object])++;
-			}
-		}
-		/*
-		for (int i = 0; i < frameHSV.rows; i++) {
-			for (int j = 0; j < frameHSV.cols; j++) {
-				cv::Vec3b p = frameHSV.at<cv::Vec3b>(i, j);
-				if (p[0] >= lhue && p[0] <= hhue &&
-					p[1] >= lsat && p[1] <= hsat &&
-					p[2] >= lval && p[2] <= hval) {
-					thresholdedImages[object].at<unsigned char>(i, j) = 255;
-				}
-			}
-		}
-		*/
-}
+	cv::extractChannel(frameHSV, thresholdedImages[BALL], 0);
+	cv::extractChannel(frameHSV, thresholdedImages[BLUE_GATE], 1);
+	cv::extractChannel(frameHSV, thresholdedImages[YELLOW_GATE], 2);
+
+
 #else
 		for (auto &object : objectList) {
 			auto r = objectMap[object];
@@ -141,5 +127,3 @@ void  ImageThresholder::Run2(OBJECT object){
 		}
 	}
 };
-
-
