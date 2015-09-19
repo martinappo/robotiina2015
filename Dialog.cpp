@@ -10,11 +10,14 @@
 Dialog::Dialog(const std::string &title, const cv::Size &ptWindowSize, const cv::Size &ptCamSize, int flags/* = CV_WINDOW_AUTOSIZE*/)
 	: windowSize(ptWindowSize), camSize(ptCamSize)
 {
+	cv::Size windowSizeDefault = cv::Size((double)camSize.width / 0.7, (double)camSize.width / 0.7);
+
 	if (windowSize != cv::Size(0, 0)) {
-		camSize = cv::Size((double)windowSize.width * 0.7, (double)windowSize.height * 0.7);
+		double scale = (double)windowSize.width / (double)windowSizeDefault.width;
+		camSize = cv::Size((double)camSize.width * scale, (double)windowSize.height * scale);
 	} 
 	else {
-		windowSize = cv::Size((double)camSize.width / 0.7, (double)camSize.height / 0.7);
+		windowSize = cv::Size((double)camSize.width / 0.7, (double)camSize.width / 0.7);
 	}
 	fontScale = (double)windowSize.height / 1024;
     m_title = title;
@@ -47,7 +50,8 @@ Dialog::Dialog(const std::string &title, const cv::Size &ptWindowSize, const cv:
 	display_empty = cv::Mat(windowSize, CV_8UC3, cv::Scalar(0));
 	display = cv::Mat(windowSize, CV_8UC3, cv::Scalar(0));
 	cam1_roi = display(cv::Rect(0, 0, camSize.width, camSize.height)); // region of interest
-	cam2_roi = display(cv::Rect(camSize - cv::Size(0, windowSize.height - camSize.height), windowSize - camSize));
+	int cam2_width = windowSize.width - camSize.width;
+	cam2_roi = display(cv::Rect(windowSize - cv::Size(cam2_width, cam2_width), cv::Size(cam2_width, cam2_width)));
 	//cam_area = cv::Mat(CAM_HEIGHT, CAM_WIDTH, CV_8UC3);
 	Start();
 
