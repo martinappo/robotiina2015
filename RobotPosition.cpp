@@ -98,24 +98,33 @@ double RobotPosition::getAngle() {
 }
 
 bool RobotPosition::isRobotAboveCenterLine(double yellowGoalAngle, double blueGoalAngle){
-
+	/*Calculation based on field: 
+	  _________________
+	 |                 |
+	B|]-------o-------[|Y
+	 |_________________|
+	
+	*/
 	double yellowToBlue = blueGoalAngle - yellowGoalAngle;
 	if (yellowToBlue < 0)
 		yellowToBlue += 360;
 	double blueToYellow = yellowGoalAngle - blueGoalAngle;
 	if (blueToYellow < 0)
 		blueToYellow += 360;
-
 	if (yellowToBlue < blueToYellow)
-		return false;
-	return true;
+		return true;
+	return false;
 }
 
 //bluegoal 0 degrees, yellow 180 degrees
 double RobotPosition::getRobotDirection(double yellowGoalDist, double yellowGoalAngle, double blueGoalDist, double blueGoalAngle){
-	return -blueGoalAngle;
-	double gamma = (blueGoalDist * blueGoalDist + 500.0 * 500.0 - (500 - blueGoalDist) * (500 - blueGoalDist)) / (2.0 * 500.0 * blueGoalDist);
-	double mAcos = acos(gamma);
-	int dir = mAcos + isRobotAboveCenterLine(yellowGoalAngle, blueGoalAngle) ? 0 : -360;
+	double aSqr = blueGoalDist * blueGoalDist;
+	double bSqr = 500.0 * 500.0;
+	double cSqr = yellowGoalDist* yellowGoalDist;
+	double ab2 = 2.0*blueGoalDist*500.0;
+	double gammaCos = (aSqr + bSqr - cSqr) / ab2;
+	double gammaRads = acos(gammaCos);
+	double gammaDegrees = gammaRads*(180 / PI);
+	int dir = gammaDegrees + (isRobotAboveCenterLine(yellowGoalAngle, blueGoalAngle) ? 0 : -360);
 	return blueGoalAngle + dir;
 }
