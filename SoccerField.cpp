@@ -52,12 +52,18 @@ void SoccerField::Run(){
 		if (blueGate.getDistance() > 0) {
 			cv::circle(field, blueGate.fieldCoords + c, 14, cv::Scalar(236, 137, 48), 7);
 			cv::circle(field, blueGate.fieldCoords + c, blueGate.polarMetricCoords.x, cv::Scalar(236, 137, 48), 2);
+			/*
 			cv::line(field, blueGate.fieldCoords + c,
 				cv::Point(blueGate.polarMetricCoords.x*sin(blueGate.polarMetricCoords.y/360*TAU),
 										blueGate.polarMetricCoords.x*cos(blueGate.polarMetricCoords.y / 360 * TAU)
 				) + blueGate.fieldCoords + c
 				, cv::Scalar(236, 137, 48),3);
-
+				*/
+			cv::line(field, self.fieldCoords + c,
+				cv::Point(self.polarMetricCoords.x*sin(blueGate.polarMetricCoords.y / 360 * TAU),
+				self.polarMetricCoords.x*cos(blueGate.polarMetricCoords.y / 360 * TAU)
+				) + self.fieldCoords + c
+				, cv::Scalar(236, 137, 48), 3);
 		}
 		/*
 		std::cout << blueGate.polarMetricCoords.x << ", " << blueGate.polarMetricCoords.y << ", " 
@@ -70,13 +76,18 @@ void SoccerField::Run(){
 		if (yellowGate.getDistance() > 0) {
 			cv::circle(field, yellowGate.fieldCoords + c, 14, cv::Scalar(61, 255, 244), 7);
 			cv::circle(field, yellowGate.fieldCoords + c, yellowGate.polarMetricCoords.x, cv::Scalar(61, 255, 244), 2);
-			
+			/*
 			cv::line(field, yellowGate.fieldCoords + c,
 				 cv::Point(-yellowGate.polarMetricCoords.x*sin(yellowGate.polarMetricCoords.y / 360 * TAU),
 				yellowGate.polarMetricCoords.x*cos(yellowGate.polarMetricCoords.y / 360 * TAU)
 				) + yellowGate.fieldCoords + c
 				, cv::Scalar(61, 255, 244), 3);
-			
+			*/
+			cv::line(field, self.fieldCoords + c,
+				cv::Point(yellowGate.polarMetricCoords.x*sin(yellowGate.polarMetricCoords.y / 360 * TAU),
+				yellowGate.polarMetricCoords.x*cos(yellowGate.polarMetricCoords.y / 360 * TAU)
+				) + self.fieldCoords + c
+				, cv::Scalar(61, 255, 244), 3);
 		}
 		m_pDisplay->ShowImage(field, false);
 		std::this_thread::sleep_for(std::chrono::milliseconds(50));
