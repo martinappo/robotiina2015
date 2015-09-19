@@ -17,8 +17,8 @@ RobotPosition::~RobotPosition()
 
 void RobotPosition::updateCoordinates() {
 	lastFieldCoords = fieldCoords;
-	this->robotAngle = getRobotDirection(yellowGate.getDistance(), yellowGate.getAngle(), blueGate.getDistance(), blueGate.getAngle());
 	updateFieldCoords();
+	this->robotAngle = getRobotDirection(yellowGate.fieldCoords, blueGate.fieldCoords, yellowGate.getDistance(), yellowGate.getAngle(), blueGate.getDistance(), blueGate.getAngle());
 }
 
 void RobotPosition::updateFieldCoords() {
@@ -117,7 +117,17 @@ bool RobotPosition::isRobotAboveCenterLine(double yellowGoalAngle, double blueGo
 }
 
 //bluegoal 0 degrees, yellow 180 degrees
-double RobotPosition::getRobotDirection(double yellowGoalDist, double yellowGoalAngle, double blueGoalDist, double blueGoalAngle){
+double RobotPosition::getRobotDirection(cv::Point circle1center, cv::Point circle2center, double yellowGoalDist, double yellowGoalAngle, double blueGoalDist, double blueGoalAngle){
+
+	// distance between the centers
+	double distance = cv::norm(circle1center - circle2center);
+
+	// if two circle radiuses do not reach
+	while (distance > yellowGoalDist + blueGoalDist) {
+		yellowGoalDist++;
+		blueGoalDist++;
+	}
+
 	double aSqr = blueGoalDist * blueGoalDist;
 	double bSqr = 500.0 * 500.0;
 	double cSqr = yellowGoalDist* yellowGoalDist;
