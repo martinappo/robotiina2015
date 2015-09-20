@@ -63,7 +63,7 @@ void ObjectPosition::updatePolarCoords(cv::Point rawCoords) {
 
 void ObjectPosition::updateFieldCoords(cv::Point robotFieldCoords) {
 	cv::Point centerOfFrame = { frameSize.height / 2, frameSize.width / 2 };
-	int fieldY = (int)(getDistance() * cos(TAU*getAngleToRobot() / 360));
+	int fieldY = -1 * (int)(getDistance() * cos(TAU*getAngleToRobot() / 360));
 	int fieldX = (int)(getDistance() * sin(TAU*getAngleToRobot() / 360));
 	cv::Point filteredCoords = cv::Point(fieldX, fieldY);//filter->doFiltering(cv::Point(fieldX, fieldY));
 	fieldCoords = { robotFieldCoords.x + filteredCoords.x, robotFieldCoords.y + filteredCoords.y };

@@ -135,6 +135,6 @@ double RobotPosition::getRobotDirection(cv::Point circle1center, cv::Point circl
 	double gammaCos = (aSqr + bSqr - cSqr) / ab2;
 	double gammaRads = acos(gammaCos);
 	double gammaDegrees = gammaRads*(180 / PI);
-	int dir = gammaDegrees + (isRobotAboveCenterLine(yellowGoalAngle, blueGoalAngle) ? 0 : -360);
+	double dir = gammaDegrees + (isRobotAboveCenterLine(yellowGoalAngle, blueGoalAngle) ? 0 : -360);
 	return blueGoalAngle + dir;
 }
