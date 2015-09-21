@@ -73,10 +73,30 @@ cv::Point2i GateFinder::LocateOnScreen(ThresholdedImages &HSVRanges, cv::Mat &fr
 	}
 */
 	cv::Scalar color4(255, 0, 0);
-	/*
 
 	cv::RotatedRect bounding_rect2 = cv::minAreaRect(contours[largest_contour_index]);
 	cv::Point2f rect_points[4]; bounding_rect2.points(rect_points);
+	int min_dist = INT_MAX;
+	int min_index = 0;
+	int min_dist2 = INT_MAX;
+	int min_index2 = 0;
+	for (int i = 0; i < 4; i++){
+		int dist = cv::norm(rect_points[i] - cv::Point2f(imgThresholded.cols / 2, imgThresholded.rows / 2));
+		if (dist < min_dist){
+			min_dist2 = min_dist;
+			min_index2 = min_index;
+			min_dist = dist;
+			min_index = i;
+		}
+		else if (dist < min_dist2){
+			min_dist2 = dist;
+			min_index2 = i;
+		}
+	}
+	center = (rect_points[min_index]+ rect_points[min_index2])/2;	
+	circle(frameBGR,  center, 7, color, -1, 8, 0);
+
+	/*
 	int shift = bounding_rect2.size.height * 0.09 +0.2;
 	//std::cout << "shift: " << shift << " height: " << bounding_rect2.size.height << std::endl;
 	for (int j = 0; j < 4; j++) {
