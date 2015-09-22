@@ -126,7 +126,9 @@ int Dialog::Draw() {
 	return 0;
 };
 void Dialog::KeyPressed(int key){
+
 	if (key == '-') return;
+	boost::mutex::scoped_lock lock(click_mutex); //allow one command at a time
 	for (auto btn : m_buttons){
 		if(std::get<1>(btn) == key){
 			std::get<2>(btn)();
