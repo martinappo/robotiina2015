@@ -1,18 +1,20 @@
 #include "ImageThresholder.h"
 #include <chrono>
 #include <thread>
+#include <algorithm>  
 
 #define EDSIZE 24
 #define ERODESIZE 10
 
 //#define IMAGETHRESHOLDER_PARALLEL_FOR
 #define IMAGETHRESHOLDER_PARALLEL_THREADS
+//#define IMAGETHRESHOLDER_PARALLEL_INRANGE
 
 #ifdef IMAGETHRESHOLDER_PARALLEL_FOR
 #include <ppl.h>
 #endif 
 
-ImageThresholder::ImageThresholder(ThresholdedImages &images, HSVColorRangeMap &objectMap) : ThreadedClass("ImageThresholder"), thresholdedImages(images), objectMap(objectMap)
+ImageThresholderOld::ImageThresholderOld(ThresholdedImages &images, HSVColorRangeMap &objectMap) : ThreadedClass("ImageThresholderOld"), thresholdedImages(images), objectMap(objectMap)
 {
 	stop_thread = false;
 	running = false;
@@ -21,8 +23,8 @@ ImageThresholder::ImageThresholder(ThresholdedImages &images, HSVColorRangeMap &
 #if defined(IMAGETHRESHOLDER_PARALLEL_THREADS)
 	for (auto objectRange : objectMap) {
 		auto object = objectRange.first;
-		//threads.create_thread(boost::bind(&ImageThresholder::Run2, this, objectRange.first));
-		threads.add_thread(new boost::thread(&ImageThresholder::Run2, this, objectRange.first));
+		//threads.create_thread(boost::bind(&ImageThresholderOld::Run2, this, objectRange.first));
+		threads.add_thread(new boost::thread(&ImageThresholderOld::Run2, this, objectRange.first));
 
 	}
 #endif
@@ -33,12 +35,12 @@ ImageThresholder::ImageThresholder(ThresholdedImages &images, HSVColorRangeMap &
 
 };
 
-ImageThresholder::~ImageThresholder(){
+ImageThresholderOld::~ImageThresholderOld(){
 	WaitForStop();
 };
 
 
-void ImageThresholder::Start(cv::Mat &frameHSV, std::vector<OBJECT> objectList) {
+void ImageThresholderOld::Start(cv::Mat &frameHSV, std::vector<OBJECT> objectList) {
 #if defined(IMAGETHRESHOLDER_PARALLEL_FOR)
 		concurrency::parallel_for_each(begin(objectList), end(objectList), [&frameHSV, this](OBJECT object) {
 			auto r = objectMap[object];
@@ -69,6 +71,34 @@ void ImageThresholder::Start(cv::Mat &frameHSV, std::vector<OBJECT> objectList) 
 			});
 		}
 	*/
+#elif defined(IMAGETHRESHOLDER_PARALLEL_INRANGE)
+
+	auto &rb = objectMap[BALL];
+	auto &rbg = objectMap[BLUE_GATE];
+	auto &ryg = objectMap[YELLOW_GATE];
+
+	for (int i = 0; i < frameHSV.cols*frameHSV.rows * 3; i += 3) { 
+		int h = frameHSV.data[i];
+		int s = frameHSV.data[i + 1];
+		int v = frameHSV.data[i + 2];
+
+
+
+		bool ball = (rb.hue.low < h) && (rb.hue.high > h) && (rb.sat.low < s) && (rb.sat.high > s) && (rb.val.low < v) && (rb.val.high > v);
+		bool blue = (rbg.hue.low < h) && (rbg.hue.high > h) && (rbg.sat.low < s) && (rbg.sat.high > s) && (rbg.val.low < v) && (rbg.val.high > v);
+		bool yellow = (ryg.hue.low < h) && (ryg.hue.high > h) && (ryg.sat.low < s) && (ryg.sat.high > s) && (ryg.val.low < v) && (ryg.val.high > v);
+
+		frameHSV.data[i] = ball ? 255 : 0;
+		frameHSV.data[i + 1] = blue ? 255 : 0;
+		frameHSV.data[i + 2] = yellow ? 255 : 0;
+
+
+	}
+	cv::extractChannel(frameHSV, thresholdedImages[BALL], 0);
+	cv::extractChannel(frameHSV, thresholdedImages[BLUE_GATE], 1);
+	cv::extractChannel(frameHSV, thresholdedImages[YELLOW_GATE], 2);
+
+
 #else
 		for (auto &object : objectList) {
 			auto r = objectMap[object];
@@ -85,7 +115,7 @@ void ImageThresholder::Start(cv::Mat &frameHSV, std::vector<OBJECT> objectList) 
 	}
 
 
-void  ImageThresholder::Run2(OBJECT object){
+void  ImageThresholderOld::Run2(OBJECT object){
 	while (!stop_thread) {
 		if (m_iWorkersInProgress & (1 << object)) {
 			auto r = objectMap[object];
@@ -97,5 +127,3 @@ void  ImageThresholder::Run2(OBJECT object){
 		}
 	}
 };
-
-

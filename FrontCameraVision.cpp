@@ -1,5 +1,8 @@
 #include "FrontCameraVision.h"
-#include "ImageThresholder.h"
+#include "SimpleImageThresholder.h"
+#include "ThreadedImageThresholder.h"
+#include "ParallelImageThresholder.h"
+#include "TBBImageThresholder.h"
 #include "GateFinder.h"
 #include "BallFinder.h"
 #include "AutoCalibrator.h"
@@ -38,7 +41,7 @@ void FrontCameraVision::Run() {
 		std::cout << "Calibration data is missing!" << std::endl;
 
 	}
-	ImageThresholder thresholder(thresholdedImages, objectThresholds);
+	TBBImageThresholder thresholder(thresholdedImages, objectThresholds);
 	GateFinder blueGateFinder;
 	GateFinder yellowGateFinder;
 	BallFinder ballFinder;
@@ -78,7 +81,7 @@ void FrontCameraVision::Run() {
 		/*	STEP 2. thresholding in parallel	          */
 		/**************************************************/
 
-		thresholder.Start(frameHSV, { BALL, BLUE_GATE, YELLOW_GATE, FIELD, INNER_BORDER, OUTER_BORDER });
+		thresholder.Start(frameHSV, { BALL, BLUE_GATE, YELLOW_GATE/*, FIELD, INNER_BORDER, OUTER_BORDER*/ });
 
 		/**************************************************/
 		/*	STEP 3. check that path to gate is clean      */

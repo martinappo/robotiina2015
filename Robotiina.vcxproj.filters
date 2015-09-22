@@ -88,9 +88,6 @@
     <ClCompile Include="ThreadedClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ImageThresholder.cpp">
-      <Filter>VisionModule</Filter>
-    </ClCompile>
     <ClCompile Include="DistanceCalibrator.cpp">
       <Filter>VisionModule</Filter>
     </ClCompile>
@@ -103,6 +100,8 @@
     <ClCompile Include="DistanceCalculator.cpp">
       <Filter>VisionModule</Filter>
     </ClCompile>
+    <ClCompile Include="ImageThresholder.cpp">
+      <Filter>ImageThresholders</Filter>
     <ClCompile Include="dialog.cpp">
       <Filter>UI</Filter>
     </ClCompile>
@@ -136,9 +135,6 @@
       <Filter>ComModule</Filter>
     </ClInclude>
     <ClInclude Include="objectfinder.h">
-      <Filter>VisionModule</Filter>
-    </ClInclude>
-    <ClInclude Include="ImageThresholder.h">
       <Filter>VisionModule</Filter>
     </ClInclude>
     <ClInclude Include="GateFinder.h">
@@ -219,6 +215,20 @@
     <ClInclude Include="DistanceCalculator.h">
       <Filter>VisionModule</Filter>
     </ClInclude>
+    <ClInclude Include="SimpleImageThresholder.h">
+      <Filter>ImageThresholders</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadedImageThresholder.h">
+      <Filter>ImageThresholders</Filter>
+    </ClInclude>
+    <ClInclude Include="ParallelImageThresholder.h">
+      <Filter>ImageThresholders</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageThresholder.h">
+      <Filter>ImageThresholders</Filter>
+    </ClInclude>
+    <ClInclude Include="TBBImageThresholder.h">
+      <Filter>ImageThresholders</Filter>
     <ClInclude Include="Simple-WebSocket-Server\server_ws.hpp">
       <Filter>Websocket</Filter>
     </ClInclude>
@@ -250,11 +260,16 @@
     <Filter Include="ComModule">
       <UniqueIdentifier>{3a5a7f6d-3c34-4499-bc65-5878a73f7087}</UniqueIdentifier>
     </Filter>
+<<<<<<< HEAD
+    <Filter Include="ImageThresholders">
+      <UniqueIdentifier>{fe018a00-0133-4b69-b118-7f70139aed08}</UniqueIdentifier>
+=======
     <Filter Include="Websocket">
       <UniqueIdentifier>{708bd84b-5023-4ff9-8df6-eaf8667dafb4}</UniqueIdentifier>
     </Filter>
     <Filter Include="UI">
       <UniqueIdentifier>{d105cd53-385f-429f-9e56-c22559116700}</UniqueIdentifier>
+>>>>>>> master
     </Filter>
   </ItemGroup>
 </Project>

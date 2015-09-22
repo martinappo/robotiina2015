@@ -108,7 +108,9 @@
     <ClInclude Include="GatePosition.h" />
     <ClInclude Include="MouseVision.h" />
     <ClInclude Include="ObjectPosition.h" />
+    <ClInclude Include="ParallelImageThresholder.h" />
     <ClInclude Include="RobotPosition.h" />
+    <ClInclude Include="SimpleImageThresholder.h" />
     <ClInclude Include="Simple-WebSocket-Server\server_ws.hpp" />
     <ClInclude Include="SoccerField.h" />
     <ClInclude Include="FrontCameraVision.h" />
@@ -123,7 +125,9 @@
     <ClInclude Include="RobotTracker.h" />
     <ClInclude Include="simpleserial.h" />
     <ClInclude Include="stillcamera.h" />
+    <ClInclude Include="TBBImageThresholder.h" />
     <ClInclude Include="ThreadedClass.h" />
+    <ClInclude Include="ThreadedImageThresholder.h" />
     <ClInclude Include="types.h" />
     <ClInclude Include="VideoRecorder.h" />
     <ClInclude Include="WebUI.h" />
