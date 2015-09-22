@@ -102,6 +102,7 @@
     </ClCompile>
     <ClCompile Include="ImageThresholder.cpp">
       <Filter>ImageThresholders</Filter>
+	   </ClCompile>
     <ClCompile Include="dialog.cpp">
       <Filter>UI</Filter>
     </ClCompile>
@@ -229,6 +230,7 @@
     </ClInclude>
     <ClInclude Include="TBBImageThresholder.h">
       <Filter>ImageThresholders</Filter>
+	  </ClInclude>
     <ClInclude Include="Simple-WebSocket-Server\server_ws.hpp">
       <Filter>Websocket</Filter>
     </ClInclude>
@@ -262,6 +264,7 @@
     </Filter>
     <Filter Include="ImageThresholders">
       <UniqueIdentifier>{fe018a00-0133-4b69-b118-7f70139aed08}</UniqueIdentifier>
+	   </Filter>
     <Filter Include="Websocket">
       <UniqueIdentifier>{708bd84b-5023-4ff9-8df6-eaf8667dafb4}</UniqueIdentifier>
     </Filter>
