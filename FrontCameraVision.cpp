@@ -88,7 +88,7 @@ void FrontCameraVision::Run() {
 		/* this is done here, because finding contures	  */
 		/* corrupts thresholded imagees					  */
 		/**************************************************/
-		if (gateObstructionDetectionEnabled) {
+		if (false && gateObstructionDetectionEnabled) {
 			cv::Mat selected(frameSize.height, frameSize.width, CV_8U, cv::Scalar::all(0));
 			cv::Mat mask(frameSize.height, frameSize.width, CV_8U, cv::Scalar::all(0));
 			cv::Mat	tmp(frameSize.height, frameSize.width, CV_8U, cv::Scalar::all(0));

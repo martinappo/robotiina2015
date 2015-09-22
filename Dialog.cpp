@@ -10,11 +10,11 @@
 Dialog::Dialog(const std::string &title, const cv::Size &ptWindowSize, const cv::Size &ptCamSize, int flags/* = CV_WINDOW_AUTOSIZE*/)
 	: windowSize(ptWindowSize), camSize(ptCamSize)
 {
-	cv::Size windowSizeDefault = cv::Size((double)camSize.width / 0.7, (double)camSize.width / 0.7);
+	cv::Size windowSizeDefault = cv::Size((double)camSize.width / 0.7, (double)camSize.height / 0.7);
 
 	if (windowSize != cv::Size(0, 0)) {
 		double scale = (double)windowSize.width / (double)windowSizeDefault.width;
-		camSize = cv::Size((double)camSize.width * scale, (double)windowSize.height * scale);
+		camSize = cv::Size((double)camSize.width * scale, (double)camSize.height * scale);
 	} 
 	else {
 		windowSize = cv::Size((double)camSize.width / 0.7, (double)camSize.width / 0.7);
