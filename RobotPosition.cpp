@@ -17,8 +17,8 @@ RobotPosition::~RobotPosition()
 
 void RobotPosition::updateCoordinates() {
 	lastFieldCoords = fieldCoords;
-	this->robotAngle = yellowGate.getAngle();
 	updateFieldCoords();
+	this->robotAngle = getRobotDirection(yellowGate.fieldCoords, blueGate.fieldCoords, yellowGate.getDistance(), yellowGate.getAngle(), blueGate.getDistance(), blueGate.getAngle());
 }
 
 void RobotPosition::updateFieldCoords() {
@@ -26,14 +26,26 @@ void RobotPosition::updateFieldCoords() {
 																			  yellowGate.getDistance(), 
 																			  blueGate.fieldCoords, 
 																			  blueGate.getDistance());
-	double possiblePointDistance1 = cv::norm(possiblePoints.first - lastFieldCoords);
+	if (isRobotAboveCenterLine(yellowGate.getAngle(), blueGate.getAngle())){
+		if (possiblePoints.first.y > 155){
+			this->fieldCoords = possiblePoints.first;
+		}else
+			this->fieldCoords = possiblePoints.second;
+	}
+	else {
+		if (possiblePoints.first.y < 155){
+			this->fieldCoords = possiblePoints.first;
+		}else
+			this->fieldCoords = possiblePoints.second;
+	}
+	/*double possiblePointDistance1 = cv::norm(possiblePoints.first - lastFieldCoords);
 	double possiblePointDistance2 = cv::norm(possiblePoints.second - lastFieldCoords);
 	if (possiblePointDistance1 < possiblePointDistance2) {
 		this->fieldCoords = possiblePoints.first;
 	}
 	else {
 		this->fieldCoords = possiblePoints.second;
-	}
+	}*/
 }
 
 void RobotPosition::updatePolarCoords() {
@@ -81,6 +93,48 @@ std::pair<cv::Point, cv::Point> RobotPosition::intersectionOfTwoCircles(cv::Poin
 	return std::pair<cv::Point, cv::Point>(possible1, possible2);
 }
 
-int RobotPosition::getAngle() {
+double RobotPosition::getAngle() {
 	return robotAngle;
+}
+
+bool RobotPosition::isRobotAboveCenterLine(double yellowGoalAngle, double blueGoalAngle){
+	/*Calculation based on field: 
+	  _________________
+	 |                 |
+	B|]-------o-------[|Y
+	 |_________________|
+	
+	*/
+	double yellowToBlue = blueGoalAngle - yellowGoalAngle;
+	if (yellowToBlue < 0)
+		yellowToBlue += 360;
+	double blueToYellow = yellowGoalAngle - blueGoalAngle;
+	if (blueToYellow < 0)
+		blueToYellow += 360;
+	if (yellowToBlue < blueToYellow)
+		return true;
+	return false;
+}
+
+//bluegoal 0 degrees, yellow 180 degrees
+double RobotPosition::getRobotDirection(cv::Point circle1center, cv::Point circle2center, double yellowGoalDist, double yellowGoalAngle, double blueGoalDist, double blueGoalAngle){
+
+	// distance between the centers
+	double distance = cv::norm(circle1center - circle2center);
+
+	// if two circle radiuses do not reach
+	while (distance > yellowGoalDist + blueGoalDist) {
+		yellowGoalDist++;
+		blueGoalDist++;
+	}
+
+	double aSqr = blueGoalDist * blueGoalDist;
+	double bSqr = 500.0 * 500.0;
+	double cSqr = yellowGoalDist* yellowGoalDist;
+	double ab2 = 2.0*blueGoalDist*500.0;
+	double gammaCos = (aSqr + bSqr - cSqr) / ab2;
+	double gammaRads = acos(gammaCos);
+	double gammaDegrees = gammaRads*(180 / PI);
+	double dir = gammaDegrees + (isRobotAboveCenterLine(yellowGoalAngle, blueGoalAngle) ? 0 : -360);
+	return blueGoalAngle + dir;
 }

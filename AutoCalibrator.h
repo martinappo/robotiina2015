@@ -16,7 +16,7 @@ class AutoCalibrator : public ColorCalibrator,
 
 public:
 	AutoCalibrator(ICamera * pCamera, IDisplay *pDisplay);
-	bool LoadFrame();
+	void LoadFrame();
 	void reset() { 
 		boost::mutex::scoped_lock lock(mutex); //allow one command at a time
 		resize(white, image, frame_size);
@@ -31,7 +31,7 @@ public:
 	int frames = 0;
 	void Run();
 	const cv::Mat & GetFrame() { return m_pCamera->Capture(); }
-	virtual bool OnMouseEvent(int event, float x, float y, int flags);
+	virtual bool OnMouseEvent(int event, float x, float y, int flags, bool bMainArea);
 
 protected:
 	cv::Mat bestLabels, clustered, centers;
@@ -46,8 +46,7 @@ protected:
 
 private:
     bool done;
-	std::string name;
-	int max_image_count = 4;
+	std::string object_name;
 	cv::Point frame_size;
 	boost::mutex mutex;
 	std::atomic_int screenshot_mode;

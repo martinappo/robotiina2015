@@ -41,7 +41,7 @@ void BallFinder::populateBalls(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, 
 	int ballsUpdatedCount = 0;
 	for (unsigned int i = 0; i < contours.size(); i++)
 	{
-		if (ballsUpdatedCount > NUMBER_OF_BALLS) break;
+		if (ballsUpdatedCount >= NUMBER_OF_BALLS) break;
 		int ballArea = (int)(cv::contourArea(contours[i], false));
 		if (ballArea >= smallestBallArea) {
 			cv::Moments M = cv::moments(contours[i]);
@@ -58,7 +58,7 @@ void BallFinder::populateBalls(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, 
 	}
 	
 	if (ballsUpdatedCount < NUMBER_OF_BALLS) {
-		for (int i = 0; i <= NUMBER_OF_BALLS; i++) {
+		for (int i = 0; i < NUMBER_OF_BALLS; i++) {
 			BallPosition &currentBall = pFieldState->balls[i];
 			if (!currentBall.isUpdated) {
 				//currentBall.predictCoordinates();

@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="dialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="robot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -105,12 +102,14 @@
     </ClCompile>
     <ClCompile Include="ImageThresholder.cpp">
       <Filter>ImageThresholders</Filter>
+    <ClCompile Include="dialog.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="WebUI.cpp">
+      <Filter>UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="dialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="robot.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -230,6 +229,14 @@
     </ClInclude>
     <ClInclude Include="TBBImageThresholder.h">
       <Filter>ImageThresholders</Filter>
+    <ClInclude Include="Simple-WebSocket-Server\server_ws.hpp">
+      <Filter>Websocket</Filter>
+    </ClInclude>
+    <ClInclude Include="dialog.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="WebUI.h">
+      <Filter>UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -253,8 +260,16 @@
     <Filter Include="ComModule">
       <UniqueIdentifier>{3a5a7f6d-3c34-4499-bc65-5878a73f7087}</UniqueIdentifier>
     </Filter>
+<<<<<<< HEAD
     <Filter Include="ImageThresholders">
       <UniqueIdentifier>{fe018a00-0133-4b69-b118-7f70139aed08}</UniqueIdentifier>
+=======
+    <Filter Include="Websocket">
+      <UniqueIdentifier>{708bd84b-5023-4ff9-8df6-eaf8667dafb4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{d105cd53-385f-429f-9e56-c22559116700}</UniqueIdentifier>
+>>>>>>> master
     </Filter>
   </ItemGroup>
 </Project>

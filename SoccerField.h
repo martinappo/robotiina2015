@@ -24,7 +24,9 @@ private:
 	IDisplay *m_pDisplay;
 	//310cm x 460+40cm <-- field dimensions. These values suit perfectly for pixel values also :)
 	//+ 40 cm for gates
-	const cv::Mat green = cv::Mat(310, 500, CV_8UC3, cv::Scalar(21, 188, 80));
-	cv::Mat field = cv::Mat(310, 500, CV_8UC3, cv::Scalar::all(245)); // blink display
+	//const cv::Mat green = cv::Mat(310, 500, CV_8UC3, cv::Scalar(21, 188, 80));
+	cv::Mat green;
+	cv::Mat field;// = cv::Mat(310, 500, CV_8UC3, cv::Scalar::all(245)); // blink display
+	cv::Point c/*enter*/;
 };
 

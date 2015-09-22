@@ -13,6 +13,7 @@ Camera::Camera(const std::string &device) {
 	Init();
 }
 void Camera::Init() {
+	paused = false;
 	frameCount = (int)(cap->get(CV_CAP_PROP_FRAME_COUNT));
 
 	*cap >> frame;
@@ -74,7 +75,13 @@ Camera::Camera(int device)
 
 }
 
-cv::Mat &Camera::Capture(){
+
+cv::Mat &Camera::GetLastFrame(bool bFullFrame){
+	return *m_pFrame;
+}
+
+cv::Mat &Camera::Capture(bool bFullFrame){
+
 	if (frameCount == 1) { // image
 		frame.copyTo(frame1); // return clean copy
 		//return frame1_roi;
@@ -115,9 +122,8 @@ const cv::Mat &Camera::CaptureHSV() {
 }
 
 void Camera::Run(){
-	frameCounter = 0;
 	while (!stop_thread) {
-		if (!bCaptureNextFrame) {
+		if (!bCaptureNextFrame || paused) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			continue;
 		}
@@ -126,13 +132,11 @@ void Camera::Run(){
 
 		if (cap->isOpened()) {
 			*cap >> nextFrame;
-			frameCounter++;
 		}
 		else {
 			bCaptureNextFrame = false;
 		}
-		if (frameCounter == frameCount){ //restartVideo
-			frameCounter = 0;
+		if (cap->get(CV_CAP_PROP_POS_FRAMES) >= frameCount){ //restartVideo
 			cap->set(CV_CAP_PROP_POS_FRAMES, 0);
 			continue;
 

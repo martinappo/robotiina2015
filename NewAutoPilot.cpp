@@ -249,7 +249,7 @@ NewDriveMode CatchBall::step(double dt)
 /*BEGIN LocateGate*/
 NewDriveMode LocateGate::step(double dt)
 {
-	ObjectPosition lastGateLocation = m_pFieldState->GetTargetGate();
+	ObjectPosition &lastGateLocation = m_pFieldState->GetTargetGate();
 	bool gateInSight = lastGateLocation.getDistance() > 0;
 	bool sightObstructed = m_pFieldState->gateObstructed;
 
@@ -274,7 +274,7 @@ NewDriveMode LocateGate::step(double dt)
 NewDriveMode AimGate::step(double dt)
 {
 
-	ObjectPosition lastGateLocation = m_pFieldState->GetTargetGate();
+	ObjectPosition &lastGateLocation = m_pFieldState->GetTargetGate();
 	bool gateInSight = lastGateLocation.getDistance() > 0;
 	bool sightObstructed = m_pFieldState->gateObstructed;
 

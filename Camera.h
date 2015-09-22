@@ -26,7 +26,7 @@ private:
 	boost::posix_time::ptime lastCapture2;
 	boost::posix_time::ptime lastCapture;
 	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
-	int frameCount, frameCounter;
+	int frameCount;
 
 protected:
 	void Run();
@@ -35,20 +35,25 @@ protected:
 		bCaptureNextFrame = true;
 		ThreadedClass::Start();
 	}
+	std::atomic_bool paused;
 public:
     Camera(const std::string &device);
 	Camera(int device);
 	Camera();
+	cv::Mat & Capture(bool bFullFrame = false);
+	cv::Mat & GetLastFrame(bool bFullFrame = false);
+	const cv::Mat & CaptureHSV();
 	void Init();
-	cv::Mat & Capture();
-    const cv::Mat & CaptureHSV();
+	virtual void TogglePlay(){
+		paused = !paused;
+	};
     virtual ~Camera(){ 
 		WaitForStop();
 		cap->release();
 		delete cap;
 	}
-	virtual cv::Size GetFrameSize(){
-		return true ? cv::Size(roi.width, roi.height) : frameSize;
+	virtual cv::Size GetFrameSize(bool bFullFrame = false){
+		return !bFullFrame ? cv::Size(roi.width, roi.height) : frameSize;
 	};
 	virtual double GetFPS() {
 		return fps;

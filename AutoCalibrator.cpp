@@ -2,8 +2,6 @@
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
-#include <chrono>
-#include <thread>
 
 AutoCalibrator::AutoCalibrator(ICamera * pCamera, IDisplay *pDisplay)
 {
@@ -16,62 +14,15 @@ AutoCalibrator::AutoCalibrator(ICamera * pCamera, IDisplay *pDisplay)
 
 //	reset();
 };
-bool AutoCalibrator::LoadFrame()
+void AutoCalibrator::LoadFrame()
 {
-	if(screenshot_mode != LIVE_FEED) return false;
-
+	if(screenshot_mode != LIVE_FEED) return;
+	frameBGR.copyTo(image);
 	screenshot_mode = GRAB_FRAME;
-	/*
-	{
-		boost::mutex::scoped_lock lock(mutex); //allow one command at a time
-		white.copyTo(display);
-	}
-	*/
-	// lock mutex
-	//image.copyTo(this->image, mask);
-//	m_pDisplay->ShowImage(white);
-    //ColorCalibrator::LoadImage(image);
-    //float data[6][3] = {{1, 0, 0/*blue*/}, {0, 0, 1 /* orange*/}, {1 ,1, 0 /* yellow*/}, {0,1, 0}/*green*/, {1,1,1}, {0,0,0}};
-	//bestLabels = cv::Mat(6, 3, CV_32F, &data); //BGR
-	cv::Mat thumb(frame_size.y / 2, frame_size.x / 2, CV_8U, cv::Scalar::all(0));
-	{
-		//boost::mutex::scoped_lock lock(mutex); //allow one command at a time
-		resize(frameBGR, thumb, thumb.size());//resize image
-		//if (frames == 0){
-		//	frameBGR.copyTo(image);
-		//}
-	}
-	cv::Mat roi;
-	if (frames ==	0) {
-		roi = image(cv::Rect(0, 0, frame_size.x / 2, frame_size.y / 2));
-	}
-	else if (frames == 1) {
-		roi = image(cv::Rect(frame_size.x/2, 0, frame_size.x/2, frame_size.y / 2));
-	}
-	else if (frames == 2) {
-		roi = image(cv::Rect(0, frame_size.y/2, frame_size.x / 2, frame_size.y/2));
-	}
-	else if (frames == 3) {
-		roi = image(cv::Rect(frame_size.x/2,  frame_size.y/2, frame_size.x/2, frame_size.y/2));
-	}
-	thumb.copyTo(roi);
-	frames++;
-	//cv::imshow("mosaic", image); //show the thresholded image
-	if (frames >= max_image_count) {
-		//cv::imshow("mosaic", image); //show the thresholded image
-		//DetectThresholds(32);
-		//screenshot_mode = CALIBRATION;
-		//screenshot_mode = false;
-
-		return true;
-	}
-	//screenshot_mode = true;
-	return false;
 };
 
 HSVColorRange AutoCalibrator::GetObjectThresholds (int index, const std::string &name)
 {
-	screenshot_mode = GET_THRESHOLD;
 	clustered.copyTo(display);
 
 	try {
@@ -79,7 +30,9 @@ HSVColorRange AutoCalibrator::GetObjectThresholds (int index, const std::string 
 	}
 	catch (...) {
 	}
-	this->name = name;
+	// order important, change name before state 
+	this->object_name = name;
+	screenshot_mode = GET_THRESHOLD;
 	return range;
 
 
@@ -110,18 +63,18 @@ HSVColorRange AutoCalibrator::GetObjectThresholds (int index, const std::string 
     }
     cvDestroyWindow(name.c_str());
 	*/
-    SaveConf(name);
+    SaveConf(object_name);
 	screenshot_mode = THRESHOLDING;
     return range;
 
 };
-bool AutoCalibrator::OnMouseEvent(int event, float x, float y, int flags) {
+bool AutoCalibrator::OnMouseEvent(int event, float x, float y, int flags, bool bMainArea) {
 	if (!running || screenshot_mode != GET_THRESHOLD) return false;
-	if (event == cv::EVENT_LBUTTONUP && x < 1.0 && y < 1.0) {
-		mouseClicked((int)(x*frame_size.x), (int)(y*frame_size.y), flags);
+	if (event == cv::EVENT_LBUTTONUP && bMainArea) {
+		mouseClicked(x, y, flags);
 	}
 	if (event == cv::EVENT_RBUTTONUP) {
-		SaveConf(this->name);
+		SaveConf(this->object_name);
 		screenshot_mode = THRESHOLDING;
 	}
 	return true;
@@ -183,7 +136,7 @@ void AutoCalibrator::mouseClicked(int x, int y, int flags) {
     //cv::imshow("auto thresholded 3", clustered); //show the thresholded image
 
 	//cv::imshow("original", image); //show the thresholded image
-	//cv::imshow(this->name.c_str(), selected); //show the thresholded image
+	//cv::imshow(this->object_name.c_str(), selected); //show the thresholded image
 
 }
 AutoCalibrator::~AutoCalibrator(){
@@ -204,30 +157,25 @@ void AutoCalibrator::Run() {
 		else if(screenshot_mode == GRAB_FRAME){
 			m_pDisplay->ShowImage(white);
 			std::this_thread::sleep_for(std::chrono::milliseconds(150)); 
-			image.copyTo(display);
+			frameBGR.copyTo(display);
 			m_pDisplay->ShowImage(display);
 			std::this_thread::sleep_for(std::chrono::milliseconds(1600)); 
-			if (frames < max_image_count) {
-				screenshot_mode = LIVE_FEED;
-			}
-			else {
-				screenshot_mode = CALIBRATION;
-				//image.copyTo(display);
-				cv::putText(display, "Please wait, clustering", cv::Point(200, 220), cv::FONT_HERSHEY_DUPLEX, 0.9, cv::Scalar(23, 40, 245));
-				m_pDisplay->ShowImage(display);
 
-				DetectThresholds(32);
-				screenshot_mode = THRESHOLDING;
-				//clustered.copyTo(display);
-				m_pDisplay->ShowImage(display);
+			screenshot_mode = CALIBRATION;
+			//image.copyTo(display);
+			cv::putText(display, "Please wait, clustering", cv::Point(200, 220), cv::FONT_HERSHEY_DUPLEX, 0.9, cv::Scalar(23, 40, 245));
+			m_pDisplay->ShowImage(display);
 
-			}
+			DetectThresholds(32);
+			screenshot_mode = THRESHOLDING;
+			//clustered.copyTo(display);
+			m_pDisplay->ShowImage(display);
 		}
 		else if (screenshot_mode == THRESHOLDING) {
 			m_pDisplay->ShowImage(clustered);
 		}
 		else if (screenshot_mode == GET_THRESHOLD) {
-			cv::putText(display, name, cv::Point(250, 220), cv::FONT_HERSHEY_DUPLEX, 1, cv::Scalar(23, 67, 245));
+			cv::putText(display, object_name, cv::Point(250, 220), cv::FONT_HERSHEY_DUPLEX, 1, cv::Scalar(23, 67, 245));
 			cv::putText(display, "(ctrl +) click to select pixels, right click back", cv::Point(190, 320), cv::FONT_HERSHEY_DUPLEX, 0.3, cv::Scalar(23, 67, 245));
 			m_pDisplay->ShowImage(display);
 
