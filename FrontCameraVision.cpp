@@ -172,6 +172,8 @@ void FrontCameraVision::Run() {
 			blue.copyTo(frameBGR, thresholdedImages[BLUE_GATE]);
 		}
 
+		cv::line(frameBGR, (frameSize / 2) + cv::Size(0, -30), (frameSize / 2) + cv::Size(0, 30), cv::Scalar(0, 0, 255), 3, 8, 0);
+		cv::line(frameBGR, (frameSize / 2) + cv::Size(-30, 0), (frameSize / 2) + cv::Size(30,0), cv::Scalar(0, 0, 255), 3, 8, 0);
 		m_pDisplay->ShowImage(frameBGR);
 	}
 }

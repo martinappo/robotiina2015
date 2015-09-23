@@ -29,8 +29,8 @@ protected:
 	void mouseClicked2(int x, int y, int flags);
 	ICamera *m_pCamera;
 	IDisplay *m_pDisplay;
-	std::vector<std::pair<std::string, cv::Point>> points;
-	std::vector<std::pair<std::string, cv::Point>>::iterator itPoints;
+	std::vector<std::tuple<cv::Point, cv::Point, std::string>> points;
+	std::vector<std::tuple<cv::Point, cv::Point, std::string>>::iterator itPoints;
 
 	void calculateDistances();
 private:

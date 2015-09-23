@@ -11,15 +11,22 @@ DistanceCalibrator::DistanceCalibrator(ICamera * pCamera, IDisplay *pDisplay){
 	frame_size = m_pCamera->GetFrameSize();
 	counterValue = "NA";
 	m_pDisplay->AddEventListener(this);
-	points.push_back(std::make_pair<std::string, cv::Point>(std::string("Click on blue gate on camera image"), cv::Point(0, 0)));
-	points.push_back(std::make_pair<std::string, cv::Point>(std::string("Click on yellow gate on camera image"), cv::Point(0, 0)));
-	points.push_back(std::make_pair<std::string, cv::Point>(std::string("Click on robot location in field"), cv::Point(0, 0)));
+	points.push_back(std::make_tuple(cv::Point( -150, 225), cv::Point( 0, 0 ), std::string("top left corner (blue gate is top)")));
+	points.push_back(std::make_tuple(cv::Point( 150, 225),cv::Point( 0, 0), std::string("top right corner")));
+	points.push_back(std::make_tuple(cv::Point(-156, 0), cv::Point(0, 0), std::string(" center left border")));
+	points.push_back(std::make_tuple(cv::Point(-36, 0), cv::Point(0, 0), std::string(" center left circle")));
+	points.push_back(std::make_tuple(cv::Point(36, 0), cv::Point(0, 0), std::string("center right circle")));
+	points.push_back(std::make_tuple(cv::Point(150, 0), cv::Point(0, 0), std::string("center right border")));
+	points.push_back(std::make_tuple(cv::Point(-150, -255), cv::Point(0, 0), std::string(" bottom left corner")));
+	points.push_back(std::make_tuple(cv::Point(150, -255), cv::Point(0, 0), std::string("bottom right corner")));
+	points.push_back(std::make_tuple(cv::Point(0, 0), cv::Point(0, 0), std::string("robot location on field image")));
+	//	points.push_back(cv::Rect(0,0, 0, 0)); // robot location
 
 };
 
 bool DistanceCalibrator::OnMouseEvent(int event, float x, float y, int flags, bool bMainArea) {
 	if (enabled && event == cv::EVENT_LBUTTONUP) {
-		itPoints->second = cv::Point(x, y);
+		std::get<1>(*itPoints)= cv::Point(x, y);
 		itPoints++;
 		if(itPoints == points.end()){
 			calculateDistances();
@@ -27,7 +34,7 @@ bool DistanceCalibrator::OnMouseEvent(int event, float x, float y, int flags, bo
 			enabled = false;
 		}
 		else {
-			message = itPoints->first;
+			message = std::get<2>(*itPoints);
 		}
 		return true;
 		if (bMainArea)
@@ -40,6 +47,16 @@ bool DistanceCalibrator::OnMouseEvent(int event, float x, float y, int flags, bo
 
 };
 void DistanceCalibrator::calculateDistances(){
+
+	auto it = points.rbegin();
+	auto robotPosOnField = std::get<1>(*it);
+	for (it++; it != points.rend(); it++){
+		double dist1 = cv::norm(std::get<1>(*it) - frame_size / 2); // on cam from center
+		double dist2 = cv::norm(std::get<0>(*it) - (robotPosOnField - cv::Point(303,303))); // on field
+		std::cout << dist2 << "=" << dist1 << std::endl;
+
+	}
+	/*
 	cv::Point2d blue1 = points[0].second;
 	cv::Point2d yellow1 = points[1].second;
 	cv::Point2d self1 = cv::Point2d(frame_size) / 2;
@@ -61,7 +78,7 @@ void DistanceCalibrator::calculateDistances(){
 	std::cout << distanceToBlue2 << "=" << distanceToBlue1 << std::endl;
 	std::cout << distanceToYellow2 << "=" << distanceToYellow1 << std::endl;
 	std::cout << "======end copy/paste============" << std::endl;
-
+	*/
 
 }
 
@@ -99,7 +116,7 @@ void DistanceCalibrator::Enable(bool enable){
 	counter = 0;
 	pt.clear();
 	itPoints = points.begin();
-	message = enable ? itPoints->first : "";
+	message = enable ? std::get<2>(*itPoints) : "";
 
 }
 
