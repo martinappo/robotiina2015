@@ -24,7 +24,7 @@ void Camera::Init() {
 
 	//auto _roi = roi;
 
-	if (frame.cols < roi.height || frame.rows < roi.width) {
+	if (frame.cols < roi.br().y || frame.rows < roi.br().x) {
 		auto _roi = roi;
 		roi = cv::Rect(0, 0, frameSize.width, frameSize.height);
 		std::cout << "Camera ROI [" << _roi << "] is bigger than frame size [" << frameSize << "], using full frame" << std::endl;
@@ -111,7 +111,7 @@ cv::Mat &Camera::Capture(bool bFullFrame){
 			frames++;
 		}
 		bCaptureNextFrame = true;
-	
+		return *m_pFrame;
 		m_pFrame->copyTo(maskedImage, mask);
 
 		return maskedImage;

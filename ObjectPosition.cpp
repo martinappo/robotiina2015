@@ -1,4 +1,6 @@
 #include "ObjectPosition.h"
+#include "DistanceCalculator.h"
+extern DistanceCalculator gDistanceCalculator;
 
 
 ObjectPosition::ObjectPosition(int distance, int angle) {
@@ -54,7 +56,7 @@ void ObjectPosition::updatePolarCoords(int x, int y) {
 
 void ObjectPosition::updatePolarCoords(cv::Point rawCoords) {
 	cv::Point centerOfFrame = { frameSize.width / 2, frameSize.height / 2 };
-	double distanceInCm = mDistanceCalculator.getDistance(centerOfFrame.x, centerOfFrame.y, rawCoords.x, rawCoords.y);
+	double distanceInCm = gDistanceCalculator.getDistance(centerOfFrame.x, centerOfFrame.y, rawCoords.x, rawCoords.y);
 	double angle = (angleBetween(rawCoords - centerOfFrame, { 0, -frameSize.height/2 }));
 	
 	this->polarMetricCoords = { distanceInCm, angle};

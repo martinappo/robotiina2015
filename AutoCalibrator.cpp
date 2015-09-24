@@ -102,8 +102,8 @@ void AutoCalibrator::mouseClicked(int x, int y, int flags) {
 	std::sort(sat.begin(), sat.end());
 	std::sort(val.begin(), val.end());
 
-	int min_index = (int)(hue.size() * 0.05);
-	int max_index = (int)(hue.size() * 0.95);
+	int min_index = 0;// (int)(hue.size() * 0.05);
+	int max_index = (int)(hue.size()-1);// (int)(hue.size() * 0.95);
 
 	if ((flags & cv::EVENT_FLAG_CTRLKEY)) {
 		range.hue.low = std::min(range.hue.low, hue[min_index]);

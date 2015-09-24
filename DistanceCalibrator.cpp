@@ -1,9 +1,12 @@
 #include "DistanceCalibrator.h"
+#include "DistanceCalculator.h"
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 #include <chrono>
 #include <thread>
+
+extern DistanceCalculator gDistanceCalculator;
 
 DistanceCalibrator::DistanceCalibrator(ICamera * pCamera, IDisplay *pDisplay){
 	m_pCamera = pCamera;
@@ -11,17 +14,15 @@ DistanceCalibrator::DistanceCalibrator(ICamera * pCamera, IDisplay *pDisplay){
 	frame_size = m_pCamera->GetFrameSize();
 	counterValue = "NA";
 	m_pDisplay->AddEventListener(this);
-	points.push_back(std::make_tuple(cv::Point( -150, 225), cv::Point( 0, 0 ), std::string("top left corner (blue gate is top)")));
-	points.push_back(std::make_tuple(cv::Point( 150, 225),cv::Point( 0, 0), std::string("top right corner")));
+	points.push_back(std::make_tuple(cv::Point(-150, -225), cv::Point(0, 0), std::string("top left corner on cam image (blue gate is top)")));
+	points.push_back(std::make_tuple(cv::Point( 150, -225),cv::Point( 0, 0), std::string("top right corner")));
 	points.push_back(std::make_tuple(cv::Point(-156, 0), cv::Point(0, 0), std::string(" center left border")));
 	points.push_back(std::make_tuple(cv::Point(-36, 0), cv::Point(0, 0), std::string(" center left circle")));
 	points.push_back(std::make_tuple(cv::Point(36, 0), cv::Point(0, 0), std::string("center right circle")));
 	points.push_back(std::make_tuple(cv::Point(150, 0), cv::Point(0, 0), std::string("center right border")));
-	points.push_back(std::make_tuple(cv::Point(-150, -255), cv::Point(0, 0), std::string(" bottom left corner")));
-	points.push_back(std::make_tuple(cv::Point(150, -255), cv::Point(0, 0), std::string("bottom right corner")));
+	points.push_back(std::make_tuple(cv::Point(-150, 255), cv::Point(0, 0), std::string(" bottom left corner")));
+	points.push_back(std::make_tuple(cv::Point(150, 255), cv::Point(0, 0), std::string("bottom right corner")));
 	points.push_back(std::make_tuple(cv::Point(0, 0), cv::Point(0, 0), std::string("robot location on field image")));
-	//	points.push_back(cv::Rect(0,0, 0, 0)); // robot location
-
 };
 
 bool DistanceCalibrator::OnMouseEvent(int event, float x, float y, int flags, bool bMainArea) {
@@ -46,16 +47,33 @@ bool DistanceCalibrator::OnMouseEvent(int event, float x, float y, int flags, bo
 	return false;
 
 };
+struct less_than_key
+{
+	inline bool operator() (const cv::Point2d& struct1, const cv::Point2d& struct2)
+	{
+		return (struct1.x < struct2.x);
+	}
+};
+
+
 void DistanceCalibrator::calculateDistances(){
 
+	pt.clear();
 	auto it = points.rbegin();
 	auto robotPosOnField = std::get<1>(*it);
+	std::vector<cv::Point2d> conf;
 	for (it++; it != points.rend(); it++){
 		double dist1 = cv::norm(std::get<1>(*it) - frame_size / 2); // on cam from center
-		double dist2 = cv::norm(std::get<0>(*it) - (robotPosOnField - cv::Point(303,303))); // on field
+		double dist2 = cv::norm(std::get<0>(*it) - (robotPosOnField - cv::Point(303, 303))); // on field
 		std::cout << dist2 << "=" << dist1 << std::endl;
-
+		conf.push_back(cv::Point2d(dist2, dist1));
 	}
+	std::sort(conf.begin(), conf.end(), less_than_key());
+	for (auto dists : conf){
+		pt.put(std::to_string((int)round(dists.x)), std::to_string(dists.y));
+	}
+	boost::property_tree::write_ini("distance_conf.ini", pt);
+	gDistanceCalculator.loadConf();
 	/*
 	cv::Point2d blue1 = points[0].second;
 	cv::Point2d yellow1 = points[1].second;

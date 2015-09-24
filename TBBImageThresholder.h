@@ -42,9 +42,9 @@ public:
 				int v = frameHSV.data[j + 2];
 
 
-				bool ball = (rb.hue.low < h) && (rb.hue.high > h) && (rb.sat.low < s) && (rb.sat.high > s) && (rb.val.low < v) && (rb.val.high > v);
-				bool blue = (rbg.hue.low < h) && (rbg.hue.high > h) && (rbg.sat.low < s) && (rbg.sat.high > s) && (rbg.val.low < v) && (rbg.val.high > v);
-				bool yellow = (ryg.hue.low < h) && (ryg.hue.high > h) && (ryg.sat.low < s) && (ryg.sat.high > s) && (ryg.val.low < v) && (ryg.val.high > v);
+				bool ball = (rb.hue.low <= h) && (rb.hue.high >= h) && (rb.sat.low <= s) && (rb.sat.high >= s) && (rb.val.low <= v) && (rb.val.high >= v);
+				bool blue = (rbg.hue.low <= h) && (rbg.hue.high >= h) && (rbg.sat.low <= s) && (rbg.sat.high >= s) && (rbg.val.low <= v) && (rbg.val.high >= v);
+				bool yellow = (ryg.hue.low <= h) && (ryg.hue.high >= h) && (ryg.sat.low <= s) && (ryg.sat.high >= s) && (ryg.val.low <= v) && (ryg.val.high >= v);
 
 				//frameHSV.data[j] = ball ? 255 : 0;
 				//frameHSV.data[j + 1] = blue ? 255 : 0;
@@ -73,6 +73,6 @@ public:
 protected:
 	cv::Mat frameHSV;
 	std::vector<OBJECT> objectList;
-	int diff = 3;
+	int diff = 2;
 };
 

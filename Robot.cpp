@@ -77,6 +77,8 @@ std::pair<STATE, std::string> states[] = {
 
 };
 
+DistanceCalculator gDistanceCalculator;
+
 std::map<STATE, std::string> STATE_LABELS(states, states + sizeof(states) / sizeof(states[0]));
 
 /* BEGIN DANCE MOVES */

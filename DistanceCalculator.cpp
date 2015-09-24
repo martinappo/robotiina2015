@@ -1,4 +1,5 @@
 #include "DistanceCalculator.h"
+#include "DistanceCalibrator.h"
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 using namespace std;
@@ -35,9 +36,10 @@ DistanceCalculator::DistanceCalculator(){
 }
 
 void DistanceCalculator::loadConf(){
+	m_bEnabled = false;
 	try{
 		read_ini("distance_conf.ini", pt);
-		printTree(pt, 0);
+		//printTree(pt, 0);
 		/*
 		int confKey = DistanceCalibrator::DISTANCE_CALIBRATOR_STEP;
 		for (int i = 0; i < DistanceCalibrator::CONF_SIZE; i++){
@@ -53,13 +55,24 @@ void DistanceCalculator::loadConf(){
 	{
 		std::cout << "Can't init settings" << ex.what()<<std::endl;
 	}
+	m_bEnabled = true;
 }
 
 double DistanceCalculator::getDistance(int centerX, int centerY, int x, int y){
-	double dist = DistanceCalibrator::calculateDistance(centerX, centerY, x, y);
+	if (!m_bEnabled) return INT_MAX;
+	double dist = cv::norm(cv::Point(centerX, centerY) - cv::Point(x, y));//DistanceCalibrator::calculateDistance(centerX, centerY, x, y);
+	//y = 7E-10x5 - 8E-07x4 + 0,0004x3 - 0,0782x2 + 7,6694x - 239,79
+	//return 7E-10*pow(dist, 5) - 8E-07*pow(dist, 4) + 0.0004*pow(dist, 3) - 0.0782*pow(dist, 2) + 7.6694*dist - 239.79;
+
+	//y = 13,136e^0,008x
+	return 13.13*exp(0.008 * dist);
+
 	double minDif = INT_MAX;
 	int index = 0;
 	auto itCur = pt.begin();
+	if (itCur == pt.end()) { // no conf
+		return INT_MAX;
+	}
 	double prev1 = atof(itCur->first.c_str());
 	double prev2 = atof(itCur->second.data().c_str());
 
