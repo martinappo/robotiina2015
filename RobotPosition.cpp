@@ -17,15 +17,31 @@ RobotPosition::~RobotPosition()
 
 void RobotPosition::updateCoordinates() {
 	lastFieldCoords = fieldCoords;
+	this->robotAngle = getRobotDirection();
 	updateFieldCoords();
-	this->robotAngle = getRobotDirection(yellowGate.fieldCoords, blueGate.fieldCoords, yellowGate.getDistance(), yellowGate.getAngle(), blueGate.getDistance(), blueGate.getAngle());
 }
 
 void RobotPosition::updateFieldCoords() {
+
+	//we konw all angles of triangle and length of one side, use cosinus theorem to find
+	const int distanceBetweenGates = 450;
+	// we have two equations
+	// distanceBetweenGates^2 = distanceToBlueGate^2 + distanceToYellowGate^2 - 2*distanceToBlueGate*distanceToYellowGate*cos(robotAngle)
+	double diff = INT_MAX;
+	double w = 1; 
+	double a = 0.0001;//learning rate
+	double d1 = blueGate.getDistance();
+	double d2 = yellowGate.getDistance();
+	double g = abs(blueGate.getAngle() - yellowGate.getAngle());
+	while (d1 > 0 && d2 > 0 && diff > 10) {
+		diff = distanceBetweenGates - sqrt(pow(w*d1, 2) + pow(w*d2, 2) - 2*w*d1*d2*cos(g));
+		w += diff*a;
+	}
+	//w = 1;
 	std::pair<cv::Point, cv::Point> possiblePoints = intersectionOfTwoCircles(yellowGate.fieldCoords, 
-																			  yellowGate.getDistance(), 
+																			  w*d2, 
 																			  blueGate.fieldCoords, 
-																			  blueGate.getDistance());
+																			  2*d1);
 	if (isRobotAboveCenterLine(yellowGate.getAngle(), blueGate.getAngle())){
 		if (possiblePoints.first.y > 155){
 			this->fieldCoords = possiblePoints.first;
@@ -117,8 +133,11 @@ bool RobotPosition::isRobotAboveCenterLine(double yellowGoalAngle, double blueGo
 }
 
 //bluegoal 0 degrees, yellow 180 degrees
-double RobotPosition::getRobotDirection(cv::Point circle1center, cv::Point circle2center, double yellowGoalDist, double yellowGoalAngle, double blueGoalDist, double blueGoalAngle){
+double RobotPosition::getRobotDirection(){
 
+	// we have triangle and two conrners are known, subtract those from full circle
+	return  ((int)(yellowGate.getAngle() + blueGate.getAngle()) % 360);
+	/*
 	// distance between the centers
 	double distance = cv::norm(circle1center - circle2center);
 
@@ -137,4 +156,5 @@ double RobotPosition::getRobotDirection(cv::Point circle1center, cv::Point circl
 	double gammaDegrees = gammaRads*(180 / PI);
 	double dir = gammaDegrees + (isRobotAboveCenterLine(yellowGoalAngle, blueGoalAngle) ? 0 : -360);
 	return blueGoalAngle + dir;
+	*/
 }
