@@ -96,12 +96,12 @@ cv::Point2i GateFinder::LocateOnScreen(ThresholdedImages &HSVRanges, cv::Mat &fr
 	center = (rect_points[min_index]+ rect_points[min_index2])/2;	
 	circle(frameBGR,  center, 7, color, -1, 8, 0);
 
-	/*
+	
 	int shift = bounding_rect2.size.height * 0.09 +0.2;
 	//std::cout << "shift: " << shift << " height: " << bounding_rect2.size.height << std::endl;
 	for (int j = 0; j < 4; j++) {
-		line(frameBGR, rect_points[j], rect_points[(j + 1) % 4], color2, 1, 8);
-
+		line(frameBGR, rect_points[j], rect_points[(j + 1) % 4], color, 1, 8);
+		/*
 		std::vector<cv::Point2i> points;
 		points.push_back(rect_points[j]);
 		points.push_back(rect_points[(j + 1) % 4]);
@@ -113,9 +113,10 @@ cv::Point2i GateFinder::LocateOnScreen(ThresholdedImages &HSVRanges, cv::Mat &fr
 			drawLine(frameBGR, HSVRanges[BALL], newLine, 1, cv::Scalar(0, 255 * (1 + 0.3), 0));
 			drawLine(frameBGR, HSVRanges[SIGHT_MASK], newLine, 1, cv::Scalar(0, 255 * (1 + 0.3), 0));
 		}
+		*/
 
 	}
-	*/
+	
 
 	// find out lowest line
 	return center;

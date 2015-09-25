@@ -33,7 +33,7 @@ void RobotPosition::updateFieldCoords() {
 	double d1 = blueGate.getDistance();
 	double d2 = yellowGate.getDistance();
 	double g = abs(blueGate.getAngle() - yellowGate.getAngle());
-	while (d1 > 0 && d2 > 0 && diff > 10) {
+	while (d1 > 0 && d2 > 0 && diff > 1) {
 		diff = distanceBetweenGates - sqrt(pow(w*d1, 2) + pow(w*d2, 2) - 2*w*d1*d2*cos(g));
 		w += diff*a;
 	}
@@ -136,10 +136,12 @@ bool RobotPosition::isRobotAboveCenterLine(double yellowGoalAngle, double blueGo
 double RobotPosition::getRobotDirection(){
 
 	// we have triangle and two conrners are known, subtract those from full circle
-	return  ((int)(yellowGate.getAngle() + blueGate.getAngle()) % 360);
-	/*
+	return  ((int)(yellowGate.getAngle() - blueGate.getAngle()) % 360); // <- this is not correct
+	
 	// distance between the centers
-	double distance = cv::norm(circle1center - circle2center);
+	double distance = cv::norm(yellowGate.fieldCoords - blueGate.fieldCoords);
+	double yellowGoalDist = yellowGate.getDistance();
+	double blueGoalDist = blueGate.getDistance();
 
 	// if two circle radiuses do not reach
 	while (distance > yellowGoalDist + blueGoalDist) {
@@ -154,7 +156,7 @@ double RobotPosition::getRobotDirection(){
 	double gammaCos = (aSqr + bSqr - cSqr) / ab2;
 	double gammaRads = acos(gammaCos);
 	double gammaDegrees = gammaRads*(180 / PI);
-	double dir = gammaDegrees + (isRobotAboveCenterLine(yellowGoalAngle, blueGoalAngle) ? 0 : -360);
-	return blueGoalAngle + dir;
-	*/
+	double dir = gammaDegrees + (isRobotAboveCenterLine(yellowGate.getAngle(), blueGate.getAngle()) ? 0 : -360);
+	return blueGate.getAngle() + dir;
+	
 }
