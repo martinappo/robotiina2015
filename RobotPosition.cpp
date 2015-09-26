@@ -41,7 +41,7 @@ void RobotPosition::updateFieldCoords() {
 	std::pair<cv::Point, cv::Point> possiblePoints = intersectionOfTwoCircles(yellowGate.fieldCoords, 
 																			  w*d2, 
 																			  blueGate.fieldCoords, 
-																			  2*d1);
+																			  w*d1);
 	if (isRobotAboveCenterLine(yellowGate.getAngle(), blueGate.getAngle())){
 		if (possiblePoints.first.y > 155){
 			this->fieldCoords = possiblePoints.first;
