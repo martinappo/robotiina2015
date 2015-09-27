@@ -69,15 +69,41 @@ HSVColorRange AutoCalibrator::GetObjectThresholds (int index, const std::string 
 
 };
 bool AutoCalibrator::OnMouseEvent(int event, float x, float y, int flags, bool bMainArea) {
-	if (!running || screenshot_mode != GET_THRESHOLD) return false;
-	if (event == cv::EVENT_LBUTTONUP && bMainArea) {
-		mouseClicked(x, y, flags);
+	if (running && screenshot_mode == CROPPING && bMainArea){
+		if (event == cv::EVENT_LBUTTONDOWN){
+			thresholdCorner1 = cv::Point(x, y);
+			thresholdCorner2 = cv::Point(x, y);
+			drawRect = true;
+		}
+		else if (event == cv::EVENT_MOUSEMOVE && drawRect){
+			thresholdCorner2 = cv::Point(x, y);
+		}
+		else if (event == cv::EVENT_LBUTTONUP){
+			if (cv::norm(thresholdCorner1 - thresholdCorner2) > 100){
+				cv::Rect myROI(thresholdCorner1, thresholdCorner2);
+				image = image(myROI);
+				m_pDisplay->ShowImage(image);
+				screenshot_mode = CALIBRATION;
+				drawRect = false;
+			}
+			else{
+				thresholdCorner1 = cv::Point(0, 0);
+				thresholdCorner2 = cv::Point(0, 0);
+				drawRect = false;
+			}
+		}
+		return true;
+	}else if (running && screenshot_mode == GET_THRESHOLD){
+		if (event == cv::EVENT_LBUTTONUP && bMainArea) {
+			mouseClicked(x, y, flags);
+		}
+		if (event == cv::EVENT_RBUTTONUP) {
+			SaveConf(this->object_name);
+			screenshot_mode = THRESHOLDING;
+		}
+		return true;
 	}
-	if (event == cv::EVENT_RBUTTONUP) {
-		SaveConf(this->object_name);
-		screenshot_mode = THRESHOLDING;
-	}
-	return true;
+	return false;
 
 };
 
@@ -154,15 +180,31 @@ void AutoCalibrator::Run() {
 			frameBGR.copyTo(display);
 			m_pDisplay->ShowImage(frameBGR);
 		}
-		else if(screenshot_mode == GRAB_FRAME){
+		else if (screenshot_mode == CROPPING){
+			image.copyTo(display);
+			if (drawRect && cv::norm(thresholdCorner1 - thresholdCorner2) > 100){
+				line(display, thresholdCorner1, cv::Point(thresholdCorner2.x, thresholdCorner1.y), cv::Scalar(0, 0, 0), 1, 8, 0);
+				line(display, thresholdCorner2, cv::Point(thresholdCorner2.x, thresholdCorner1.y), cv::Scalar(0, 0, 0), 1, 8, 0);
+
+				line(display, thresholdCorner1, cv::Point(thresholdCorner1.x, thresholdCorner2.y), cv::Scalar(0, 0, 0), 1, 8, 0);
+				line(display, thresholdCorner2, cv::Point(thresholdCorner1.x, thresholdCorner2.y), cv::Scalar(0, 0, 0), 1, 8, 0);
+			}
+			else{
+				cv::putText(display, "Select area for thresholding", cv::Point(200, 220), cv::FONT_HERSHEY_DUPLEX, 0.9, cv::Scalar(23, 40, 245));
+			}
+			m_pDisplay->ShowImage(display);
+
+		}
+		else if (screenshot_mode == GRAB_FRAME){
 			m_pDisplay->ShowImage(white);
-			std::this_thread::sleep_for(std::chrono::milliseconds(150)); 
+			std::this_thread::sleep_for(std::chrono::milliseconds(150));
 			frameBGR.copyTo(display);
 			m_pDisplay->ShowImage(display);
-			std::this_thread::sleep_for(std::chrono::milliseconds(1600)); 
-
-			screenshot_mode = CALIBRATION;
-			//image.copyTo(display);
+			std::this_thread::sleep_for(std::chrono::milliseconds(1600));
+			screenshot_mode = CROPPING;
+		}
+		else if (screenshot_mode == CALIBRATION){
+			image.copyTo(display);
 			cv::putText(display, "Please wait, clustering", cv::Point(200, 220), cv::FONT_HERSHEY_DUPLEX, 0.9, cv::Scalar(23, 40, 245));
 			m_pDisplay->ShowImage(display);
 
@@ -171,12 +213,13 @@ void AutoCalibrator::Run() {
 			//clustered.copyTo(display);
 			m_pDisplay->ShowImage(display);
 		}
-		else if (screenshot_mode == THRESHOLDING) {
-			m_pDisplay->ShowImage(clustered);
+		else if (screenshot_mode == THRESHOLDING){
+			image.copyTo(display);
+			m_pDisplay->ShowImage(display);
 		}
 		else if (screenshot_mode == GET_THRESHOLD) {
-			cv::putText(display, object_name, cv::Point(250, 220), cv::FONT_HERSHEY_DUPLEX, 1, cv::Scalar(23, 67, 245));
-			cv::putText(display, "(ctrl +) click to select pixels, right click back", cv::Point(190, 320), cv::FONT_HERSHEY_DUPLEX, 0.3, cv::Scalar(23, 67, 245));
+			cv::putText(display, object_name, cv::Point((int)(image.cols * 0.3), (int)(image.rows*0.3)), cv::FONT_HERSHEY_DUPLEX , 1, cv::Scalar(23, 67, 245));
+			cv::putText(display, "(ctrl +) click to select pixels, right click back", cv::Point((int)(image.cols * 0.2), (int)(image.rows*0.5)), cv::FONT_HERSHEY_DUPLEX, 0.3, cv::Scalar(23, 67, 245));
 			m_pDisplay->ShowImage(display);
 
 		}

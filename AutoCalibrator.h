@@ -11,7 +11,8 @@ class AutoCalibrator : public ColorCalibrator,
 		GRAB_FRAME,
 		CALIBRATION,
 		THRESHOLDING,
-		GET_THRESHOLD
+		GET_THRESHOLD,
+		CROPPING
 	};
 
 public:
@@ -24,6 +25,10 @@ public:
 		white.copyTo(display);
 		frames = 0;
 		screenshot_mode = LIVE_FEED;
+
+		cv::Point thresholdCorner1 = cv::Point(0, 0);
+		cv::Point thresholdCorner2 = cv::Point(0, 0);
+		bool drawRect = false;
 	};
 	HSVColorRange GetObjectThresholds(int index, const std::string &name);
 
@@ -50,6 +55,8 @@ private:
 	cv::Point frame_size;
 	boost::mutex mutex;
 	std::atomic_int screenshot_mode;
-
+	cv::Point thresholdCorner1 = cv::Point(0, 0);
+	cv::Point thresholdCorner2 = cv::Point(0, 0);
+	bool drawRect = false;
 
 };
