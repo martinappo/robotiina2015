@@ -33,7 +33,8 @@ void ObjectPosition::updateRawCoordinates(const cv::Point pos, cv::RotatedRect b
 	double distanceInCm = gDistanceCalculator.getDistance(orgin, pos);
 	double angle = angleBetween(pos - orgin, { 0, -1 });
 
-	this->polarMetricCoords = { distanceInCm, angle };
+	polarMetricCoords = { distanceInCm, angle };
+	rawBounds = bounds;
 
 
 }

@@ -6,6 +6,8 @@
 #include "GateFinder.h"
 #include "BallFinder.h"
 #include "AutoCalibrator.h"
+#include <queue>          // std::priority_queue
+#include <functional>     // std::greater
 
 FrontCameraVision::FrontCameraVision(ICamera *pCamera, IDisplay *pDisplay, FieldState *pFieldState) : ConfigurableModule("FrontCameraVision")
 {
@@ -116,6 +118,41 @@ void FrontCameraVision::Run() {
 		//Yellow gate pos
 		yellowGateFinder.Locate(thresholdedImages[YELLOW_GATE], frameHSV, frameBGR, m_pState->yellowGate);
 		// ajust gate positions to ..
+		// find closest points to opposite gate centre
+		cv::Point2f r1[4]; m_pState->blueGate.rawBounds.points(r1);
+		cv::Point2f r2[4]; m_pState->yellowGate.rawBounds.points(r2);
+		auto min_i1 = 0, min_j1 = 0, min_i2 = 0, min_j2 = 0;
+		double min_dist1 = INT_MAX, min_dist2 = INT_MAX;
+		for (int i = 0; i < 4; i++){
+			double dist1 = cv::norm(r1[i] - (cv::Point2f)m_pState->yellowGate.rawPixelCoords);
+			double dist2 = cv::norm(r2[i] - (cv::Point2f)m_pState->blueGate.rawPixelCoords);
+			if (dist1 < min_dist1) {
+				min_dist1 = dist1;
+				min_i1 = i;
+			}
+			if (dist2 < min_dist2) {
+				min_dist2 = dist2;
+				min_j1 = i;
+			}
+		}
+		auto next = (min_i1 + 1) % 4;
+		auto prev = (min_i1 + 3) % 4;
+		// find longest side
+		min_i2 = (cv::norm(r1[min_i1] - r1[next]) > cv::norm(r1[min_i1] - r1[prev])) ? next : prev;
+		next = (min_j1 + 1) % 4;
+		prev = (min_j1 + 3) % 4;
+		// find longest side
+		min_j2 = (cv::norm(r2[min_j1] - r2[next]) > cv::norm(r2[min_j1] - r2[prev])) ? next : prev;
+		cv::Scalar color4(0, 0, 0);
+
+		cv::Scalar color2(0, 0, 255);
+
+		auto c1 = (r1[min_i1] + r1[min_i2]) / 2;
+		circle(frameBGR, c1, 12, color4, -1, 12, 0);
+		auto c2 = (r2[min_j1] + r2[min_j2]) / 2;
+		circle(frameBGR, c2, 7, color2, -1, 8, 0);
+		m_pState->blueGate.updateRawCoordinates(c1, cv::RotatedRect(), frameBGR.size() / 2);
+		m_pState->yellowGate.updateRawCoordinates(c2, cv::RotatedRect(), frameBGR.size() / 2);
 
 		m_pState->self.updateCoordinates();
 		//Balls pos

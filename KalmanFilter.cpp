@@ -6,27 +6,29 @@ KalmanFilter::KalmanFilter(const cv::Point2i &startPoint){
 													 0, 0, 1, 0, 
 													 0, 0, 0, 1);
 
-	
+	/*
 	measurement(0) = (float)(startPoint.x);
 	measurement(1) = (float)(startPoint.y);
 	estimated(0) = (float)(startPoint.x);
 	estimated(1) = (float)(startPoint.y);
+	*/
+	measurement.setTo(cv::Scalar(0));
 
 	KF.statePre.at<float>(0) = (float)(startPoint.x);
 	KF.statePre.at<float>(1) = (float)(startPoint.y);
-	KF.statePre.at<float>(2) = (float)(startPoint.x);
-	KF.statePre.at<float>(3) = (float)(startPoint.y);
-
+	KF.statePre.at<float>(2) = 0;
+	KF.statePre.at<float>(3) = 0;
+	/*
 	KF.statePost.at<float>(0) = (float)(startPoint.x);
 	KF.statePost.at<float>(1) = (float)(startPoint.y);
 	KF.statePost.at<float>(2) = (float)(startPoint.x);
 	KF.statePost.at<float>(3) = (float)(startPoint.y);
-
+	*/
 
 	setIdentity(KF.measurementMatrix);
-	setIdentity(KF.processNoiseCov, cv::Scalar::all(0.5));
-	setIdentity(KF.measurementNoiseCov, cv::Scalar::all(0.5));
-	setIdentity(KF.errorCovPost, cv::Scalar::all(0.5));
+	setIdentity(KF.processNoiseCov, cv::Scalar::all(1e-4));
+	setIdentity(KF.measurementNoiseCov, cv::Scalar::all(1e-1));
+	setIdentity(KF.errorCovPost, cv::Scalar::all(0.1));
 }
 
 cv::Point2i KalmanFilter::doFiltering(const cv::Point2i &point) {

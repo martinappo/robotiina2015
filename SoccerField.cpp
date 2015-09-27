@@ -35,6 +35,7 @@ void SoccerField::Run(){
 		green.copyTo(field);
 
 
+		cv::circle(field, self.rawFieldCoords + c, 24, cv::Scalar(0, 33, 255), 4);
 		cv::circle(field, self.fieldCoords + c, 14, cv::Scalar(133, 33, 55), 4);
 		cv::line(field, self.fieldCoords + c,
 			cv::Point(40.0*sin(self.getAngle() / 360 * TAU), -40 * cos(self.getAngle() / 360 * TAU))
