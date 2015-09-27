@@ -14,5 +14,4 @@ public:
 	virtual void updateFieldCoords();
 	virtual void updateCoordinates(int x, int y);
 	virtual void updateCoordinates(cv::Point rawCoords);
-
 };

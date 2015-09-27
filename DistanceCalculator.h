@@ -4,7 +4,7 @@
 class DistanceCalculator{
 public:
 	DistanceCalculator();
-	double getDistance(int centerX, int centerY, int x, int y);
+	double getDistance(const cv::Point &pos, const cv::Point &orgin) const;
 	void loadConf();
 
 private:

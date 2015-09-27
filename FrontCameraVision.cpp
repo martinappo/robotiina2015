@@ -48,10 +48,10 @@ void FrontCameraVision::Run() {
 
 	auto frameSize = m_pCamera->GetFrameSize();
 
-
+	/*
 	m_pState->blueGate.setFrameSize(frameSize);
 	m_pState->yellowGate.setFrameSize(frameSize);
-
+	*/
 	
 
 	cv::Mat white(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(255, 255, 255));
@@ -107,36 +107,19 @@ void FrontCameraVision::Run() {
 
 
 
-		if (borderDetectionEnabled) {
-			//float y = finder.IsolateField(thresholdedImages, frameHSV, frameBGR, false, nightVisionEnabled);
-			//finder.LocateCursor(frameBGR, cv::Point2i(frameSize.width / 2, y), BALL, borderDistance);
-		}
-		else {
-			borderDistance.setDistance(INT_MAX);
-		};
 
 		/**************************************************/
 		/* STEP 4. extract closest ball and gate positions*/
 		/**************************************************/
 		//Blue gate pos
-		cv::Point2i blueGatePoint = blueGateFinder.LocateOnScreen(thresholdedImages, frameHSV, frameBGR, BLUE_GATE);
+		blueGateFinder.Locate(thresholdedImages[BLUE_GATE], frameHSV, frameBGR, m_pState->blueGate);
 		//Yellow gate pos
-		cv::Point2i yellowGatePoint = yellowGateFinder.LocateOnScreen(thresholdedImages, frameHSV, frameBGR, YELLOW_GATE);
+		yellowGateFinder.Locate(thresholdedImages[YELLOW_GATE], frameHSV, frameBGR, m_pState->yellowGate);
+		// ajust gate positions to ..
 
-		//update state, lock state until done
-		{
-			FieldStateLock state(m_pState);
-
-			state->blueGate.updateCoordinates(blueGatePoint);
-
-			state->yellowGate.updateCoordinates(yellowGatePoint);
-
-			//Robot pos (is updated from gates)
-			state->self.updateCoordinates();
-
-			//Balls pos
-			ballFinder.populateBalls(thresholdedImages, frameHSV, frameBGR, BALL, m_pState);
-		}
+		m_pState->self.updateCoordinates();
+		//Balls pos
+		ballFinder.populateBalls(thresholdedImages, frameHSV, frameBGR, BALL, m_pState);
 		/*
 		ObjectPosition *targetGatePos = 0;
 		if (targetGate == BLUE_GATE && BlueGateFound) targetGatePos = &blueGatePos;

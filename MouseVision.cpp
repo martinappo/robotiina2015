@@ -23,7 +23,6 @@ MouseVision::~MouseVision()
 }
 
 void MouseVision::Run(){
-	ObjectFinder finder;
 	ObjectPosition mousePos;
 	RobotPosition &robotPos = m_pState->self;
 	while (!stop_thread){
@@ -34,7 +33,8 @@ void MouseVision::Run(){
 		//cv::circle(frameBGR, cv::Point(frameBGR.cols - x, frameBGR.rows - y), 8, color, -1);
 
 		frameBGR.copyTo(display);
-		m_pState->blueGate.updateCoordinates(cv::Point(x, y));
+		cv::RotatedRect bounds;
+		m_pState->blueGate.updateRawCoordinates(cv::Point(x, y), bounds, frameBGR.size()/2);
 		//m_pState->yellowGate.updateCoordinates(cv::Point(frameBGR.cols - x, frameBGR.rows - y));
 		m_pState->self.updateCoordinates();
 		//ballFinder.populateBalls(thresholdedImages, frameHSV, frameBGR, BALL, m_pState);

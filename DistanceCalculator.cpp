@@ -58,9 +58,9 @@ void DistanceCalculator::loadConf(){
 	m_bEnabled = true;
 }
 
-double DistanceCalculator::getDistance(int centerX, int centerY, int x, int y){
+double DistanceCalculator::getDistance(const cv::Point &pos, const cv::Point &orgin) const{
 	if (!m_bEnabled) return INT_MAX;
-	double dist = cv::norm(cv::Point(centerX, centerY) - cv::Point(x, y));//DistanceCalibrator::calculateDistance(centerX, centerY, x, y);
+	double dist = cv::norm(pos - orgin);//DistanceCalibrator::calculateDistance(centerX, centerY, x, y);
 	//y = 8E-08x4 - 6E-05x3 + 0,0167x2 - 1,5818x + 72,791
 	return (8E-8)*pow(dist, 4) - (6E-5)*pow(dist, 3) + 0.0167*pow(dist, 2) - 1.5818 * dist + 72.791;
 

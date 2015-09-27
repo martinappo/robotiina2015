@@ -51,7 +51,7 @@ void BallFinder::populateBalls(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, 
 			rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), redColor, 1, 8, 0);
 			//TODO: index balls and match the right BallPosition object and contour from frame
 			BallPosition &currentBall = pFieldState->balls[ballsUpdatedCount]; // ref into array
-			currentBall.updateCoordinates(posX, posY, pFieldState->self.fieldCoords, pFieldState->self.getAngle());
+			//currentBall.updateRawCoordinates(posX, posY, pFieldState->self.fieldCoords, pFieldState->self.getAngle());
 			currentBall.setIsUpdated(true);
 			ballsUpdatedCount++;
 		}

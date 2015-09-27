@@ -17,8 +17,12 @@ RobotPosition::~RobotPosition()
 
 void RobotPosition::updateCoordinates() {
 	lastFieldCoords = fieldCoords;
-	this->robotAngle = getRobotDirection();
 	updateFieldCoords();
+	// no that we know robot position, we can calculate it's angle to blue or yellow gate on the field
+	double angleToBlueGate = angleBetween(fieldCoords - blueGate.fieldCoords, { 0, -1 });
+	// now add real gate angle to this angle
+	polarMetricCoords.y = (angleToBlueGate - blueGate.getAngle()) + 180;
+
 }
 
 void RobotPosition::updateFieldCoords() {
@@ -33,15 +37,15 @@ void RobotPosition::updateFieldCoords() {
 	double d1 = blueGate.getDistance();
 	double d2 = yellowGate.getDistance();
 	double g = abs(blueGate.getAngle() - yellowGate.getAngle());
-	while (d1 > 0 && d2 > 0 && diff > 1) {
-		diff = distanceBetweenGates - sqrt(pow(w*d1, 2) + pow(w*d2, 2) - 2*w*d1*d2*cos(g));
-		w += diff*a;
+	if (true || abs(g - 180) > 15) { // do not use this for wery acute triangles, floating point errors are big
+		while (d1 > 0 && d2 > 0 && diff > 1) {
+			diff = distanceBetweenGates - sqrt(pow(w*d1, 2) + pow(w*d2, 2) - 2 * w*d1*d2*cos(g));
+			w += diff*a;
+		}
 	}
-	//w = 1;
-	std::pair<cv::Point, cv::Point> possiblePoints = intersectionOfTwoCircles(yellowGate.fieldCoords, 
-																			  w*d2, 
-																			  blueGate.fieldCoords, 
-																			  w*d1);
+	w = 1;
+	auto possiblePoints = intersectionOfTwoCircles(yellowGate.fieldCoords, w*d2, blueGate.fieldCoords,  w*d1);
+
 	if (isRobotAboveCenterLine(yellowGate.getAngle(), blueGate.getAngle())){
 		if (possiblePoints.first.y > 155){
 			this->fieldCoords = possiblePoints.first;
@@ -110,7 +114,7 @@ std::pair<cv::Point, cv::Point> RobotPosition::intersectionOfTwoCircles(cv::Poin
 }
 
 double RobotPosition::getAngle() {
-	return robotAngle;
+	return polarMetricCoords.y;
 }
 
 bool RobotPosition::isRobotAboveCenterLine(double yellowGoalAngle, double blueGoalAngle){

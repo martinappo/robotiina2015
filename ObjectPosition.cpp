@@ -14,24 +14,28 @@ ObjectPosition::ObjectPosition(cv::Point2i polarCoords) {
 
 ObjectPosition::~ObjectPosition() {};
 
-double ObjectPosition::getDistance() {
-	return polarMetricCoords.x;
-}
 
 void ObjectPosition::setDistance(int distance) {
 	this->polarMetricCoords.x = distance;
 }
-
+/*
 void ObjectPosition::setFrameSize(cv::Size frameSize) {
 	this->frameSize = frameSize;
 }
-
-double ObjectPosition::getAngle() {
-	return polarMetricCoords.y;
-}
+*/
 
 double ObjectPosition::getAngleToRobot() {
 	return getAngle() + robotAngle;
+}
+void ObjectPosition::updateRawCoordinates(const cv::Point pos, cv::RotatedRect bounds, cv::Point orgin) {
+	lastFieldCoords = fieldCoords;
+	rawPixelCoords = pos;
+	double distanceInCm = gDistanceCalculator.getDistance(orgin, pos);
+	double angle = angleBetween(pos - orgin, { 0, -1 });
+
+	this->polarMetricCoords = { distanceInCm, angle };
+
+
 }
 
 void ObjectPosition::updateCoordinates(int x, int y, cv::Point robotFieldCoords, double robotAngle) {
@@ -55,20 +59,26 @@ void ObjectPosition::updatePolarCoords(int x, int y) {
 }
 
 void ObjectPosition::updatePolarCoords(cv::Point rawCoords) {
+	throw std::runtime_error("fixme");
+	/*
 	cv::Point centerOfFrame = { frameSize.width / 2, frameSize.height / 2 };
 	double distanceInCm = gDistanceCalculator.getDistance(centerOfFrame.x, centerOfFrame.y, rawCoords.x, rawCoords.y);
 	double angle = (angleBetween(rawCoords - centerOfFrame, { 0, -frameSize.height/2 }));
 	
 	this->polarMetricCoords = { distanceInCm, angle};
+	*/
 }
 
 
 void ObjectPosition::updateFieldCoords(cv::Point robotFieldCoords) {
+	throw std::runtime_error("fixme");
+	/*
 	cv::Point centerOfFrame = { frameSize.height / 2, frameSize.width / 2 };
 	int fieldY = -1 * (int)(getDistance() * cos(TAU*getAngleToRobot() / 360));
 	int fieldX = (int)(getDistance() * sin(TAU*getAngleToRobot() / 360));
 	cv::Point filteredCoords = cv::Point(fieldX, fieldY);//filter->doFiltering(cv::Point(fieldX, fieldY));
 	fieldCoords = { robotFieldCoords.x + filteredCoords.x, robotFieldCoords.y + filteredCoords.y };
+	*/
 	
 }
 

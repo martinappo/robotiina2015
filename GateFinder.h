@@ -6,6 +6,6 @@ class GateFinder :
 public:
 	GateFinder();
 	~GateFinder();
-	cv::Point2i LocateOnScreen(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::Mat &frameBGR, OBJECT target);
+	bool Locate(cv::Mat &thresholdedImage, cv::Mat &frameHSV, cv::Mat &frameBGR, ObjectPosition & objectPos);
 };
 

@@ -10,7 +10,7 @@ void BallPosition::setIsUpdated(bool updated) {
 }
 
 void BallPosition::predictCoordinates() {
-	updateCoordinates(0, 0, cv::Point(0,0), 0);
+	//updateCoordinates(0, 0, cv::Point(0,0), 0);
 	//pixelCoordsForField = filter->getPrediction();
 	//TODO: generate other coordinate types from predicted pixelcoords
 }
