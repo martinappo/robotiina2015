@@ -6,6 +6,7 @@
 
 std::pair<NewDriveMode, DriveInstruction*> NewDriveModes[] = {
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_IDLE, new Idle()),
+#ifdef AUTOPILOT_IS_WORKING
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_LOCATE_BALL, new LocateBall()),
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_BALL, new DriveToBall()),
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_LOCATE_HOME, new LocateHome()),
@@ -14,6 +15,7 @@ std::pair<NewDriveMode, DriveInstruction*> NewDriveModes[] = {
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_AIM_GATE, new AimGate()),
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_KICK, new Kick()),
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_CATCH_BALL, new CatchBall()),
+#endif
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_RECOVER_CRASH, new RecoverCrash()),
 
 	//	std::pair<STATE, std::string>(STATE_END_OF_GAME, "End of Game") // this is intentionally left out
@@ -79,6 +81,7 @@ NewDriveMode Idle::step(double dt)
 	//return (actionStart - newAutoPilot.lastUpdate).total_milliseconds() > 0 ? DRIVEMODE_IDLE : DRIVEMODE_DRIVE_TO_BALL;
 	return DRIVEMODE_IDLE;
 }
+#ifdef AUTOPILOT_IS_WORKING
 
 /*BEGIN LocateBall*/
 void LocateBall::onEnter()
@@ -325,7 +328,7 @@ void Kick::onEnter()
 	DriveInstruction::onEnter();
 	m_pCom->ToggleTribbler(false);
 }
-
+#endif
 /*BEGIN RecoverCrash*/
 NewDriveMode RecoverCrash::step(double dt)
 {

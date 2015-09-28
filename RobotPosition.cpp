@@ -5,33 +5,16 @@
 //} 
 
 RobotPosition::RobotPosition(GatePosition &yellowGate, GatePosition &blueGate, cv::Point initialCoords):
-yellowGate(yellowGate), blueGate(blueGate), filter(cv::Point(0,0)){
+yellowGate(yellowGate), blueGate(blueGate), filter(initialCoords){
 	this->polarMetricCoords = cv::Point(0, 0);
 	this->fieldCoords = initialCoords;
-	updateCoordinates();
 }
 
 RobotPosition::~RobotPosition()
 {
 }
 
-void RobotPosition::updateCoordinates() {
-	lastFieldCoords = fieldCoords;
-	updateFieldCoords();
-	// no that we know robot position, we can calculate it's angle to blue or yellow gate on the field
-	double angleToBlueGate = angleBetween(fieldCoords - blueGate.fieldCoords, { 0, 1 });
-	double angleToYellowGate = angleBetween(fieldCoords - yellowGate.fieldCoords, { 0, 1 });
-	// now add real gate angle to this angle
-	auto a1 = (angleToBlueGate - blueGate.getAngle());
-	auto a2 = (angleToYellowGate - yellowGate.getAngle());
-	// for taking average, they must have same sign
-	if (a1 < 0) a1 += 360;
-	if (a2 < 0) a2 += 360;
-	polarMetricCoords.y = (a1 + a2) / 2;
-
-}
-
-void RobotPosition::updateFieldCoords() {
+void RobotPosition::updateFieldCoords(cv::Point orgin) {
 
 	//we konw all angles of triangle and length of one side, use cosinus theorem to find
 	const int distanceBetweenGates = 450;
@@ -73,6 +56,19 @@ void RobotPosition::updateFieldCoords() {
 	else {
 		this->fieldCoords = possiblePoints.second;
 	}*/
+
+	// no that we know robot position, we can calculate it's angle to blue or yellow gate on the field
+	double angleToBlueGate = angleBetween(fieldCoords - blueGate.fieldCoords, { 0, 1 });
+	double angleToYellowGate = angleBetween(fieldCoords - yellowGate.fieldCoords, { 0, 1 });
+	// now add real gate angle to this angle
+	auto a1 = (angleToBlueGate - blueGate.getAngle());
+	auto a2 = (angleToYellowGate - yellowGate.getAngle());
+	// for taking average, they must have same sign
+	if (a1 < 0) a1 += 360;
+	if (a2 < 0) a2 += 360;
+	polarMetricCoords.y = (a1 + a2) / 2;
+
+
 }
 
 void RobotPosition::updatePolarCoords() {

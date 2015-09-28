@@ -14,3 +14,12 @@ void BallPosition::predictCoordinates() {
 	//pixelCoordsForField = filter->getPrediction();
 	//TODO: generate other coordinate types from predicted pixelcoords
 }
+
+void BallPosition::updateFieldCoords(cv::Point orgin) {
+
+	int fieldY = -(int)(polarMetricCoords.x * cos(TAU*polarMetricCoords.y / 360));
+	int fieldX = (int)(polarMetricCoords.x * sin(TAU*polarMetricCoords.y / 360));
+	cv::Point filteredCoords = filter.doFiltering(cv::Point(fieldX, fieldY));
+	fieldCoords = orgin + filteredCoords;
+
+}

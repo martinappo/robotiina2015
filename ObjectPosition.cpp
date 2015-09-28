@@ -34,6 +34,7 @@ void ObjectPosition::updateRawCoordinates(const cv::Point pos, cv::Point orgin) 
 	double angle = angleBetween(pos - orgin, { 0, -1 });
 
 	polarMetricCoords = { distanceInCm, angle };
+//	updateFieldCoords(cv::Point());
 }
 
 void ObjectPosition::updateCoordinates(int x, int y, cv::Point robotFieldCoords, double robotAngle) {
@@ -68,17 +69,6 @@ void ObjectPosition::updatePolarCoords(cv::Point rawCoords) {
 }
 
 
-void ObjectPosition::updateFieldCoords(cv::Point robotFieldCoords) {
-	throw std::runtime_error("fixme");
-	/*
-	cv::Point centerOfFrame = { frameSize.height / 2, frameSize.width / 2 };
-	int fieldY = -1 * (int)(getDistance() * cos(TAU*getAngleToRobot() / 360));
-	int fieldX = (int)(getDistance() * sin(TAU*getAngleToRobot() / 360));
-	cv::Point filteredCoords = cv::Point(fieldX, fieldY);//filter->doFiltering(cv::Point(fieldX, fieldY));
-	fieldCoords = { robotFieldCoords.x + filteredCoords.x, robotFieldCoords.y + filteredCoords.y };
-	*/
-	
-}
 
 double ObjectPosition::angleBetween(const cv::Point2i &a, const cv::Point2i &b) {
 

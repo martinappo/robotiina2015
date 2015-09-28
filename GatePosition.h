@@ -5,13 +5,7 @@
 class GatePosition : public ObjectPosition
 {
 public:
-	GatePosition() {};
-	GatePosition(int x, int y); //Values relative to field and in cm
 	GatePosition(OBJECT gate);
 	virtual ~GatePosition();
-	int id;
-
-	virtual void updateFieldCoords();
-	virtual void updateCoordinates(int x, int y);
-	virtual void updateCoordinates(cv::Point rawCoords);
+	virtual void updateFieldCoords(cv::Point orgin = cv::Point(0, 0)){};
 };

@@ -6,13 +6,15 @@
 class BallPosition : public ObjectPosition
 {
 public:
-	BallPosition() {};
+	BallPosition(){};
 	virtual ~BallPosition();
 	int id;
 	bool isValid;
 	std::atomic_bool isUpdated;
 	void predictCoordinates();
 	void setIsUpdated(bool updated);
+	void updateFieldCoords(cv::Point orgin = cv::Point(0, 0));
+
 private:
-	KalmanFilter* filter = new KalmanFilter(cv::Point2i(400, 400));
+	KalmanFilter filter = KalmanFilter(cv::Point2i(0, 0));
 };

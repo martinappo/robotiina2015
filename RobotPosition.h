@@ -9,8 +9,7 @@ public:
 	RobotPosition(GatePosition &yellowGate, GatePosition &blueGate, cv::Point initialCoords = cv::Point(0,0));
 	virtual ~RobotPosition();
 	virtual void updatePolarCoords();
-	virtual void updateFieldCoords(/*GatePosition yellowGate, GatePosition blueGate*/);
-	virtual void updateCoordinates(/*GatePosition yellowGate, GatePosition blueGate*/);
+	void updateFieldCoords(cv::Point orgin = cv::Point(0,0));
 	double getAngle();
 	cv::Point2i rawFieldCoords; // (x, y) Coordinates to display objects on field by, relative to field
 private:

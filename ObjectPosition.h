@@ -8,7 +8,7 @@ public:
 	ObjectPosition(const ObjectPosition& that) = delete; // disable copy positions
 	double getDistance() const { return polarMetricCoords.x; };
 	double getAngle() const { return polarMetricCoords.y; };
-	cv::Point getFieldPos();
+	cv::Point getFieldPos() { return fieldCoords; };
 	virtual void updateRawCoordinates(const cv::Point pos, cv::Point orgin = cv::Point(0, 0)); // Takes raw coordinates of object from frame
 	virtual ~ObjectPosition();
 	ObjectPosition(int distance, int angle);
@@ -29,10 +29,10 @@ public:
 	cv::Point2i rawPixelCoords; // (x, y) Raw from frame
 	cv::Point2d polarMetricCoords;      // (distance, angle) Relative to robot
 	cv::RotatedRect rawBounds; // object bounds on raw image
-	
+	virtual void updateFieldCoords(cv::Point orgin = cv::Point(0, 0)) = 0;
+
 protected:
 	virtual void updatePolarCoords();
-	virtual void updateFieldCoords(cv::Point robotFieldCoords);
 	cv::Point2i lastFieldCoords;
 private:
 	//cv::Size frameSize;

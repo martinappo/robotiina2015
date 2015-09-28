@@ -52,7 +52,7 @@ public:
 	virtual void onExit();
 	virtual NewDriveMode step(double dt);
 };
-
+#ifdef AUTOPILOT_IS_WORKING
 class LocateBall : public DriveInstruction
 {
 private:
@@ -126,7 +126,7 @@ public:
 	Kick() : DriveInstruction("KICK"){};
 	virtual NewDriveMode step(double dt);
 };
-
+#endif
 class RecoverCrash : public DriveInstruction
 {
 public:

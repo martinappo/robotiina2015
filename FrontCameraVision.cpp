@@ -63,7 +63,6 @@ void FrontCameraVision::Run() {
 	cv::Mat blue(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(236, 137, 48));
 	cv::Mat orange(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(48, 154, 236));
 
-	ObjectPosition borderDistance = {0,0};
 	bool notEnoughtGreen = false;
 	int mouseControl = 0;
 	bool somethingOnWay = false;
@@ -157,24 +156,27 @@ void FrontCameraVision::Run() {
 		m_pState->blueGate.updateRawCoordinates(c1, frameBGR.size() / 2);
 		m_pState->yellowGate.updateRawCoordinates(c2, frameBGR.size() / 2);
 
-		m_pState->self.updateCoordinates();
+		m_pState->self.updateFieldCoords();
 		
 		//Balls pos
-		cv::Mat rotMat = getRotationMatrix2D(cv::Point(0,0), m_pState->self.getAngle(), 1);
-		cv::Mat balls(1, 1, CV_32FC2);
+		cv::Mat rotMat = getRotationMatrix2D(cv::Point(0,0), -m_pState->self.getAngle(), 1);
+		cv::Mat balls(3, NUMBER_OF_BALLS, CV_64FC1);
 		found = ballFinder.Locate(thresholdedImages[BALL], frameHSV, frameBGR, balls);
 		if (!found) continue; // nothing to do :(
+		balls.row(0) -= frameBGR.size().width / 2;
+		balls.row(1) -= frameBGR.size().height / 2;
 		cv::Mat rotatedBalls(balls.size(), balls.type());
-		cv::Mat balls_t(balls.size(), balls.type());
+
 		std::cout << CV_64FC1 << ", " << rotMat.type() << ", " << balls.type() << std::endl;
 		std::cout << rotMat << std::endl;
 		std::cout << balls << std::endl;
-//		cv::transpose(balls, balls_t);
-//		rotatedBalls = rotMat * balls;
-		cv::warpAffine(balls, rotatedBalls, rotMat, balls.size());
+
+		//cv::warpAffine(balls, rotatedBalls, rotMat, balls.size());
+		rotatedBalls = rotMat * balls;
 		std::cout << rotatedBalls << std::endl;
 		for (int i = 0; i < rotatedBalls.cols; i++){
-			m_pState->balls[i].updateRawCoordinates(cv::Point(rotatedBalls.at<cv::Vec2f>(0, i)), frameBGR.size() / 2);
+			m_pState->balls[i].updateRawCoordinates(cv::Point(rotatedBalls.col(i)), cv::Point(0,0));
+			m_pState->balls[i].updateFieldCoords(m_pState->self.getFieldPos());
 		}
 		
 		/*
