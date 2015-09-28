@@ -3,30 +3,7 @@
 extern DistanceCalculator gDistanceCalculator;
 
 
-ObjectPosition::ObjectPosition(int distance, int angle) {
-	this->polarMetricCoords.x = distance;
-	this->polarMetricCoords.y = angle;
-}
 
-ObjectPosition::ObjectPosition(cv::Point2i polarCoords) {
-	this->polarMetricCoords = polarCoords;
-}
-
-ObjectPosition::~ObjectPosition() {};
-
-
-void ObjectPosition::setDistance(int distance) {
-	this->polarMetricCoords.x = distance;
-}
-/*
-void ObjectPosition::setFrameSize(cv::Size frameSize) {
-	this->frameSize = frameSize;
-}
-*/
-
-double ObjectPosition::getAngleToRobot() {
-	return getAngle() + robotAngle;
-}
 void ObjectPosition::updateRawCoordinates(const cv::Point pos, cv::Point orgin) {
 	lastFieldCoords = fieldCoords;
 	rawPixelCoords = pos;
@@ -35,37 +12,6 @@ void ObjectPosition::updateRawCoordinates(const cv::Point pos, cv::Point orgin) 
 
 	polarMetricCoords = { distanceInCm, angle };
 //	updateFieldCoords(cv::Point());
-}
-
-void ObjectPosition::updateCoordinates(int x, int y, cv::Point robotFieldCoords, double robotAngle) {
-	this->robotAngle = robotAngle;
-	lastFieldCoords = fieldCoords;
-	this->rawPixelCoords = { x, y };
-	updatePolarCoords();
-	updateFieldCoords(robotFieldCoords);
-}
-
-void ObjectPosition::updateCoordinates(cv::Point point, cv::Point robotFieldCoords, double robotAngle) {
-	return updateCoordinates(point.x, point.y, robotFieldCoords, robotAngle);
-}
-
-void ObjectPosition::updatePolarCoords() {
-	updatePolarCoords(rawPixelCoords);
-}
-
-void ObjectPosition::updatePolarCoords(int x, int y) {
-	updatePolarCoords(cv::Point(x, y));
-}
-
-void ObjectPosition::updatePolarCoords(cv::Point rawCoords) {
-	throw std::runtime_error("fixme");
-	/*
-	cv::Point centerOfFrame = { frameSize.width / 2, frameSize.height / 2 };
-	double distanceInCm = gDistanceCalculator.getDistance(centerOfFrame.x, centerOfFrame.y, rawCoords.x, rawCoords.y);
-	double angle = (angleBetween(rawCoords - centerOfFrame, { 0, -frameSize.height/2 }));
-	
-	this->polarMetricCoords = { distanceInCm, angle};
-	*/
 }
 
 
