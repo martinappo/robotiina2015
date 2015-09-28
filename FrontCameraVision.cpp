@@ -126,8 +126,8 @@ void FrontCameraVision::Run() {
 		auto min_i1 = 0, min_j1 = 0, min_i2 = 0, min_j2 = 0;
 		double min_dist1 = INT_MAX, min_dist2 = INT_MAX;
 		for (int i = 0; i < 4; i++){
-			double dist1 = cv::norm(r1[i] - (cv::Point2f)g1);
-			double dist2 = cv::norm(r2[i] - (cv::Point2f)g2);
+			double dist1 = cv::norm(r1[i] - (cv::Point2f)g2);
+			double dist2 = cv::norm(r2[i] - (cv::Point2f)g1);
 			if (dist1 < min_dist1) {
 				min_dist1 = dist1;
 				min_i1 = i;
@@ -158,9 +158,9 @@ void FrontCameraVision::Run() {
 		m_pState->yellowGate.updateRawCoordinates(c2, frameBGR.size() / 2);
 
 		m_pState->self.updateCoordinates();
-		/*
+		
 		//Balls pos
-		cv::Mat rotMat = getRotationMatrix2D((cv::Point)frameBGR.size() / 2, m_pState->self.getAngle(), 1);
+		cv::Mat rotMat = getRotationMatrix2D(cv::Point(0,0), m_pState->self.getAngle(), 1);
 		cv::Mat balls(1, 1, CV_32FC2);
 		found = ballFinder.Locate(thresholdedImages[BALL], frameHSV, frameBGR, balls);
 		if (!found) continue; // nothing to do :(
@@ -176,7 +176,7 @@ void FrontCameraVision::Run() {
 		for (int i = 0; i < rotatedBalls.cols; i++){
 			m_pState->balls[i].updateRawCoordinates(cv::Point(rotatedBalls.at<cv::Vec2f>(0, i)), frameBGR.size() / 2);
 		}
-		*/
+		
 		/*
 		ObjectPosition *targetGatePos = 0;
 		if (targetGate == BLUE_GATE && BlueGateFound) targetGatePos = &blueGatePos;
