@@ -67,7 +67,7 @@ enum STATE
 
 class IObjectPosition {
 public:
-	virtual void updateRawCoordinates(const cv::Point pos, cv::RotatedRect bounds, cv::Point orgin = cv::Point(0,0)) = 0; // Takes raw coordinates of object from frame
+	virtual void updateRawCoordinates(const cv::Point pos, cv::Point orgin = cv::Point(0,0)) = 0; // Takes raw coordinates of object from frame
 	virtual double getAngle() = 0;
 	virtual double getDistance() = 0;
 	virtual cv::Point getFieldPos() = 0;

@@ -113,19 +113,21 @@ void FrontCameraVision::Run() {
 		/**************************************************/
 		/* STEP 4. extract closest ball and gate positions*/
 		/**************************************************/
+		cv::Point2f r1[4], r2[4];
+		cv::Point g1, g2;
 		//Blue gate pos
-		blueGateFinder.Locate(thresholdedImages[BLUE_GATE], frameHSV, frameBGR, m_pState->blueGate);
+		bool found = blueGateFinder.Locate(thresholdedImages[BLUE_GATE], frameHSV, frameBGR, g1, r1);
+		if (!found) continue; // nothing to do :(
 		//Yellow gate pos
-		yellowGateFinder.Locate(thresholdedImages[YELLOW_GATE], frameHSV, frameBGR, m_pState->yellowGate);
+		found = yellowGateFinder.Locate(thresholdedImages[YELLOW_GATE], frameHSV, frameBGR, g2, r2);
+		if (!found) continue; // nothing to do :(
 		// ajust gate positions to ..
 		// find closest points to opposite gate centre
-		cv::Point2f r1[4]; m_pState->blueGate.rawBounds.points(r1);
-		cv::Point2f r2[4]; m_pState->yellowGate.rawBounds.points(r2);
 		auto min_i1 = 0, min_j1 = 0, min_i2 = 0, min_j2 = 0;
 		double min_dist1 = INT_MAX, min_dist2 = INT_MAX;
 		for (int i = 0; i < 4; i++){
-			double dist1 = cv::norm(r1[i] - (cv::Point2f)m_pState->yellowGate.rawPixelCoords);
-			double dist2 = cv::norm(r2[i] - (cv::Point2f)m_pState->blueGate.rawPixelCoords);
+			double dist1 = cv::norm(r1[i] - (cv::Point2f)g1);
+			double dist2 = cv::norm(r2[i] - (cv::Point2f)g2);
 			if (dist1 < min_dist1) {
 				min_dist1 = dist1;
 				min_i1 = i;
@@ -151,12 +153,30 @@ void FrontCameraVision::Run() {
 		circle(frameBGR, c1, 12, color4, -1, 12, 0);
 		auto c2 = (r2[min_j1] + r2[min_j2]) / 2;
 		circle(frameBGR, c2, 7, color2, -1, 8, 0);
-		m_pState->blueGate.updateRawCoordinates(c1, cv::RotatedRect(), frameBGR.size() / 2);
-		m_pState->yellowGate.updateRawCoordinates(c2, cv::RotatedRect(), frameBGR.size() / 2);
+
+		m_pState->blueGate.updateRawCoordinates(c1, frameBGR.size() / 2);
+		m_pState->yellowGate.updateRawCoordinates(c2, frameBGR.size() / 2);
 
 		m_pState->self.updateCoordinates();
+		/*
 		//Balls pos
-		ballFinder.populateBalls(thresholdedImages, frameHSV, frameBGR, BALL, m_pState);
+		cv::Mat rotMat = getRotationMatrix2D((cv::Point)frameBGR.size() / 2, m_pState->self.getAngle(), 1);
+		cv::Mat balls(1, 1, CV_32FC2);
+		found = ballFinder.Locate(thresholdedImages[BALL], frameHSV, frameBGR, balls);
+		if (!found) continue; // nothing to do :(
+		cv::Mat rotatedBalls(balls.size(), balls.type());
+		cv::Mat balls_t(balls.size(), balls.type());
+		std::cout << CV_64FC1 << ", " << rotMat.type() << ", " << balls.type() << std::endl;
+		std::cout << rotMat << std::endl;
+		std::cout << balls << std::endl;
+//		cv::transpose(balls, balls_t);
+//		rotatedBalls = rotMat * balls;
+		cv::warpAffine(balls, rotatedBalls, rotMat, balls.size());
+		std::cout << rotatedBalls << std::endl;
+		for (int i = 0; i < rotatedBalls.cols; i++){
+			m_pState->balls[i].updateRawCoordinates(cv::Point(rotatedBalls.at<cv::Vec2f>(0, i)), frameBGR.size() / 2);
+		}
+		*/
 		/*
 		ObjectPosition *targetGatePos = 0;
 		if (targetGate == BLUE_GATE && BlueGateFound) targetGatePos = &blueGatePos;

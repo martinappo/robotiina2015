@@ -9,7 +9,7 @@ public:
 	double getDistance() const { return polarMetricCoords.x; };
 	double getAngle() const { return polarMetricCoords.y; };
 	cv::Point getFieldPos();
-	virtual void updateRawCoordinates(const cv::Point pos, cv::RotatedRect bounds, cv::Point orgin = cv::Point(0, 0)); // Takes raw coordinates of object from frame
+	virtual void updateRawCoordinates(const cv::Point pos, cv::Point orgin = cv::Point(0, 0)); // Takes raw coordinates of object from frame
 	virtual ~ObjectPosition();
 	ObjectPosition(int distance, int angle);
 	ObjectPosition(cv::Point2i polarCoords);

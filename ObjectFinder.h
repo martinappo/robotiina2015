@@ -15,6 +15,7 @@ protected:
 	cv::Point2d lastPosition = cv::Point2d(-1.0, -1.0);
 public:
 	ObjectFinder();
-	virtual bool Locate(cv::Mat &threshHoldedImage, cv::Mat &frameHSV, cv::Mat &frameBGR, ObjectPosition & objectPos) = 0;
+	/* objectCoords: is matrix with maxObjects rows and (x,y, rotated rect pairs) as columns */
+	virtual bool Locate(cv::Mat &threshHoldedImage, cv::Mat &frameHSV, cv::Mat &frameBGR, cv::Mat &objectCoords) = 0;
 	virtual ~ObjectFinder(){ }
 };

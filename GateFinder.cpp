@@ -13,10 +13,10 @@ GateFinder::~GateFinder()
 
 extern void drawLine(cv::Mat & img, cv::Mat & img2, cv::Vec4f line, int thickness, CvScalar color, bool nightVision = false);
 
-bool GateFinder::Locate(cv::Mat &imgThresholded, cv::Mat &frameHSV, cv::Mat &frameBGR, ObjectPosition & objectPos) {
+bool GateFinder::Locate(cv::Mat &imgThresholded, cv::Mat &frameHSV, cv::Mat &frameBGR, cv::Point &center, cv::Point2f *bounds) {
 	int smallestGateArea = 1000;
 	double growGateHeight = 1.2;
-	cv::Point2d center(-1, -1);
+	center = cv::Point(-1, -1);
 	//cv::Mat imgThresholded = HSVRanges[target]; // reference counted, I think
 	if (imgThresholded.rows == 0) return false;
 
@@ -75,8 +75,8 @@ bool GateFinder::Locate(cv::Mat &imgThresholded, cv::Mat &frameHSV, cv::Mat &fra
 	cv::Scalar color4(255, 0, 0);
 
 	cv::RotatedRect bounding_rect2 = cv::minAreaRect(contours[largest_contour_index]);
-	cv::Point2f rect_points[4]; bounding_rect2.points(rect_points);
-	objectPos.updateRawCoordinates(center, bounding_rect2, imgThresholded.size() / 2);
+	/*cv::Point2f bounds[4];*/ bounding_rect2.points(bounds);
+	//objectPos.updateRawCoordinates(center, bounding_rect2, imgThresholded.size() / 2);
 	/*
 	int min_dist = INT_MAX;
 	int min_index = 0;
@@ -102,7 +102,7 @@ bool GateFinder::Locate(cv::Mat &imgThresholded, cv::Mat &frameHSV, cv::Mat &fra
 	//int shift = bounding_rect2.size.height * 0.09 +0.2;
 	//std::cout << "shift: " << shift << " height: " << bounding_rect2.size.height << std::endl;
 	for (int j = 0; j < 4; j++) {
-		line(frameBGR, rect_points[j], rect_points[(j + 1) % 4], color, 1, 8);
+		line(frameBGR, bounds[j], bounds[(j + 1) % 4], color, 1, 8);
 		/*
 		std::vector<cv::Point2i> points;
 		points.push_back(rect_points[j]);

@@ -27,16 +27,13 @@ void ObjectPosition::setFrameSize(cv::Size frameSize) {
 double ObjectPosition::getAngleToRobot() {
 	return getAngle() + robotAngle;
 }
-void ObjectPosition::updateRawCoordinates(const cv::Point pos, cv::RotatedRect bounds, cv::Point orgin) {
+void ObjectPosition::updateRawCoordinates(const cv::Point pos, cv::Point orgin) {
 	lastFieldCoords = fieldCoords;
 	rawPixelCoords = pos;
 	double distanceInCm = gDistanceCalculator.getDistance(orgin, pos);
 	double angle = angleBetween(pos - orgin, { 0, -1 });
 
 	polarMetricCoords = { distanceInCm, angle };
-	rawBounds = bounds;
-
-
 }
 
 void ObjectPosition::updateCoordinates(int x, int y, cv::Point robotFieldCoords, double robotAngle) {

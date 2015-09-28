@@ -11,16 +11,18 @@ BallFinder::~BallFinder()
 }
 
 
-void BallFinder::populateBalls(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, cv::Mat &frameBGR, OBJECT target, FieldState *pFieldState) {
+
+bool BallFinder::Locate(cv::Mat &imgThresholded, cv::Mat &frameHSV, cv::Mat &frameBGR, cv::Mat &objectCoords) {
+
 	cv::Point2d notValidPosition = cv::Point2d(-1.0, -1.0);
 	
 	int smallestBallArea = 4;
 	cv::Point2d center(-1, -1);
 
-	cv::Mat imgThresholded = HSVRanges[target]; // reference counted, I think
+	//cv::Mat imgThresholded = HSVRanges[target]; // reference counted, I think
 	if (imgThresholded.rows == 0){
 		std::cout << "Image thresholding has failed" << std::endl;
-		return;
+		return false;
 	}
 	cv::Mat dst(imgThresholded.rows, imgThresholded.cols, CV_8U, cv::Scalar::all(0));
 
@@ -34,14 +36,14 @@ void BallFinder::populateBalls(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, 
 	findContours(imgThresholded, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE); // Find the contours in the image
 
 	if (contours.size() == 0){ //if no contours found
-		return;
+		return false;
 	}
 
-	pFieldState->resetBallsUpdateState();
+	//pFieldState->resetBallsUpdateState();
 	int ballsUpdatedCount = 0;
 	for (unsigned int i = 0; i < contours.size(); i++)
 	{
-		if (ballsUpdatedCount >= NUMBER_OF_BALLS) break;
+		if (ballsUpdatedCount >= objectCoords.cols) break;
 		int ballArea = (int)(cv::contourArea(contours[i], false));
 		if (ballArea >= smallestBallArea) {
 			cv::Moments M = cv::moments(contours[i]);
@@ -49,14 +51,20 @@ void BallFinder::populateBalls(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, 
 			int posX = (int)(M.m10 / M.m00);
 			cv::Rect bounding_rect = cv::boundingRect(contours[i]);
 			rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), redColor, 1, 8, 0);
+			objectCoords.at<cv::Vec2f>(0, ballsUpdatedCount) = cv::Point2f(posX, posY);
+			/*
 			//TODO: index balls and match the right BallPosition object and contour from frame
 			BallPosition &currentBall = pFieldState->balls[ballsUpdatedCount]; // ref into array
 			//currentBall.updateRawCoordinates(posX, posY, pFieldState->self.fieldCoords, pFieldState->self.getAngle());
 			currentBall.setIsUpdated(true);
+			*/
 			ballsUpdatedCount++;
 		}
 	}
-	
+	for (int i = ballsUpdatedCount; i < objectCoords.rows; i++){
+		objectCoords.row(ballsUpdatedCount) = cv::Scalar::all(0);
+	}
+	/*
 	if (ballsUpdatedCount < NUMBER_OF_BALLS) {
 		for (int i = 0; i < NUMBER_OF_BALLS; i++) {
 			BallPosition &currentBall = pFieldState->balls[i];
@@ -65,6 +73,8 @@ void BallFinder::populateBalls(ThresholdedImages &HSVRanges, cv::Mat &frameHSV, 
 			}
 		}
 	}
+	*/
+	return true;
 }
 
 bool BallFinder::validateBall(ThresholdedImages &HSVRanges, cv::Point2d endPoint, cv::Mat &frameHSV, cv::Mat &frameBGR)
