@@ -54,7 +54,7 @@ bool BallFinder::Locate(cv::Mat &imgThresholded, cv::Mat &frameHSV, cv::Mat &fra
 			objectCoords.at<double>(0, ballsUpdatedCount) = posX;
 			objectCoords.at<double>(1, ballsUpdatedCount) = posY;
 			objectCoords.at<double>(2, ballsUpdatedCount) = 1;
-			std::cout << "c: " << objectCoords.col(ballsUpdatedCount) << std::endl;
+			//std::cout << "c: " << objectCoords.col(ballsUpdatedCount) << std::endl;
 			/*
 			//TODO: index balls and match the right BallPosition object and contour from frame
 			BallPosition &currentBall = pFieldState->balls[ballsUpdatedCount]; // ref into array

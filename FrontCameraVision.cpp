@@ -167,13 +167,13 @@ void FrontCameraVision::Run() {
 		balls.row(1) -= frameBGR.size().height / 2;
 		cv::Mat rotatedBalls(balls.size(), balls.type());
 
-		std::cout << CV_64FC1 << ", " << rotMat.type() << ", " << balls.type() << std::endl;
-		std::cout << rotMat << std::endl;
-		std::cout << balls << std::endl;
+		//std::cout << CV_64FC1 << ", " << rotMat.type() << ", " << balls.type() << std::endl;
+		//std::cout << rotMat << std::endl;
+		//std::cout << balls << std::endl;
 
 		//cv::warpAffine(balls, rotatedBalls, rotMat, balls.size());
 		rotatedBalls = rotMat * balls;
-		std::cout << rotatedBalls << std::endl;
+		//std::cout << rotatedBalls << std::endl;
 		for (int i = 0; i < rotatedBalls.cols; i++){
 			m_pState->balls[i].updateRawCoordinates(cv::Point(rotatedBalls.col(i)), cv::Point(0,0));
 			m_pState->balls[i].updateFieldCoords(m_pState->self.getFieldPos());

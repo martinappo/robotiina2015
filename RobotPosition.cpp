@@ -16,24 +16,7 @@ RobotPosition::~RobotPosition()
 
 void RobotPosition::updateFieldCoords(cv::Point orgin) {
 
-	//we konw all angles of triangle and length of one side, use cosinus theorem to find
-	const int distanceBetweenGates = 450;
-	// we have two equations
-	// distanceBetweenGates^2 = distanceToBlueGate^2 + distanceToYellowGate^2 - 2*distanceToBlueGate*distanceToYellowGate*cos(robotAngle)
-	double diff = INT_MAX;
-	double w = 1; 
-	double a = 0.0001;//learning rate
-	double d1 = blueGate.getDistance();
-	double d2 = yellowGate.getDistance();
-	double g = abs(blueGate.getAngle() - yellowGate.getAngle());
-	if (true || abs(g - 180) > 15) { // do not use this for wery acute triangles, floating point errors are big
-		while (d1 > 0 && d2 > 0 && abs(diff) > 1) {
-			diff = distanceBetweenGates - sqrt(pow(w*d1, 2) + pow(w*d2, 2) - 2 * w*w*d1*d2*cos(g));
-			w += diff*a;
-		}
-	}
-	//w = 1;
-	auto possiblePoints = intersectionOfTwoCircles(yellowGate.fieldCoords, w*d2, blueGate.fieldCoords,  w*d1);
+	auto possiblePoints = intersectionOfTwoCircles(yellowGate.fieldCoords, yellowGate.getDistance(), blueGate.fieldCoords, blueGate.getDistance());
 
 	if (isRobotAboveCenterLine(yellowGate.getAngle(), blueGate.getAngle())){
 		if (possiblePoints.first.y > 155){
