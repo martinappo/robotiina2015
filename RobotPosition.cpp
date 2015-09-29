@@ -27,12 +27,12 @@ void RobotPosition::updateFieldCoords(cv::Point orgin) {
 	double d2 = yellowGate.getDistance();
 	double g = abs(blueGate.getAngle() - yellowGate.getAngle());
 	if (true || abs(g - 180) > 15) { // do not use this for wery acute triangles, floating point errors are big
-		while (d1 > 0 && d2 > 0 && diff > 1) {
-			diff = distanceBetweenGates - sqrt(pow(w*d1, 2) + pow(w*d2, 2) - 2 * w*d1*d2*cos(g));
+		while (d1 > 0 && d2 > 0 && abs(diff) > 1) {
+			diff = distanceBetweenGates - sqrt(pow(w*d1, 2) + pow(w*d2, 2) - 2 * w*w*d1*d2*cos(g));
 			w += diff*a;
 		}
 	}
-	w = 1;
+	//w = 1;
 	auto possiblePoints = intersectionOfTwoCircles(yellowGate.fieldCoords, w*d2, blueGate.fieldCoords,  w*d1);
 
 	if (isRobotAboveCenterLine(yellowGate.getAngle(), blueGate.getAngle())){
@@ -66,7 +66,8 @@ void RobotPosition::updateFieldCoords(cv::Point orgin) {
 	// for taking average, they must have same sign
 	if (a1 < 0) a1 += 360;
 	if (a2 < 0) a2 += 360;
-	polarMetricCoords.y = (a1 + a2) / 2;
+	//polarMetricCoords.y = (a1 + a2) / 2;
+	polarMetricCoords.y = blueGate.getDistance() > yellowGate.getDistance() ? a1 : a2;
 
 
 }
