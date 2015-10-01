@@ -5,7 +5,6 @@
 
 
 #include "Camera.h"
-#include "StillCamera.h"
 #include "WheelController.h"
 #include "CoilBoard.h"
 #include "Dialog.h"
