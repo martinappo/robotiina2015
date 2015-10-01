@@ -10,14 +10,14 @@
 Dialog::Dialog(const std::string &title, const cv::Size &ptWindowSize, const cv::Size &ptCamSize, int flags/* = CV_WINDOW_AUTOSIZE*/)
 	: windowSize(ptWindowSize), camSize(ptCamSize)
 {
-	cv::Size windowSizeDefault = cv::Size((double)camSize.width / 0.7, (double)camSize.height / 0.7);
+	cv::Size windowSizeDefault = cv::Size((int)((double)camSize.width / 0.7), (int)((double)camSize.height / 0.7));
 
 	if (windowSize != cv::Size(0, 0)) {
 		double scale = (double)windowSize.width / (double)windowSizeDefault.width;
-		camSize = cv::Size((double)camSize.width * scale, (double)camSize.height * scale);
+		camSize = cv::Size((int)((double)camSize.width * scale), (int)((double)camSize.height * scale));
 	} 
 	else {
-		windowSize = cv::Size((double)camSize.width / 0.7, (double)camSize.width / 0.7);
+		windowSize = cv::Size((int)((double)camSize.width / 0.7), (int)((double)camSize.width / 0.7));
 	}
 	fontScale = (double)windowSize.height / 1024;
     m_title = title;
@@ -168,10 +168,10 @@ void Dialog::Run(){
 			size = ((Dialog*)self)->cam2_roi.size();
 			target = ((Dialog*)self)->cam2_area.size();
 		}
-		scaled.x = (double)(x - offset.x) / size.width * target.width;
-		scaled.y = (double)(y - offset.y) / size.height * target.height;
+		scaled.x = (int)((double)(x - offset.x) / size.width * target.width);
+		scaled.y = (int)((double)(y - offset.y) / size.height * target.height);
 		for (auto pListener : ((Dialog*)self)->m_EventListeners){
-			if (pListener->OnMouseEvent(event, scaled.x, scaled.y, flags, bMainArea)) {
+			if (pListener->OnMouseEvent(event, (float)(scaled.x), (float)(scaled.y), flags, bMainArea)) {
 				return; // event was handled
 			}
 		}
