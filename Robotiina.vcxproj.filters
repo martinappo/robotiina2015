@@ -102,12 +102,15 @@
     </ClCompile>
     <ClCompile Include="ImageThresholder.cpp">
       <Filter>ImageThresholders</Filter>
-	   </ClCompile>
+    </ClCompile>
     <ClCompile Include="dialog.cpp">
       <Filter>UI</Filter>
     </ClCompile>
     <ClCompile Include="WebUI.cpp">
       <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="kdNode2D.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -230,7 +233,7 @@
     </ClInclude>
     <ClInclude Include="TBBImageThresholder.h">
       <Filter>ImageThresholders</Filter>
-	  </ClInclude>
+    </ClInclude>
     <ClInclude Include="Simple-WebSocket-Server\server_ws.hpp">
       <Filter>Websocket</Filter>
     </ClInclude>
@@ -239,6 +242,9 @@
     </ClInclude>
     <ClInclude Include="WebUI.h">
       <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="kdNode2D.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -264,7 +270,7 @@
     </Filter>
     <Filter Include="ImageThresholders">
       <UniqueIdentifier>{fe018a00-0133-4b69-b118-7f70139aed08}</UniqueIdentifier>
-	   </Filter>
+    </Filter>
     <Filter Include="Websocket">
       <UniqueIdentifier>{708bd84b-5023-4ff9-8df6-eaf8667dafb4}</UniqueIdentifier>
     </Filter>

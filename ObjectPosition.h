@@ -5,7 +5,7 @@ class ObjectPosition
 {
 public:
 	ObjectPosition(){};
-	ObjectPosition(const ObjectPosition& that) = delete; // disable copy positions
+	//ObjectPosition(const ObjectPosition& that) = delete; // disable copy positions
 	double getDistance() const { return polarMetricCoords.x; };
 	double getAngle() const { return polarMetricCoords.y; };
 	cv::Point getFieldPos() { return fieldCoords; };
@@ -20,8 +20,6 @@ public:
 
 protected:
 	cv::Point2i lastFieldCoords;
-	double angleBetween(const cv::Point2i &p1, const cv::Point2i &p2);
-
 };
 
 

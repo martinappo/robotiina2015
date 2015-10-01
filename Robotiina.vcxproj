@@ -106,6 +106,7 @@
     <ClInclude Include="DistanceCalibrator.h" />
     <ClInclude Include="FieldState.h" />
     <ClInclude Include="GatePosition.h" />
+    <ClInclude Include="kdNode2D.h" />
     <ClInclude Include="MouseVision.h" />
     <ClInclude Include="ObjectPosition.h" />
     <ClInclude Include="ParallelImageThresholder.h" />
@@ -151,6 +152,7 @@
     <ClCompile Include="FieldState.cpp" />
     <ClCompile Include="GatePosition.cpp" />
     <ClCompile Include="ImageThresholder.cpp" />
+    <ClCompile Include="kdNode2D.cpp" />
     <ClCompile Include="MouseVision.cpp" />
     <ClCompile Include="ObjectPosition.cpp" />
     <ClCompile Include="RobotPosition.cpp" />
