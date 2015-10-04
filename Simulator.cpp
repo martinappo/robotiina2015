@@ -6,7 +6,7 @@ extern DistanceCalculator gDistanceCalculator;
 
 Simulator::Simulator() :ThreadedClass("Simulator")
 {
-	self.fieldCoords = cv::Point(0, 0);
+	self.fieldCoords = cv::Point(0, 10);
 	self.polarMetricCoords = cv::Point(0,0);
 	// distribute balls uniformly
 	for (int i = 0; i < NUMBER_OF_BALLS; i++) {
@@ -37,8 +37,8 @@ void Simulator::UpdateGatePos(){
 	for (int i = 0; i < NUMBER_OF_BALLS; i++){
 		double a = gDistanceCalculator.angleBetween(self.fieldCoords, balls[i].fieldCoords) + self.getAngle();
 		double d = gDistanceCalculator.getDistanceInverted(self.fieldCoords, balls[i].fieldCoords);
-		double x = d1*sin(a / 180 * CV_PI);
-		double y = d1*cos(a / 180 * CV_PI);
+		double x = d*sin(a / 180 * CV_PI);
+		double y = d*cos(a / 180 * CV_PI);
 		cv::Scalar color(48, 154, 236);
 		cv::circle(frame, cv::Point(x, y) + cv::Point(frame.size() / 2), 12, color, -1);
 	}
