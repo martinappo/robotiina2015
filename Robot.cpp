@@ -225,7 +225,7 @@ void Robot::Run()
 	}
 	*/
 	/* Field state */
-	SoccerField field(m_pDisplay, camera->GetFrameSize());
+	SoccerField field(m_pDisplay);
 
 	/* Vision modules */
 	FrontCameraVision visionModule(camera, m_pDisplay, &field);

@@ -8,6 +8,11 @@
 #include "AutoCalibrator.h"
 #include <queue>          // std::priority_queue
 #include <functional>     // std::greater
+//#include "kdNode2D.h"
+#include "DistanceCalculator.h"
+
+extern DistanceCalculator gDistanceCalculator;
+
 
 FrontCameraVision::FrontCameraVision(ICamera *pCamera, IDisplay *pDisplay, FieldState *pFieldState) : ConfigurableModule("FrontCameraVision")
 {
@@ -69,7 +74,6 @@ void FrontCameraVision::Run() {
 
 	while (!stop_thread){
 		cv::Mat frameBGR = m_pCamera->Capture();
-
 		/**************************************************/
 		/*	STEP 1. Convert picture to HSV colorspace	  */
 		/**************************************************/
@@ -116,10 +120,16 @@ void FrontCameraVision::Run() {
 		cv::Point g1, g2;
 		//Blue gate pos
 		bool found = blueGateFinder.Locate(thresholdedImages[BLUE_GATE], frameHSV, frameBGR, g1, r1);
-		if (!found) continue; // nothing to do :(
+		if (!found) {
+			m_pDisplay->ShowImage(frameBGR);
+			continue; // nothing to do :(
+		}
 		//Yellow gate pos
 		found = yellowGateFinder.Locate(thresholdedImages[YELLOW_GATE], frameHSV, frameBGR, g2, r2);
-		if (!found) continue; // nothing to do :(
+		if (!found) {
+			m_pDisplay->ShowImage(frameBGR);
+			continue; // nothing to do :(
+		}
 		// ajust gate positions to ..
 		// find closest points to opposite gate centre
 		auto min_i1 = 0, min_j1 = 0, min_i2 = 0, min_j2 = 0;
@@ -162,23 +172,63 @@ void FrontCameraVision::Run() {
 		cv::Mat rotMat = getRotationMatrix2D(cv::Point(0,0), -m_pState->self.getAngle(), 1);
 		cv::Mat balls(3, NUMBER_OF_BALLS, CV_64FC1);
 		found = ballFinder.Locate(thresholdedImages[BALL], frameHSV, frameBGR, balls);
-		if (!found) continue; // nothing to do :(
-		balls.row(0) -= frameBGR.size().width / 2;
-		balls.row(1) -= frameBGR.size().height / 2;
-		cv::Mat rotatedBalls(balls.size(), balls.type());
+		if (found) {
+			balls.row(0) -= frameBGR.size().width / 2;
+			balls.row(1) -= frameBGR.size().height / 2;
+			cv::Mat rotatedBalls(balls.size(), balls.type());
 
-		//std::cout << CV_64FC1 << ", " << rotMat.type() << ", " << balls.type() << std::endl;
-		//std::cout << rotMat << std::endl;
-		//std::cout << balls << std::endl;
+			//std::cout << CV_64FC1 << ", " << rotMat.type() << ", " << balls.type() << std::endl;
+			//std::cout << rotMat << std::endl;
+			//std::cout << balls << std::endl;
 
-		//cv::warpAffine(balls, rotatedBalls, rotMat, balls.size());
-		rotatedBalls = rotMat * balls;
-		//std::cout << rotatedBalls << std::endl;
-		for (int i = 0; i < rotatedBalls.cols; i++){
-			m_pState->balls[i].updateRawCoordinates(cv::Point(rotatedBalls.col(i)), cv::Point(0,0));
-			m_pState->balls[i].updateFieldCoords(m_pState->self.getFieldPos());
+			//cv::warpAffine(balls, rotatedBalls, rotMat, balls.size());
+			rotatedBalls = rotMat * balls;
+			//std::cout << rotatedBalls << std::endl;
+			m_pState->resetBallsUpdateState();;
+			/*
+			kdNode2D sortedballs(m_pState->balls, NUMBER_OF_BALLS);
+			std::cout << "##################" << std::endl;
+			for (int i = 0; i < rotatedBalls.cols; i++){
+			std::cout << "=============" << std::endl;
+			cv::Point pos = gDistanceCalculator.getFieldCoordinates(cv::Point(rotatedBalls.col(i)), cv::Point(0, 0)) + (cv::Point2d)m_pState->self.getFieldPos();
+			auto nearest = sortedballs.nearest(pos);
+			std::cout << "nearest: " << nearest.second->id << " " << pos << " ->" << nearest.second->fieldCoords <<  std::endl;
+			assert(nearest.second);
+			nearest.second->updateRawCoordinates(cv::Point(rotatedBalls.col(i)), cv::Point(0, 0));
+			nearest.second->updateFieldCoords(m_pState->self.getFieldPos());
+			nearest.second->isUpdated = true;
+			}
+			*/
+			std::vector<int> newBalls; // new balls that are too far from existing ones
+			/* find balls that are close by */
+			for (int i = 0; i < rotatedBalls.cols; i++){
+				cv::Point2i pos = gDistanceCalculator.getFieldCoordinates(cv::Point(rotatedBalls.col(i)), cv::Point(0, 0)) + (cv::Point2d)m_pState->self.getFieldPos();
+				bool ball_found = false;
+				for (int j = 0; j < NUMBER_OF_BALLS; j++) {
+					if (!m_pState->balls[j].isUpdated && cv::norm(pos - m_pState->balls[j].fieldCoords) < 50) {
+						m_pState->balls[j].updateRawCoordinates(cv::Point(rotatedBalls.col(i)), cv::Point(0, 0));
+						m_pState->balls[j].updateFieldCoords(m_pState->self.getFieldPos());
+						m_pState->balls[j].isUpdated = true;
+						ball_found = true;
+						break;
+					}
+				}
+				if (!ball_found) {
+					newBalls.push_back(i);
+				}
+			}
+			// now update empty slots with new balls
+			for (auto newBall : newBalls){
+				for (int j = 0; j < NUMBER_OF_BALLS; j++) {
+					if (!m_pState->balls[j].isUpdated) {
+						m_pState->balls[j].updateRawCoordinates(cv::Point(rotatedBalls.col(newBall)), cv::Point(0, 0));
+						m_pState->balls[j].updateFieldCoords(m_pState->self.getFieldPos());
+						m_pState->balls[j].isUpdated = true;
+						break;
+					}
+				}
+			}
 		}
-		
 		/*
 		ObjectPosition *targetGatePos = 0;
 		if (targetGate == BLUE_GATE && BlueGateFound) targetGatePos = &blueGatePos;

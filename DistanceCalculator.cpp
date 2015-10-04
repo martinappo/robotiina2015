@@ -57,12 +57,33 @@ void DistanceCalculator::loadConf(){
 	}
 	m_bEnabled = true;
 }
+cv::Point2d DistanceCalculator::getPolarCoordinates(const cv::Point &pos, const cv::Point &orgin) const {
+	double distanceInCm = getDistance(orgin, pos);
+	double angle = angleBetween(pos - orgin, { 0, -1 });
 
+	return { distanceInCm, angle };
+};
+
+cv::Point2d DistanceCalculator::getFieldCoordinates(const cv::Point &pos, const cv::Point &orgin) const {
+
+	double distanceInCm = getDistance(pos, orgin);
+	double angle = angleBetween(pos - orgin, { 0, -1 });
+
+	int fieldY = -(int)(distanceInCm * cos(TAU*angle / 360));
+	int fieldX = (int)(distanceInCm * sin(TAU*angle / 360));
+	return cv::Point(fieldX, fieldY);
+
+}
+double DistanceCalculator::getDistanceInverted(const cv::Point &pos, const cv::Point &orgin) const{
+	double dist = cv::norm(pos - orgin);
+	return 125 * log(dist / 13.13);
+
+}
 double DistanceCalculator::getDistance(const cv::Point &pos, const cv::Point &orgin) const{
 	if (!m_bEnabled) return INT_MAX;
 	double dist = cv::norm(pos - orgin);//DistanceCalibrator::calculateDistance(centerX, centerY, x, y);
 	//y = 8E-08x4 - 6E-05x3 + 0,0167x2 - 1,5818x + 72,791
-	return (8E-8)*pow(dist, 4) - (6E-5)*pow(dist, 3) + 0.0167*pow(dist, 2) - 1.5818 * dist + 72.791;
+	//return (8E-8)*pow(dist, 4) - (6E-5)*pow(dist, 3) + 0.0167*pow(dist, 2) - 1.5818 * dist + 72.791;
 
 	//y = 13,136e^0,008x
 	return 13.13*exp(0.008 * dist);

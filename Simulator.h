@@ -2,8 +2,8 @@
 #include "types.h"
 #include "FieldState.h"
 #include "ThreadedClass.h"
-
-class Simulator: public ICamera, public IWheelController, public ThreadedClass
+#include <mutex>
+class Simulator: public ICamera, public IWheelController, public ThreadedClass, protected FieldState
 {
 public:
 	Simulator();
@@ -26,11 +26,11 @@ public:
 protected:
 	double orientation;
 	cv::Mat frame = cv::Mat(1024, 1280, CV_8UC3);
-	cv::Mat frame_blank = cv::Mat(1024, 1280, CV_8UC3);
+	cv::Mat frame_copy = cv::Mat(1024, 1280, CV_8UC3);
+	cv::Mat frame_blank = cv::Mat(1024, 1280, CV_8UC3, cv::Scalar(21, 188, 80));
 	Speed targetSpeed, actualSpeed;
-	FieldState fieldState;
 	void UpdateGatePos();
 	void UpdateRobotPos();
-
+	std::mutex mutex;
 };
 

@@ -6,18 +6,52 @@ extern DistanceCalculator gDistanceCalculator;
 
 Simulator::Simulator() :ThreadedClass("Simulator")
 {
-	for (int i = 0; i < NUMBER_OF_BALLS; i++){
-		fieldState.balls[i].fieldCoords = cv::Point(i / 4, i % 4) - cv::Point(303,303);
+	self.fieldCoords = cv::Point(0, 0);
+	self.polarMetricCoords = cv::Point(0,0);
+	// distribute balls uniformly
+	for (int i = 0; i < NUMBER_OF_BALLS; i++) {
+		balls[i].fieldCoords.x = ((i % 3) - 1) * 100;
+		balls[i].fieldCoords.y = (i / 3 - 1.5) * 110;
+		balls[i].id = i;
 	}
-	fieldState.self.fieldCoords = cv::Point(0, 0);
-	fieldState.self.polarMetricCoords = cv::Point(0,0);
 	Start();
 }
 void Simulator::UpdateGatePos(){
-	//double a1 = gDistanceCalculator.angleBetween()
+	double a1 = gDistanceCalculator.angleBetween(self.fieldCoords, blueGate.fieldCoords) + self.getAngle();
+	double a2 = gDistanceCalculator.angleBetween(self.fieldCoords, yellowGate.fieldCoords) + self.getAngle();
+	double d1 = gDistanceCalculator.getDistanceInverted(self.fieldCoords, blueGate.fieldCoords);
+	double d2 = gDistanceCalculator.getDistanceInverted(self.fieldCoords, yellowGate.fieldCoords);
+	// draw gates
+	frame_blank.copyTo(frame);
+	double x1 = d1*sin(a1 / 180 * CV_PI);
+	double y1 = d1*cos(a1 / 180 * CV_PI);
+	double x2 = d2*sin(a2 / 180 * CV_PI);
+	double y2 = d2*cos(a2 / 180 * CV_PI);
+
+	cv::Scalar color(236, 137, 48);
+	cv::Scalar color2(61, 255, 244);
+	cv::circle(frame, cv::Point(x1, y1) + cv::Point(frame.size() / 2), 38, color, -1);
+	cv::circle(frame, cv::Point(x2, y2) + cv::Point(frame.size() / 2), 38, color2, -1);
+
+	// balls 
+	for (int i = 0; i < NUMBER_OF_BALLS; i++){
+		double a = gDistanceCalculator.angleBetween(self.fieldCoords, balls[i].fieldCoords) + self.getAngle();
+		double d = gDistanceCalculator.getDistanceInverted(self.fieldCoords, balls[i].fieldCoords);
+		double x = d1*sin(a / 180 * CV_PI);
+		double y = d1*cos(a / 180 * CV_PI);
+		cv::Scalar color(48, 154, 236);
+		cv::circle(frame, cv::Point(x, y) + cv::Point(frame.size() / 2), 12, color, -1);
+	}
+
+	{
+		std::lock_guard<std::mutex> lock(mutex);
+		frame.copyTo(frame_copy);
+	}
+
 }
 
 void Simulator::UpdateRobotPos(){
+	UpdateGatePos();
 }
 
 
@@ -27,7 +61,7 @@ Simulator::~Simulator()
 }
 
 cv::Mat & Simulator::Capture(bool bFullFrame){
-	return frame;
+	return frame_copy;
 }
 
 cv::Size Simulator::GetFrameSize(bool bFullFrame){
