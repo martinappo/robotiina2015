@@ -18,9 +18,8 @@ Simulator::Simulator() :ThreadedClass("Simulator")
 }
 void Simulator::UpdateGatePos(){
 
-	// angles are wrong
-	double a1 = gDistanceCalculator.angleBetween(self.fieldCoords, blueGate.fieldCoords) + self.getAngle();
-	double a2 = gDistanceCalculator.angleBetween(self.fieldCoords, yellowGate.fieldCoords) + self.getAngle();
+	double a1 = gDistanceCalculator.angleBetween(cv::Point(0, 1), self.fieldCoords- blueGate.fieldCoords) + self.getAngle();
+	double a2 = gDistanceCalculator.angleBetween(cv::Point(0, 1), self.fieldCoords - yellowGate.fieldCoords) + self.getAngle();
 
 	double d1 = gDistanceCalculator.getDistanceInverted(self.fieldCoords, blueGate.fieldCoords);
 	double d2 = gDistanceCalculator.getDistanceInverted(self.fieldCoords, yellowGate.fieldCoords);
@@ -38,7 +37,7 @@ void Simulator::UpdateGatePos(){
 
 	// balls 
 	for (int i = 0; i < NUMBER_OF_BALLS; i++){
-		double a = gDistanceCalculator.angleBetween(self.fieldCoords, balls[i].fieldCoords) + self.getAngle();
+		double a = gDistanceCalculator.angleBetween(cv::Point(0, 1), self.fieldCoords - balls[i].fieldCoords) + self.getAngle();
 		double d = gDistanceCalculator.getDistanceInverted(self.fieldCoords, balls[i].fieldCoords);
 		double x = d*sin(a / 180 * CV_PI);
 		double y = d*cos(a / 180 * CV_PI);
