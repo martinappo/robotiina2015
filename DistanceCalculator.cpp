@@ -57,6 +57,23 @@ void DistanceCalculator::loadConf(){
 	}
 	m_bEnabled = true;
 }
+cv::Point2d DistanceCalculator::getPolarCoordinates(const cv::Point &pos, const cv::Point &orgin) const {
+	double distanceInCm = getDistance(orgin, pos);
+	double angle = angleBetween(pos - orgin, { 0, -1 });
+
+	return { distanceInCm, angle };
+};
+
+cv::Point2d DistanceCalculator::getFieldCoordinates(const cv::Point &pos, const cv::Point &orgin) const {
+
+	double distanceInCm = getDistance(pos, orgin);
+	double angle = angleBetween(pos - orgin, { 0, -1 });
+
+	int fieldY = -(int)(distanceInCm * cos(TAU*angle / 360));
+	int fieldX = (int)(distanceInCm * sin(TAU*angle / 360));
+	return cv::Point(fieldX, fieldY);
+
+}
 
 double DistanceCalculator::getDistance(const cv::Point &pos, const cv::Point &orgin) const{
 	if (!m_bEnabled) return INT_MAX;

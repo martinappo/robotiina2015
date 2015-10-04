@@ -25,8 +25,11 @@ GatePosition & SoccerField::GetTargetGate() {
 };
 
 void SoccerField::initBalls(cv::Size frameSize) {
+	// distribute balls uniformly
 	for (int i = 0; i < NUMBER_OF_BALLS; i++) {
-//		balls[i].setFrameSize(frameSize);
+		balls[i].fieldCoords.x = ((i % 3) - 1) * 100;
+		balls[i].fieldCoords.y = (i / 3 - 1.5) * 110;
+		balls[i].id = i;
 	}
 }
 
@@ -43,13 +46,13 @@ void SoccerField::Run(){
 			, cv::Scalar(133, 33, 55), 3);
 
 
-
+		
 		for (int i = 0; i < NUMBER_OF_BALLS; i++) {
 			BallPosition &_ball = balls[i];
 			cv::circle(field, _ball.fieldCoords + c, 7, cv::Scalar(48, 154, 236), -1);
-			_ball.setIsUpdated(false);
+			//_ball.setIsUpdated(false);
 		}
-
+		
 		if (blueGate.getDistance() > 0) {
 			cv::circle(field, blueGate.fieldCoords + c, 14, cv::Scalar(236, 137, 48), 7);
 			cv::circle(field, blueGate.fieldCoords + c, (int)(blueGate.polarMetricCoords.x), cv::Scalar(236, 137, 48), 2);

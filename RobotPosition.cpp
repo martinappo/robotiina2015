@@ -1,5 +1,5 @@
 #include "RobotPosition.h"
-
+#include "DistanceCalculator.h"
 //RobotPosition::RobotPosition() {
 //	this->polarMetricCoords = cv::Point(0, 0);
 //} 
@@ -41,8 +41,8 @@ void RobotPosition::updateFieldCoords(cv::Point orgin) {
 	}*/
 
 	// no that we know robot position, we can calculate it's angle to blue or yellow gate on the field
-	double angleToBlueGate = angleBetween(fieldCoords - blueGate.fieldCoords, { 0, 1 });
-	double angleToYellowGate = angleBetween(fieldCoords - yellowGate.fieldCoords, { 0, 1 });
+	double angleToBlueGate = DistanceCalculator::angleBetween(fieldCoords - blueGate.fieldCoords, { 0, 1 });
+	double angleToYellowGate = DistanceCalculator::angleBetween(fieldCoords - yellowGate.fieldCoords, { 0, 1 });
 	// now add real gate angle to this angle
 	auto a1 = (angleToBlueGate - blueGate.getAngle());
 	auto a2 = (angleToYellowGate - yellowGate.getAngle());

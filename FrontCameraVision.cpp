@@ -8,6 +8,11 @@
 #include "AutoCalibrator.h"
 #include <queue>          // std::priority_queue
 #include <functional>     // std::greater
+//#include "kdNode2D.h"
+#include "DistanceCalculator.h"
+
+extern DistanceCalculator gDistanceCalculator;
+
 
 FrontCameraVision::FrontCameraVision(ICamera *pCamera, IDisplay *pDisplay, FieldState *pFieldState) : ConfigurableModule("FrontCameraVision")
 {
@@ -174,11 +179,51 @@ void FrontCameraVision::Run() {
 		//cv::warpAffine(balls, rotatedBalls, rotMat, balls.size());
 		rotatedBalls = rotMat * balls;
 		//std::cout << rotatedBalls << std::endl;
+		m_pState->resetBallsUpdateState();;
+		/* 
+		kdNode2D sortedballs(m_pState->balls, NUMBER_OF_BALLS);
+		std::cout << "##################" << std::endl;
 		for (int i = 0; i < rotatedBalls.cols; i++){
-			m_pState->balls[i].updateRawCoordinates(cv::Point(rotatedBalls.col(i)), cv::Point(0,0));
-			m_pState->balls[i].updateFieldCoords(m_pState->self.getFieldPos());
+			std::cout << "=============" << std::endl;
+			cv::Point pos = gDistanceCalculator.getFieldCoordinates(cv::Point(rotatedBalls.col(i)), cv::Point(0, 0)) + (cv::Point2d)m_pState->self.getFieldPos();
+			auto nearest = sortedballs.nearest(pos);
+			std::cout << "nearest: " << nearest.second->id << " " << pos << " ->" << nearest.second->fieldCoords <<  std::endl;
+			assert(nearest.second);
+			nearest.second->updateRawCoordinates(cv::Point(rotatedBalls.col(i)), cv::Point(0, 0));
+			nearest.second->updateFieldCoords(m_pState->self.getFieldPos());
+			nearest.second->isUpdated = true;
 		}
-		
+		*/
+		std::vector<int> newBalls; // new balls that are too far from existing ones
+		/* find balls that are close by */
+		for (int i = 0; i < rotatedBalls.cols; i++){
+			cv::Point2i pos = gDistanceCalculator.getFieldCoordinates(cv::Point(rotatedBalls.col(i)), cv::Point(0, 0)) + (cv::Point2d)m_pState->self.getFieldPos();
+			found = false;
+			for (int j = 0; j < NUMBER_OF_BALLS;j++) {
+				if (!m_pState->balls[j].isUpdated && cv::norm(pos - m_pState->balls[j].fieldCoords) < 50) {
+					m_pState->balls[j].updateRawCoordinates(cv::Point(rotatedBalls.col(i)), cv::Point(0, 0));
+					m_pState->balls[j].updateFieldCoords(m_pState->self.getFieldPos());
+					m_pState->balls[j].isUpdated = true;
+					found = true;
+					break;
+				}			
+			}
+			if (!found) {
+				newBalls.push_back(i);
+			}
+		}
+		// now update empty slots with new balls
+		for (auto newBall : newBalls){
+			for (int j = 0; j < NUMBER_OF_BALLS; j++) {
+				if (!m_pState->balls[j].isUpdated) {
+					m_pState->balls[j].updateRawCoordinates(cv::Point(rotatedBalls.col(newBall)), cv::Point(0, 0));
+					m_pState->balls[j].updateFieldCoords(m_pState->self.getFieldPos());
+					m_pState->balls[j].isUpdated = true;
+					found = true;
+					break;
+				}
+			}
+		}
 		/*
 		ObjectPosition *targetGatePos = 0;
 		if (targetGate == BLUE_GATE && BlueGateFound) targetGatePos = &blueGatePos;
