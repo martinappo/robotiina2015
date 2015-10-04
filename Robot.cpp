@@ -2,7 +2,7 @@
 #include "AutoCalibrator.h"
 #include "DistanceCalibrator.h"
 #include "DistanceCalculator.h"
-
+#include "Simulator.h"
 
 #include "Camera.h"
 #include "WheelController.h"
@@ -100,8 +100,10 @@ Robot::Robot(boost::asio::io_service &io) : io(io), camera(0), wheels(0), coilBo
 }
 Robot::~Robot()
 {
-	if (camera)
+	if (camera) {
 		delete camera;
+		camera = NULL; // avoid double delete of silmulator
+	}
 	std::cout << "coilBoard " << coilBoard << std::endl;
 	if (coilBoard)
 		delete coilBoard;
@@ -114,11 +116,19 @@ Robot::~Robot()
 //		delete m_pDisplay;
 }
 
+
 bool Robot::Launch(int argc, char* argv[])
 {
 	if (!ParseOptions(argc, argv)) return false;
+	bool bSimulator = config["camera"].as<std::string>() == "simulator";
+	if (bSimulator) {
+		InitSimulator();
+	}
+	else {
+		InitHardware();
+	}
+	std::cout << "Starting Robot" << std::endl;
 
-	initCamera();
 	cv::Size winSize(0, 0);
 	if (config.count("app-size")) {
 		std::vector<std::string> tokens;
@@ -130,58 +140,41 @@ bool Robot::Launch(int argc, char* argv[])
 	// Compose robot from its parts
 	if (config.count("webui") == 0)
 		m_pDisplay = new Dialog("Robotiina", winSize, camera->GetFrameSize());
-	else 
+	else
 		m_pDisplay = new WebUI(8080);
-
-	if (config.count("skip-ports") == 0) {
-		scanner = new ComPortScanner(io);
-	}
-	wheels = new WheelController(scanner);
 	captureFrames = config.count("capture-frames") > 0;
-	coilBoardPortsOk = false;
-	wheelsPortsOk = false;
-
-	initPorts();
-	initWheels();
-	initCoilboard();
-
-	std::cout << "Done initializing" << std::endl;
-	std::cout << "Starting Robot" << std::endl;
-    Run();
+	Run();
 	return true;
 }
+void Robot::InitSimulator() {
+	camera = new Simulator();
+	wheels = (IWheelController*)camera;
+}
 
-void Robot::initCamera()
-{
-
+void Robot::InitHardware() {
 	std::cout << "Initializing camera... " << std::endl;
 	if (config.count("camera"))
-		if (config["camera"].as<std::string>() == "ximea") 
+		if (config["camera"].as<std::string>() == "ximea")
 			camera = new Camera(CV_CAP_XIAPI);
 		else
 			camera = new Camera(config["camera"].as<std::string>());
 	else
 		camera = new Camera(0);
 	std::cout << "Done" << std::endl;
-}
 
-
-void Robot::initPorts()
-{
-	if (config.count("skip-ports")) {
-		std::cout << "Skiping COM port check" << std::endl;
-		coilBoardPortsOk = false;
-		wheelsPortsOk = false;
+	if (config.count("skip-ports") == 0) {
+		scanner = new ComPortScanner(io);
 	}
-	else {
-	}
-}
+	wheels = new WheelController(scanner);
+	coilBoardPortsOk = false;
+	wheelsPortsOk = false;
 
-void Robot::initWheels()
-{
 	wheels->Init();
+	//initCoilboard();
+	std::cout << "Done initializing" << std::endl;
+	return;
 }
-
+/*
 void Robot::initCoilboard() {
 	if (coilBoardPortsOk) {
 		std::cout << "Using coilgun" << std::endl;
@@ -201,7 +194,7 @@ void Robot::initCoilboard() {
 		coilBoard = new CoilGun();
 	}
 }
-
+*/
 void Robot::Run()
 {
 	//double fps;
@@ -307,7 +300,7 @@ void Robot::Run()
 				remoteControl.Enable(false);
 				autoPilot.enableTestMode(false);
 				distanceCalibrator.Enable(false);
-				wheels->Stop();
+				wheels->Drive(0);
 				STATE_BUTTON("(A)utoCalibrate objects", 'a', STATE_AUTOCALIBRATE)
 				//STATE_BUTTON("(M)anualCalibrate objects", STATE_CALIBRATE)
 				STATE_BUTTON("(C)Change Gate [" + OBJECT_LABELS[targetGate] + "]", 'c', STATE_SELECT_GATE)
@@ -333,13 +326,14 @@ void Robot::Run()
 				});
 				STATE_BUTTON("(S)ettings", 's', STATE_SETTINGS)
 					m_pDisplay->createButton("Reinit wheels", '-', [this] {
-					initPorts();
-					initWheels();
+					//initPorts();
+					//initWheels();
+					//TODO: fix this
 					this->last_state = STATE_END_OF_GAME; // force dialog redraw
 				});
 				m_pDisplay->createButton("Reinit coilboard", '-', [this] {
-					initPorts();
-					initCoilboard();
+					//initPorts();
+					//initCoilboard();
 					this->last_state = STATE_END_OF_GAME; // force dialog redraw
 				});
 				
@@ -460,7 +454,7 @@ void Robot::Run()
 					*/
 					//SetState(STATE_SELECT_GATE);
 					coilBoard->ToggleTribbler(false);
-					wheels->Stop();
+					wheels->Drive(0);
 					autoPilot.Enable(!autoPilot.running);
 					SetState(STATE_NONE);
 				}
@@ -547,7 +541,7 @@ void Robot::Run()
 		m_pDisplay->putText( std::string("Gate:") + (targetGatePos.getDistance() >0 ? "yes" : "no"), cv::Point(-140, 80), 0.5, cv::Scalar(255, 255, 255));
 
 		
-		m_pDisplay->putText( std::string("Trib:") + (coilBoard->BallInTribbler() ? "yes" : "no"), cv::Point(-140, 100), 0.5, cv::Scalar(255, 255, 255));
+//		m_pDisplay->putText( std::string("Trib:") + (coilBoard->BallInTribbler() ? "yes" : "no"), cv::Point(-140, 100), 0.5, cv::Scalar(255, 255, 255));
 		m_pDisplay->putText( std::string("Sight:") + (field.gateObstructed ? "obst" : "free"), cv::Point(-140, 120), 0.5, cv::Scalar(255, 255, 255));
 		//m_pDisplay->putText( std::string("OnWay:") + (somethingOnWay ? "yes" : "no"), cv::Point(-140, 140), 0.5, cv::Scalar(255, 255, 255));
 		

@@ -106,6 +106,9 @@
     <ClCompile Include="WebUI.cpp">
       <Filter>UI</Filter>
     </ClCompile>
+    <ClCompile Include="Simulator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="robot.h">
@@ -234,6 +237,9 @@
     <ClInclude Include="WebUI.h">
       <Filter>UI</Filter>
     </ClInclude>
+    <ClInclude Include="Simulator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -264,6 +270,9 @@
     </Filter>
     <Filter Include="UI">
       <UniqueIdentifier>{d105cd53-385f-429f-9e56-c22559116700}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Simulator">
+      <UniqueIdentifier>{ae1a70fa-494e-44cc-a86d-057b65349061}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -38,7 +38,7 @@ public:
     void MoveTo(const CvPoint &);
 
 	void Rotate(bool direction, double speed);
-	void Drive(double velocity, double direction, double rotate);
+	void Drive(double velocity, double direction = 0, double angularSpeed = 0);
 	void DriveRotate(double velocity, double direction, double rotate);
 	void Stop();
 

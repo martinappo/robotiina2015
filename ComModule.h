@@ -5,7 +5,7 @@ class ComModule :
 {
 public:
 	ComModule(IWheelController * pWheels, ICoilGun *pCoilGun);
-
+	void Init() {};
 	virtual ~ComModule();
 
 	virtual void Drive(double fowardSpeed, double direction, double angularSpeed) {
@@ -25,6 +25,10 @@ public:
 	}
 	const Speed & GetTargetSpeed(){
 		return m_pWheels->GetTargetSpeed();
+	}
+	std::string GetDebugInfo() { return ""; }
+	bool IsReal(){
+		return true;
 	}
 
 protected:

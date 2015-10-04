@@ -17,7 +17,7 @@ private:
 
     ICamera *camera;
 	ComPortScanner *scanner;
-    WheelController * wheels;
+    IWheelController * wheels;
 	CoilGun *coilBoard;
 	IDisplay *m_pDisplay;
 	bool coilBoardPortsOk;
@@ -27,10 +27,10 @@ private:
     std::atomic<STATE> state;
 	std::atomic<STATE> last_state;
 	bool ParseOptions(int argc, char* argv[]);
-	void initCamera();
-	void initPorts();
-	void initWheels();
-	void initCoilboard();
+	void InitHardware();
+	void InitSimulator();
+//	void initWheels();
+//	void initCoilboard();
 
 	void Run();
     boost::mutex remote_mutex;
