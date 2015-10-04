@@ -85,6 +85,7 @@ void Simulator::TogglePlay(){
 
 
 void Simulator::Drive(double fowardSpeed, double direction, double angularSpeed){
+	self.polarMetricCoords.y = angularSpeed;
 }
 
 
