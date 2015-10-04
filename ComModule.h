@@ -8,7 +8,7 @@ public:
 	void Init() {};
 	virtual ~ComModule();
 
-	virtual void Drive(double fowardSpeed, double direction, double angularSpeed) {
+	virtual void Drive(double fowardSpeed, double direction=0, double angularSpeed=0) {
 		m_pWheels->Drive(fowardSpeed, direction, angularSpeed);
 	};
 	virtual bool BallInTribbler() {

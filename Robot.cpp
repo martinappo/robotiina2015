@@ -100,9 +100,13 @@ Robot::Robot(boost::asio::io_service &io) : io(io), camera(0), wheels(0), coilBo
 }
 Robot::~Robot()
 {
+	if (pSim){
+		delete pSim;
+		camera = NULL;
+		wheels = NULL;
+	}
 	if (camera) {
 		delete camera;
-		camera = NULL; // avoid double delete of silmulator
 	}
 	std::cout << "coilBoard " << coilBoard << std::endl;
 	if (coilBoard)
@@ -147,8 +151,9 @@ bool Robot::Launch(int argc, char* argv[])
 	return true;
 }
 void Robot::InitSimulator() {
-	camera = new Simulator();
-	wheels = (IWheelController*)camera;
+	pSim = new Simulator();
+	camera = pSim;
+	wheels = pSim;
 }
 
 void Robot::InitHardware() {

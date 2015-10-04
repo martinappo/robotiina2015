@@ -20,7 +20,7 @@ public:
 	bool IsReal(){ return false;  }
 
 protected:
-	cv::Mat frame = cv::Mat(400, 400, CV_8UC3);
+	cv::Mat frame = cv::Mat(1024, 1280, CV_8UC3);
 	Speed targetSpeed, actualSpeed;
 
 };
