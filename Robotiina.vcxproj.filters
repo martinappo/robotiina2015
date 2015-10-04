@@ -37,9 +37,6 @@
     <ClCompile Include="objectfinder.cpp">
       <Filter>VisionModule</Filter>
     </ClCompile>
-    <ClCompile Include="stillcamera.cpp">
-      <Filter>VisionModule</Filter>
-    </ClCompile>
     <ClCompile Include="wheel.cpp">
       <Filter>ComModule</Filter>
     </ClCompile>
@@ -131,9 +128,6 @@
     </ClInclude>
     <ClInclude Include="wheel.h">
       <Filter>ComModule</Filter>
-    </ClInclude>
-    <ClInclude Include="stillcamera.h">
-      <Filter>VisionModule</Filter>
     </ClInclude>
     <ClInclude Include="simpleserial.h">
       <Filter>ComModule</Filter>

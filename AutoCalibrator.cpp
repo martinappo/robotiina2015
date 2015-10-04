@@ -71,12 +71,12 @@ HSVColorRange AutoCalibrator::GetObjectThresholds (int index, const std::string 
 bool AutoCalibrator::OnMouseEvent(int event, float x, float y, int flags, bool bMainArea) {
 	if (running && screenshot_mode == CROPPING && bMainArea){
 		if (event == cv::EVENT_LBUTTONDOWN){
-			thresholdCorner1 = cv::Point(x, y);
-			thresholdCorner2 = cv::Point(x, y);
+			thresholdCorner1 = cv::Point((int)(x), (int)(y));
+			thresholdCorner2 = cv::Point((int)(x), (int)(y));
 			drawRect = true;
 		}
 		else if (event == cv::EVENT_MOUSEMOVE && drawRect){
-			thresholdCorner2 = cv::Point(x, y);
+			thresholdCorner2 = cv::Point((int)(x), (int)(y));
 		}
 		else if (event == cv::EVENT_LBUTTONUP){
 			if (cv::norm(thresholdCorner1 - thresholdCorner2) > 100){
@@ -95,7 +95,7 @@ bool AutoCalibrator::OnMouseEvent(int event, float x, float y, int flags, bool b
 		return true;
 	}else if (running && screenshot_mode == GET_THRESHOLD){
 		if (event == cv::EVENT_LBUTTONUP && bMainArea) {
-			mouseClicked(x, y, flags);
+			mouseClicked((int)(x), (int)(y), flags);
 		}
 		if (event == cv::EVENT_RBUTTONUP) {
 			SaveConf(this->object_name);
