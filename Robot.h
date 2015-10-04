@@ -10,16 +10,16 @@ class ObjectFinder;
 class WheelController;
 class CoilGun;
 class ComPortScanner;
-
+class Simulator;
 class Robot {
 private:
 	po::variables_map config;
-
-    ICamera *camera;
-	ComPortScanner *scanner;
-    IWheelController * wheels;
-	CoilGun *coilBoard;
-	IDisplay *m_pDisplay;
+	Simulator *pSim = NULL;
+	ICamera *camera = NULL;
+	ComPortScanner *scanner = NULL;
+	IWheelController * wheels = NULL;
+	CoilGun *coilBoard = NULL;
+	IDisplay *m_pDisplay = NULL;
 	bool coilBoardPortsOk;
 	bool wheelsPortsOk;
 
