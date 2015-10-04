@@ -1,6 +1,9 @@
 #pragma once
 #include "types.h"
-class Simulator: public ICamera, public IWheelController
+#include "FieldState.h"
+#include "ThreadedClass.h"
+
+class Simulator: public ICamera, public IWheelController, public ThreadedClass
 {
 public:
 	Simulator();
@@ -18,10 +21,16 @@ public:
 	virtual void Init();
 	std::string GetDebugInfo();
 	bool IsReal(){ return false;  }
+	void Run();
 
 protected:
+	double orientation;
 	cv::Mat frame = cv::Mat(1024, 1280, CV_8UC3);
+	cv::Mat frame_blank = cv::Mat(1024, 1280, CV_8UC3);
 	Speed targetSpeed, actualSpeed;
+	FieldState fieldState;
+	void UpdateGatePos();
+	void UpdateRobotPos();
 
 };
 
