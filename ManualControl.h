@@ -12,5 +12,10 @@ public:
 	void Run();
 protected:
 	ICommunicationModule *m_pComModule;
+	// accelerations
+	double speed = 0;
+	double direction = 0;
+	double rotation = 0;
+	boost::posix_time::ptime last_tick;
 };
 
