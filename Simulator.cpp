@@ -63,7 +63,10 @@ Simulator::~Simulator()
 }
 
 cv::Mat & Simulator::Capture(bool bFullFrame){
-	return frame_copy;
+
+	std::lock_guard<std::mutex> lock(mutex);
+	frame_copy.copyTo(frame_copy2);
+	return frame_copy2;
 }
 
 cv::Size Simulator::GetFrameSize(bool bFullFrame){

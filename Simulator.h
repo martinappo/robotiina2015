@@ -27,6 +27,7 @@ protected:
 	double orientation;
 	cv::Mat frame = cv::Mat(1024, 1280, CV_8UC3);
 	cv::Mat frame_copy = cv::Mat(1024, 1280, CV_8UC3);
+	cv::Mat frame_copy2 = cv::Mat(1024, 1280, CV_8UC3);
 	cv::Mat frame_blank = cv::Mat(1024, 1280, CV_8UC3, cv::Scalar(21, 188, 80));
 	Speed targetSpeed, actualSpeed;
 	void UpdateGatePos();

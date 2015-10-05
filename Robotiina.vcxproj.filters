@@ -106,11 +106,11 @@
     <ClCompile Include="WebUI.cpp">
       <Filter>UI</Filter>
     </ClCompile>
-    <ClCompile Include="Simulator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="kdNode2D.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Simulator.cpp">
+      <Filter>Simulator</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -240,11 +240,11 @@
     <ClInclude Include="WebUI.h">
       <Filter>UI</Filter>
     </ClInclude>
-    <ClInclude Include="Simulator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="kdNode2D.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Simulator.h">
+      <Filter>Simulator</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
