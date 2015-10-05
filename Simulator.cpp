@@ -18,23 +18,25 @@ Simulator::Simulator() :ThreadedClass("Simulator")
 }
 void Simulator::UpdateGatePos(){
 
-	double a1 = gDistanceCalculator.angleBetween(cv::Point(0, 1), self.fieldCoords- blueGate.fieldCoords) + self.getAngle();
-	double a2 = gDistanceCalculator.angleBetween(cv::Point(0, 1), self.fieldCoords - yellowGate.fieldCoords) + self.getAngle();
-
-	double d1 = gDistanceCalculator.getDistanceInverted(self.fieldCoords, blueGate.fieldCoords);
-	double d2 = gDistanceCalculator.getDistanceInverted(self.fieldCoords, yellowGate.fieldCoords);
-	// draw gates
 	frame_blank.copyTo(frame);
-	double x1 = d1*sin(a1 / 180 * CV_PI);
-	double y1 = d1*cos(a1 / 180 * CV_PI);
-	double x2 = d2*sin(a2 / 180 * CV_PI);
-	double y2 = d2*cos(a2 / 180 * CV_PI);
+	for (int s = -1; s < 2; s += 2){
+		cv::Point2i shift(s * 10, 0);
+		double a1 = gDistanceCalculator.angleBetween(cv::Point(0, 1), self.fieldCoords - blueGate.fieldCoords + shift) + self.getAngle();
+		double a2 = gDistanceCalculator.angleBetween(cv::Point(0, 1), self.fieldCoords - yellowGate.fieldCoords + shift) + self.getAngle();
 
-	cv::Scalar color(236, 137, 48);
-	cv::Scalar color2(61, 255, 244);
-	cv::circle(frame, cv::Point(x1, y1) + cv::Point(frame.size() / 2), 38, color, -1);
-	cv::circle(frame, cv::Point(x2, y2) + cv::Point(frame.size() / 2), 38, color2, -1);
+		double d1 = gDistanceCalculator.getDistanceInverted(self.fieldCoords, blueGate.fieldCoords + shift);
+		double d2 = gDistanceCalculator.getDistanceInverted(self.fieldCoords, yellowGate.fieldCoords + shift);
+		// draw gates
+		double x1 = d1*sin(a1 / 180 * CV_PI);
+		double y1 = d1*cos(a1 / 180 * CV_PI);
+		double x2 = d2*sin(a2 / 180 * CV_PI);
+		double y2 = d2*cos(a2 / 180 * CV_PI);
 
+		cv::Scalar color(236, 137, 48);
+		cv::Scalar color2(61, 255, 244);
+		cv::circle(frame, cv::Point(x1, y1) + cv::Point(frame.size() / 2), 28, color, -1);
+		cv::circle(frame, cv::Point(x2, y2) + cv::Point(frame.size() / 2), 28, color2, -1);
+	}
 	// balls 
 	for (int i = 0; i < NUMBER_OF_BALLS; i++){
 		double a = gDistanceCalculator.angleBetween(cv::Point(0, 1), self.fieldCoords - balls[i].fieldCoords) + self.getAngle();
