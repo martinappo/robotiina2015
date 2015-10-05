@@ -436,6 +436,7 @@ void Robot::Run()
 				});
 			}
 			STATE_BUTTON("BACK", 8, STATE_NONE)
+			manualControl.Enable(true);
 			END_DIALOG
 		}
 		else if (STATE_REMOTE_CONTROL == state) {
