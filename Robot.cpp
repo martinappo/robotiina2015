@@ -302,7 +302,7 @@ void Robot::Run()
 				mouseVision.Enable(false);
 				calibrator.Enable(false);
 				visionModule.Enable(true);
-				autoPilot.Enable(false);
+				//autoPilot.Enable(false);
 				manualControl.Enable(false);
 				remoteControl.Enable(false);
 				autoPilot.enableTestMode(false);
@@ -310,7 +310,7 @@ void Robot::Run()
 				wheels->Stop();
 				STATE_BUTTON("(A)utoCalibrate objects", 'a', STATE_AUTOCALIBRATE)
 				//STATE_BUTTON("(M)anualCalibrate objects", STATE_CALIBRATE)
-				STATE_BUTTON("(C)Change Gate [" + OBJECT_LABELS[targetGate] + "]", 'c', STATE_SELECT_GATE)
+				STATE_BUTTON("(C)Change Gate [" + ((int)field.GetTargetGate().getDistance() == (int)(field.blueGate.getDistance()) ? "blue" : "yellow") + "]", 'c', STATE_SELECT_GATE)
 				STATE_BUTTON("Auto(P)ilot [" + (autoPilot.running ? "On" : "Off") + "]", 'p', STATE_LAUNCH)
 				/*
 			createButton(std::string("(M)ouse control [") + (mouseControl == 0 ? "Off" : (mouseControl == 1 ? "Ball" : "Gate")) + "]", [this, &mouseControl]{
@@ -447,11 +447,11 @@ void Robot::Run()
 			END_DIALOG
 		}
 		else if (STATE_LAUNCH == state) {
-			if (targetGate == NUMBER_OF_OBJECTS) {
-				std::cout << "Select target gate" << std::endl;
-				SetState(STATE_SELECT_GATE);
-			}
-			else {
+			//if (targetGate == NUMBER_OF_OBJECTS) {
+			//	std::cout << "Select target gate" << std::endl;
+			//	SetState(STATE_SELECT_GATE);
+			//}
+			//else {
 				try {
 					/*
 					CalibrationConfReader calibrator;
@@ -470,7 +470,7 @@ void Robot::Run()
 					//TODO: display error
 					SetState(STATE_AUTOCALIBRATE); // no conf
 				}
-			}
+			//}
 		}
 		else if (STATE_RUN == state) {
 			START_DIALOG
