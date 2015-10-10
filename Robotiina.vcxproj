@@ -125,6 +125,7 @@
     <ClInclude Include="robot.h" />
     <ClInclude Include="RobotTracker.h" />
     <ClInclude Include="simpleserial.h" />
+    <ClInclude Include="TargetPosition.h" />
     <ClInclude Include="TBBImageThresholder.h" />
     <ClInclude Include="ThreadedClass.h" />
     <ClInclude Include="ThreadedImageThresholder.h" />
@@ -166,6 +167,7 @@
     <ClCompile Include="robot.cpp" />
     <ClCompile Include="Robotiina.cpp" />
     <ClCompile Include="RobotTracker.cpp" />
+    <ClCompile Include="TargetPosition.cpp" />
     <ClCompile Include="ThreadedClass.cpp" />
     <ClCompile Include="VideoRecorder.cpp" />
     <ClCompile Include="WebUI.cpp" />

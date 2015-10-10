@@ -257,6 +257,12 @@ void Robot::Run()
 		time = boost::posix_time::microsec_clock::local_time();
 //		boost::posix_time::time_duration::tick_type dt = (time - lastStepTime).total_milliseconds();
 		boost::posix_time::time_duration::tick_type rotateDuration = (time - rotateTime).total_milliseconds();
+
+
+		auto &ballPos = field.balls[0];
+		auto &targetGatePos = field.GetTargetGate();
+
+		autoPilot.UpdateState(&ballPos, &targetGatePos);
 		/*
 		if (dt > 1000) {
 			fps = 1000.0 * frames / dt;
@@ -494,11 +500,8 @@ void Robot::Run()
 				*/
 				STATE_BUTTON("(B)ack", 8, STATE_NONE)
 				STATE_BUTTON("E(x)it", 27, STATE_END_OF_GAME)
-			END_DIALOG
-
-				
+			END_DIALOG			
 			
-//			autoPilot->UpdateState(ballFound ? &ballPos : NULL, targetGatePos, sightObstructed);
 			
 		}
 		else if (STATE_TEST == state) {
@@ -542,8 +545,6 @@ void Robot::Run()
 		m_pDisplay->putText( "fps: " + std::to_string(camera->GetFPS()), cv::Point(-140, 20), 0.5, cv::Scalar(255, 255, 255));
 		//assert(STATE_END_OF_GAME != state);
 		m_pDisplay->putText( "state: " + STATE_LABELS[state], cv::Point(-140, 40), 0.5, cv::Scalar(255, 255, 255));
-		auto &ballPos = field.balls[0];
-		auto &targetGatePos = field.GetTargetGate();
 		m_pDisplay->putText( std::string("Ball:") + (ballPos.getDistance() > 0 ? "yes" : "no"), cv::Point(-140, 60), 0.5, cv::Scalar(255, 255, 255));
 		m_pDisplay->putText( std::string("Gate:") + (targetGatePos.getDistance() >0 ? "yes" : "no"), cv::Point(-140, 80), 0.5, cv::Scalar(255, 255, 255));
 
