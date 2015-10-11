@@ -15,8 +15,8 @@ public:
 	GatePosition yellowGate;
 	RobotPosition self; //Robot distance on field
 	std::atomic_bool gateObstructed;
-//	virtual void SetTargetGate(OBJECT gate) = 0;
-//	virtual GatePosition &GetTargetGate() = 0;
+	virtual void SetTargetGate(OBJECT gate) = 0;
+	virtual GatePosition &GetTargetGate() = 0;
 	void resetBallsUpdateState();
 	virtual void Lock() {};
 	virtual void UnLock() {};
