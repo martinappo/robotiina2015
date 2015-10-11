@@ -71,52 +71,6 @@ void RobotPosition::updateFieldCoordsNew(cv::Point orgin) {
 	polarMetricCoords.y = (da1 + da2) / 2;
 	//polarMetricCoords.y = d1 > d2 ? da1 : da2;
 
-	/*
-	if (d1 < d2) {
-		if (a < 180) {
-			// top right
-			fieldCoords = { 60, -100 };
-		}
-		else {
-			//top bottom
-			fieldCoords = { -60, -100 };
-		}
-	}
-	else {
-		if (a < 180 ) {
-			// bottom right
-			fieldCoords = { 60, 100 };
-		}
-		else {
-			//bottom bottom
-			fieldCoords = { -60, 100 };
-		}
-
-	}
-	*/
-	/*
-	if (a < 0) a = 360 + a;
-	double a1, a2 = 0;
-	int axis = 0;
-	double err, lastErr = INT_MAX;
-	double d;
-	do {
-		d = sqrt(pow(d1, 2) + pow(d2, 2) - 2 * d1 * d2*cos(a/360*CV_PI));
-		err = abs(d - 450);
-		if (err < 10) break;
-
-		if (err > lastErr) {
-			axis = axis ^ 1;
-		}
-		else {
-			if (axis == 0) d1 += err*0.1;
-			if (axis == 1) d2 += err*0.1;
-			lastErr = err;
-		}
-	} while (true);
-	blueGate.polarMetricCoords.x = d1;
-	yellowGate.polarMetricCoords.x = d2;
-	*/
 }
 void RobotPosition::updateFieldCoords(cv::Point orgin) {
 
