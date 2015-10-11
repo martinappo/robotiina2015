@@ -2,7 +2,7 @@
 #include "AutoCalibrator.h"
 #include "DistanceCalibrator.h"
 #include "DistanceCalculator.h"
-
+#include "Simulator.h"
 
 #include "Camera.h"
 #include "WheelController.h"
@@ -100,8 +100,14 @@ Robot::Robot(boost::asio::io_service &io) : io(io), camera(0), wheels(0), coilBo
 }
 Robot::~Robot()
 {
-	if (camera)
+	if (pSim){
+		delete pSim;
+		camera = NULL;
+		wheels = NULL;
+	}
+	if (camera) {
 		delete camera;
+	}
 	std::cout << "coilBoard " << coilBoard << std::endl;
 	if (coilBoard)
 		delete coilBoard;
@@ -114,11 +120,19 @@ Robot::~Robot()
 //		delete m_pDisplay;
 }
 
+
 bool Robot::Launch(int argc, char* argv[])
 {
 	if (!ParseOptions(argc, argv)) return false;
+	bool bSimulator = config["camera"].as<std::string>() == "simulator";
+	if (bSimulator) {
+		InitSimulator();
+	}
+	else {
+		InitHardware();
+	}
+	std::cout << "Starting Robot" << std::endl;
 
-	initCamera();
 	cv::Size winSize(0, 0);
 	if (config.count("app-size")) {
 		std::vector<std::string> tokens;
@@ -130,58 +144,42 @@ bool Robot::Launch(int argc, char* argv[])
 	// Compose robot from its parts
 	if (config.count("webui") == 0)
 		m_pDisplay = new Dialog("Robotiina", winSize, camera->GetFrameSize());
-	else 
+	else
 		m_pDisplay = new WebUI(8080);
-
-	if (config.count("skip-ports") == 0) {
-		scanner = new ComPortScanner(io);
-	}
-	wheels = new WheelController(scanner);
 	captureFrames = config.count("capture-frames") > 0;
-	coilBoardPortsOk = false;
-	wheelsPortsOk = false;
-
-	initPorts();
-	initWheels();
-	initCoilboard();
-
-	std::cout << "Done initializing" << std::endl;
-	std::cout << "Starting Robot" << std::endl;
-    Run();
+	Run();
 	return true;
 }
+void Robot::InitSimulator() {
+	pSim = new Simulator();
+	camera = pSim;
+	wheels = pSim;
+}
 
-void Robot::initCamera()
-{
-
+void Robot::InitHardware() {
 	std::cout << "Initializing camera... " << std::endl;
 	if (config.count("camera"))
-		if (config["camera"].as<std::string>() == "ximea") 
+		if (config["camera"].as<std::string>() == "ximea")
 			camera = new Camera(CV_CAP_XIAPI);
 		else
 			camera = new Camera(config["camera"].as<std::string>());
 	else
 		camera = new Camera(0);
 	std::cout << "Done" << std::endl;
-}
 
-
-void Robot::initPorts()
-{
-	if (config.count("skip-ports")) {
-		std::cout << "Skiping COM port check" << std::endl;
-		coilBoardPortsOk = false;
-		wheelsPortsOk = false;
+	if (config.count("skip-ports") == 0) {
+		scanner = new ComPortScanner(io);
 	}
-	else {
-	}
-}
+	wheels = new WheelController(scanner);
+	coilBoardPortsOk = false;
+	wheelsPortsOk = false;
 
-void Robot::initWheels()
-{
 	wheels->Init();
+	//initCoilboard();
+	std::cout << "Done initializing" << std::endl;
+	return;
 }
-
+/*
 void Robot::initCoilboard() {
 	if (coilBoardPortsOk) {
 		std::cout << "Using coilgun" << std::endl;
@@ -201,7 +199,7 @@ void Robot::initCoilboard() {
 		coilBoard = new CoilGun();
 	}
 }
-
+*/
 void Robot::Run()
 {
 	//double fps;
@@ -227,7 +225,7 @@ void Robot::Run()
 	}
 	*/
 	/* Field state */
-	SoccerField field(m_pDisplay, camera->GetFrameSize());
+	SoccerField field(m_pDisplay);
 
 	/* Vision modules */
 	FrontCameraVision visionModule(camera, m_pDisplay, &field);
@@ -313,7 +311,7 @@ void Robot::Run()
 				remoteControl.Enable(false);
 				autoPilot.enableTestMode(false);
 				distanceCalibrator.Enable(false);
-				wheels->Stop();
+				wheels->Drive(0);
 				STATE_BUTTON("(A)utoCalibrate objects", 'a', STATE_AUTOCALIBRATE)
 				//STATE_BUTTON("(M)anualCalibrate objects", STATE_CALIBRATE)
 				STATE_BUTTON("(C)Change Gate [" + ((int)field.GetTargetGate().getDistance() == (int)(field.blueGate.getDistance()) ? "blue" : "yellow") + "]", 'c', STATE_SELECT_GATE)
@@ -339,13 +337,14 @@ void Robot::Run()
 				});
 				STATE_BUTTON("(S)ettings", 's', STATE_SETTINGS)
 					m_pDisplay->createButton("Reinit wheels", '-', [this] {
-					initPorts();
-					initWheels();
+					//initPorts();
+					//initWheels();
+					//TODO: fix this
 					this->last_state = STATE_END_OF_GAME; // force dialog redraw
 				});
 				m_pDisplay->createButton("Reinit coilboard", '-', [this] {
-					initPorts();
-					initCoilboard();
+					//initPorts();
+					//initCoilboard();
 					this->last_state = STATE_END_OF_GAME; // force dialog redraw
 				});
 				
@@ -467,7 +466,7 @@ void Robot::Run()
 					*/
 					//SetState(STATE_SELECT_GATE);
 					coilBoard->ToggleTribbler(false);
-					wheels->Stop();
+					wheels->Drive(0);
 					autoPilot.Enable(!autoPilot.running);
 					SetState(STATE_NONE);
 				}
@@ -549,7 +548,7 @@ void Robot::Run()
 		m_pDisplay->putText( std::string("Gate:") + (targetGatePos.getDistance() >0 ? "yes" : "no"), cv::Point(-140, 80), 0.5, cv::Scalar(255, 255, 255));
 
 		
-		m_pDisplay->putText( std::string("Trib:") + (coilBoard->BallInTribbler() ? "yes" : "no"), cv::Point(-140, 100), 0.5, cv::Scalar(255, 255, 255));
+//		m_pDisplay->putText( std::string("Trib:") + (coilBoard->BallInTribbler() ? "yes" : "no"), cv::Point(-140, 100), 0.5, cv::Scalar(255, 255, 255));
 		m_pDisplay->putText( std::string("Sight:") + (field.gateObstructed ? "obst" : "free"), cv::Point(-140, 120), 0.5, cv::Scalar(255, 255, 255));
 		//m_pDisplay->putText( std::string("OnWay:") + (somethingOnWay ? "yes" : "no"), cv::Point(-140, 140), 0.5, cv::Scalar(255, 255, 255));
 		
@@ -559,16 +558,20 @@ void Robot::Run()
 			m_pDisplay->putText( std::string("Ball") + std::to_string(i) + ": "+ std::to_string(ball.fieldCoords.x) + " : " + std::to_string(ball.fieldCoords.y), cv::Point(-250, i * 15 + 10), 0.3, cv::Scalar(255, 255, 255));
 		}
 
-		m_pDisplay->putText( "robot: " + std::to_string(field.self.fieldCoords.x) + " " + std::to_string(field.self.fieldCoords.y), cv::Point(-140, 200), 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putText("robot x:" + std::to_string(field.self.fieldCoords.x) + " y: " + std::to_string(field.self.fieldCoords.y) + " r: " + std::to_string(field.self.getAngle()), cv::Point(-250, 200), 0.4, cv::Scalar(255, 255, 255));
+		if (pSim != NULL)
+			m_pDisplay->putText("simul x:" + std::to_string(pSim->self.fieldCoords.x) + " y: " + std::to_string(pSim->self.fieldCoords.y) + " r: " + std::to_string(pSim->self.getAngle()), cv::Point(-250, 220), 0.4, cv::Scalar(255, 255, 255));
+
 
 
 		//m_pDisplay->putText( "border: " + std::to_string(borderDistance.distance), cv::Point(-140, 280), 0.5, cv::Scalar(255, 255, 255));
 
-
-		m_pDisplay->putText("Blue Gate", cv::Point(-240, 320), 0.5, cv::Scalar(255, 255, 255));
-		m_pDisplay->putText("(dist / angle): " + std::to_string((int)field.blueGate.getDistance()) + " / " + std::to_string(field.blueGate.getAngle()), cv::Point(-240, 340), 0.5, cv::Scalar(255, 255, 255));
-		m_pDisplay->putText("Yellow Gate", cv::Point(-240, 360), 0.5, cv::Scalar(255, 255, 255));
-		m_pDisplay->putText("(dist / angle): " + std::to_string((int)field.yellowGate.getDistance()) + " / " + std::to_string(field.yellowGate.getAngle()), cv::Point(-240, 380), 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putText("Blue gate d: " + std::to_string((int)field.blueGate.getDistance()) + " a: " + std::to_string(field.blueGate.getAngle()), cv::Point(-250, 260), 0.4, cv::Scalar(255, 255, 255));
+		if (pSim != NULL)
+			m_pDisplay->putText("Blue gate d: " + std::to_string((int)pSim->blueGate.getDistance()) + " a: " + std::to_string(pSim->blueGate.getAngle()), cv::Point(-250, 280), 0.4, cv::Scalar(255, 255, 255));
+		m_pDisplay->putText("Yell gate d: " + std::to_string((int)field.yellowGate.getDistance()) + " a: " + std::to_string(field.yellowGate.getAngle()), cv::Point(-250, 310), 0.4, cv::Scalar(255, 255, 255));
+		if (pSim != NULL)
+			m_pDisplay->putText("Yell gate d: " + std::to_string((int)pSim->yellowGate.getDistance()) + " a: " + std::to_string(pSim->yellowGate.getAngle()), cv::Point(-250, 330), 0.4, cv::Scalar(255, 255, 255));
 
 		
 

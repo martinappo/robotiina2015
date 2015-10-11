@@ -113,6 +113,7 @@
     <ClInclude Include="RobotPosition.h" />
     <ClInclude Include="SimpleImageThresholder.h" />
     <ClInclude Include="Simple-WebSocket-Server\server_ws.hpp" />
+    <ClInclude Include="Simulator.h" />
     <ClInclude Include="SoccerField.h" />
     <ClInclude Include="FrontCameraVision.h" />
     <ClInclude Include="GateFinder.h" />
@@ -156,6 +157,7 @@
     <ClCompile Include="MouseVision.cpp" />
     <ClCompile Include="ObjectPosition.cpp" />
     <ClCompile Include="RobotPosition.cpp" />
+    <ClCompile Include="Simulator.cpp" />
     <ClCompile Include="SoccerField.cpp" />
     <ClCompile Include="FrontCameraVision.cpp" />
     <ClCompile Include="GateFinder.cpp" />

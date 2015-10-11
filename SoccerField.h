@@ -9,14 +9,14 @@ class SoccerField :
 	public ThreadedClass, public FieldState
 {
 public:
-	SoccerField(IDisplay *pDisplay, cv::Size frameSize);
+	SoccerField(IDisplay *pDisplay);
 	virtual ~SoccerField();
 	void Run();
 	virtual void SetTargetGate(OBJECT gate) {
 		m_targetGate = gate;
 	};
 	virtual GatePosition &GetTargetGate();
-	void initBalls(cv::Size frameSize);
+	void initBalls();
 	void Lock(){};
 	void UnLock(){};
 private:

@@ -1,5 +1,8 @@
 #include "RobotPosition.h"
 #include "DistanceCalculator.h"
+
+extern DistanceCalculator gDistanceCalculator;
+
 //RobotPosition::RobotPosition() {
 //	this->polarMetricCoords = cv::Point(0, 0);
 //} 
@@ -14,7 +17,111 @@ RobotPosition::~RobotPosition()
 {
 }
 
+void RobotPosition::updateFieldCoordsNew(cv::Point orgin) {
+
+
+	double d1 = blueGate.getDistance();
+	double d2 = yellowGate.getDistance();
+	double a1 = blueGate.getAngle();
+	double a2 = yellowGate.getAngle();
+	double a = a1 - a2;
+	if (a < 0) a += 360;
+
+	cv::Point pos;
+	if (abs(a - 180) > 0){
+		pos.x = a < 180 ? 1 : -1;
+	}
+	if (abs(d1 - d2) > 1){
+		pos.y = d1 < d2 ? -1 : 1;
+	}
+	fieldCoords = cv::Point(60 * pos.x, 100 * pos.y);
+	double aa = a > 180 ? a - 180: a;
+	double a11 = asin(d2 * sin(abs(aa / 180 * CV_PI)) / 450) / CV_PI * 180;
+	double a12 = asin(d1 * sin(abs(aa / 180 * CV_PI)) / 450) / CV_PI * 180;
+	double a111 = pos.x < 0 ? a11 : 180 - a11;
+	double a112 = pos.y > 0 ? a11 : 180 - a11;
+	double a121 = pos.x < 0 ? a12 : 180 - a12;
+	double a122 = pos.y > 0 ? a12 : 180 - a12;
+	double dx1 = d1 * sin(a111 / 180 * CV_PI)*pos.x;
+	double dy1 = d1 * cos(a112 / 180 * CV_PI)*pos.y;
+	double dx2 = d2 * sin(a121 / 180 * CV_PI)*pos.x;
+	double dy2 = d2 * cos(a122 / 180 * CV_PI)*-pos.y;
+
+	double x1 = dx1 + blueGate.fieldCoords.x;
+	double y1 = dy1 + blueGate.fieldCoords.y;
+	double x2 = dx2 + yellowGate.fieldCoords.x;
+	double y2 = dy2 + yellowGate.fieldCoords.y;
+//	x1 = x2; y1 = y2;
+//	x2 = x1; y2 = y1;
+	fieldCoords.x = (x1 + x2) / 2;
+	fieldCoords.y = (y1 + y2) / 2;
+
+	// no that we know robot position, we can calculate it's angle to blue or yellow gate on the field
+	double angleToBlueGate = DistanceCalculator::angleBetween(fieldCoords - blueGate.fieldCoords, { 0, 1 });
+	double angleToYellowGate = DistanceCalculator::angleBetween(fieldCoords - yellowGate.fieldCoords, { 0, 1 });
+	// now add real gate angle to this angle
+	auto da1 = (angleToBlueGate - blueGate.getAngle());
+	auto da2 = (angleToYellowGate - yellowGate.getAngle());
+	// for taking average, they must have same sign
+	if (abs(da1 - da2) > 180) {
+		if (da1 < 0) da1 = 360 + da1;
+		if (da2< 0) da2 = 360 + da2;
+	}
+//	if (da2 < 0) da2 += 360;
+	polarMetricCoords.y = (da1 + da2) / 2;
+	//polarMetricCoords.y = d1 > d2 ? da1 : da2;
+
+	/*
+	if (d1 < d2) {
+		if (a < 180) {
+			// top right
+			fieldCoords = { 60, -100 };
+		}
+		else {
+			//top bottom
+			fieldCoords = { -60, -100 };
+		}
+	}
+	else {
+		if (a < 180 ) {
+			// bottom right
+			fieldCoords = { 60, 100 };
+		}
+		else {
+			//bottom bottom
+			fieldCoords = { -60, 100 };
+		}
+
+	}
+	*/
+	/*
+	if (a < 0) a = 360 + a;
+	double a1, a2 = 0;
+	int axis = 0;
+	double err, lastErr = INT_MAX;
+	double d;
+	do {
+		d = sqrt(pow(d1, 2) + pow(d2, 2) - 2 * d1 * d2*cos(a/360*CV_PI));
+		err = abs(d - 450);
+		if (err < 10) break;
+
+		if (err > lastErr) {
+			axis = axis ^ 1;
+		}
+		else {
+			if (axis == 0) d1 += err*0.1;
+			if (axis == 1) d2 += err*0.1;
+			lastErr = err;
+		}
+	} while (true);
+	blueGate.polarMetricCoords.x = d1;
+	yellowGate.polarMetricCoords.x = d2;
+	*/
+}
 void RobotPosition::updateFieldCoords(cv::Point orgin) {
+
+	updateFieldCoordsNew();
+	return;
 
 	auto possiblePoints = intersectionOfTwoCircles(yellowGate.fieldCoords, yellowGate.getDistance(), blueGate.fieldCoords, blueGate.getDistance());
 
@@ -68,8 +175,8 @@ std::pair<cv::Point, cv::Point> RobotPosition::intersectionOfTwoCircles(cv::Poin
 
 	// if two circle radiuses do not reach
 	while (distance > circle1Rad + circle2Rad) {
-		circle1Rad++;
-		circle2Rad++;
+		circle1Rad += 0.2*circle1Rad;
+		circle2Rad += 0.2*circle2Rad;
 	}
 
 	// calculating area and height of trianlge formed by points

@@ -10,16 +10,16 @@ class ObjectFinder;
 class WheelController;
 class CoilGun;
 class ComPortScanner;
-
+class Simulator;
 class Robot {
 private:
 	po::variables_map config;
-
-    ICamera *camera;
-	ComPortScanner *scanner;
-    WheelController * wheels;
-	CoilGun *coilBoard;
-	IDisplay *m_pDisplay;
+	Simulator *pSim = NULL;
+	ICamera *camera = NULL;
+	ComPortScanner *scanner = NULL;
+	IWheelController * wheels = NULL;
+	CoilGun *coilBoard = NULL;
+	IDisplay *m_pDisplay = NULL;
 	bool coilBoardPortsOk;
 	bool wheelsPortsOk;
 
@@ -27,10 +27,10 @@ private:
     std::atomic<STATE> state;
 	std::atomic<STATE> last_state;
 	bool ParseOptions(int argc, char* argv[]);
-	void initCamera();
-	void initPorts();
-	void initWheels();
-	void initCoilboard();
+	void InitHardware();
+	void InitSimulator();
+//	void initWheels();
+//	void initCoilboard();
 
 	void Run();
     boost::mutex remote_mutex;

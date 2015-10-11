@@ -5,6 +5,7 @@ class DistanceCalculator{
 public:
 	DistanceCalculator();
 	double getDistance(const cv::Point &pos, const cv::Point &orgin) const;
+	double getDistanceInverted(const cv::Point &pos, const cv::Point &orgin) const;
 	cv::Point2d getPolarCoordinates(const cv::Point &pos, const cv::Point &orgin) const;
 	cv::Point2d getFieldCoordinates(const cv::Point &pos, const cv::Point &orgin) const;
 	void loadConf();

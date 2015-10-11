@@ -109,7 +109,10 @@
     <ClCompile Include="kdNode2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TargetPosition.cpp">
+    <ClCompile Include="Simulator.cpp">
+      <Filter>Simulator</Filter>
+    </ClCompile>
+      <ClCompile Include="TargetPosition.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -243,7 +246,10 @@
     <ClInclude Include="kdNode2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TargetPosition.h">
+    <ClInclude Include="Simulator.h">
+      <Filter>Simulator</Filter>
+    </ClInclude>
+      <ClInclude Include="TargetPosition.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -276,6 +282,9 @@
     </Filter>
     <Filter Include="UI">
       <UniqueIdentifier>{d105cd53-385f-429f-9e56-c22559116700}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Simulator">
+      <UniqueIdentifier>{ae1a70fa-494e-44cc-a86d-057b65349061}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

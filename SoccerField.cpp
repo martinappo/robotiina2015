@@ -2,13 +2,13 @@
 #include <chrono>
 #include <thread>
 
-SoccerField::SoccerField(IDisplay *pDisplay, cv::Size frameSize) :m_pDisplay(pDisplay)
+SoccerField::SoccerField(IDisplay *pDisplay) :m_pDisplay(pDisplay)
 {
 	green = cv::imread("field.png", CV_LOAD_IMAGE_COLOR);   // Read the file
 	field = cv::Mat(green.size(), CV_8UC3, cv::Scalar::all(245));
 	c = green.size() / 2;
 //	this->self.setFrameSize(frameSize);
-	initBalls(frameSize);
+	initBalls();
 	Start();
 }
 
@@ -24,7 +24,7 @@ GatePosition & SoccerField::GetTargetGate() {
 	else return blueGate; // { return{ -1, 0 }; }
 };
 
-void SoccerField::initBalls(cv::Size frameSize) {
+void SoccerField::initBalls() {
 	// distribute balls uniformly
 	for (int i = 0; i < NUMBER_OF_BALLS; i++) {
 		balls[i].fieldCoords.x = ((i % 3) - 1) * 100;

@@ -121,9 +121,14 @@ public:
 
 class IWheelController {
 public:
-	virtual void Drive(double fowardSpeed, double direction, double angularSpeed) = 0;
+	virtual void Drive(double fowardSpeed, double direction =0, double angularSpeed=0) = 0;
 	virtual const Speed & GetActualSpeed() = 0;
 	virtual const Speed & GetTargetSpeed() = 0;
+	virtual void Init() = 0;
+	virtual std::string GetDebugInfo() = 0;
+	virtual bool IsReal() = 0;
+
+
 
 };
 class ICoilGun {
