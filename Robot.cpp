@@ -154,6 +154,7 @@ void Robot::InitSimulator() {
 	pSim = new Simulator();
 	camera = pSim;
 	wheels = pSim;
+	coilBoard = new CoilGun(); //TODO: fix this, to simulator
 }
 
 void Robot::InitHardware() {
@@ -175,6 +176,7 @@ void Robot::InitHardware() {
 	wheelsPortsOk = false;
 
 	wheels->Init();
+	coilBoard = new CoilGun(); //TODO: fix this, to use real coilboard
 	//initCoilboard();
 	std::cout << "Done initializing" << std::endl;
 	return;

@@ -22,7 +22,8 @@ public:
 	std::string GetDebugInfo();
 	bool IsReal(){ return false;  }
 	void Run();
-
+	virtual void SetTargetGate(OBJECT gate) {}
+	virtual GatePosition &GetTargetGate() { return blueGate; };
 protected:
 	double orientation;
 	cv::Mat frame = cv::Mat(1024, 1280, CV_8UC3);
