@@ -28,7 +28,7 @@ void RobotPosition::updateFieldCoordsNew(cv::Point orgin) {
 	if (a < 0) a += 360;
 
 	cv::Point pos;
-	if (abs(a - 180) > 1){
+	if (abs(a - 180) > 0){
 		pos.x = a < 180 ? 1 : -1;
 	}
 	if (abs(d1 - d2) > 1){
@@ -36,18 +36,23 @@ void RobotPosition::updateFieldCoordsNew(cv::Point orgin) {
 	}
 	fieldCoords = cv::Point(60 * pos.x, 100 * pos.y);
 	double aa = a > 180 ? a - 180: a;
-	double a11 = asin(d1 * sin(abs(aa / 180 * CV_PI)) / 450) / CV_PI * 180;
-	double a12 = asin(d2 * sin(abs(aa / 180 * CV_PI)) / 450) / CV_PI * 180;
+	double a11 = asin(d2 * sin(abs(aa / 180 * CV_PI)) / 450) / CV_PI * 180;
+	double a12 = asin(d1 * sin(abs(aa / 180 * CV_PI)) / 450) / CV_PI * 180;
+	double a111 = pos.x < 0 ? a11 : 180 - a11;
+	double a112 = pos.y > 0 ? a11 : 180 - a11;
+	double a121 = pos.x < 0 ? a12 : 180 - a12;
+	double a122 = pos.y > 0 ? a12 : 180 - a12;
+	double dx1 = d1 * sin(a111 / 180 * CV_PI)*pos.x;
+	double dy1 = d1 * cos(a112 / 180 * CV_PI)*pos.y;
+	double dx2 = d2 * sin(a121 / 180 * CV_PI)*pos.x;
+	double dy2 = d2 * cos(a122 / 180 * CV_PI)*-pos.y;
 
-	double dx1 = d1 * sin(a11 / 180 * CV_PI) * pos.x;
-	double dy1 = d1 * cos(a11 / 180 * CV_PI) * pos.y;
-	double dx2 = d2 * sin(a12 / 180 * CV_PI) * pos.x;
-	double dy2 = d2 * cos(a12 / 180 * CV_PI) * -pos.y;
 	double x1 = dx1 + blueGate.fieldCoords.x;
 	double y1 = dy1 + blueGate.fieldCoords.y;
 	double x2 = dx2 + yellowGate.fieldCoords.x;
 	double y2 = dy2 + yellowGate.fieldCoords.y;
-	//x1 = x2; y1 = y2;
+//	x1 = x2; y1 = y2;
+//	x2 = x1; y2 = y1;
 	fieldCoords.x = (x1 + x2) / 2;
 	fieldCoords.y = (y1 + y2) / 2;
 
@@ -58,10 +63,13 @@ void RobotPosition::updateFieldCoordsNew(cv::Point orgin) {
 	auto da1 = (angleToBlueGate - blueGate.getAngle());
 	auto da2 = (angleToYellowGate - yellowGate.getAngle());
 	// for taking average, they must have same sign
-	if (da1 < 0) da1 += 360;
-	if (da2 < 0) da2 += 360;
-	//polarMetricCoords.y = (da1 + da2) / 2;
-	polarMetricCoords.y = d1 > d2 ? da1 : da2;
+	if (abs(da1 - da2) > 180) {
+		if (da1 < 0) da1 = 360 + da1;
+		if (da2< 0) da2 = 360 + da2;
+	}
+//	if (da2 < 0) da2 += 360;
+	polarMetricCoords.y = (da1 + da2) / 2;
+	//polarMetricCoords.y = d1 > d2 ? da1 : da2;
 
 	/*
 	if (d1 < d2) {

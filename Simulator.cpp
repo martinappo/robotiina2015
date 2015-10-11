@@ -6,7 +6,7 @@ extern DistanceCalculator gDistanceCalculator;
 
 Simulator::Simulator() :ThreadedClass("Simulator")
 {
-	self.fieldCoords = cv::Point(-100, 110);
+	self.fieldCoords = cv::Point(50, 50);
 	self.polarMetricCoords = cv::Point(0,0);
 	// distribute balls uniformly
 	for (int i = 0; i < NUMBER_OF_BALLS; i++) {
@@ -104,6 +104,7 @@ void Simulator::TogglePlay(){
 
 void Simulator::Drive(double fowardSpeed, double direction, double angularSpeed){
 	self.polarMetricCoords.y += angularSpeed;
+	if (self.polarMetricCoords.y > 360) self.polarMetricCoords.y -= 360;
 	self.fieldCoords.x += fowardSpeed * sin((direction - self.getAngle()) / 180 * CV_PI);
 	self.fieldCoords.y += fowardSpeed * cos((direction - self.getAngle()) / 180 * CV_PI);
 }
