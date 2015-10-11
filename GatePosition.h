@@ -5,6 +5,7 @@
 class GatePosition : public ObjectPosition
 {
 public:
+	GatePosition(){};
 	GatePosition(OBJECT gate);
 	virtual ~GatePosition();
 	virtual void updateFieldCoords(cv::Point orgin = cv::Point(0, 0)){};

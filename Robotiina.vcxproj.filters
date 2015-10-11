@@ -112,6 +112,9 @@
     <ClCompile Include="Simulator.cpp">
       <Filter>Simulator</Filter>
     </ClCompile>
+      <ClCompile Include="TargetPosition.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="robot.h">
@@ -245,6 +248,9 @@
     </ClInclude>
     <ClInclude Include="Simulator.h">
       <Filter>Simulator</Filter>
+    </ClInclude>
+      <ClInclude Include="TargetPosition.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

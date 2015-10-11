@@ -4,6 +4,7 @@
 #include "BallPosition.h"
 #include "GatePosition.h"
 #include "RobotPosition.h"
+#include "TargetPosition.h"
 
 class FieldState {
 public:

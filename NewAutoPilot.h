@@ -52,7 +52,7 @@ public:
 	virtual void onExit();
 	virtual NewDriveMode step(double dt);
 };
-#ifdef AUTOPILOT_IS_WORKING
+
 class LocateBall : public DriveInstruction
 {
 private:
@@ -92,8 +92,8 @@ public:
 class DriveToBall : public DriveInstruction
 {
 private:
-	ObjectPosition start;
-	ObjectPosition target;
+	TargetPosition start;
+	TargetPosition target;
 	double speed;
 	double rotate;
 	double rotateGate;
@@ -126,7 +126,7 @@ public:
 	Kick() : DriveInstruction("KICK"){};
 	virtual NewDriveMode step(double dt);
 };
-#endif
+
 class RecoverCrash : public DriveInstruction
 {
 public:
@@ -157,10 +157,10 @@ private:
 	std::map<NewDriveMode, DriveInstruction*>::iterator curDriveMode;
 	ICommunicationModule *m_pComModule;
 	FieldState *m_pFieldState;
-	/*
-	ObjectPosition lastBallLocation;
-	ObjectPosition lastGateLocation;
-	ObjectPosition lastHomeGateLocation;
+	
+	BallPosition lastBallLocation;
+	GatePosition lastGateLocation;
+	GatePosition lastHomeGateLocation;
 
 	std::atomic_bool ballInSight;
 	std::atomic_bool gateInSight;
@@ -171,7 +171,7 @@ private:
 	std::atomic_int borderDistance;
 	boost::atomic<cv::Point2i> ballCount;
 	cv::Point2i lastBallCount;
-	*/
+	
 
 
 	std::atomic_bool drive;
@@ -185,19 +185,17 @@ private:
 	NewDriveMode testDriveMode = DRIVEMODE_IDLE;
 
 protected:
-	/*
-	//	NewDriveMode DriveToBall();
+	NewDriveMode DriveToBall();
 	NewDriveMode LocateBall();
 	NewDriveMode CatchBall();
 	NewDriveMode LocateGate();
 	NewDriveMode LocateHome();
 	NewDriveMode DriveToHome();
 	NewDriveMode RecoverCrash();
-	*/
 	void Step();
 public:
 	NewAutoPilot(ICommunicationModule *pComModule, FieldState *pState);
-	//void UpdateState(ObjectPosition *ballLocation, ObjectPosition *gateLocation, bool ballInTribbler, bool sightObstructed, bool somethingOnWay, int borderDistance, cv::Point2i ballCount);
+	void UpdateState(BallPosition *ballLocation, GatePosition *gateLocation);
 	void setTestMode(NewDriveMode mode);
 	void enableTestMode(bool enable);
 	void Run();

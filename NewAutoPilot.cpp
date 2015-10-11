@@ -6,7 +6,6 @@
 
 std::pair<NewDriveMode, DriveInstruction*> NewDriveModes[] = {
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_IDLE, new Idle()),
-#ifdef AUTOPILOT_IS_WORKING
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_LOCATE_BALL, new LocateBall()),
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_BALL, new DriveToBall()),
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_LOCATE_HOME, new LocateHome()),
@@ -15,7 +14,6 @@ std::pair<NewDriveMode, DriveInstruction*> NewDriveModes[] = {
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_AIM_GATE, new AimGate()),
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_KICK, new Kick()),
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_CATCH_BALL, new CatchBall()),
-#endif
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_RECOVER_CRASH, new RecoverCrash()),
 
 	//	std::pair<STATE, std::string>(STATE_END_OF_GAME, "End of Game") // this is intentionally left out
@@ -44,25 +42,24 @@ NewAutoPilot::NewAutoPilot(ICommunicationModule *pComModule, FieldState *pState)
 	*/
 
 }
-/*
-void NewAutoPilot::UpdateState(ObjectPosition *ballLocation, ObjectPosition *gateLocation, bool ballInTribbler, bool sightObstructed, bool somethingOnWay, int borderDistance, cv::Point2i ballCount)
+
+void NewAutoPilot::UpdateState(BallPosition *ballLocation, GatePosition *gateLocation)
 {
 	boost::mutex::scoped_lock lock(mutex);
 	ballInSight = ballLocation != NULL;
 	gateInSight = gateLocation != NULL;
 	if (ballInSight) lastBallLocation = *ballLocation;
 	if (gateInSight) lastGateLocation = *gateLocation;
-	this->ballInTribbler = ballInTribbler;
-	this->sightObstructed = sightObstructed;
+	this->ballInTribbler = m_pComModule->BallInTribbler();
+	/*this->sightObstructed = sightObstructed;
 	this->somethingOnWay = somethingOnWay;
-	this->borderDistance = borderDistance;
-	this->ballCount = ballCount;
+	this->borderDistance = borderDistance;*/
 	if (!testMode) {
 		lastUpdate = boost::posix_time::microsec_clock::local_time();
 		if (driveMode == DRIVEMODE_IDLE) driveMode = DRIVEMODE_LOCATE_BALL;
 	}
 }
-*/
+
 /*BEGIN Idle*/
 void Idle::onEnter()
 {
@@ -79,9 +76,8 @@ NewDriveMode Idle::step(double dt)
 {
 	//TODO: Figure this out!
 	//return (actionStart - newAutoPilot.lastUpdate).total_milliseconds() > 0 ? DRIVEMODE_IDLE : DRIVEMODE_DRIVE_TO_BALL;
-	return DRIVEMODE_IDLE;
+	return DRIVEMODE_LOCATE_BALL;
 }
-#ifdef AUTOPILOT_IS_WORKING
 
 /*BEGIN LocateBall*/
 void LocateBall::onEnter()
@@ -161,9 +157,9 @@ void DriveToBall::onEnter()
 	std::chrono::milliseconds dura(200);
 	std::this_thread::sleep_for(dura);
 	m_pCom->ToggleTribbler(false);
-	start = m_pFieldState->balls[0];
+	start = TargetPosition(m_pFieldState->balls[0]);
 	//Desired distance
-	target = ObjectPosition(cv::Point2i{350,0});
+	target = TargetPosition(cv::Point2i{ 350, 0 });
 }
 
 NewDriveMode DriveToBall::step(double dt)
@@ -328,7 +324,7 @@ void Kick::onEnter()
 	DriveInstruction::onEnter();
 	m_pCom->ToggleTribbler(false);
 }
-#endif
+
 /*BEGIN RecoverCrash*/
 NewDriveMode RecoverCrash::step(double dt)
 {
