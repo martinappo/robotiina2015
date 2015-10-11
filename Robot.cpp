@@ -508,6 +508,7 @@ void Robot::Run()
 		else if (STATE_TEST == state) {
 			START_DIALOG
 				autoPilot.enableTestMode(true);
+				autoPilot.Enable(true);
 				for (const auto d : autoPilot.driveModes) {
 					m_pDisplay->createButton(d.second->name, '-', [this, &autoPilot, d]{
 						autoPilot.setTestMode(d.first);
