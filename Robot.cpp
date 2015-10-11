@@ -557,16 +557,20 @@ void Robot::Run()
 			m_pDisplay->putText( std::string("Ball") + std::to_string(i) + ": "+ std::to_string(ball.fieldCoords.x) + " : " + std::to_string(ball.fieldCoords.y), cv::Point(-250, i * 15 + 10), 0.3, cv::Scalar(255, 255, 255));
 		}
 
-		m_pDisplay->putText( "robot: " + std::to_string(field.self.fieldCoords.x) + " " + std::to_string(field.self.fieldCoords.y), cv::Point(-140, 200), 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putText("robot x:" + std::to_string(field.self.fieldCoords.x) + " y: " + std::to_string(field.self.fieldCoords.y) + " r: " + std::to_string(field.self.getAngle()), cv::Point(-250, 200), 0.4, cv::Scalar(255, 255, 255));
+		if (pSim != NULL)
+			m_pDisplay->putText("simul x:" + std::to_string(pSim->self.fieldCoords.x) + " y: " + std::to_string(pSim->self.fieldCoords.y) + " r: " + std::to_string(pSim->self.getAngle()), cv::Point(-250, 220), 0.4, cv::Scalar(255, 255, 255));
+
 
 
 		//m_pDisplay->putText( "border: " + std::to_string(borderDistance.distance), cv::Point(-140, 280), 0.5, cv::Scalar(255, 255, 255));
 
-
-		m_pDisplay->putText("Blue Gate", cv::Point(-240, 320), 0.5, cv::Scalar(255, 255, 255));
-		m_pDisplay->putText("(dist / angle): " + std::to_string((int)field.blueGate.getDistance()) + " / " + std::to_string(field.blueGate.getAngle()), cv::Point(-240, 340), 0.5, cv::Scalar(255, 255, 255));
-		m_pDisplay->putText("Yellow Gate", cv::Point(-240, 360), 0.5, cv::Scalar(255, 255, 255));
-		m_pDisplay->putText("(dist / angle): " + std::to_string((int)field.yellowGate.getDistance()) + " / " + std::to_string(field.yellowGate.getAngle()), cv::Point(-240, 380), 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putText("Blue gate d: " + std::to_string((int)field.blueGate.getDistance()) + " a: " + std::to_string(field.blueGate.getAngle()), cv::Point(-250, 260), 0.4, cv::Scalar(255, 255, 255));
+		if (pSim != NULL)
+			m_pDisplay->putText("Blue gate d: " + std::to_string((int)pSim->blueGate.getDistance()) + " a: " + std::to_string(pSim->blueGate.getAngle()), cv::Point(-250, 280), 0.4, cv::Scalar(255, 255, 255));
+		m_pDisplay->putText("Yell gate d: " + std::to_string((int)field.yellowGate.getDistance()) + " a: " + std::to_string(field.yellowGate.getAngle()), cv::Point(-250, 300), 0.4, cv::Scalar(255, 255, 255));
+		if (pSim != NULL)
+			m_pDisplay->putText("Yell gate d: " + std::to_string((int)pSim->yellowGate.getDistance()) + " a: " + std::to_string(pSim->yellowGate.getAngle()), cv::Point(-250, 320), 0.4, cv::Scalar(255, 255, 255));
 
 		
 

@@ -6,7 +6,7 @@ extern DistanceCalculator gDistanceCalculator;
 
 Simulator::Simulator() :ThreadedClass("Simulator")
 {
-	self.fieldCoords = cv::Point(-100, -110);
+	self.fieldCoords = cv::Point(-100, 110);
 	self.polarMetricCoords = cv::Point(0,0);
 	// distribute balls uniformly
 	for (int i = 0; i < NUMBER_OF_BALLS; i++) {
@@ -19,6 +19,12 @@ Simulator::Simulator() :ThreadedClass("Simulator")
 void Simulator::UpdateGatePos(){
 
 	frame_blank.copyTo(frame);
+	blueGate.polarMetricCoords.x = cv::norm(self.fieldCoords- blueGate.fieldCoords);
+	blueGate.polarMetricCoords.y = 360-gDistanceCalculator.angleBetween(cv::Point(0, 1), self.fieldCoords - (blueGate.fieldCoords)) + self.getAngle();
+	yellowGate.polarMetricCoords.x = cv::norm(self.fieldCoords - yellowGate.fieldCoords);;
+	yellowGate.polarMetricCoords.y = 360 - gDistanceCalculator.angleBetween(cv::Point(0, 1), self.fieldCoords - (yellowGate.fieldCoords)) + self.getAngle();
+
+
 	for (int s = -1; s < 2; s += 2){
 		cv::Point2i shift1(s * 10, -20);
 		cv::Point2i shift2(s * 10, 20);
@@ -27,6 +33,8 @@ void Simulator::UpdateGatePos(){
 
 		double d1 = gDistanceCalculator.getDistanceInverted(self.fieldCoords, blueGate.fieldCoords + shift1);
 		double d2 = gDistanceCalculator.getDistanceInverted(self.fieldCoords, yellowGate.fieldCoords + shift2);
+
+
 		// draw gates
 		double x1 = d1*sin(a1 / 180 * CV_PI);
 		double y1 = d1*cos(a1 / 180 * CV_PI);
@@ -38,6 +46,8 @@ void Simulator::UpdateGatePos(){
 		cv::circle(frame, cv::Point(x1, y1) + cv::Point(frame.size() / 2), 28, color, -1);
 		cv::circle(frame, cv::Point(x2, y2) + cv::Point(frame.size() / 2), 28, color2, -1);
 	}
+
+
 	// balls 
 	for (int i = 0; i < NUMBER_OF_BALLS; i++){
 		double a = gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - balls[i].fieldCoords) + self.getAngle();

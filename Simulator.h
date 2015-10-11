@@ -3,7 +3,7 @@
 #include "FieldState.h"
 #include "ThreadedClass.h"
 #include <mutex>
-class Simulator: public ICamera, public IWheelController, public ThreadedClass, protected FieldState
+class Simulator: public ICamera, public IWheelController, public ThreadedClass, public FieldState
 {
 public:
 	Simulator();
