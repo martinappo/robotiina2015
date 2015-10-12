@@ -105,6 +105,7 @@ void Simulator::TogglePlay(){
 void Simulator::Drive(double fowardSpeed, double direction, double angularSpeed){
 	self.polarMetricCoords.y += angularSpeed;
 	if (self.polarMetricCoords.y > 360) self.polarMetricCoords.y -= 360;
+	if (self.polarMetricCoords.y < -360) self.polarMetricCoords.y += 360;
 	self.fieldCoords.x += fowardSpeed * sin((direction - self.getAngle()) / 180 * CV_PI);
 	self.fieldCoords.y += fowardSpeed * cos((direction - self.getAngle()) / 180 * CV_PI);
 }

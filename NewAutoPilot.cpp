@@ -6,7 +6,7 @@
 
 std::pair<NewDriveMode, DriveInstruction*> NewDriveModes[] = {
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_IDLE, new Idle()),
-	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_LOCATE_BALL, new LocateBall()),
+//	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_LOCATE_BALL, new LocateBall()),
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_BALL, new DriveToBall()),
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_LOCATE_HOME, new LocateHome()),
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_HOME, new DriveToHome()),
@@ -42,7 +42,7 @@ NewAutoPilot::NewAutoPilot(ICommunicationModule *pComModule, FieldState *pState)
 	*/
 
 }
-
+/*
 void NewAutoPilot::UpdateState(BallPosition *ballLocation, GatePosition *gateLocation)
 {
 	boost::mutex::scoped_lock lock(mutex);
@@ -51,14 +51,15 @@ void NewAutoPilot::UpdateState(BallPosition *ballLocation, GatePosition *gateLoc
 	if (ballInSight) lastBallLocation = *ballLocation;
 	if (gateInSight) lastGateLocation = *gateLocation;
 	this->ballInTribbler = m_pComModule->BallInTribbler();
-	/*this->sightObstructed = sightObstructed;
+	this->sightObstructed = sightObstructed;
 	this->somethingOnWay = somethingOnWay;
-	this->borderDistance = borderDistance;*/
+	this->borderDistance = borderDistance;
 	if (!testMode) {
 		lastUpdate = boost::posix_time::microsec_clock::local_time();
 		if (driveMode == DRIVEMODE_IDLE) driveMode = DRIVEMODE_LOCATE_BALL;
 	}
 }
+*/
 
 /*BEGIN Idle*/
 void Idle::onEnter()
@@ -76,67 +77,13 @@ NewDriveMode Idle::step(double dt)
 {
 	//TODO: Figure this out!
 	//return (actionStart - newAutoPilot.lastUpdate).total_milliseconds() > 0 ? DRIVEMODE_IDLE : DRIVEMODE_DRIVE_TO_BALL;
-	return DRIVEMODE_LOCATE_BALL;
+	return DRIVEMODE_DRIVE_TO_BALL;
 }
 
-/*BEGIN LocateBall*/
-void LocateBall::onEnter()
-{
-	DriveInstruction::onEnter();
-	m_pCom->ToggleTribbler(false);
-	rotateStart = boost::posix_time::microsec_clock::local_time();
-}
-
-NewDriveMode LocateBall::step(double dt)
-{
-	auto ballInTribbler = m_pCom->BallInTribbler();
-	auto ballInSight = m_pFieldState->balls[0].getDistance() >= 0;
-
-	
-	if (ballInTribbler) return DRIVEMODE_LOCATE_GATE;
-	if (ballInSight) return DRIVEMODE_DRIVE_TO_BALL;
-
-	//m_pCom->Stop();
-	//return DRIVEMODE_LOCATE_BALL;
-
-	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
-	boost::posix_time::time_duration::tick_type rotateDuration = (time - rotateStart).total_milliseconds();
-	int dir = 1;
- 
- 		   
-	if (rotateDuration < 5700){
-	    if(true) {
-		float speed = 30*fabs(cos( (float)rotateDuration / 1000));
-		//float speed = -0.008*rotateDuration + 50;
-		//std::cout << speed <<","<< rotateDuration << std::endl;
-		m_pCom->Drive(0,0,dir*speed);
-	    
-		} else if (rotateDuration < 1000) {
-			m_pCom->Drive(0, 0, dir * 50);
-		}
-		else if (rotateDuration < 2500){
-			m_pCom->Drive(0, 0, dir * 35);
-		}
-		else if (rotateDuration < 4500) {
-			m_pCom->Drive(0, 0, dir * 20);
-		}
-		else if (rotateDuration < 5000) {
-			m_pCom->Drive(0, 0, dir * 15);
-		}
-		else{
-			m_pCom->Drive(0,0,0);
-		}
-		
-		return DRIVEMODE_LOCATE_BALL;
-	}
-	else {
-		return DRIVEMODE_DRIVE_TO_HOME;
-	}
-}
 /*BEGIN LocateHome*/
 NewDriveMode LocateHome::step(double dt)
 {
-	return DRIVEMODE_LOCATE_BALL;
+	return DRIVEMODE_DRIVE_TO_BALL;
 }
 
 /*BEGIN DriveToHome*/
@@ -147,7 +94,7 @@ NewDriveMode DriveToHome::step(double dt)
 	std::this_thread::sleep_for(dura);
 	m_pCom->Drive(0,0,0);
 
-	return DRIVEMODE_LOCATE_BALL;
+	return DRIVEMODE_DRIVE_TO_BALL;
 }
 /*BEGIN DriveToBall*/
 void DriveToBall::onEnter()
@@ -165,7 +112,7 @@ void DriveToBall::onEnter()
 NewDriveMode DriveToBall::step(double dt)
 {
 	ObjectPosition &lastBallLocation = m_pFieldState->balls[0];
-	if (lastBallLocation.getDistance() < 0) return DRIVEMODE_LOCATE_BALL;
+	if (lastBallLocation.getDistance() < 0) return DRIVEMODE_IDLE;
 	if (m_pCom->BallInTribbler()) return DRIVEMODE_LOCATE_GATE;
 
 	//auto &lastBallLocation = newAutoPilot.lastBallLocation;
@@ -229,7 +176,7 @@ NewDriveMode CatchBall::step(double dt)
 		return DRIVEMODE_LOCATE_GATE;
 	}
 	else if (catchDuration > 2000) { //trying to catch ball for 2 seconds
-		return DRIVEMODE_LOCATE_BALL;
+		return DRIVEMODE_DRIVE_TO_BALL;
 	}
 	else {
 		double rotate = abs(lastBallLocation.getAngle()) * 0.4 + 5;
@@ -254,7 +201,7 @@ NewDriveMode LocateGate::step(double dt)
 
 	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
 
-	if (!m_pCom->BallInTribbler()) return DRIVEMODE_LOCATE_BALL;
+	if (!m_pCom->BallInTribbler()) return DRIVEMODE_DRIVE_TO_BALL;
 	if (gateInSight) {
 		std::chrono::milliseconds dura(100); // do we need to sleep?
 		std::this_thread::sleep_for(dura);
@@ -278,7 +225,7 @@ NewDriveMode AimGate::step(double dt)
 	bool sightObstructed = m_pFieldState->gateObstructed;
 
 
-	if (!m_pCom->BallInTribbler()) return DRIVEMODE_LOCATE_BALL;
+	if (!m_pCom->BallInTribbler()) return DRIVEMODE_DRIVE_TO_BALL;
 	if (!gateInSight) return DRIVEMODE_LOCATE_GATE;
 
 	if ((boost::posix_time::microsec_clock::local_time() - actionStart).total_milliseconds() > 5000) {
@@ -316,7 +263,7 @@ NewDriveMode Kick::step(double dt)
 	std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	m_pCom->Kick();
 	std::this_thread::sleep_for(std::chrono::milliseconds(500)); //half second wait.
-	return DRIVEMODE_LOCATE_BALL;
+	return DRIVEMODE_DRIVE_TO_BALL;
 
 }
 void Kick::onEnter()
@@ -340,7 +287,7 @@ NewDriveMode RecoverCrash::step(double dt)
 	
 	m_pCom->Drive(0, 0, 0);
 
-	return DRIVEMODE_LOCATE_BALL;
+	return DRIVEMODE_DRIVE_TO_BALL;
 }
 void NewAutoPilot::setTestMode(NewDriveMode mode) 
 {
@@ -360,13 +307,14 @@ void NewAutoPilot::Run()
 	NewDriveMode newMode = curDriveMode->first;
 	curDriveMode->second->onEnter();
 	while (!stop_thread){
+		/*
 		if (!testMode && ((boost::posix_time::microsec_clock::local_time() - lastUpdate).total_milliseconds() > 1000)) {
 			newMode = DRIVEMODE_IDLE;
 		}
-		else if (!testMode /*&& somethingOnWay*/ && curDriveMode->first != DRIVEMODE_RECOVER_CRASH && curDriveMode->first != DRIVEMODE_IDLE){
+		else if (!testMode && somethingOnWay && curDriveMode->first != DRIVEMODE_RECOVER_CRASH && curDriveMode->first != DRIVEMODE_IDLE){
 			newMode = DRIVEMODE_RECOVER_CRASH;
 		}
-		else {
+		else*/ {
 			boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
 			boost::posix_time::time_duration::tick_type dt = (time - lastStep).total_milliseconds();
 			newMode = curDriveMode->second->step(double(dt));
@@ -381,8 +329,8 @@ void NewAutoPilot::Run()
 			//m_pCom->Stop();
 			curDriveMode = driveModes.find(newMode);
 			if (curDriveMode == driveModes.end()) {
-				std::cout << "Invalid drive mode from :" << old->second->name << ", reverting to locate_ball" << std::endl;
-				curDriveMode = driveModes.find(DRIVEMODE_LOCATE_BALL);;
+				std::cout << "Invalid drive mode from :" << old->second->name << ", reverting to drive_to_ball" << std::endl;
+				curDriveMode = driveModes.find(DRIVEMODE_DRIVE_TO_BALL);;
 			}
 			std::cout << "state change :" << old->second->name << " ->" << curDriveMode->second->name << std::endl;
 

@@ -52,7 +52,7 @@ public:
 	virtual void onExit();
 	virtual NewDriveMode step(double dt);
 };
-
+/*
 class LocateBall : public DriveInstruction
 {
 private:
@@ -62,7 +62,7 @@ public:
 	virtual void onEnter();
 	virtual NewDriveMode step(double dt);
 };
-
+*/
 class LocateHome : public DriveInstruction
 {
 public:
@@ -157,7 +157,7 @@ private:
 	std::map<NewDriveMode, DriveInstruction*>::iterator curDriveMode;
 	ICommunicationModule *m_pComModule;
 	FieldState *m_pFieldState;
-	
+	/*
 	BallPosition lastBallLocation;
 	GatePosition lastGateLocation;
 	GatePosition lastHomeGateLocation;
@@ -171,7 +171,7 @@ private:
 	std::atomic_int borderDistance;
 	boost::atomic<cv::Point2i> ballCount;
 	cv::Point2i lastBallCount;
-	
+	*/
 
 
 	std::atomic_bool drive;
@@ -179,14 +179,14 @@ private:
 	boost::posix_time::ptime rotateTime = time;
 
 	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
-	boost::posix_time::ptime lastUpdate = time - boost::posix_time::seconds(60);
+	//boost::posix_time::ptime lastUpdate = time - boost::posix_time::seconds(60);
 	NewDriveMode lastDriveMode = DRIVEMODE_IDLE;
 	NewDriveMode driveMode = DRIVEMODE_IDLE;
 	NewDriveMode testDriveMode = DRIVEMODE_IDLE;
 
 protected:
 	NewDriveMode DriveToBall();
-	NewDriveMode LocateBall();
+//	NewDriveMode LocateBall();
 	NewDriveMode CatchBall();
 	NewDriveMode LocateGate();
 	NewDriveMode LocateHome();
@@ -195,7 +195,7 @@ protected:
 	void Step();
 public:
 	NewAutoPilot(ICommunicationModule *pComModule, FieldState *pState);
-	void UpdateState(BallPosition *ballLocation, GatePosition *gateLocation);
+	//void UpdateState(BallPosition *ballLocation, GatePosition *gateLocation);
 	void setTestMode(NewDriveMode mode);
 	void enableTestMode(bool enable);
 	void Run();
