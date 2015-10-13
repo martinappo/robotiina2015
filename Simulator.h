@@ -3,7 +3,7 @@
 #include "FieldState.h"
 #include "ThreadedClass.h"
 #include <mutex>
-class Simulator: public ICamera, public IWheelController, public ThreadedClass, public FieldState
+class Simulator: public ICamera, public IWheelController, public ICoilGun, public ThreadedClass, public FieldState
 {
 public:
 	Simulator();
@@ -24,6 +24,17 @@ public:
 	void Run();
 	virtual void SetTargetGate(OBJECT gate) {}
 	virtual GatePosition &GetTargetGate() { return blueGate; };
+	virtual bool BallInTribbler() {
+		// check if ball is infront of robot
+		throw std::runtime_error("Implement me");
+	};
+	virtual void Kick() {
+		//remove ball from field
+		throw std::runtime_error("Implement me");
+	};
+	virtual void ToggleTribbler(bool start) {
+		// do nothing
+	};
 protected:
 	double orientation;
 	cv::Mat frame = cv::Mat(1024, 1280, CV_8UC3);

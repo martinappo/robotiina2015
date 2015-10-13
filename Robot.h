@@ -18,7 +18,7 @@ private:
 	ICamera *camera = NULL;
 	ComPortScanner *scanner = NULL;
 	IWheelController * wheels = NULL;
-	CoilGun *coilBoard = NULL;
+	ICoilGun *coilBoard = NULL;
 	IDisplay *m_pDisplay = NULL;
 	bool coilBoardPortsOk;
 	bool wheelsPortsOk;

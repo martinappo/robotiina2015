@@ -104,6 +104,7 @@ Robot::~Robot()
 		delete pSim;
 		camera = NULL;
 		wheels = NULL;
+		coilBoard = NULL;
 	}
 	if (camera) {
 		delete camera;
@@ -154,7 +155,7 @@ void Robot::InitSimulator() {
 	pSim = new Simulator();
 	camera = pSim;
 	wheels = pSim;
-	coilBoard = new CoilGun(); //TODO: fix this, to simulator
+	coilBoard = pSim;
 }
 
 void Robot::InitHardware() {
