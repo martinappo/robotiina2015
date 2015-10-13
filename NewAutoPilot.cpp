@@ -10,7 +10,7 @@ std::pair<NewDriveMode, DriveInstruction*> NewDriveModes[] = {
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_BALL, new DriveToBall()),
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_LOCATE_HOME, new LocateHome()),
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_HOME, new DriveToHome()),
-	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_LOCATE_GATE, new LocateGate()),
+	//std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_LOCATE_GATE, new LocateGate()),
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_AIM_GATE, new AimGate()),
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_KICK, new Kick()),
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_CATCH_BALL, new CatchBall()),
@@ -113,7 +113,7 @@ NewDriveMode DriveToBall::step(double dt)
 {
 	ObjectPosition &lastBallLocation = m_pFieldState->balls[0];
 	if (lastBallLocation.getDistance() < 0) return DRIVEMODE_IDLE;
-	if (m_pCom->BallInTribbler()) return DRIVEMODE_LOCATE_GATE;
+	if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
 
 	//auto &lastBallLocation = newAutoPilot.lastBallLocation;
 
@@ -173,7 +173,7 @@ NewDriveMode CatchBall::step(double dt)
 
 	//std::cout << catchDuration << std::endl;
 	if (m_pCom->BallInTribbler()) {
-		return DRIVEMODE_LOCATE_GATE;
+		return DRIVEMODE_AIM_GATE;
 	}
 	else if (catchDuration > 2000) { //trying to catch ball for 2 seconds
 		return DRIVEMODE_DRIVE_TO_BALL;
@@ -193,6 +193,7 @@ NewDriveMode CatchBall::step(double dt)
 /*END CatchBall*/
 
 /*BEGIN LocateGate*/
+/*
 NewDriveMode LocateGate::step(double dt)
 {
 	ObjectPosition &lastGateLocation = m_pFieldState->GetTargetGate();
@@ -216,17 +217,18 @@ NewDriveMode LocateGate::step(double dt)
 	
 	return DRIVEMODE_LOCATE_GATE;
 }
+*/
 /*BEGIN AimGate*/
 NewDriveMode AimGate::step(double dt)
 {
 
 	ObjectPosition &lastGateLocation = m_pFieldState->GetTargetGate();
-	bool gateInSight = lastGateLocation.getDistance() > 0;
+	//bool gateInSight = lastGateLocation.getDistance() > 0;
 	bool sightObstructed = m_pFieldState->gateObstructed;
 
 
 	if (!m_pCom->BallInTribbler()) return DRIVEMODE_DRIVE_TO_BALL;
-	if (!gateInSight) return DRIVEMODE_LOCATE_GATE;
+	//if (!gateInSight) return DRIVEMODE_LOCATE_GATE;
 
 	if ((boost::posix_time::microsec_clock::local_time() - actionStart).total_milliseconds() > 5000) {
 		return DRIVEMODE_KICK;

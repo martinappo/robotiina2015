@@ -36,8 +36,8 @@ void RobotPosition::updateFieldCoordsNew(cv::Point orgin) {
 	}
 	fieldCoords = cv::Point(60 * pos.x, 100 * pos.y);
 	double aa = a > 180 ? a - 180: a;
-	double a11 = asin(d2 * sin(abs(aa / 180 * CV_PI)) / 450) / CV_PI * 180;
-	double a12 = asin(d1 * sin(abs(aa / 180 * CV_PI)) / 450) / CV_PI * 180;
+	double a11 = asin(d2 * sin(abs(aa / 180 * CV_PI)) / 460) / CV_PI * 180;
+	double a12 = asin(d1 * sin(abs(aa / 180 * CV_PI)) / 460) / CV_PI * 180;
 	double a111 = pos.x < 0 ? a11 : 180 - a11;
 	double a112 = pos.y > 0 ? a11 : 180 - a11;
 	double a121 = pos.x < 0 ? a12 : 180 - a12;
