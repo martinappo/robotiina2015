@@ -65,7 +65,7 @@ bool BallFinder::Locate(cv::Mat &imgThresholded, cv::Mat &frameHSV, cv::Mat &fra
 		}
 	}
 	for (int i = ballsUpdatedCount; i < objectCoords.rows; i++){
-		objectCoords.row(ballsUpdatedCount) = cv::Scalar::all(0);
+		objectCoords.row(i) = cv::Scalar::all(0);
 	}
 	/*
 	if (ballsUpdatedCount < NUMBER_OF_BALLS) {

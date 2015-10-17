@@ -27,8 +27,8 @@ GatePosition & SoccerField::GetTargetGate() {
 void SoccerField::initBalls() {
 	// distribute balls uniformly
 	for (int i = 0; i < NUMBER_OF_BALLS; i++) {
-		balls[i].fieldCoords.x = ((i % 3) - 1) * 100;
-		balls[i].fieldCoords.y = (i / 3 - 1.5) * 110;
+		balls[i].fieldCoords.x = (int)(((i % 3) - 1) * 100);
+		balls[i].fieldCoords.y = (int)((i / 3 - 1.5) * 110);
 		balls[i].id = i;
 	}
 }

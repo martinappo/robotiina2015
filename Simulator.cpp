@@ -10,8 +10,8 @@ Simulator::Simulator() :ThreadedClass("Simulator")
 	self.polarMetricCoords = cv::Point(0,0);
 	// distribute balls uniformly
 	for (int i = 0; i < NUMBER_OF_BALLS; i++) {
-		balls[i].fieldCoords.x = ((i % 3) - 1) * 100;
-		balls[i].fieldCoords.y = (i / 3 - 1.5) * 110;
+		balls[i].fieldCoords.x = (int)(((i % 3) - 1) * 100);
+		balls[i].fieldCoords.y = (int)((i / 3 - 1.5) * 110);
 		balls[i].id = i;
 	}
 	Start();
@@ -43,13 +43,13 @@ void Simulator::UpdateGatePos(){
 
 		cv::Scalar color(236, 137, 48);
 		cv::Scalar color2(61, 255, 244);
-		cv::circle(frame, cv::Point(x1, y1) + cv::Point(frame.size() / 2), 28, color, -1);
-		cv::circle(frame, cv::Point(x2, y2) + cv::Point(frame.size() / 2), 28, color2, -1);
+		cv::circle(frame, cv::Point((int)(x1), (int)(y1)) + cv::Point(frame.size() / 2), 28, color, -1);
+		cv::circle(frame, cv::Point((int)(x2), (int)(y2))+cv::Point(frame.size() / 2), 28, color2, -1);
 	}
 
 
 	// balls 
-	for (int i = 0; i < NUMBER_OF_BALLS; i++){
+	for (int i = 0; i < mNumberOfBalls; i++){
 		double a = gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - balls[i].fieldCoords) + self.getAngle();
 		double d = gDistanceCalculator.getDistanceInverted(self.fieldCoords, balls[i].fieldCoords);
 		double x = d*sin(a / 180 * CV_PI);
@@ -103,11 +103,13 @@ void Simulator::TogglePlay(){
 
 
 void Simulator::Drive(double fowardSpeed, double direction, double angularSpeed){
+	if (mNumberOfBalls == 0)
+		return;
 	self.polarMetricCoords.y += angularSpeed;
 	if (self.polarMetricCoords.y > 360) self.polarMetricCoords.y -= 360;
 	if (self.polarMetricCoords.y < -360) self.polarMetricCoords.y += 360;
-	self.fieldCoords.x += fowardSpeed * sin((direction - self.getAngle()) / 180 * CV_PI);
-	self.fieldCoords.y += fowardSpeed * cos((direction - self.getAngle()) / 180 * CV_PI);
+	self.fieldCoords.x += (int)(fowardSpeed * sin((direction - self.getAngle()) / 180 * CV_PI));
+	self.fieldCoords.y += (int)(fowardSpeed * cos((direction - self.getAngle()) / 180 * CV_PI));
 }
 
 
@@ -133,4 +135,34 @@ void Simulator::Run(){
 		UpdateRobotPos();
 		std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	}
+}
+
+bool Simulator::BallInTribbler(){
+	double minDist = INT_MAX;
+	double dist = INT_MAX;
+	for (int i = 0; i < mNumberOfBalls; i++){
+		dist = cv::norm(self.fieldCoords - balls[i].fieldCoords);
+		std::cout << dist << std::endl;
+		if (dist < minDist)
+			minDist = dist;
+	}
+	if (minDist < 40)
+		return true;
+	else return false;
+}
+
+void Simulator::Kick(){
+	double minDist = INT_MAX;
+	double dist = INT_MAX;
+	int minDistIndex = mNumberOfBalls - 1;
+	for (int i = 0; i < mNumberOfBalls; i++){
+		dist = cv::norm(self.fieldCoords - balls[i].fieldCoords);
+		if (dist < minDist){
+			minDist = dist;
+			minDistIndex = i;
+		}
+	}
+	balls[minDistIndex] = balls[mNumberOfBalls - 1];
+	balls[mNumberOfBalls - 1].~BallPosition();
+	mNumberOfBalls--;
 }

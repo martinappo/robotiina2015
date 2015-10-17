@@ -24,14 +24,8 @@ public:
 	void Run();
 	virtual void SetTargetGate(OBJECT gate) {}
 	virtual GatePosition &GetTargetGate() { return blueGate; };
-	virtual bool BallInTribbler() {
-		// check if ball is infront of robot
-		throw std::runtime_error("Implement me");
-	};
-	virtual void Kick() {
-		//remove ball from field
-		throw std::runtime_error("Implement me");
-	};
+	virtual bool BallInTribbler();
+	virtual void Kick();
 	virtual void ToggleTribbler(bool start) {
 		// do nothing
 	};
@@ -45,5 +39,8 @@ protected:
 	void UpdateGatePos();
 	void UpdateRobotPos();
 	std::mutex mutex;
+
+private:
+	int mNumberOfBalls = NUMBER_OF_BALLS;
 };
 
