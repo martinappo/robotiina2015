@@ -310,7 +310,9 @@ void Robot::Run()
 				mouseVision.Enable(false);
 				calibrator.Enable(false);
 				visionModule.Enable(true);
-				//autoPilot.Enable(false);
+				if (last_state == STATE_TEST){
+					autoPilot.Enable(false);
+				}
 				manualControl.Enable(false);
 				remoteControl.Enable(false);
 				autoPilot.enableTestMode(false);
@@ -516,6 +518,7 @@ void Robot::Run()
 						autoPilot.setTestMode(d.first);
 					});
 				}
+				last_state = STATE_TEST;
 				STATE_BUTTON("BACK", 8, STATE_NONE)
 			END_DIALOG
 		}
