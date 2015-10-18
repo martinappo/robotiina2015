@@ -76,6 +76,16 @@ Simulator::~Simulator()
 }
 
 cv::Mat & Simulator::Capture(bool bFullFrame){
+	if (frames > 10) {
+		boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
+		boost::posix_time::time_duration::tick_type dt2 = (time - lastCapture2).total_milliseconds();
+		fps = 1000.0 * frames / dt2;
+		lastCapture2 = time;
+		frames = 0;
+	}
+	else {
+		frames++;
+	}
 
 	std::lock_guard<std::mutex> lock(mutex);
 	frame_copy.copyTo(frame_copy2);
@@ -88,7 +98,7 @@ cv::Size Simulator::GetFrameSize(bool bFullFrame){
 
 
 double Simulator::GetFPS(){
-	return 0;
+	return fps;
 }
 
 

@@ -29,6 +29,7 @@ public:
 	virtual void ToggleTribbler(bool start) {
 		// do nothing
 	};
+
 protected:
 	double orientation;
 	cv::Mat frame = cv::Mat(1024, 1280, CV_8UC3);
@@ -42,5 +43,8 @@ protected:
 
 private:
 	int mNumberOfBalls = NUMBER_OF_BALLS;
+	int frames = 0;
+	double fps;
+	boost::posix_time::ptime lastCapture2;
 };
 
