@@ -142,7 +142,7 @@ bool Simulator::BallInTribbler(){
 	double dist = INT_MAX;
 	for (int i = 0; i < mNumberOfBalls; i++){
 		dist = cv::norm(self.fieldCoords - balls[i].fieldCoords);
-		std::cout << dist << std::endl;
+		//std::cout << dist << std::endl;
 		if (dist < minDist)
 			minDist = dist;
 	}
