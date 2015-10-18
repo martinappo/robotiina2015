@@ -104,52 +104,55 @@ void DriveToBall::onEnter()
 	std::chrono::milliseconds dura(200);
 	std::this_thread::sleep_for(dura);
 	m_pCom->ToggleTribbler(false);
-	start = TargetPosition(m_pFieldState->balls[0]);
-	//Desired distance
-	target = TargetPosition(cv::Point2i{ 350, 0 });
+
+	target = m_pFieldState->balls[0];
+	for (BallPosition ball : m_pFieldState->balls) {
+		if (ball.getDistance() < target.getDistance()) {
+			target = ball;
+		}
+	}
 }
 
 NewDriveMode DriveToBall::step(double dt)
 {
-	ObjectPosition &lastBallLocation = m_pFieldState->balls[0];
-	if (lastBallLocation.getDistance() < 0) return DRIVEMODE_IDLE;
+	for (BallPosition ball : m_pFieldState->balls) {
+		if (ball.getDistance() < target.getDistance()) {
+			target = ball;
+		}
+	}
+	
+	//ObjectPosition &lastBallLocation = m_pFieldState->balls[0];
+	if (target.getDistance() > 10000) return DRIVEMODE_IDLE;
 	if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
 
-	//auto &lastBallLocation = newAutoPilot.lastBallLocation;
 
-	if(lastBallLocation.getDistance()  < target.getDistance() +50){
-		m_pCom->ToggleTribbler(true);
-	}
-	else{
-		m_pCom->ToggleTribbler(false);
-	}
-	//Ball is close and center
-	if ((lastBallLocation.getDistance()  < target.getDistance()) && abs(lastBallLocation.getAngle()) <= 13) {
-		m_pCom->ToggleTribbler(true);
-		return DRIVEMODE_CATCH_BALL;
+	//Ball is close
+	if (target.getDistance() < 20) {
+		// Ball is centered
+		if (target.getAngle() <= 13 || target.getAngle() >= 347) {
+			m_pCom->ToggleTribbler(true);
+			return DRIVEMODE_CATCH_BALL;
+		}
+		// Ball is not centered
+		else {
+			m_pCom->Drive(-3, 0, target.getAngle());
+			m_pCom->ToggleTribbler(true);
+		}
+		
 	} 
-	//Ball is close and not center
-	else if (lastBallLocation.getDistance() < target.getDistance()){
-		rotate = abs(lastBallLocation.getAngle()) * 0.4 + 5;
-
-		//std::cout << "rotate: " << rotate << std::endl;
-		//m_pCom->Rotate(lastBallLocation.horizontalAngle < 0, rotate);
-		m_pCom->Drive(10, 0, lastBallLocation.getAngle() < 0 ? rotate : -rotate);
-		m_pCom->ToggleTribbler(true);
-	}
 	//Ball is far away
 	else {
-		rotate = abs(lastBallLocation.getAngle()) * 0.4 +3;
 		//rotate = 0;
 		//speed calculation
-		if (lastBallLocation.getDistance() > 700){
-			speed = 150;
+		if (target.getDistance() > 100){
+			speed = 30;
 		}
 		else{
-			speed = lastBallLocation.getDistance() * 0.29 - 94;
+			speed = target.getDistance(); // TODO: ilmselt veidi väiksemaks
 		}
-		m_pCom->Drive(speed, -lastBallLocation.getAngle(), lastBallLocation.getAngle() < 0?rotate:-rotate);
+		m_pCom->Drive(-speed, 0, target.getAngle()); // TODO: mingi väikese kaarega sõita
 	}
+	
 	return DRIVEMODE_DRIVE_TO_BALL;
 }
 /*BEGIN CatchBall*/

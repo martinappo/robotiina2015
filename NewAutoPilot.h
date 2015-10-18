@@ -93,7 +93,7 @@ class DriveToBall : public DriveInstruction
 {
 private:
 	TargetPosition start;
-	TargetPosition target;
+	BallPosition target;
 	double speed;
 	double rotate;
 	double rotateGate;
