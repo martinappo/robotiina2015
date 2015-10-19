@@ -150,7 +150,7 @@ NewDriveMode DriveToBall::step(double dt)
 		else{
 			speed = target.getDistance(); // TODO: ilmselt veidi väiksemaks
 		}
-		m_pCom->Drive(-speed, 0, target.getAngle()); // TODO: mingi väikese kaarega sõita
+		m_pCom->Drive(-speed, 0, target.getAngle()*0.2); // TODO: mingi väikese kaarega sõita
 	}
 	
 	return DRIVEMODE_DRIVE_TO_BALL;

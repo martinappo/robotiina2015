@@ -81,8 +81,8 @@ void Simulator::UpdateRobotPos(){
 	if (self.polarMetricCoords.y > 360) self.polarMetricCoords.y -= 360;
 	if (self.polarMetricCoords.y < -360) self.polarMetricCoords.y += 360;
 
-	self.fieldCoords.x += (int)(dv*dt * sin((targetSpeed.heading - self.getAngle()) / 180 * CV_PI));
-	self.fieldCoords.y += (int)(dv*dt * cos((targetSpeed.heading - self.getAngle()) / 180 * CV_PI));
+	self.fieldCoords.x += (int)(dv*dt * sin((self.getAngle()) / 180 * CV_PI));
+	self.fieldCoords.y += (int)(dv*dt * cos((self.getAngle()) / 180 * CV_PI));
 
 
 	UpdateGatePos();
