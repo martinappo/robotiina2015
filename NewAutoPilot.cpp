@@ -135,7 +135,7 @@ NewDriveMode DriveToBall::step(double dt)
 		}
 		// Ball is not centered
 		else {
-			m_pCom->Drive(-3, 0, target.getAngle());
+			m_pCom->Drive(-3, 0, (target.getAngle() / PI * 180));
 			m_pCom->ToggleTribbler(true);
 		}
 		
@@ -150,7 +150,7 @@ NewDriveMode DriveToBall::step(double dt)
 		else{
 			speed = target.getDistance(); // TODO: ilmselt veidi väiksemaks
 		}
-		m_pCom->Drive(-speed, 0, target.getAngle()*0.2); // TODO: mingi väikese kaarega sõita
+		m_pCom->Drive(-speed, 0, (target.getAngle()/PI*180)); // TODO: mingi väikese kaarega sõita
 	}
 	
 	return DRIVEMODE_DRIVE_TO_BALL;
