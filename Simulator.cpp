@@ -66,7 +66,27 @@ void Simulator::UpdateGatePos(){
 }
 
 void Simulator::UpdateRobotPos(){
+	time = boost::posix_time::microsec_clock::local_time();
+
+	double dt = (double)(time - lastStep).total_milliseconds() / 1000.0;
+	lastStep = time;
+
+	if (dt < 0.0000001) return;
+
+	double dv = targetSpeed.velocity - actualSpeed.velocity;
+	double dr = targetSpeed.rotation - actualSpeed.rotation;
+
+
+	self.polarMetricCoords.y += dr * dt;
+	if (self.polarMetricCoords.y > 360) self.polarMetricCoords.y -= 360;
+	if (self.polarMetricCoords.y < -360) self.polarMetricCoords.y += 360;
+
+	self.fieldCoords.x += (int)(dv*dt * sin((targetSpeed.heading - self.getAngle()) / 180 * CV_PI));
+	self.fieldCoords.y += (int)(dv*dt * cos((targetSpeed.heading - self.getAngle()) / 180 * CV_PI));
+
+
 	UpdateGatePos();
+
 }
 
 
@@ -115,11 +135,14 @@ void Simulator::TogglePlay(){
 void Simulator::Drive(double fowardSpeed, double direction, double angularSpeed){
 	if (mNumberOfBalls == 0)
 		return;
+	targetSpeed = { fowardSpeed, direction, angularSpeed };
+	/*
 	self.polarMetricCoords.y += angularSpeed;
 	if (self.polarMetricCoords.y > 360) self.polarMetricCoords.y -= 360;
 	if (self.polarMetricCoords.y < -360) self.polarMetricCoords.y += 360;
 	self.fieldCoords.x += (int)(fowardSpeed * sin((direction - self.getAngle()) / 180 * CV_PI));
 	self.fieldCoords.y += (int)(fowardSpeed * cos((direction - self.getAngle()) / 180 * CV_PI));
+	*/
 }
 
 
