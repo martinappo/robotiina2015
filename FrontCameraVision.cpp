@@ -208,6 +208,7 @@ void FrontCameraVision::Run() {
 					if (!m_pState->balls[j].isUpdated && cv::norm(pos - m_pState->balls[j].fieldCoords) < 50) {
 						m_pState->balls[j].updateRawCoordinates(cv::Point(rotatedBalls.col(i)), cv::Point(0, 0));
 						m_pState->balls[j].updateFieldCoords(m_pState->self.getFieldPos());
+						m_pState->balls[j].polarMetricCoords.y -= m_pState->self.getAngle(); // rotate balls back
 						m_pState->balls[j].isUpdated = true;
 						ball_found = true;
 						break;

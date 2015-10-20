@@ -6,7 +6,7 @@ extern DistanceCalculator gDistanceCalculator;
 
 Simulator::Simulator() :ThreadedClass("Simulator")
 {
-	self.fieldCoords = cv::Point(50, 50);
+	self.fieldCoords = cv::Point(150, 50);
 	self.polarMetricCoords = cv::Point(0,0);
 	// distribute balls uniformly
 	for (int i = 0; i < NUMBER_OF_BALLS; i++) {
@@ -71,7 +71,7 @@ void Simulator::UpdateRobotPos(){
 	double dt = (double)(time - lastStep).total_milliseconds() / 1000.0;
 	lastStep = time;
 
-	if (dt < 0.0000001) return;
+	//if (dt < 0.0000001) return;
 
 	double v = targetSpeed.velocity;
 	double w = targetSpeed.rotation;
@@ -82,7 +82,7 @@ void Simulator::UpdateRobotPos(){
 	if (self.polarMetricCoords.y < -360) self.polarMetricCoords.y += 360;
 
 	self.fieldCoords.x += (int)(v*dt * sin((self.getAngle() + targetSpeed.heading) / 180 * CV_PI));
-	self.fieldCoords.y += (int)(v*dt * cos((self.getAngle() + targetSpeed.heading) / 180 * CV_PI));
+	self.fieldCoords.y -= (int)(v*dt * cos((self.getAngle() + targetSpeed.heading) / 180 * CV_PI));
 
 
 	UpdateGatePos();
@@ -179,7 +179,7 @@ bool Simulator::BallInTribbler(){
 		if (dist < minDist)
 			minDist = dist;
 	}
-	if (minDist < 40)
+	if (minDist < 15)
 		return true;
 	else return false;
 }

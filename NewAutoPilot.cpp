@@ -115,11 +115,13 @@ void DriveToBall::onEnter()
 
 NewDriveMode DriveToBall::step(double dt)
 {
+	target.polarMetricCoords.x = INT_MAX;
 	for (BallPosition ball : m_pFieldState->balls) {
 		if (ball.getDistance() < target.getDistance()) {
 			target = ball;
 		}
 	}
+	std::cout << target.fieldCoords << target.getDistance() << "  " << target.getAngle() << std::endl;
 	
 	//ObjectPosition &lastBallLocation = m_pFieldState->balls[0];
 	if (target.getDistance() > 10000) return DRIVEMODE_IDLE;
@@ -127,7 +129,10 @@ NewDriveMode DriveToBall::step(double dt)
 
 
 	//Ball is close
-	if (target.getDistance() < 20) {
+	double angle = target.getAngle();
+	if (angle > 180)
+		angle = angle - 360;
+	if (false && target.getDistance() < 20) {
 		// Ball is centered
 		if (target.getAngle() <= 13 || target.getAngle() >= 347) {
 			m_pCom->ToggleTribbler(true);
@@ -135,7 +140,7 @@ NewDriveMode DriveToBall::step(double dt)
 		}
 		// Ball is not centered
 		else {
-			m_pCom->Drive(-3, 0, (target.getAngle() / PI * 180));
+			m_pCom->Drive(-3, 0, (angle) * 0.005);
 			m_pCom->ToggleTribbler(true);
 		}
 		
@@ -144,13 +149,19 @@ NewDriveMode DriveToBall::step(double dt)
 	else {
 		//rotate = 0;
 		//speed calculation
-		if (target.getDistance() > 100){
-			speed = 30;
+		if (cv::norm(angle) > 12){
+			m_pCom->Drive(0, 0, 10*sign(angle));
+			
 		}
 		else{
-			speed = target.getDistance(); // TODO: ilmselt veidi väiksemaks
+			if (target.getDistance() > 100){
+				speed = 30;
+			}
+			else{
+				speed = target.getDistance(); // TODO: ilmselt veidi väiksemaks
+			}
+			m_pCom->Drive(speed, 0, 0); // TODO: mingi väikese kaarega sõita
 		}
-		m_pCom->Drive(-speed, 0, (target.getAngle()/PI*180)); // TODO: mingi väikese kaarega sõita
 	}
 	
 	return DRIVEMODE_DRIVE_TO_BALL;
