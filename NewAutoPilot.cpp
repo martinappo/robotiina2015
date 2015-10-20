@@ -248,9 +248,13 @@ NewDriveMode AimGate::step(double dt)
 		return DRIVEMODE_KICK;
 	}
 	int dir = sign(lastGateLocation.getAngle());
+	double angle = lastGateLocation.getAngle();
+	if (angle > 180){
+		angle -= 360;
+	}
 
 	//Turn robot to gate
-	if (abs(lastGateLocation.getAngle()) < 30) {
+	if (abs(lastGateLocation.getAngle()) < 10) {
 		if (sightObstructed) { //then move sideways away from gate
 			//std::cout << sightObstructed << std::endl;
 			m_pCom->Drive(45, 90, 0);
@@ -264,8 +268,8 @@ NewDriveMode AimGate::step(double dt)
 	else {
 		//rotate calculation for gate
 		//int rotate = abs(lastGateLocation.horizontalAngle) * 0.4 + 3; // +3 makes no sense we should aim straight
-		int rotate = (int)((abs(lastGateLocation.getAngle()) * 0.4 + 6)); // should we rotate oposite way?
-		m_pCom->Drive(0,0, (lastGateLocation.getAngle() < 0 ? 1 : -1) * rotate);
+		//int rotate = (int)((abs(lastGateLocation.getAngle()) * 0.4 + 6)); // should we rotate oposite way?
+		m_pCom->Drive(0,0, dir*(std::max(cv::norm(angle), 6.0)));
 	}
 	return DRIVEMODE_AIM_GATE;
 
