@@ -27,6 +27,6 @@ private:
 	//const cv::Mat green = cv::Mat(310, 500, CV_8UC3, cv::Scalar(21, 188, 80));
 	cv::Mat green;
 	cv::Mat field;// = cv::Mat(310, 500, CV_8UC3, cv::Scalar::all(245)); // blink display
-	cv::Point c/*enter*/;
+	cv::Point2d c/*enter*/;
 };
 

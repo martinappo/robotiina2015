@@ -12,7 +12,7 @@ public:
 	void updateFieldCoordsNew(cv::Point orgin = cv::Point(0, 0));
 	void updateFieldCoords(cv::Point orgin = cv::Point(0, 0));
 	double getAngle();
-	cv::Point2i rawFieldCoords; // (x, y) Coordinates to display objects on field by, relative to field
+	cv::Point2d rawFieldCoords; // (x, y) Coordinates to display objects on field by, relative to field
 private:
 	GatePosition & yellowGate, & blueGate; // use references that point somewhere
 	void initPolarCoordinates();

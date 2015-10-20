@@ -38,6 +38,7 @@ protected:
 	cv::Mat frame_blank = cv::Mat(1024, 1280, CV_8UC3, cv::Scalar(21, 188, 80));
 	Speed targetSpeed, actualSpeed;
 	void UpdateGatePos();
+	void UpdateBallPos(double dt);
 	void UpdateRobotPos();
 	std::mutex mutex;
 

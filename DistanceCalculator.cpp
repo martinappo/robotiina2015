@@ -69,9 +69,9 @@ cv::Point2d DistanceCalculator::getFieldCoordinates(const cv::Point &pos, const 
 	double distanceInCm = getDistance(pos, orgin);
 	double angle = angleBetween(pos - orgin, { 0, -1 });
 
-	int fieldY = -(int)(distanceInCm * cos(TAU*angle / 360));
-	int fieldX = (int)(distanceInCm * sin(TAU*angle / 360));
-	return cv::Point(fieldX, fieldY);
+	double fieldY = -(distanceInCm * cos(TAU*angle / 360));
+	double fieldX = (distanceInCm * sin(TAU*angle / 360));
+	return cv::Point2d(fieldX, fieldY);
 
 }
 double DistanceCalculator::getDistanceInverted(const cv::Point &pos, const cv::Point &orgin) const{

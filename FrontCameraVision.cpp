@@ -202,7 +202,7 @@ void FrontCameraVision::Run() {
 			std::vector<int> newBalls; // new balls that are too far from existing ones
 			/* find balls that are close by */
 			for (int i = 0; i < rotatedBalls.cols; i++){
-				cv::Point2i pos = gDistanceCalculator.getFieldCoordinates(cv::Point(rotatedBalls.col(i)), cv::Point(0, 0)) + (cv::Point2d)m_pState->self.getFieldPos();
+				cv::Point2d pos = gDistanceCalculator.getFieldCoordinates(cv::Point(rotatedBalls.col(i)), cv::Point(0, 0)) + (cv::Point2d)m_pState->self.getFieldPos();
 				bool ball_found = false;
 				for (int j = 0; j < NUMBER_OF_BALLS; j++) {
 					if (!m_pState->balls[j].isUpdated && cv::norm(pos - m_pState->balls[j].fieldCoords) < 50) {

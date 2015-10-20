@@ -14,6 +14,9 @@ public:
 	void predictCoordinates();
 	void setIsUpdated(bool updated);
 	void updateFieldCoords(cv::Point orgin = cv::Point(0, 0));
+	// for simulator
+	double speed = 0;
+	double heading = 0;
 
 private:
 	KalmanFilter filter = KalmanFilter(cv::Point2i(0, 0));

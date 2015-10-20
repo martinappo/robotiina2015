@@ -6,7 +6,7 @@ SoccerField::SoccerField(IDisplay *pDisplay) :m_pDisplay(pDisplay)
 {
 	green = cv::imread("field.png", CV_LOAD_IMAGE_COLOR);   // Read the file
 	field = cv::Mat(green.size(), CV_8UC3, cv::Scalar::all(245));
-	c = green.size() / 2;
+	c = cv::Point2d(green.size()) / 2;
 //	this->self.setFrameSize(frameSize);
 	initBalls();
 	Start();
@@ -41,7 +41,7 @@ void SoccerField::Run(){
 		cv::circle(field, self.rawFieldCoords + c, 24, cv::Scalar(0, 33, 255), 4);
 		cv::circle(field, self.fieldCoords + c, 14, cv::Scalar(133, 33, 55), 4);
 		cv::line(field, self.fieldCoords + c,
-			cv::Point((int)(40.0*sin(self.getAngle() / 360 * TAU)),(int)( -40 * cos(self.getAngle() / 360 * TAU)))
+			cv::Point2d((40.0*sin(self.getAngle() / 360 * TAU)),( -40 * cos(self.getAngle() / 360 * TAU)))
 			+ self.fieldCoords + c
 			, cv::Scalar(133, 33, 55), 3);
 
@@ -64,8 +64,8 @@ void SoccerField::Run(){
 				, cv::Scalar(236, 137, 48),3);
 				*/
 			cv::line(field, self.fieldCoords + c,
-				cv::Point((int)(blueGate.polarMetricCoords.x*sin((blueGate.polarMetricCoords.y+self.getAngle()) / 180 * CV_PI)),
-				(int)(-blueGate.polarMetricCoords.x*cos((blueGate.polarMetricCoords.y+self.getAngle()) / 180 * CV_PI))
+				cv::Point2d((blueGate.polarMetricCoords.x*sin((blueGate.polarMetricCoords.y+self.getAngle()) / 180 * CV_PI)),
+				(-blueGate.polarMetricCoords.x*cos((blueGate.polarMetricCoords.y+self.getAngle()) / 180 * CV_PI))
 				) + self.fieldCoords + c
 				, cv::Scalar(236, 137, 48), 3);
 		}
@@ -88,8 +88,8 @@ void SoccerField::Run(){
 				, cv::Scalar(61, 255, 244), 3);
 			*/
 			cv::line(field, self.fieldCoords + c,
-				cv::Point((int)(yellowGate.polarMetricCoords.x*sin((yellowGate.polarMetricCoords.y + self.getAngle()) / 360 * TAU)),
-				(int)(-yellowGate.polarMetricCoords.x*cos((yellowGate.polarMetricCoords.y + self.getAngle()) / 360 * TAU))
+				cv::Point2d((yellowGate.polarMetricCoords.x*sin((yellowGate.polarMetricCoords.y + self.getAngle()) / 360 * TAU)),
+				(-yellowGate.polarMetricCoords.x*cos((yellowGate.polarMetricCoords.y + self.getAngle()) / 360 * TAU))
 				) + self.fieldCoords + c
 				, cv::Scalar(61, 255, 244), 3);
 		}
