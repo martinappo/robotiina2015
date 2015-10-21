@@ -10,8 +10,8 @@ Simulator::Simulator() :ThreadedClass("Simulator")
 	self.polarMetricCoords = cv::Point(0,0);
 	// distribute balls uniformly
 	for (int i = 0; i < NUMBER_OF_BALLS; i++) {
-		balls[i].fieldCoords.x = (int)(((i % 3) - 1) * 100);
-		balls[i].fieldCoords.y = (int)((i / 3 - 1.5) * 110);
+		balls[i].fieldCoords.x = (int)(((i % 3) - 1) * 100) + rand() % 50;
+		balls[i].fieldCoords.y = (int)((i / 3 - 1.5) * 110) + rand() % 50;
 		balls[i].id = i;
 	}
 	Start();
@@ -52,8 +52,8 @@ void Simulator::UpdateBallPos(double dt){
 	// balls 
 	for (int i = 0; i < mNumberOfBalls; i++){
 		if (balls[i].speed > 0.001) {
-			balls[i].fieldCoords.x += balls[i].speed * (sin(balls[i].heading / 180 * CV_PI));
-			balls[i].fieldCoords.y -= balls[i].speed * (cos(balls[i].heading / 180 * CV_PI));
+			balls[i].fieldCoords.x += balls[i].speed*dt * (sin(balls[i].heading / 180 * CV_PI));
+			balls[i].fieldCoords.y -= balls[i].speed*dt * (cos(balls[i].heading / 180 * CV_PI));
 			balls[i].speed *= 0.95;
 		}
 		double a = gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - balls[i].fieldCoords) + self.getAngle();
@@ -201,7 +201,7 @@ void Simulator::Kick(){
 			minDistIndex = i;
 		}
 	}
-	balls[minDistIndex].speed = 30;
+	balls[minDistIndex].speed = 600;
 	balls[minDistIndex].heading = self.getAngle();
 	//balls[minDistIndex] = balls[mNumberOfBalls - 1];
 	//balls[mNumberOfBalls - 1].~BallPosition();
