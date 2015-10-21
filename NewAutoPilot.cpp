@@ -150,12 +150,12 @@ NewDriveMode DriveToBall::step(double dt)
 		//rotate = 0;
 		//speed calculation
 		if (cv::norm(angle) > 12){
-			m_pCom->Drive(0, 0, 10*sign(angle));
+			m_pCom->Drive(0, 0, 60*sign(angle));
 			
 		}
 		else{
 			if (target.getDistance() > 100){
-				speed = 30;
+				speed = 60;
 			}
 			else{
 				speed = target.getDistance(); // TODO: ilmselt veidi väiksemaks
@@ -254,7 +254,7 @@ NewDriveMode AimGate::step(double dt)
 	}
 
 	//Turn robot to gate
-	if (abs(lastGateLocation.getAngle()) < 10) {
+	if (abs(angle) < 2) {
 		if (sightObstructed) { //then move sideways away from gate
 			//std::cout << sightObstructed << std::endl;
 			m_pCom->Drive(45, 90, 0);
