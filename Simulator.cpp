@@ -52,9 +52,9 @@ void Simulator::UpdateBallPos(double dt){
 	// balls 
 	for (int i = 0; i < mNumberOfBalls; i++){
 		if (balls[i].speed > 0.001) {
-			balls[i].fieldCoords.x += (balls[i].speed*dt * sin(targetSpeed.heading) / 180 * CV_PI);
-			balls[i].fieldCoords.y -= (balls[i].speed*dt * cos(targetSpeed.heading) / 180 * CV_PI);
-			balls[i].speed *= 0.95;
+			balls[i].fieldCoords.x += (balls[i].speed*dt * sin(balls[i].heading) / 180 * CV_PI);
+			balls[i].fieldCoords.y -= (balls[i].speed*dt * cos(balls[i].heading) / 180 * CV_PI);
+			balls[i].speed *= 0.995;
 		}
 		double a = gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - balls[i].fieldCoords) + self.getAngle();
 		double d = gDistanceCalculator.getDistanceInverted(self.fieldCoords, balls[i].fieldCoords);
