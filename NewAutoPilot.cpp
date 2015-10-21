@@ -140,7 +140,7 @@ NewDriveMode DriveToBall::step(double dt)
 		}
 		// Ball is not centered
 		else {
-			m_pCom->Drive(3, 0, (angle) * 0.05);
+			m_pCom->Drive(0, 0, angle);
 			m_pCom->ToggleTribbler(true);
 		}
 		
@@ -149,19 +149,21 @@ NewDriveMode DriveToBall::step(double dt)
 	else {
 		//rotate = 0;
 		//speed calculation
-		if (cv::norm(angle) > 12){
-			m_pCom->Drive(0, 0, 60*sign(angle));
+		//(cv::norm(angle) > 12){
+			//m_pCom->Drive(0, 0, 60*sign(angle));
 			
-		}
-		else{
+		//}
+		//else{
 			if (target.getDistance() > 100){
 				speed = 60;
 			}
 			else{
 				speed = target.getDistance(); // TODO: ilmselt veidi väiksemaks
 			}
-			m_pCom->Drive(speed, 0, 0); // TODO: mingi väikese kaarega sõita
-		}
+			double angleConst = abs(angle) < 13? 0 : std::max(std::min(50.0 / target.getDistance(), 1.0), 0.5);
+			std::cout << angleConst << std::endl;
+			m_pCom->Drive(speed, angle, angleConst * angle); // TODO: mingi väikese kaarega sõita
+		//}
 	}
 	
 	return DRIVEMODE_DRIVE_TO_BALL;
