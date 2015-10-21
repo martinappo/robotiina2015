@@ -132,15 +132,15 @@ NewDriveMode DriveToBall::step(double dt)
 	double angle = target.getAngle();
 	if (angle > 180)
 		angle = angle - 360;
-	if (false && target.getDistance() < 20) {
+	if (target.getDistance() < 20) {
 		// Ball is centered
-		if (target.getAngle() <= 13 || target.getAngle() >= 347) {
+		if (abs(angle) <= 13) {
 			m_pCom->ToggleTribbler(true);
 			return DRIVEMODE_CATCH_BALL;
 		}
 		// Ball is not centered
 		else {
-			m_pCom->Drive(-3, 0, (angle) * 0.005);
+			m_pCom->Drive(3, 0, (angle) * 0.05);
 			m_pCom->ToggleTribbler(true);
 		}
 		
