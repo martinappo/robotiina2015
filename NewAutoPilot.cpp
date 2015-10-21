@@ -77,7 +77,7 @@ NewDriveMode Idle::step(double dt)
 {
 	//TODO: Figure this out!
 	//return (actionStart - newAutoPilot.lastUpdate).total_milliseconds() > 0 ? DRIVEMODE_IDLE : DRIVEMODE_DRIVE_TO_BALL;
-	return DRIVEMODE_DRIVE_TO_BALL;
+	return false ? DRIVEMODE_DRIVE_TO_HOME : DRIVEMODE_DRIVE_TO_BALL;
 }
 
 /*BEGIN LocateHome*/
@@ -89,12 +89,17 @@ NewDriveMode LocateHome::step(double dt)
 /*BEGIN DriveToHome*/
 NewDriveMode DriveToHome::step(double dt)
 {
+
+	double move1 = 100 * sin(dt / 4000);
+	double move2 = 360 * cos(dt / 4000);
+	m_pCom->Drive(move1, move2, -move1);
+	/*
 	m_pCom->Drive(-40,0,0);
 	std::chrono::milliseconds dura(300);
 	std::this_thread::sleep_for(dura);
 	m_pCom->Drive(0,0,0);
-
-	return DRIVEMODE_DRIVE_TO_BALL;
+	*/
+	return DRIVEMODE_DRIVE_TO_HOME;
 }
 /*BEGIN DriveToBall*/
 void DriveToBall::onEnter()
@@ -117,12 +122,16 @@ NewDriveMode DriveToBall::step(double dt)
 {
 	target.polarMetricCoords.x = INT_MAX;
 	for (BallPosition ball : m_pFieldState->balls) {
+		if (abs(ball.fieldCoords.y) > 250) continue; // too far outside of the field
+		//if (abs(ball.fieldCoords.y) > 250) continue;
 		if (ball.getDistance() < target.getDistance()) {
 			target = ball;
 		}
 	}
 	std::cout << target.fieldCoords << target.getDistance() << "  " << target.getAngle() << std::endl;
-	
+	if (target.polarMetricCoords.x == INT_MAX){ // no valid balls
+		return DRIVEMODE_DRIVE_TO_HOME;
+	}
 	//ObjectPosition &lastBallLocation = m_pFieldState->balls[0];
 	if (target.getDistance() > 10000) return DRIVEMODE_IDLE;
 	if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
