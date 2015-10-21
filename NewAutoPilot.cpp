@@ -244,9 +244,9 @@ NewDriveMode AimGate::step(double dt)
 	if (!m_pCom->BallInTribbler()) return DRIVEMODE_DRIVE_TO_BALL;
 	//if (!gateInSight) return DRIVEMODE_LOCATE_GATE;
 
-	if ((boost::posix_time::microsec_clock::local_time() - actionStart).total_milliseconds() > 5000) {
-		return DRIVEMODE_KICK;
-	}
+	//if ((boost::posix_time::microsec_clock::local_time() - actionStart).total_milliseconds() > 5000) {
+	//	return DRIVEMODE_KICK;
+	//}
 	int dir = sign(lastGateLocation.getAngle());
 	double angle = lastGateLocation.getAngle();
 	if (angle > 180){
