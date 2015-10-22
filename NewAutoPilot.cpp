@@ -9,7 +9,7 @@ std::pair<NewDriveMode, DriveInstruction*> NewDriveModes[] = {
 //	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_LOCATE_BALL, new LocateBall()),
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_BALL, new DriveToBall()),
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_LOCATE_HOME, new LocateHome()),
-	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_HOME, new DriveToHome()),
+	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_HOME, new DriveHome()),
 	//std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_LOCATE_GATE, new LocateGate()),
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_AIM_GATE, new AimGate()),
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_KICK, new Kick()),
@@ -77,7 +77,7 @@ NewDriveMode Idle::step(double dt)
 {
 	//TODO: Figure this out!
 	//return (actionStart - newAutoPilot.lastUpdate).total_milliseconds() > 0 ? DRIVEMODE_IDLE : DRIVEMODE_DRIVE_TO_BALL;
-	return false ? DRIVEMODE_DRIVE_TO_HOME : DRIVEMODE_DRIVE_TO_BALL;
+	return false ? DRIVEMODE_DRIVE_HOME : DRIVEMODE_DRIVE_TO_BALL;
 }
 
 /*BEGIN LocateHome*/
@@ -86,20 +86,43 @@ NewDriveMode LocateHome::step(double dt)
 	return DRIVEMODE_DRIVE_TO_BALL;
 }
 
-/*BEGIN DriveToHome*/
-NewDriveMode DriveToHome::step(double dt)
+/*BEGIN DriveHome*/
+NewDriveMode DriveHome::step(double dt)
 {
 
-	double move1 = 100 * sin(dt / 4000);
+	/*double move1 = 100 * sin(dt / 4000);
 	double move2 = 360 * cos(dt / 4000);
-	m_pCom->Drive(move1, move2, -move1);
+	m_pCom->Drive(move1, move2, -move1);*/
+
+	ObjectPosition &lastGateLocation = m_pFieldState->GetHomeGate();
+	double angle = lastGateLocation.getAngle();
+	if (angle > 180)
+		angle -= 360;
+	if (abs(angle) < 10){
+		if (lastGateLocation.getDistance() > 10 ){
+			m_pCom->Drive(90);
+		}
+		else{
+			double angle = m_pFieldState->GetTargetGate().getAngle();
+			if (angle > 180)
+				angle -= 360;
+			if (abs(angle) > 5){
+				m_pCom->Drive(0, 0, angle);
+				return DRIVEMODE_IDLE;
+			}
+		}
+	}
+	else {
+		m_pCom->Drive(0, 0, angle);
+	}
+
 	/*
 	m_pCom->Drive(-40,0,0);
 	std::chrono::milliseconds dura(300);
 	std::this_thread::sleep_for(dura);
 	m_pCom->Drive(0,0,0);
 	*/
-	return DRIVEMODE_DRIVE_TO_HOME;
+	return DRIVEMODE_DRIVE_HOME;
 }
 /*BEGIN DriveToBall*/
 void DriveToBall::onEnter()
@@ -130,7 +153,7 @@ NewDriveMode DriveToBall::step(double dt)
 	}
 	std::cout << target.fieldCoords << target.getDistance() << "  " << target.getAngle() << std::endl;
 	if (target.polarMetricCoords.x == INT_MAX){ // no valid balls
-		return DRIVEMODE_DRIVE_TO_HOME;
+		return DRIVEMODE_DRIVE_HOME;
 	}
 	//ObjectPosition &lastBallLocation = m_pFieldState->balls[0];
 	if (target.getDistance() > 10000) return DRIVEMODE_IDLE;
@@ -174,7 +197,6 @@ NewDriveMode DriveToBall::step(double dt)
 			m_pCom->Drive(speed, angle, angleConst * angle); // TODO: mingi väikese kaarega sõita
 		//}
 	}
-	
 	return DRIVEMODE_DRIVE_TO_BALL;
 }
 /*BEGIN CatchBall*/

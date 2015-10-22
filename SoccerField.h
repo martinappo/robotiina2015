@@ -16,6 +16,7 @@ public:
 		m_targetGate = gate;
 	};
 	virtual GatePosition &GetTargetGate();
+	virtual GatePosition &GetHomeGate();
 	void initBalls();
 	void Lock(){};
 	void UnLock(){};

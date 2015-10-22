@@ -24,6 +24,12 @@ GatePosition & SoccerField::GetTargetGate() {
 	else return blueGate; // { return{ -1, 0 }; }
 };
 
+GatePosition & SoccerField::GetHomeGate() {
+	if (m_targetGate == BLUE_GATE) return yellowGate;
+	else if (m_targetGate == YELLOW_GATE) return blueGate;
+	else return yellowGate; // { return{ -1, 0 }; }
+};
+
 void SoccerField::initBalls() {
 	// distribute balls uniformly
 	for (int i = 0; i < NUMBER_OF_BALLS; i++) {

@@ -11,7 +11,7 @@ enum NewDriveMode {
 	DRIVEMODE_LOCATE_BALL,
 	DRIVEMODE_DRIVE_TO_BALL,
 	DRIVEMODE_LOCATE_HOME,
-	DRIVEMODE_DRIVE_TO_HOME,
+	DRIVEMODE_DRIVE_HOME,
 	DRIVEMODE_CATCH_BALL,
 	DRIVEMODE_LOCATE_GATE,
 	DRIVEMODE_AIM_GATE,
@@ -70,10 +70,10 @@ public:
 	virtual NewDriveMode step(double dt);
 };
 
-class DriveToHome : public DriveInstruction
+class DriveHome : public DriveInstruction
 {
 public:
-	DriveToHome() : DriveInstruction("DRIVE_TO_HOME"){};
+	DriveHome() : DriveInstruction("DRIVE_HOME"){};
 	virtual NewDriveMode step(double dt);
 };
 

@@ -24,6 +24,7 @@ public:
 	void Run();
 	virtual void SetTargetGate(OBJECT gate) {}
 	virtual GatePosition &GetTargetGate() { return blueGate; };
+	virtual GatePosition &GetHomeGate() { return yellowGate; };
 	virtual bool BallInTribbler();
 	virtual void Kick();
 	virtual void ToggleTribbler(bool start) {

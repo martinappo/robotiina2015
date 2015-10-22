@@ -17,6 +17,7 @@ public:
 	std::atomic_bool gateObstructed;
 	virtual void SetTargetGate(OBJECT gate) = 0;
 	virtual GatePosition &GetTargetGate() = 0;
+	virtual GatePosition &GetHomeGate() = 0;
 	void resetBallsUpdateState();
 	virtual void Lock() {};
 	virtual void UnLock() {};
