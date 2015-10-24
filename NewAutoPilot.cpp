@@ -16,6 +16,15 @@ std::pair<NewDriveMode, DriveInstruction*> NewDriveModes[] = {
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_CATCH_BALL, new CatchBall()),
 	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_RECOVER_CRASH, new RecoverCrash()),
 
+	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_2V2_OFFENSIVE,		new Offensive()),
+	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_2V2_DEFENSIVE,		new Defensive()),
+	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_2V2_KICKOFF,		new KickOff()),
+	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_2V2_AIM_GATE,		new AimGate2v2()),
+	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_2V2_KICK,			new Kick2v2()),
+	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_2V2_DRIVE_TO_BALL,	new DriveToBall2v2()),
+	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_2V2_CATCH_BALL,	new CatchBall2v2()),
+	std::pair<NewDriveMode, DriveInstruction*>(DRIVEMODE_2V2_DRIVE_HOME,	new DriveHome2v2()),
+
 	//	std::pair<STATE, std::string>(STATE_END_OF_GAME, "End of Game") // this is intentionally left out
 
 };
@@ -414,4 +423,278 @@ NewAutoPilot::~NewAutoPilot()
 	}
 	//m_pCom->ToggleTribbler(false);
 
+}
+
+/*2v2 part*/
+/*BEGIN Offensive*/
+NewDriveMode Offensive::step(double dt){
+	if (m_pCom->BallInTribbler()){
+		//ATTACK! -> GOAL!!
+		return DRIVEMODE_2V2_AIM_GATE;
+	}
+	else
+		return DRIVEMODE_2V2_CATCH_BALL;
+	return DRIVEMODE_2V2_KICK;
+}
+
+/*BEGIN Defensive*/
+NewDriveMode Defensive::step(double dt){
+	GatePosition ally;
+	if (abs(m_pFieldState->GetHomeGate().getDistance() - ally.getDistance()) > 100){
+		if (m_pFieldState->GetHomeGate().getDistance() > 80)
+			return DRIVEMODE_2V2_DRIVE_HOME;
+		else{
+			//block gate & look for ball
+		}
+	}
+	else{
+		/*active defense
+		positon self between opponent and gate?
+		*/
+	}
+	return DRIVEMODE_2V2_DEFENSIVE;
+}
+
+/*BEGIN KickOff*/
+void KickOff::onEnter(){
+	DriveInstruction::onEnter();
+	active = false;
+	m_pCom->Drive(0, 0, 0);
+	for (BallPosition ball : m_pFieldState->balls) {
+		if (ball.getDistance() < 80) {
+			active = true;
+		}
+	}
+}
+NewDriveMode KickOff::step(double dt){
+	if (active){
+		if (m_pCom->BallInTribbler()) {
+			GatePosition ally;//other robot
+			if (abs(ally.getAngle()) < 5){
+				m_pCom->Kick();
+				return DRIVEMODE_2V2_DEFENSIVE;
+			}
+			else{
+				//aim ally
+			}
+		}
+		else{ // get ball
+			BallPosition target;
+			target.polarMetricCoords.x = INT_MAX;
+			for (BallPosition ball : m_pFieldState->balls) {
+				if (abs(ball.fieldCoords.y) > 250) continue; // too far outside of the field
+				if (ball.getDistance() < target.getDistance()) {
+					target = ball;
+				}
+			}
+			if (target.polarMetricCoords.x == INT_MAX || target.getDistance() > 10000){ // no valid balls
+				//broke
+				//TO DO: something
+				return DRIVEMODE_EXIT;
+			}
+			//Ball is close
+			double angle = target.getAngle();
+			if (angle > 180)
+				angle = angle - 360;
+			//ball is close enough for catching
+			if (target.getDistance() < 20) {
+				// Ball is centered
+				if (abs(angle) <= 13) {
+					m_pCom->ToggleTribbler(true);
+				}
+				// Ball is not centered
+				else {
+					m_pCom->Drive(0, 0, angle);
+					m_pCom->ToggleTribbler(true);
+				}
+			}
+			// ball is still to far -  go closer
+			else {
+				double angleConst = abs(angle) < 13 ? 0 : std::max(std::min(50.0 / target.getDistance(), 1.0), 0.5);
+				m_pCom->Drive(target.getDistance(), angle, angleConst * angle);
+			}
+		}
+	}
+	else{
+		if (m_pCom->BallInTribbler()){
+			return DRIVEMODE_2V2_OFFENSIVE;
+		}
+		else{
+			GatePosition ally;//other robot
+			if (abs(ally.getAngle()) < 5){ //facing other robot?
+				for (BallPosition ball : m_pFieldState->balls) { 
+					if (ball.getDistance() < 250) { //ball incoming?
+						m_pCom->ToggleTribbler(true);//prepare to catch; ride towards ball?
+					}
+				}
+			}
+			else{
+				//aim ally
+			}
+		}
+	}
+	return DRIVEMODE_2V2_KICKOFF;
+}
+
+/*BEGIN AimGate2v2*/
+void AimGate2v2::onEnter(){
+}
+NewDriveMode AimGate2v2::step(double dt){
+
+
+	ObjectPosition &lastGateLocation = m_pFieldState->GetTargetGate();
+	bool sightObstructed = m_pFieldState->gateObstructed;
+
+
+	if (!m_pCom->BallInTribbler()) return DRIVEMODE_2V2_OFFENSIVE;
+
+	int dir = sign(lastGateLocation.getAngle());
+	double angle = lastGateLocation.getAngle();
+	if (angle > 180){
+		angle -= 360;
+	}
+
+	if (abs(angle) < 2) {
+		if (sightObstructed) { //then move sideways away from gate
+			//std::cout << sightObstructed << std::endl;
+			m_pCom->Drive(45, 90, 0);
+			std::chrono::milliseconds dura(400); // do we need to sleep?
+			std::this_thread::sleep_for(dura);
+		}
+		else {
+			return DRIVEMODE_2V2_KICK;
+		}
+	}
+	else {
+		m_pCom->Drive(0, 0, dir*(std::max(cv::norm(angle), 6.0)));
+	}
+	return DRIVEMODE_2V2_AIM_GATE;
+}
+
+/*BEGIN Kick2v2*/
+void Kick2v2::onEnter(){
+	DriveInstruction::onEnter();
+	m_pCom->ToggleTribbler(false);
+}
+
+NewDriveMode Kick2v2::step(double dt){
+	m_pCom->ToggleTribbler(false);
+	m_pCom->Drive(0, 0, 0);
+	std::this_thread::sleep_for(std::chrono::milliseconds(50));
+	m_pCom->Kick();
+	std::this_thread::sleep_for(std::chrono::milliseconds(500)); //half second wait.
+	return DRIVEMODE_2V2_DEFENSIVE;
+}
+
+/*BEGIN DriveToBall2v2*/
+void DriveToBall2v2::onEnter(){
+	DriveInstruction::onEnter();
+	m_pCom->Drive(0, 0, 0);
+	std::chrono::milliseconds dura(200);
+	std::this_thread::sleep_for(dura);
+	m_pCom->ToggleTribbler(false);
+
+	target = m_pFieldState->balls[0];
+	for (BallPosition ball : m_pFieldState->balls) {
+		if (ball.getDistance() < target.getDistance()) {
+			target = ball;
+		}
+	}
+}
+
+NewDriveMode DriveToBall2v2::step(double dt){
+	target.polarMetricCoords.x = INT_MAX;
+	for (BallPosition ball : m_pFieldState->balls) {
+		if (abs(ball.fieldCoords.y) > 250) continue; 
+		if (ball.getDistance() < target.getDistance()) {
+			target = ball;
+		}
+	}
+	if (target.polarMetricCoords.x == INT_MAX){ // no valid balls
+		return DRIVEMODE_2V2_DEFENSIVE;
+	}
+	if (target.getDistance() > 10000) return DRIVEMODE_2V2_DEFENSIVE;
+	if (m_pCom->BallInTribbler()) return DRIVEMODE_2V2_AIM_GATE;
+
+	//Ball is close
+	double angle = target.getAngle();
+	if (angle > 180)
+		angle = angle - 360;
+	if (target.getDistance() < 20) {
+		if (abs(angle) <= 13) {
+			m_pCom->ToggleTribbler(true);
+			return DRIVEMODE_2V2_CATCH_BALL;
+		}
+		else {
+			m_pCom->Drive(0, 0, angle);
+			m_pCom->ToggleTribbler(true);
+		}
+
+	}
+	else {
+		if (target.getDistance() > 100){
+			speed = 60;
+		}
+		else{
+			speed = target.getDistance(); 
+		}
+		double angleConst = abs(angle) < 13 ? 0 : std::max(std::min(50.0 / target.getDistance(), 1.0), 0.5);
+		std::cout << angleConst << std::endl;
+		m_pCom->Drive(speed, angle, angleConst * angle); 
+	}
+	return DRIVEMODE_2V2_DRIVE_TO_BALL;
+}
+
+/*BEGIN CatchBall2v2*/
+void CatchBall2v2::onEnter(){
+	DriveInstruction::onEnter();
+	m_pCom->ToggleTribbler(true);
+	catchStart = boost::posix_time::microsec_clock::local_time();
+	m_pCom->Drive(0, 0, 0);
+}
+
+NewDriveMode CatchBall2v2::step(double dt){
+	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
+	boost::posix_time::time_duration::tick_type catchDuration = (time - catchStart).total_milliseconds();
+	ObjectPosition &lastBallLocation = m_pFieldState->balls[0];
+
+	//std::cout << catchDuration << std::endl;
+	if (m_pCom->BallInTribbler()) {
+		return DRIVEMODE_2V2_AIM_GATE;
+	}
+	else if (catchDuration > 2000) { //trying to catch ball for 2 seconds
+		return DRIVEMODE_2V2_DRIVE_TO_BALL;
+	}
+	else {
+		double rotate = abs(lastBallLocation.getAngle()) * 0.4 + 5;
+
+		//std::cout << "rotate: " << rotate << std::endl;
+		//m_pCom->Rotate(lastBallLocation.horizontalAngle < 0, rotate);
+		m_pCom->Drive(50, 0, lastBallLocation.getAngle() < 0 ? rotate : -rotate);
+		//newAutoPilot.m_pCom->Drive(40, 0, 0);
+		//double shake = 10 * sign(sin(1 * (time - actionStart).total_milliseconds()));
+		//newAutoPilot.m_pCom->Drive(40, 0, shake);
+	}
+	return DRIVEMODE_2V2_CATCH_BALL;
+}
+
+/*BEGIN DriveHome2v2*/
+void DriveHome2v2::onEnter(){
+}
+
+NewDriveMode DriveHome2v2::step(double dt){
+	ObjectPosition &lastGateLocation = m_pFieldState->GetHomeGate();
+	double angle = lastGateLocation.getAngle();
+	if (angle > 180)
+		angle -= 360;
+	if (abs(angle) < 10){
+		if (lastGateLocation.getDistance() > 10){
+			m_pCom->Drive(90);
+		}
+		else return DRIVEMODE_2V2_DEFENSIVE;
+	}
+	else {
+		m_pCom->Drive(0, 0, angle);
+	}
+	return DRIVEMODE_2V2_DRIVE_HOME;
 }

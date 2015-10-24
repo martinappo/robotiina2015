@@ -3,7 +3,7 @@
 
 static int cmpX(const void* a, const void* b)
 {
-	return (*(BallPosition*)a).fieldCoords.x - (*(BallPosition*)b).fieldCoords.x;
+	return (int)((*(BallPosition*)a).fieldCoords.x - (*(BallPosition*)b).fieldCoords.x);
 }
 
 static int cmpY(const void* a, const void* b)
@@ -61,7 +61,7 @@ std::pair<unsigned, BallPosition*>  kdNode2D::nearest(const cv::Point &point, in
 		return { (unsigned)(r.dot(r)), p };
 	}
 	*/
-	const int tmp = depth == 0 ? p->fieldCoords.x - point.x : p->fieldCoords.y - point.y;
+	const int tmp = (int)(depth == 0 ? p->fieldCoords.x - point.x : p->fieldCoords.y - point.y);
 	const int side = tmp < 0; /* Prefer the left. */
 
 	/* Switch depth. */
