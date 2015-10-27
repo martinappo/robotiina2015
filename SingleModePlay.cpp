@@ -4,23 +4,21 @@
 DriveMode DriveToBall::step(double dt)
 {
 	CHECK_FOR_STOP
-	if (BALL_IN_TRIBBLER) return DRIVEMODE_AIM_GATE;
-	FIND_TARGET_BALL
-	if (TARGET_BALL_NOT_FOUND) return DRIVEMODE_DRIVE_HOME;
+	auto target = getClosestBall();
 
-	if (TARGET_BALL_TOO_FAR) return DRIVEMODE_IDLE;
-	else if (TARGET_BALL_IS_VERY_CLOSE){
-		if(TARGET_BALL_IS_IN_CENTER) return DRIVEMODE_CATCH_BALL;
-		else {
-			ROTATE_TOWARD_TO_TARGET;
-			START_TRIBBLER;
+	if (target.getDistance() > 10000) return DRIVEMODE_IDLE;
+	if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
+
+	if (aimTarget(target)){
+		if (driveToTarget(target)){
+			if (aimTarget(target)){
+				m_pCom->ToggleTribbler(true);
+				return DRIVEMODE_CATCH_BALL;
+			}
 		}
 	}
-	else {
-		ROTATE_AND_DRIVE_TOWARD_TO_TARGET;
-		STOP_TRIBBLER;
-	}
 	return DRIVEMODE_DRIVE_TO_BALL;
+	
 
 } 
 
@@ -64,7 +62,7 @@ DriveMode AimGate::step(double dt)
 	if (STUCK_IN_STATE(9000)) return DRIVEMODE_KICK;
 
 	//Turn robot to gate
-	if (TARGET_GATE_IS_IN_CENTER) {
+	if (aimTarget(target, 2)){
 		if (SIGHT_OBSTRUCTED) { //then move sideways away from gate
 			DRIVE_SIDEWAYS
 			//m_pCom->Drive(45, 90, 0);

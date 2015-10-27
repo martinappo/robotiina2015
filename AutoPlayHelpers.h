@@ -5,18 +5,6 @@
 #define SIGHT_OBSTRUCTED false //TODO:Fix this
 
 
-const BallPosition &FindClosestBall(BallPosition *balls, int n){
-	int target_distance = INT_MAX;
-	int target_index = 0;
-	for (int i = 0; i < n; i++) {
-		if (abs(balls[i].fieldCoords.y) > 250) continue; // too far outside of the field
-		//if (abs(ball.fieldCoords.y) > 250) continue;
-		if (balls[i].getDistance() < target_distance) {
-			target_index = i;
-		}
-	}
-	return balls[target_index];
-}
 void DriveToTagetFromNear(int speed, ICommunicationModule*pCom, const ObjectPosition &target) {
 	pCom->Drive(speed, 0, HEADING(target.getAngle()));
 }
@@ -33,7 +21,7 @@ void DriveToTagetFromFar(ICommunicationModule*pCom, const ObjectPosition &target
 	std::cout << angleConst << std::endl;
 	pCom->Drive(speed, angle, angleConst * angle); // TODO: mingi väikese kaarega sõita
 }
-#define FIND_TARGET_BALL const BallPosition & target = FindClosestBall(m_pFieldState->balls, NUMBER_OF_BALLS);
+#define FIND_TARGET_BALL const BallPosition & target = getClosestBall();
 #define FIND_TARGET_GATE const GatePosition & target = m_pFieldState->GetTargetGate();
 #define TARGET_BALL_NOT_FOUND target.getDistance() > 500
 #define TARGET_BALL_TOO_FAR target.getDistance() > 250

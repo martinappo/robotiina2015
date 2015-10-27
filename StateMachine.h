@@ -28,6 +28,11 @@ public:
 	virtual DriveMode step(double dt) = 0;
 	virtual void onExit(){};
 
+	const static bool USE_ANGLED_DRIVING = false;
+	bool aimTarget(const ObjectPosition &target, double errorMargin = (USE_ANGLED_DRIVING) ? 90 : 10);
+	bool driveToTarget(const ObjectPosition &target, double maxDistance = 20);
+	bool driveToTargetWithAngle(const ObjectPosition &target, double maxDistance = 20);
+	const BallPosition &getClosestBall();
 };
 class Idle : public DriveInstruction
 {
