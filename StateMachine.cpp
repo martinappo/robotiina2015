@@ -82,7 +82,7 @@ void StateMachine::Run()
 	while (!stop_thread) {
 		boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
 		boost::posix_time::time_duration::tick_type dt = (time - lastStep).total_milliseconds();
-		newMode = curDriveMode->second->step(double(dt));
+		newMode = curDriveMode->second->step1(double(dt));
 		
 	auto old = curDriveMode;
 

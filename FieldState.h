@@ -8,6 +8,19 @@
 
 class FieldState {
 public:
+	enum GameMode {
+		GAME_MODE_STOPED = 0,
+		GAME_MODE_START_SINGLE_PLAY,
+		GAME_MODE_START_OUR_KICK_OFF,
+		GAME_MODE_START_OPPONENT_KICK_OFF,
+		GAME_MODE_START_OUR_THROWIN,
+		GAME_MODE_START_OPPONENT_THROWIN,
+		GAME_MODE_START_OUR_FREE_KICK,
+		GAME_MODE_START_OPPONENT_FREE_KICK,
+		GAME_MODE_IN_PROGRESS
+
+	};
+	std::atomic_int gameMode;
 	FieldState();
 	virtual ~FieldState();
 	BallPosition balls[NUMBER_OF_BALLS]; //All others are distance from self and heading to it
@@ -23,6 +36,7 @@ public:
 	void resetBallsUpdateState();
 	virtual void Lock() {};
 	virtual void UnLock() {};
+
 };
 
 class FieldStateLock{

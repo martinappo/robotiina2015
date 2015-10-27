@@ -3,7 +3,7 @@
 
 DriveMode DriveToBall::step(double dt)
 {
-	CHECK_FOR_STOP
+
 	auto target = getClosestBall();
 
 	if (target.getDistance() > 10000) return DRIVEMODE_IDLE;
@@ -37,7 +37,7 @@ void CatchBall::onExit()
 }
 DriveMode CatchBall::step(double dt)
 {
-	CHECK_FOR_STOP
+
 
 	FIND_TARGET_BALL
 

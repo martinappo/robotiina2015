@@ -5,9 +5,6 @@
 typedef int DriveMode;
 const DriveMode DRIVEMODE_IDLE = 0;
 
-#define CHECK_FOR_STOP std::string command = m_pCom->GetPlayCommand(); \
-if (command == "STOP") return DRIVEMODE_IDLE;
-
 class DriveInstruction
 {
 protected:
@@ -24,6 +21,10 @@ public:
 	};
 	virtual void onEnter(){
 		actionStart = boost::posix_time::microsec_clock::local_time();
+	};
+	virtual DriveMode step1(double dt){
+		if (m_pFieldState->gameMode == FieldState::GAME_MODE_STOPED) return DRIVEMODE_IDLE;
+		return step(dt);
 	};
 	virtual DriveMode step(double dt) = 0;
 	virtual void onExit(){};

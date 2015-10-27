@@ -23,6 +23,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
 #include "SingleModePlay.h"
+#include "MultiModePlay.h"
 #include "RobotTracker.h"
 #include "VideoRecorder.h"
 #include "FrontCameraVision.h"
@@ -208,8 +209,8 @@ void Robot::Run()
 	//double fps;
 	//int frames = 0;
 	//timer for rotation measure
-	boost::posix_time::ptime lastStepTime;	
-	boost::posix_time::time_duration dt;	
+	boost::posix_time::ptime lastStepTime;
+	boost::posix_time::time_duration dt;
 
 	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
 	boost::posix_time::ptime epoch = boost::posix_time::microsec_clock::local_time();
@@ -224,7 +225,7 @@ void Robot::Run()
 	/*= "videos/" + boost::posix_time::to_simple_string(time) + "/";
 	std::replace(captureDir.begin(), captureDir.end(), ':', '.');
 	if (captureFrames) {
-		boost::filesystem::create_directories(captureDir);
+	boost::filesystem::create_directories(captureDir);
 	}
 	*/
 	/* Field state */
@@ -243,7 +244,17 @@ void Robot::Run()
 	ComModule comModule(wheels, coilBoard);
 
 	/* Logic modules */
-	SingleModePlay autoPilot(&comModule, &field);
+	StateMachine *autoPilot = NULL;
+	if (config.count("play-mode")){
+		if (config["play-mode"].as<std::string>() == "slave") {
+			autoPilot = new MultiModePlay(&comModule, &field, false);
+		}
+		else if (config["play-mode"].as<std::string>() == "master"){
+			autoPilot = new MultiModePlay(&comModule, &field, true);
+		}
+	}
+	if (autoPilot == NULL)
+		autoPilot = new SingleModePlay(&comModule, &field);
 
 	ManualControl manualControl(&comModule);
 	RemoteControl remoteControl(io, &comModule);
@@ -263,7 +274,7 @@ void Robot::Run()
 		auto &ballPos = field.balls[0];
 		auto &targetGatePos = field.GetTargetGate();
 
-		autoPilot.UpdateState(&ballPos, &targetGatePos);
+		autoPilot->UpdateState(&ballPos, &targetGatePos);
 		*/
 		/*
 		if (dt > 1000) {
@@ -311,17 +322,17 @@ void Robot::Run()
 				calibrator.Enable(false);
 				visionModule.Enable(true);
 				if (last_state == STATE_TEST){
-					autoPilot.Enable(false);
+					autoPilot->Enable(false);
 				}
 				manualControl.Enable(false);
 				remoteControl.Enable(false);
-				autoPilot.enableTestMode(false);
+				autoPilot->enableTestMode(false);
 				distanceCalibrator.Enable(false);
 				wheels->Drive(0);
 				STATE_BUTTON("(A)utoCalibrate objects", 'a', STATE_AUTOCALIBRATE)
 				//STATE_BUTTON("(M)anualCalibrate objects", STATE_CALIBRATE)
 				STATE_BUTTON("(C)Change Gate [" + ((int)field.GetTargetGate().getDistance() == (int)(field.blueGate.getDistance()) ? "blue" : "yellow") + "]", 'c', STATE_SELECT_GATE)
-				STATE_BUTTON("Auto(P)ilot [" + (autoPilot.running ? "On" : "Off") + "]", 'p', STATE_LAUNCH)
+				STATE_BUTTON("Auto(P)ilot [" + (autoPilot->running ? "On" : "Off") + "]", 'p', STATE_LAUNCH)
 				/*
 			createButton(std::string("(M)ouse control [") + (mouseControl == 0 ? "Off" : (mouseControl == 1 ? "Ball" : "Gate")) + "]", [this, &mouseControl]{
 				mouseControl = (mouseControl + 1) % 3;
@@ -473,7 +484,8 @@ void Robot::Run()
 					//SetState(STATE_SELECT_GATE);
 					coilBoard->ToggleTribbler(false);
 					wheels->Drive(0);
-					autoPilot.Enable(!autoPilot.running);
+					autoPilot->Enable(!autoPilot->running);
+					if (autoPilot->running) field.gameMode = FieldState::GAME_MODE_START_SINGLE_PLAY;
 					SetState(STATE_NONE);
 				}
 				catch (...){
@@ -511,11 +523,11 @@ void Robot::Run()
 		}
 		else if (STATE_TEST == state) {
 			START_DIALOG
-				autoPilot.enableTestMode(true);
-				autoPilot.Enable(true);
-				for (const auto d : autoPilot.driveModes) {
+				autoPilot->enableTestMode(true);
+				autoPilot->Enable(true);
+				for (const auto d : autoPilot->driveModes) {
 					m_pDisplay->createButton(d.second->name, '-', [this, &autoPilot, d]{
-						autoPilot.setTestMode(d.first);
+						autoPilot->setTestMode(d.first);
 					});
 				}
 				last_state = STATE_TEST;
@@ -535,7 +547,7 @@ void Robot::Run()
 		 
 		subtitles.str("");
 		//subtitles << oss.str();
-		subtitles << "|" << autoPilot.GetDebugInfo();
+		subtitles << "|" << autoPilot->GetDebugInfo();
 		subtitles << "|" << wheels->GetDebugInfo();
 		if (scanner && scanner->running) {
 			subtitles << "|" << "Please wait, Scanning Ports";
@@ -626,7 +638,8 @@ void Robot::Run()
 		delete outputVideo;
 	}
 
-
+	if (autoPilot != NULL)
+		delete autoPilot;
 }
 
 

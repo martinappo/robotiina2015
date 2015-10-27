@@ -118,6 +118,9 @@
     <ClCompile Include="StateMachine.cpp">
       <Filter>LogicModule</Filter>
     </ClCompile>
+    <ClCompile Include="MultiModePlay.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="robot.h">
@@ -260,6 +263,9 @@
     </ClInclude>
     <ClInclude Include="SingleModePlay.h">
       <Filter>LogicModule</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiModePlay.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
