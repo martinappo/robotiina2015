@@ -49,6 +49,9 @@ public:
 	};
 	virtual NewDriveMode step(double dt) = 0;
 	virtual void onExit(){};
+	bool aimTarget(ObjectPosition &target, double errorMargin = 10);
+	bool driveToTarget(ObjectPosition &target, double maxDistance = 20);
+	BallPosition getClosestBall();
 
 };
 class Idle : public DriveInstruction
