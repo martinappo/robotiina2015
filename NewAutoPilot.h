@@ -49,8 +49,10 @@ public:
 	};
 	virtual NewDriveMode step(double dt) = 0;
 	virtual void onExit(){};
-	bool aimTarget(ObjectPosition &target, double errorMargin = 10);
+	const static bool USE_ANGLED_DRIVING = false;
+	bool aimTarget(ObjectPosition &target, double errorMargin = (USE_ANGLED_DRIVING) ? 90 : 10);
 	bool driveToTarget(ObjectPosition &target, double maxDistance = 20);
+	bool driveToTargetWithAngle(ObjectPosition &target, double maxDistance = 20);
 	BallPosition getClosestBall();
 
 };

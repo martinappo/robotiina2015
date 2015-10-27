@@ -64,9 +64,24 @@ bool DriveInstruction::aimTarget(ObjectPosition &target, double errorMargin){
 }
 
 bool DriveInstruction::driveToTarget(ObjectPosition &target, double maxDistance){
+	if (USE_ANGLED_DRIVING)
+		return driveToTargetWithAngle(target, maxDistance);
 	double dist = target.getDistance();
 	if (dist > maxDistance){
 		m_pCom->Drive((dist > 50) ? 100 : (std::max(dist, 20.0)));//To Do: set speed based on distance
+		return false;
+	}
+	else return true;
+}
+
+bool DriveInstruction::driveToTargetWithAngle(ObjectPosition &target, double maxDistance){
+	double angle = target.getAngle();
+	if (angle > 180)
+		angle -= 360;
+	double dist = target.getDistance();
+	if (dist > maxDistance){
+		double speed = (dist > 50) ? 100 : (std::max(dist, 20.0));
+		m_pCom->Drive(speed, 0, angle*1.5);//To Do: set speed based on distance
 		return false;
 	}
 	else return true;
