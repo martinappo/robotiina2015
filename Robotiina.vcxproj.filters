@@ -112,11 +112,11 @@
     <ClCompile Include="TargetPosition.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="StateMachine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SingleModePlay.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>LogicModule</Filter>
+    </ClCompile>
+    <ClCompile Include="StateMachine.cpp">
+      <Filter>LogicModule</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -252,14 +252,14 @@
     <ClInclude Include="TargetPosition.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StateMachine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SingleModePlay.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="AutoPlayHelpers.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StateMachine.h">
+      <Filter>LogicModule</Filter>
+    </ClInclude>
+    <ClInclude Include="SingleModePlay.h">
+      <Filter>LogicModule</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
