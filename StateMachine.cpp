@@ -43,6 +43,7 @@ const BallPosition &DriveInstruction::getClosestBall(){
 		//if (abs(ball.fieldCoords.y) > 250) continue;
 		if (m_pFieldState->balls[i].getDistance() < target_distance) {
 			target_index = i;
+			target_distance = m_pFieldState->balls[i].getDistance();
 		}
 	}
 	return m_pFieldState->balls[target_index];
