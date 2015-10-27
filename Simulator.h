@@ -3,7 +3,7 @@
 #include "FieldState.h"
 #include "ThreadedClass.h"
 #include <mutex>
-class Simulator: public ICamera, public IWheelController, public ICoilGun, public ThreadedClass, public FieldState
+class Simulator: public ICamera, public IPlayCommand, public IWheelController, public ICoilGun, public ThreadedClass, public FieldState
 {
 public:
 	Simulator();
@@ -30,6 +30,10 @@ public:
 	virtual void ToggleTribbler(bool start) {
 		// do nothing
 	};
+	std::string GetPlayCommand(){
+		throw std::runtime_error("Implement Simulator::GetPlayCommand");
+	}
+
 
 protected:
 	double orientation;

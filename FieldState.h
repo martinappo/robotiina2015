@@ -14,6 +14,8 @@ public:
 	GatePosition blueGate;
 	GatePosition yellowGate;
 	RobotPosition self; //Robot distance on field
+	ObjectPosition partner;
+	ObjectPosition opponents[2];
 	std::atomic_bool gateObstructed;
 	virtual void SetTargetGate(OBJECT gate) = 0;
 	virtual GatePosition &GetTargetGate() = 0;

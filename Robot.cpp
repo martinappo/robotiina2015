@@ -22,7 +22,7 @@
 #include <boost/date_time/posix_time/posix_time_io.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
-#include "NewAutoPilot.h"
+#include "SingleModePlay.h"
 #include "RobotTracker.h"
 #include "VideoRecorder.h"
 #include "FrontCameraVision.h"
@@ -243,7 +243,7 @@ void Robot::Run()
 	ComModule comModule(wheels, coilBoard);
 
 	/* Logic modules */
-	NewAutoPilot autoPilot(&comModule, &field);
+	SingleModePlay autoPilot(&comModule, &field);
 
 	ManualControl manualControl(&comModule);
 	RemoteControl remoteControl(io, &comModule);
@@ -640,7 +640,8 @@ bool Robot::ParseOptions(int argc, char* argv[])
 		("locate_cursor", "find cursor instead of ball")
 		("skip-ports", "skip ALL COM port checks")
 		("skip-missing-ports", "skip missing COM ports")
-		("save-frames", "Save captured frames to disc");
+		("save-frames", "Save captured frames to disc")
+		("play-mode", po::value<std::string>(), "Play mode: single, master, slave");
 
 	po::store(po::parse_command_line(argc, argv, desc), config);
 	po::notify(config);

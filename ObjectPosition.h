@@ -16,7 +16,9 @@ public:
 	cv::Point2d fieldCoords; // (x, y) Coordinates to display objects on field by, relative to field
 	cv::Point2i rawPixelCoords; // (x, y) Raw from frame
 	cv::Point2d polarMetricCoords;      // (distance, angle) Relative to robot
-	virtual void updateFieldCoords(cv::Point orgin = cv::Point(0, 0)) = 0;
+	virtual void updateFieldCoords(cv::Point orgin = cv::Point(0, 0)) {
+		throw std::runtime_error("Not implemented");
+	};
 
 protected:
 	cv::Point2d lastFieldCoords;

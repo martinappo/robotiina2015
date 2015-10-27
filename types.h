@@ -139,7 +139,12 @@ public:
 
 };
 
-class ICommunicationModule : public IWheelController, public ICoilGun {
+class IPlayCommand {
+public:
+	virtual std::string GetPlayCommand() = 0;
+};
+
+class ICommunicationModule : public IWheelController, public ICoilGun, public IPlayCommand {
 //	virtual bool Init(IWheelController * pWheels, ICoilGun *pCoilGun) = 0;
 
 };
