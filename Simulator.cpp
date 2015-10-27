@@ -177,6 +177,7 @@ void Simulator::Run(){
 }
 
 bool Simulator::BallInTribbler(){
+	if (!tribblerRunning) return false;
 	double minDist = INT_MAX;
 	double dist = INT_MAX;
 	for (int i = 0; i < mNumberOfBalls; i++){

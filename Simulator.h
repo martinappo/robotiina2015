@@ -28,7 +28,7 @@ public:
 	virtual bool BallInTribbler();
 	virtual void Kick();
 	virtual void ToggleTribbler(bool start) {
-		// do nothing
+		tribblerRunning = start;
 	};
 	std::string GetPlayCommand(){
 		throw std::runtime_error("Implement Simulator::GetPlayCommand");
@@ -51,6 +51,7 @@ private:
 	int mNumberOfBalls = NUMBER_OF_BALLS;
 	int frames = 0;
 	double fps;
+	bool tribblerRunning = false;
 	boost::posix_time::ptime lastCapture2;
 	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
 	boost::posix_time::ptime lastStep = time;
