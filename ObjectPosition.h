@@ -13,7 +13,7 @@ public:
 	virtual ~ObjectPosition(){};
 
 public:
-	cv::Point2d fieldCoords; // (x, y) Coordinates to display objects on field by, relative to field
+	cv::Point2d fieldCoords = cv::Point2d(INT_MAX, INT_MAX); // (x, y) Coordinates to display objects on field by, relative to field
 	cv::Point2i rawPixelCoords; // (x, y) Raw from frame
 	cv::Point2d polarMetricCoords;      // (distance, angle) Relative to robot
 	virtual void updateFieldCoords(cv::Point orgin = cv::Point(0, 0)) {

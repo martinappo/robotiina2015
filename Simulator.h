@@ -4,6 +4,7 @@
 #include "ThreadedClass.h"
 #include "UdpServer.h"
 #include <mutex>
+const int MAX_ROBOTS = 10;
 class Simulator : public ICamera, public IPlayCommand, public IWheelController, public ICoilGun, public ThreadedClass, public FieldState, public UdpServer
 {
 public:
@@ -48,6 +49,7 @@ protected:
 	void UpdateBallPos(double dt);
 	void UpdateRobotPos();
 	std::mutex mutex;
+	ObjectPosition robots[MAX_ROBOTS];
 
 private:
 	int mNumberOfBalls = NUMBER_OF_BALLS;

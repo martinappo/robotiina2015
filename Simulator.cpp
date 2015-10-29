@@ -20,19 +20,38 @@ Simulator::Simulator(boost::asio::io_service &io, bool master) :ThreadedClass("S
 		}
 	}
 	else {
-		SendMessage("ID?"); // ask slave id
+		SendMessage("ID? X"); // ask slave id
 	};
 	Start();
 }
 void Simulator::MessageReceived(const std::string & message){
-	std::string command = message.substr(0, 3);
-	if (command == "ID?") {
-		if (isMaster) SendMessage("ID=" + std::to_string(next_id++));
+	std::stringstream ss(message);
+	std::string command, id;
+	ss >> command;
+	if (isMaster) {
+		if (command == "ID?") {
+			SendMessage("ID= " + std::to_string(next_id++));
+		}
+		else if (command == "POS") { // foward to slaves
+			SendMessage(message);
+		}
 	}
-	else if (command == "MP=") {
-		id = atoi(message.substr(2).c_str());
+	else if (command == "ID=") {
+		ss >> id;
+		this->id = atoi(id.c_str());
 	}
+	if (command == "POS") {
+		ss >> id;
+		int _id = atoi(id.c_str());
+		if (_id != this->id) {
+			std::string x, y, a;
+			ss >> x >> y >> a;
+			robots[_id].fieldCoords.x = atoi(x.c_str());
+			robots[_id].fieldCoords.y = atoi(y.c_str());
+			robots[_id].polarMetricCoords.y = atoi(a.c_str());
+		}
 
+	}
 }
 void Simulator::UpdateGatePos(){
 
@@ -82,9 +101,15 @@ void Simulator::UpdateBallPos(double dt){
 		cv::circle(frame, cv::Point(x, y) + cv::Point(frame.size() / 2), 12, color, -1);
 	}
 
-	{
-		std::lock_guard<std::mutex> lock(mutex);
-		frame.copyTo(frame_copy);
+	// draw shared robots
+	for (int i = 0; i < MAX_ROBOTS; i++) {
+		if (abs(robots[i].fieldCoords.x) > 1000) continue;
+		double a = gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - robots[i].fieldCoords) + self.getAngle();
+		double d = gDistanceCalculator.getDistanceInverted(self.fieldCoords, robots[i].fieldCoords);
+		double x = d*sin(a / 180 * CV_PI);
+		double y = d*cos(a / 180 * CV_PI);
+		cv::Scalar color(i * 52, i * 15 + 100, i * 30);
+		cv::circle(frame, cv::Point(x, y) + cv::Point(frame.size() / 2), 12, color, -1);
 	}
 
 }
@@ -108,9 +133,19 @@ void Simulator::UpdateRobotPos(){
 	self.fieldCoords.x += (int)(v*dt * sin((self.getAngle() + targetSpeed.heading) / 180 * CV_PI));
 	self.fieldCoords.y -= (int)(v*dt * cos((self.getAngle() + targetSpeed.heading) / 180 * CV_PI));
 
-
+	if (isMaster || id > 0) {
+		std::stringstream message;
+		message << "POS " << id << " " << self.fieldCoords.x << " " << self.fieldCoords.y << " " << self.getAngle();
+		SendMessage(message.str());
+	}
 	UpdateGatePos();
 	UpdateBallPos(dt);
+
+	{
+		std::lock_guard<std::mutex> lock(mutex);
+		frame.copyTo(frame_copy);
+	}
+
 }
 
 
@@ -225,7 +260,7 @@ void Simulator::Kick(){
 		balls[minDistIndex].heading = self.getAngle();
 	}
 	else {
-		SendMessage(id + " kick 600" + std::to_string(self.getAngle()));
+		SendMessage("KCK" + std::to_string(id) + " 600 " + std::to_string(self.getAngle()));
 	}
 	//balls[minDistIndex] = balls[mNumberOfBalls - 1];
 	//balls[mNumberOfBalls - 1].~BallPosition();
