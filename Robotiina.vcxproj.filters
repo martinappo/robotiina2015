@@ -121,6 +121,9 @@
     <ClCompile Include="MultiModePlay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UdpServer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="robot.h">
@@ -265,6 +268,9 @@
       <Filter>LogicModule</Filter>
     </ClInclude>
     <ClInclude Include="MultiModePlay.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UdpServer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

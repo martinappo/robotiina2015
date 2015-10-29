@@ -134,6 +134,7 @@
     <ClInclude Include="ThreadedClass.h" />
     <ClInclude Include="ThreadedImageThresholder.h" />
     <ClInclude Include="types.h" />
+    <ClInclude Include="UdpServer.h" />
     <ClInclude Include="VideoRecorder.h" />
     <ClInclude Include="WebUI.h" />
     <ClInclude Include="wheel.h" />
@@ -176,6 +177,7 @@
     <ClCompile Include="RobotTracker.cpp" />
     <ClCompile Include="TargetPosition.cpp" />
     <ClCompile Include="ThreadedClass.cpp" />
+    <ClCompile Include="UdpServer.cpp" />
     <ClCompile Include="VideoRecorder.cpp" />
     <ClCompile Include="WebUI.cpp" />
     <ClCompile Include="wheel.cpp" />

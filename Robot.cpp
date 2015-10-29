@@ -229,7 +229,7 @@ void Robot::Run()
 	}
 	*/
 	/* Field state */
-	SoccerField field(m_pDisplay);
+	SoccerField field(io, m_pDisplay);
 
 	/* Vision modules */
 	FrontCameraVision visionModule(camera, m_pDisplay, &field);
@@ -264,8 +264,10 @@ void Robot::Run()
 	std::stringstream subtitles;
 
 	VideoRecorder videoRecorder("videos/", 30, camera->GetFrameSize(true));
+	//port.get_io_service().run();
 	while (true)
     {
+		io.poll_one();
 		time = boost::posix_time::microsec_clock::local_time();
 //		boost::posix_time::time_duration::tick_type dt = (time - lastStepTime).total_milliseconds();
 		boost::posix_time::time_duration::tick_type rotateDuration = (time - rotateTime).total_milliseconds();

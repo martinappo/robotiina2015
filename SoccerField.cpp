@@ -1,13 +1,14 @@
 #include "SoccerField.h"
 #include <chrono>
 #include <thread>
-
-SoccerField::SoccerField(IDisplay *pDisplay) :m_pDisplay(pDisplay)
+#include <boost/system/error_code.hpp>
+SoccerField::SoccerField(boost::asio::io_service &io, IDisplay *pDisplay) :m_pDisplay(pDisplay)
+, UdpServer(io, 45000)
 {
 	green = cv::imread("field.png", CV_LOAD_IMAGE_COLOR);   // Read the file
 	field = cv::Mat(green.size(), CV_8UC3, cv::Scalar::all(245));
 	c = cv::Point2d(green.size()) / 2;
-//	this->self.setFrameSize(frameSize);
+
 	initBalls();
 	Start();
 }
@@ -16,6 +17,8 @@ SoccerField::SoccerField(IDisplay *pDisplay) :m_pDisplay(pDisplay)
 SoccerField::~SoccerField()
 {
 	WaitForStop();
+	boost::system::error_code error;
+
 }
 
 GatePosition & SoccerField::GetTargetGate() {
@@ -38,9 +41,30 @@ void SoccerField::initBalls() {
 		balls[i].id = i;
 	}
 }
+void SoccerField::sendState(){
+	std::string message = "testing 123";
+	SendMessage(message);
+
+}
+
+void SoccerField::recvState(){
+	/*
+	// Receive data.
+	boost::array<char, 4> buffer;
+	std::size_t bytes_transferred =
+		socket.receive_from(boost::asio::buffer(buffer), senderEndpoint);
+
+	std::cout << "got " << bytes_transferred << " bytes." << std::endl;
+	*/
+}
+
+
 
 void SoccerField::Run(){
 	while (!stop_thread){
+
+		sendState();
+		//recvState();
 		green.copyTo(field);
 
 

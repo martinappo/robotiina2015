@@ -4,12 +4,13 @@
 #include <boost/thread/mutex.hpp>
 #include "FieldState.h"
 #include "ObjectPosition.h"
+#include "UdpServer.h"
 
 class SoccerField :
-	public ThreadedClass, public FieldState
+	public UdpServer, ThreadedClass, public FieldState
 {
 public:
-	SoccerField(IDisplay *pDisplay);
+	SoccerField(boost::asio::io_service &io, IDisplay *pDisplay);
 	virtual ~SoccerField();
 	void Run();
 	virtual void SetTargetGate(OBJECT gate) {
@@ -29,5 +30,9 @@ private:
 	cv::Mat green;
 	cv::Mat field;// = cv::Mat(310, 500, CV_8UC3, cv::Scalar::all(245)); // blink display
 	cv::Point2d c/*enter*/;
+	void sendState();
+	void recvState();
+
+
 };
 
