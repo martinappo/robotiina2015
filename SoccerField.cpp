@@ -43,7 +43,7 @@ void SoccerField::initBalls() {
 }
 void SoccerField::sendState(){
 	std::string message = "testing 123";
-	SendMessage(message);
+	//SendMessage(message);
 
 }
 

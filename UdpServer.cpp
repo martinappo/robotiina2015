@@ -8,6 +8,7 @@ UdpServer::UdpServer(boost::asio::io_service &io, int port)
 	, broadcast_endpoint(boost::asio::ip::address_v4::broadcast(), port)
 
 {
+	broadcast_socket.set_option(boost::asio::socket_base::broadcast(true));
 	start_receive();
 }
 

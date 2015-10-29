@@ -6,7 +6,7 @@ extern DistanceCalculator gDistanceCalculator;
 
 Simulator::Simulator(boost::asio::io_service &io) :ThreadedClass("Simulator"), UdpServer(io, 31000)
 {
-	self.fieldCoords = cv::Point(150, 50);
+	self.fieldCoords = cv::Point(rand() % 300 - 150, rand() % 200 - 100);
 	self.polarMetricCoords = cv::Point(0, 0);
 
 	SendMessage("MP? 150 50");
