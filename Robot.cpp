@@ -153,7 +153,7 @@ bool Robot::Launch(int argc, char* argv[])
 	return true;
 }
 void Robot::InitSimulator() {
-	pSim = new Simulator();
+	pSim = new Simulator(io);
 	camera = pSim;
 	wheels = pSim;
 	coilBoard = pSim;

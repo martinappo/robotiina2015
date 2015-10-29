@@ -2,8 +2,10 @@
 
 
 UdpServer::UdpServer(boost::asio::io_service &io, int port)
-	: socket(io, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), port))
-	, remote_endpoint(boost::asio::ip::address_v4::broadcast(), port+1)
+	: recv_socket(io, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), port))
+	, broadcast_socket(io, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 0))
+	, recv_endpoint(boost::asio::ip::udp::v4(), port)
+	, broadcast_endpoint(boost::asio::ip::address_v4::broadcast(), port)
 
 {
 	start_receive();
@@ -16,8 +18,8 @@ UdpServer::~UdpServer()
 
 void UdpServer::start_receive()
 {
-	socket.async_receive_from(
-		boost::asio::buffer(recv_buffer_), remote_endpoint,
+	recv_socket.async_receive_from(
+		boost::asio::buffer(recv_buffer_), recv_endpoint,
 		boost::bind(&UdpServer::handle_receive, this,
 		boost::asio::placeholders::error,
 		boost::asio::placeholders::bytes_transferred));
@@ -54,7 +56,7 @@ void UdpServer::handle_send(boost::shared_ptr<std::string> /*message*/,
 void UdpServer::SendMessage(const std::string &message){
 	boost::shared_ptr<std::string> x(
 		new std::string(message));
-	socket.async_send_to(boost::asio::buffer(*x), remote_endpoint,
+	broadcast_socket.async_send_to(boost::asio::buffer(*x), broadcast_endpoint,
 		boost::bind(&UdpServer::handle_send, this, x,
 		boost::asio::placeholders::error,
 		boost::asio::placeholders::bytes_transferred));

@@ -4,10 +4,17 @@
 #include <thread>
 extern DistanceCalculator gDistanceCalculator;
 
-Simulator::Simulator() :ThreadedClass("Simulator")
+Simulator::Simulator(boost::asio::io_service &io) :ThreadedClass("Simulator"), UdpServer(io, 31000)
 {
 	self.fieldCoords = cv::Point(150, 50);
-	self.polarMetricCoords = cv::Point(0,0);
+	self.polarMetricCoords = cv::Point(0, 0);
+
+	SendMessage("MP? 150 50");
+	Sleep(1000);
+	if (isMasterPresent) {
+		return;
+	}
+	isMaster = true;
 	// distribute balls uniformly
 	for (int i = 0; i < NUMBER_OF_BALLS; i++) {
 		balls[i].fieldCoords.x = (int)(((i % 3) - 1) * 100) + rand() % 50;
@@ -15,6 +22,16 @@ Simulator::Simulator() :ThreadedClass("Simulator")
 		balls[i].id = i;
 	}
 	Start();
+}
+void Simulator::MessageReceived(const std::string & message){
+	std::string command = message.substr(0, 2);
+	if (command == "MP?") {
+		if (isMaster) SendMessage("MP1");
+	}
+	else if (command == "MP1") {
+		isMasterPresent = true;
+	}
+
 }
 void Simulator::UpdateGatePos(){
 
@@ -202,8 +219,13 @@ void Simulator::Kick(){
 			minDistIndex = i;
 		}
 	}
-	balls[minDistIndex].speed = 600;
-	balls[minDistIndex].heading = self.getAngle();
+	if (isMaster) {
+		balls[minDistIndex].speed = 600;
+		balls[minDistIndex].heading = self.getAngle();
+	}
+	else {
+		SendMessage(id + " kick 600" + std::to_string(self.getAngle()));
+	}
 	//balls[minDistIndex] = balls[mNumberOfBalls - 1];
 	//balls[mNumberOfBalls - 1].~BallPosition();
 	//mNumberOfBalls--;

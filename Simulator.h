@@ -2,11 +2,12 @@
 #include "types.h"
 #include "FieldState.h"
 #include "ThreadedClass.h"
+#include "UdpServer.h"
 #include <mutex>
-class Simulator: public ICamera, public IPlayCommand, public IWheelController, public ICoilGun, public ThreadedClass, public FieldState
+class Simulator : public ICamera, public IPlayCommand, public IWheelController, public ICoilGun, public ThreadedClass, public FieldState, public UdpServer
 {
 public:
-	Simulator();
+	Simulator(boost::asio::io_service &io);
 	virtual ~Simulator();
 
 	virtual cv::Mat & Capture(bool bFullFrame = false);
@@ -33,6 +34,7 @@ public:
 	std::string GetPlayCommand(){
 		throw std::runtime_error("Implement Simulator::GetPlayCommand");
 	}
+	virtual void MessageReceived(const std::string & message);
 
 
 protected:
@@ -55,6 +57,9 @@ private:
 	boost::posix_time::ptime lastCapture2;
 	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
 	boost::posix_time::ptime lastStep = time;
+	bool isMaster = false;
+	bool isMasterPresent = false;
+	std::string id = "AA";
 
 };
 

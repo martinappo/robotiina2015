@@ -21,8 +21,10 @@ protected:
 	virtual void MessageReceived(const std::string & message){};
 	void SendMessage(const std::string &message);
 private:
-	boost::asio::ip::udp::socket socket;
-	boost::asio::ip::udp::endpoint remote_endpoint;
+	boost::asio::ip::udp::socket recv_socket;
+	boost::asio::ip::udp::socket broadcast_socket;
+	boost::asio::ip::udp::endpoint broadcast_endpoint;
+	boost::asio::ip::udp::endpoint recv_endpoint;
 	boost::array<char, 200> recv_buffer_;
 
 };
