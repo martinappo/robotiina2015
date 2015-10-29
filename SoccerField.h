@@ -10,7 +10,7 @@ class SoccerField :
 	public UdpServer, ThreadedClass, public FieldState
 {
 public:
-	SoccerField(boost::asio::io_service &io, IDisplay *pDisplay);
+	SoccerField(boost::asio::io_service &io, IDisplay *pDisplay, bool master, int port=45000);
 	virtual ~SoccerField();
 	void Run();
 	virtual void SetTargetGate(OBJECT gate) {

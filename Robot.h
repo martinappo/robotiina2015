@@ -28,7 +28,7 @@ private:
 	std::atomic<STATE> last_state;
 	bool ParseOptions(int argc, char* argv[]);
 	void InitHardware();
-	void InitSimulator();
+	void InitSimulator(bool master);
 //	void initWheels();
 //	void initCoilboard();
 

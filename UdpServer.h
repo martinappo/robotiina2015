@@ -6,7 +6,7 @@
 class UdpServer
 {
 public:
-	UdpServer(boost::asio::io_service &io, int port);
+	UdpServer(boost::asio::io_service &io, int port, bool master);
 	~UdpServer();
 protected:
 	void start_receive();

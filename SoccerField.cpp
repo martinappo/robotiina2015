@@ -2,8 +2,8 @@
 #include <chrono>
 #include <thread>
 #include <boost/system/error_code.hpp>
-SoccerField::SoccerField(boost::asio::io_service &io, IDisplay *pDisplay) :m_pDisplay(pDisplay)
-, UdpServer(io, 45000)
+SoccerField::SoccerField(boost::asio::io_service &io, IDisplay *pDisplay, bool master, int port) :m_pDisplay(pDisplay)
+, UdpServer(io, port, master)
 {
 	green = cv::imread("field.png", CV_LOAD_IMAGE_COLOR);   // Read the file
 	field = cv::Mat(green.size(), CV_8UC3, cv::Scalar::all(245));

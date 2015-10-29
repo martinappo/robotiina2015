@@ -1,11 +1,11 @@
 #include "UdpServer.h"
 
 
-UdpServer::UdpServer(boost::asio::io_service &io, int port)
-	: recv_socket(io, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), port))
+UdpServer::UdpServer(boost::asio::io_service &io, int port, bool master)
+	: recv_socket(io, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), port + !master))
 	, broadcast_socket(io, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 0))
 	, recv_endpoint(boost::asio::ip::udp::v4(), port)
-	, broadcast_endpoint(boost::asio::ip::address_v4::broadcast(), port)
+	, broadcast_endpoint(boost::asio::ip::address_v4::broadcast(), port + master)
 
 {
 	broadcast_socket.set_option(boost::asio::socket_base::broadcast(true));
@@ -55,6 +55,8 @@ void UdpServer::handle_send(boost::shared_ptr<std::string> /*message*/,
 }
 
 void UdpServer::SendMessage(const std::string &message){
+	std::cout << "SendMessage" << message << std::endl;
+
 	boost::shared_ptr<std::string> x(
 		new std::string(message));
 	broadcast_socket.async_send_to(boost::asio::buffer(*x), broadcast_endpoint,

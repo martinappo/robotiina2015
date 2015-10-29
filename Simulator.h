@@ -7,7 +7,7 @@
 class Simulator : public ICamera, public IPlayCommand, public IWheelController, public ICoilGun, public ThreadedClass, public FieldState, public UdpServer
 {
 public:
-	Simulator(boost::asio::io_service &io);
+	Simulator(boost::asio::io_service &io, bool master);
 	virtual ~Simulator();
 
 	virtual cv::Mat & Capture(bool bFullFrame = false);
@@ -59,7 +59,8 @@ private:
 	boost::posix_time::ptime lastStep = time;
 	bool isMaster = false;
 	bool isMasterPresent = false;
-	std::string id = "AA";
+	int id = 0;
+	int next_id = 1;
 
 };
 

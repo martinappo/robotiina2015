@@ -29,7 +29,9 @@
 #include "FrontCameraVision.h"
 #include "ComModule.h"
 #include "ManualControl.h"
+#ifdef ENABLE_REMOTE_CONTROL
 #include "RemoteControl.h"
+#endif
 #include "SoccerField.h"
 #include "MouseVision.h"
 
@@ -126,9 +128,10 @@ Robot::~Robot()
 bool Robot::Launch(int argc, char* argv[])
 {
 	if (!ParseOptions(argc, argv)) return false;
-	bool bSimulator = config["camera"].as<std::string>() == "simulator";
+	auto _cam = config["camera"].as<std::string>();
+	bool bSimulator = _cam == "simulator" || _cam == "simulator-master";
 	if (bSimulator) {
-		InitSimulator();
+		InitSimulator(_cam == "simulator-master");
 	}
 	else {
 		InitHardware();
@@ -152,8 +155,8 @@ bool Robot::Launch(int argc, char* argv[])
 	Run();
 	return true;
 }
-void Robot::InitSimulator() {
-	pSim = new Simulator(io);
+void Robot::InitSimulator(bool master) {
+	pSim = new Simulator(io, master);
 	camera = pSim;
 	wheels = pSim;
 	coilBoard = pSim;
@@ -228,8 +231,12 @@ void Robot::Run()
 	boost::filesystem::create_directories(captureDir);
 	}
 	*/
+	std::string play_mode = "single";
+	if (config.count("play-mode")) 
+		play_mode = config["play-mode"].as<std::string>();
+
 	/* Field state */
-	SoccerField field(io, m_pDisplay);
+	SoccerField field(io, m_pDisplay, play_mode == "master" || play_mode == "single");
 
 	/* Vision modules */
 	FrontCameraVision visionModule(camera, m_pDisplay, &field);
@@ -245,19 +252,17 @@ void Robot::Run()
 
 	/* Logic modules */
 	StateMachine *autoPilot = NULL;
-	if (config.count("play-mode")){
-		if (config["play-mode"].as<std::string>() == "slave") {
-			autoPilot = new MultiModePlay(&comModule, &field, false);
-		}
-		else if (config["play-mode"].as<std::string>() == "master"){
-			autoPilot = new MultiModePlay(&comModule, &field, true);
-		}
+	if (play_mode=="master" || play_mode =="slave"){
+		autoPilot = new MultiModePlay(&comModule, &field, play_mode == "master");
 	}
-	if (autoPilot == NULL)
+	else  {
 		autoPilot = new SingleModePlay(&comModule, &field);
+	}
 
 	ManualControl manualControl(&comModule);
+#ifdef ENABLE_REMOTE_CONTROL
 	RemoteControl remoteControl(io, &comModule);
+#endif
 
 	//RobotTracker tracker(wheels);
 
@@ -327,7 +332,9 @@ void Robot::Run()
 					autoPilot->Enable(false);
 				}
 				manualControl.Enable(false);
+#ifdef ENABLE_REMOTE_CONTROL
 				remoteControl.Enable(false);
+#endif
 				autoPilot->enableTestMode(false);
 				distanceCalibrator.Enable(false);
 				wheels->Drive(0);
@@ -464,12 +471,14 @@ void Robot::Run()
 			manualControl.Enable(true);
 			END_DIALOG
 		}
+#ifdef ENABLE_REMOTE_CONTROL
 		else if (STATE_REMOTE_CONTROL == state) {
 			START_DIALOG;
 			remoteControl.Enable(true);
 			STATE_BUTTON("BACK", 8, STATE_NONE);
 			END_DIALOG
 		}
+#endif
 		else if (STATE_LAUNCH == state) {
 			//if (targetGate == NUMBER_OF_OBJECTS) {
 			//	std::cout << "Select target gate" << std::endl;
@@ -656,7 +665,9 @@ bool Robot::ParseOptions(int argc, char* argv[])
 		("skip-ports", "skip ALL COM port checks")
 		("skip-missing-ports", "skip missing COM ports")
 		("save-frames", "Save captured frames to disc")
-		("play-mode", po::value<std::string>(), "Play mode: single, master, slave");
+		("play-mode", po::value<std::string>(), "Play mode: single, opponent, master, slave")
+		("twitter-port", po::value<int>(), "UDP port for communication between robots");
+
 
 	po::store(po::parse_command_line(argc, argv, desc), config);
 	po::notify(config);

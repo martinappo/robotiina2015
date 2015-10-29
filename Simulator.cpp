@@ -2,34 +2,35 @@
 #include "DistanceCalculator.h"
 #include <chrono>
 #include <thread>
+#include <time.h>       /* time */
 extern DistanceCalculator gDistanceCalculator;
 
-Simulator::Simulator(boost::asio::io_service &io) :ThreadedClass("Simulator"), UdpServer(io, 31000)
+Simulator::Simulator(boost::asio::io_service &io, bool master) :ThreadedClass("Simulator"), UdpServer(io, 31000, master), isMaster(master)
 {
-	self.fieldCoords = cv::Point(rand() % 300 - 150, rand() % 200 - 100);
-	self.polarMetricCoords = cv::Point(0, 0);
+	srand(::time(NULL));
 
-	SendMessage("MP? 150 50");
-	Sleep(1000);
-	if (isMasterPresent) {
-		return;
+	self.fieldCoords = cv::Point(rand() % 300 - 150, rand() % 460 - 230);
+	self.polarMetricCoords = cv::Point(0, 0);
+	if (isMaster) {
+		// distribute balls uniformly at random
+		for (int i = 0; i < NUMBER_OF_BALLS; i++) {
+			balls[i].fieldCoords.x = (int)(((i % 3) - 1) * 100) + rand() % 50;
+			balls[i].fieldCoords.y = (int)((i / 3 - 1.5) * 110) + rand() % 50;
+			balls[i].id = i;
+		}
 	}
-	isMaster = true;
-	// distribute balls uniformly
-	for (int i = 0; i < NUMBER_OF_BALLS; i++) {
-		balls[i].fieldCoords.x = (int)(((i % 3) - 1) * 100) + rand() % 50;
-		balls[i].fieldCoords.y = (int)((i / 3 - 1.5) * 110) + rand() % 50;
-		balls[i].id = i;
-	}
+	else {
+		SendMessage("ID?"); // ask slave id
+	};
 	Start();
 }
 void Simulator::MessageReceived(const std::string & message){
-	std::string command = message.substr(0, 2);
-	if (command == "MP?") {
-		if (isMaster) SendMessage("MP1");
+	std::string command = message.substr(0, 3);
+	if (command == "ID?") {
+		if (isMaster) SendMessage("ID=" + std::to_string(next_id++));
 	}
-	else if (command == "MP1") {
-		isMasterPresent = true;
+	else if (command == "MP=") {
+		id = atoi(message.substr(2).c_str());
 	}
 
 }
