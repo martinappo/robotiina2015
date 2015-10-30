@@ -80,8 +80,17 @@ std::pair<STATE, std::string> states[] = {
 };
 
 DistanceCalculator gDistanceCalculator;
-//boost::asio::ip::address addr = boost::asio::ip::address::from_string("127.255.255.255"); // localhost only 
-boost::asio::ip::address addr = boost::asio::ip::address_v4::broadcast(); // local network
+//TODO: convert to commandline options
+//#define USE_ROBOTIINA_WIFI
+#ifdef USE_ROBOTIINA_WIFI 
+// robotiina wifi
+boost::asio::ip::address bind_addr = boost::asio::ip::address::from_string("10.0.0.6"); // this computer ip
+boost::asio::ip::address brdc_addr = boost::asio::ip::address::from_string("10.0.0.15"); // netmask 255.255.255.240
+#else
+// any local network
+boost::asio::ip::address bind_addr = boost::asio::ip::address::from_string("0.0.0.0"); // all interfaces
+boost::asio::ip::address brdc_addr = boost::asio::ip::address_v4::broadcast(); // local network
+#endif;
 
 std::map<STATE, std::string> STATE_LABELS(states, states + sizeof(states) / sizeof(states[0]));
 
@@ -154,7 +163,12 @@ bool Robot::Launch(int argc, char* argv[])
 	else
 		m_pDisplay = new WebUI(8080);
 	captureFrames = config.count("capture-frames") > 0;
+	std::thread io_thread([&](){
+		io.run();
+	});
 	Run();
+	io.stop();
+	io_thread.join();
 	return true;
 }
 void Robot::InitSimulator(bool master) {
@@ -274,7 +288,7 @@ void Robot::Run()
 	//port.get_io_service().run();
 	while (true)
     {
-		io.poll_one();
+		//io.poll_one();
 		time = boost::posix_time::microsec_clock::local_time();
 //		boost::posix_time::time_duration::tick_type dt = (time - lastStepTime).total_milliseconds();
 		boost::posix_time::time_duration::tick_type rotateDuration = (time - rotateTime).total_milliseconds();

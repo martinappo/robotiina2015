@@ -4,9 +4,8 @@
 #include <thread>
 #include <time.h>       /* time */
 extern DistanceCalculator gDistanceCalculator;
-extern boost::asio::ip::address addr;
 
-Simulator::Simulator(boost::asio::io_service &io, bool master) :ThreadedClass("Simulator"), UdpServer(io, addr, 31000, master), isMaster(master)
+Simulator::Simulator(boost::asio::io_service &io, bool master) :ThreadedClass("Simulator"), UdpServer(io, 31000, master), isMaster(master)
 {
 	srand(::time(NULL));
 
@@ -15,49 +14,76 @@ Simulator::Simulator(boost::asio::io_service &io, bool master) :ThreadedClass("S
 	if (isMaster) {
 		// distribute balls uniformly at random
 		for (int i = 0; i < NUMBER_OF_BALLS; i++) {
-			balls[i].fieldCoords.x = (int)(((i % 3) - 1) * 100) + rand() % 50;
-			balls[i].fieldCoords.y = (int)((i / 3 - 1.5) * 110) + rand() % 50;
+			balls[i].fieldCoords.x = (int)(((i % 3) - 1) * 100);// +rand() % 50;
+			balls[i].fieldCoords.y = (int)((i / 3 - 1.5) * 110);// +rand() % 50;
 			balls[i].id = i;
 		}
 	}
 	else {
-		SendMessage("ID? X"); // ask slave id
+		SendMessage("ID? #"); // ask slave id
 	};
 	Start();
 }
 void Simulator::MessageReceived(const std::string & message){
 	std::stringstream ss(message);
-	std::string command, id;
+	std::string command, r_id;
 	ss >> command;
 	if (isMaster) {
 		if (command == "ID?") {
-			SendMessage("ID= " + std::to_string(next_id++));
+			stop_send = true;
+			SendMessage("ID= " + std::to_string(next_id++) + " #");
 		}
 		else if (command == "POS") { // foward to slaves
 			SendMessage(message);
 		}
+		else if (command == "ACK") { // id received
+			stop_send = false;
+		}
 	}
 	else { // slave commands
 		if (command == "ID=") {
-			ss >> id;
-			this->id = atoi(id.c_str());
+			ss >> r_id;
+			id = atoi(r_id.c_str());
+			SendMessage("ACK #");
 		}
 		else if (command == "BAL") {
-			ss >> id;
-			int _id = atoi(id.c_str());
-			if (_id != this->id) {
+			ss >> r_id;
+			int _id = atoi(r_id.c_str());
+			if (_id != id) {
 				std::string x, y, a;
 				ss >> x >> y;
 				balls[_id].fieldCoords.x = atoi(x.c_str());
 				balls[_id].fieldCoords.y = atoi(y.c_str());
 			}
 		}
+		else if (command == "STT") {
+			int numballs;
+			ss >> numballs;
+			for (int i = 0; i < mNumberOfBalls; i++) {
+				std::string x, y, a;
+				ss >> x >> y;
+				balls[i].fieldCoords.x = atoi(x.c_str());
+				balls[i].fieldCoords.y = atoi(y.c_str());
+			}
+			std::string r_id;
+			do {
+				std::string x, y, a;
+				ss >> r_id >> x  >> y;
+				int _id = atoi(r_id.c_str());
+				if (_id != id) {
+					robots[_id].fieldCoords.x = atoi(x.c_str());
+					robots[_id].fieldCoords.y = atoi(y.c_str());
+				}
+
+
+			} while (r_id != "99");
+		}
 
 	}
 	if (command == "POS") {
-		ss >> id;
-		int _id = atoi(id.c_str());
-		if (_id != this->id) {
+		ss >> r_id;
+		int _id = atoi(r_id.c_str());
+		if (_id != id) {
 			std::string x, y, a;
 			ss >> x >> y >> a;
 			robots[_id].fieldCoords.x = atoi(x.c_str());
@@ -99,6 +125,8 @@ void Simulator::UpdateGatePos(){
 
 }
 void Simulator::UpdateBallPos(double dt){
+	std::stringstream message;
+	message << "STT " << mNumberOfBalls << " ";
 	// balls 
 	for (int i = 0; i < mNumberOfBalls; i++){
 		if (isMaster) {
@@ -107,9 +135,8 @@ void Simulator::UpdateBallPos(double dt){
 				balls[i].fieldCoords.y -= balls[i].speed*dt * (cos(balls[i].heading / 180 * CV_PI));
 				balls[i].speed *= 0.95;
 			}
-			std::stringstream message;
-			message << "BAL " << i << " " << (int)balls[i].fieldCoords.x << " " << (int)balls[i].fieldCoords.y << " #";
-			SendMessage(message.str());
+			message << (int)balls[i].fieldCoords.x << " " << (int)balls[i].fieldCoords.y << " ";
+			//SendMessage(message.str());
 		}
 		double a = gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - balls[i].fieldCoords) + self.getAngle();
 		double d = gDistanceCalculator.getDistanceInverted(self.fieldCoords, balls[i].fieldCoords);
@@ -118,7 +145,9 @@ void Simulator::UpdateBallPos(double dt){
 		cv::Scalar color(48, 154, 236);
 		cv::circle(frame, cv::Point(x, y) + cv::Point(frame.size() / 2), 12, color, -1);
 	}
-
+	if (isMaster) {
+		message << 0 << " " << self.fieldCoords.x << " " << self.fieldCoords.y << " ";
+	}
 	// draw shared robots
 	for (int i = 0; i < MAX_ROBOTS; i++) {
 		if (abs(robots[i].fieldCoords.x) > 1000) continue;
@@ -127,7 +156,14 @@ void Simulator::UpdateBallPos(double dt){
 		double x = d*sin(a / 180 * CV_PI);
 		double y = d*cos(a / 180 * CV_PI);
 		cv::Scalar color(i * 52, i * 15 + 100, i * 30);
-		cv::circle(frame, cv::Point(x, y) + cv::Point(frame.size() / 2), 12, color, -1);
+		cv::circle(frame, cv::Point(x, y) + cv::Point(frame.size() / 2), 24, color, -1);
+		if (isMaster) {
+			message << i << " " << (int)robots[i].fieldCoords.x << " " << (int)robots[i].fieldCoords.y << " ";
+		}
+	}
+	if (isMaster) {
+		message << " 99 0 0 #";
+		SendMessage(message.str());
 	}
 
 }
@@ -151,11 +187,12 @@ void Simulator::UpdateRobotPos(){
 	self.fieldCoords.x += (int)(v*dt * sin((self.getAngle() + targetSpeed.heading) / 180 * CV_PI));
 	self.fieldCoords.y -= (int)(v*dt * cos((self.getAngle() + targetSpeed.heading) / 180 * CV_PI));
 
-	if (isMaster || id > 0) {
+	if (!isMaster && id > 0) {
 		std::stringstream message;
 		message << "POS " << id << " " << self.fieldCoords.x << " " << self.fieldCoords.y << " " << self.getAngle() << " #";
 		SendMessage(message.str());
-	}
+	} 
+
 	UpdateGatePos();
 	UpdateBallPos(dt);
 

@@ -2,10 +2,9 @@
 #include <chrono>
 #include <thread>
 #include <boost/system/error_code.hpp>
-extern boost::asio::ip::address addr;
 
 SoccerField::SoccerField(boost::asio::io_service &io, IDisplay *pDisplay, bool master, int port) :m_pDisplay(pDisplay)
-, UdpServer(io, addr, port, master)
+, UdpServer(io, port, master)
 {
 	green = cv::imread("field.png", CV_LOAD_IMAGE_COLOR);   // Read the file
 	field = cv::Mat(green.size(), CV_8UC3, cv::Scalar::all(245));

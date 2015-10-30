@@ -1,11 +1,13 @@
 #include "UdpServer.h"
+extern boost::asio::ip::address bind_addr;
+extern boost::asio::ip::address brdc_addr;
 
 
-UdpServer::UdpServer(boost::asio::io_service &io, const boost::asio::ip::address & addr, unsigned short port, bool master)
+UdpServer::UdpServer(boost::asio::io_service &io, unsigned short port, bool master)
 	: recv_socket(io, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), port + !master))
-	, broadcast_socket(io, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 0))
-	, recv_endpoint(boost::asio::ip::udp::v4(), port)
-	, broadcast_endpoint(addr/*boost::asio::ip::address_v4::broadcast()*/, port + master)
+	, broadcast_socket(io, boost::asio::ip::udp::endpoint(bind_addr, 0))
+	, recv_endpoint(boost::asio::ip::udp::v4(), port + !master)
+	, broadcast_endpoint(brdc_addr/*boost::asio::ip::address_v4::broadcast()*/, port + master)
 
 {
 	broadcast_socket.set_option(boost::asio::socket_base::broadcast(true));

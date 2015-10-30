@@ -63,6 +63,7 @@ private:
 	bool isMasterPresent = false;
 	int id = 0;
 	int next_id = 1;
+	bool stop_send = false;
 
 };
 

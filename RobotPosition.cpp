@@ -68,8 +68,8 @@ void RobotPosition::updateFieldCoordsNew(cv::Point orgin) {
 		if (da2< 0) da2 = 360 + da2;
 	}
 //	if (da2 < 0) da2 += 360;
-	polarMetricCoords.y = (da1 + da2) / 2;
-	//polarMetricCoords.y = d1 > d2 ? da1 : da2;
+	//polarMetricCoords.y = (da1 + da2) / 2;
+	polarMetricCoords.y = d1 > d2 ? da1 : da2;
 
 }
 void RobotPosition::updateFieldCoords(cv::Point orgin) {
