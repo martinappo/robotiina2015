@@ -36,9 +36,22 @@ void Simulator::MessageReceived(const std::string & message){
 			SendMessage(message);
 		}
 	}
-	else if (command == "ID=") {
-		ss >> id;
-		this->id = atoi(id.c_str());
+	else { // slave commands
+		if (command == "ID=") {
+			ss >> id;
+			this->id = atoi(id.c_str());
+		}
+		else if (command == "BAL") {
+			ss >> id;
+			int _id = atoi(id.c_str());
+			if (_id != this->id) {
+				std::string x, y, a;
+				ss >> x >> y;
+				balls[_id].fieldCoords.x = atoi(x.c_str());
+				balls[_id].fieldCoords.y = atoi(y.c_str());
+			}
+		}
+
 	}
 	if (command == "POS") {
 		ss >> id;
@@ -50,7 +63,6 @@ void Simulator::MessageReceived(const std::string & message){
 			robots[_id].fieldCoords.y = atoi(y.c_str());
 			robots[_id].polarMetricCoords.y = atoi(a.c_str());
 		}
-
 	}
 }
 void Simulator::UpdateGatePos(){
@@ -88,10 +100,15 @@ void Simulator::UpdateGatePos(){
 void Simulator::UpdateBallPos(double dt){
 	// balls 
 	for (int i = 0; i < mNumberOfBalls; i++){
-		if (balls[i].speed > 0.001) {
-			balls[i].fieldCoords.x += balls[i].speed*dt * (sin(balls[i].heading / 180 * CV_PI));
-			balls[i].fieldCoords.y -= balls[i].speed*dt * (cos(balls[i].heading / 180 * CV_PI));
-			balls[i].speed *= 0.95;
+		if (isMaster) {
+			if (balls[i].speed > 0.001) {
+				balls[i].fieldCoords.x += balls[i].speed*dt * (sin(balls[i].heading / 180 * CV_PI));
+				balls[i].fieldCoords.y -= balls[i].speed*dt * (cos(balls[i].heading / 180 * CV_PI));
+				balls[i].speed *= 0.95;
+			}
+			std::stringstream message;
+			message << "BAL " << i << " " << balls[i].fieldCoords.x << " " << balls[i].fieldCoords.y;
+			SendMessage(message.str());
 		}
 		double a = gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - balls[i].fieldCoords) + self.getAngle();
 		double d = gDistanceCalculator.getDistanceInverted(self.fieldCoords, balls[i].fieldCoords);
@@ -225,7 +242,7 @@ std::string Simulator::GetDebugInfo() {
 void Simulator::Run(){
 	while (!stop_thread){
 		UpdateRobotPos();
-		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		Sleep(50);
 	}
 }
 

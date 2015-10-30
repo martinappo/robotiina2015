@@ -29,11 +29,11 @@ void UdpServer::start_receive()
 void UdpServer::handle_receive(const boost::system::error_code& error,
 	std::size_t /*bytes_transferred*/)
 {
-	std::cout << "handle_receive" << std::endl;
+	//std::cout << "handle_receive" << std::endl;
 	if (!error || error == boost::asio::error::message_size)
 	{
 		std::string message = std::string(recv_buffer_.begin(), recv_buffer_.end());
-		std::cout << "udp packet:" << message << std::endl;
+		//std::cout << "udp packet:" << message << std::endl;
 		MessageReceived(message);
 		/*
 		boost::shared_ptr<std::string> message(
@@ -55,7 +55,7 @@ void UdpServer::handle_send(boost::shared_ptr<std::string> /*message*/,
 }
 
 void UdpServer::SendMessage(const std::string &message){
-	std::cout << "SendMessage" << message << std::endl;
+	//std::cout << "SendMessage" << message << std::endl;
 
 	boost::shared_ptr<std::string> x(
 		new std::string(message));
