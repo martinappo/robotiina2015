@@ -4,8 +4,9 @@
 #include <thread>
 #include <time.h>       /* time */
 extern DistanceCalculator gDistanceCalculator;
+extern boost::asio::ip::address addr;
 
-Simulator::Simulator(boost::asio::io_service &io, bool master) :ThreadedClass("Simulator"), UdpServer(io, 31000, master), isMaster(master)
+Simulator::Simulator(boost::asio::io_service &io, bool master) :ThreadedClass("Simulator"), UdpServer(io, addr, 31000, master), isMaster(master)
 {
 	srand(::time(NULL));
 

@@ -1,11 +1,11 @@
 #include "UdpServer.h"
 
 
-UdpServer::UdpServer(boost::asio::io_service &io, int port, bool master)
+UdpServer::UdpServer(boost::asio::io_service &io, const boost::asio::ip::address & addr, unsigned short port, bool master)
 	: recv_socket(io, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), port + !master))
 	, broadcast_socket(io, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 0))
 	, recv_endpoint(boost::asio::ip::udp::v4(), port)
-	, broadcast_endpoint(boost::asio::ip::address_v4::broadcast(), port + master)
+	, broadcast_endpoint(addr/*boost::asio::ip::address_v4::broadcast()*/, port + master)
 
 {
 	broadcast_socket.set_option(boost::asio::socket_base::broadcast(true));
