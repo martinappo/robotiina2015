@@ -80,8 +80,8 @@ std::pair<STATE, std::string> states[] = {
 };
 
 DistanceCalculator gDistanceCalculator;
-boost::asio::ip::address addr = boost::asio::ip::address::from_string("127.255.255.255"); // localhost only 
-//const boost::asio::ip::address addr = boost::asio::ip::address_v4::broadcast(); // local network
+//boost::asio::ip::address addr = boost::asio::ip::address::from_string("127.255.255.255"); // localhost only 
+boost::asio::ip::address addr = boost::asio::ip::address_v4::broadcast(); // local network
 
 std::map<STATE, std::string> STATE_LABELS(states, states + sizeof(states) / sizeof(states[0]));
 

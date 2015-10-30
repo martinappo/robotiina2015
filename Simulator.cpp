@@ -108,7 +108,7 @@ void Simulator::UpdateBallPos(double dt){
 				balls[i].speed *= 0.95;
 			}
 			std::stringstream message;
-			message << "BAL " << i << " " << balls[i].fieldCoords.x << " " << balls[i].fieldCoords.y;
+			message << "BAL " << i << " " << (int)balls[i].fieldCoords.x << " " << (int)balls[i].fieldCoords.y << " #";
 			SendMessage(message.str());
 		}
 		double a = gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - balls[i].fieldCoords) + self.getAngle();
@@ -153,7 +153,7 @@ void Simulator::UpdateRobotPos(){
 
 	if (isMaster || id > 0) {
 		std::stringstream message;
-		message << "POS " << id << " " << self.fieldCoords.x << " " << self.fieldCoords.y << " " << self.getAngle();
+		message << "POS " << id << " " << self.fieldCoords.x << " " << self.fieldCoords.y << " " << self.getAngle() << " #";
 		SendMessage(message.str());
 	}
 	UpdateGatePos();
