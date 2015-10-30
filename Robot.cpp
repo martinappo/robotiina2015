@@ -72,6 +72,7 @@ std::pair<STATE, std::string> states[] = {
 	std::pair<STATE, std::string>(STATE_DANCE, "Dance"),
 	std::pair<STATE, std::string>(STATE_MOUSE_VISION, "Mouse Vision"),
 	std::pair<STATE, std::string>(STATE_DISTANCE_CALIBRATE, "dist"),
+	std::pair<STATE, std::string>(STATE_TOGGLE_REFEREE, "Toggle Referee Listener"),
 	//	std::pair<STATE, std::string>(STATE_END_OF_GAME, "End of Game") // this is intentionally left out
 
 };
@@ -179,8 +180,26 @@ void Robot::InitHardware() {
 	wheels->Init();
 	coilBoard = new CoilGun(); //TODO: fix this, to use real coilboard
 	//initCoilboard();
+
+	initRefCom();
+	
 	std::cout << "Done initializing" << std::endl;
 	return;
+}
+
+void Robot::initRefCom() {
+	std::cout << "Init referee communications" << std::endl;
+	try {
+		using boost::property_tree::ptree;
+		ptree pt;
+		read_ini("conf/ports.ini", pt);
+		std::string port = pt.get<std::string>(std::to_string(ID_REF));
+		refCom = new RefereeCom(io, port);
+	}
+	catch (...) { 
+		std::cout << "viga" << std::endl;
+		refCom = NULL;
+	}
 }
 /*
 void Robot::initCoilboard() {
@@ -302,7 +321,10 @@ void Robot::Run()
 			oss << "|[Robot] Gate Pos: - ";
 //		oss << "Gate Pos: (" << lastBallLocation.distance << "," << lastBallLocation.horizontalAngle << "," << lastBallLocation.horizontalDev << ")";
 */
-		/*
+		while (refCom->isCommandAvailable()) {
+			std::cout << refCom->getNextCommand() << std::endl;
+		}
+
 
 		/* Main UI */
 		if (STATE_NONE == state) {
@@ -321,6 +343,7 @@ void Robot::Run()
 				STATE_BUTTON("(A)utoCalibrate objects", 'a', STATE_AUTOCALIBRATE)
 				//STATE_BUTTON("(M)anualCalibrate objects", STATE_CALIBRATE)
 				STATE_BUTTON("(C)Change Gate [" + ((int)field.GetTargetGate().getDistance() == (int)(field.blueGate.getDistance()) ? "blue" : "yellow") + "]", 'c', STATE_SELECT_GATE)
+				STATE_BUTTON("(T)oggle Referee Listener [" + (refCom->running ? "On" : "Off") + "]", 't', STATE_TOGGLE_REFEREE)
 				STATE_BUTTON("Auto(P)ilot [" + (autoPilot.running ? "On" : "Off") + "]", 'p', STATE_LAUNCH)
 				/*
 			createButton(std::string("(M)ouse control [") + (mouseControl == 0 ? "Off" : (mouseControl == 1 ? "Ball" : "Gate")) + "]", [this, &mouseControl]{
@@ -435,6 +458,13 @@ void Robot::Run()
 						this->last_state = STATE_END_OF_GAME; // force dialog redraw
 					});
 				}
+				pModule = static_cast<IConfigurableModule*>(refCom);
+				for (auto setting : pModule->GetSettings()){
+					m_pDisplay->createButton(setting.first + ": " + std::get<0>(setting.second)(), '-', [this, setting]{
+						std::get<1>(setting.second)();
+						this->last_state = STATE_END_OF_GAME; // force dialog redraw
+					});
+				}
 				STATE_BUTTON("BACK", 8, STATE_NONE)
 			END_DIALOG
 		}
@@ -528,6 +558,11 @@ void Robot::Run()
 			wheels->Drive(move1, move2,0);
 			//cv::putText(frameBGR, "move1:" + std::to_string(move1), cv::Point(frameBGR.cols - 140, 120), 0.5, cv::Scalar(255, 255, 255));
 			//cv::putText(frameBGR, "move2:" + std::to_string(move2), cv::Point(frameBGR.cols - 140, 140), 0.5, cv::Scalar(255, 255, 255));
+		}
+		else if (STATE_TOGGLE_REFEREE == state) {
+			refCom->Enable(!refCom->running);
+			last_state = STATE_TOGGLE_REFEREE;
+			state = STATE_NONE;
 		}
 		else if (STATE_END_OF_GAME == state) {
 			break;

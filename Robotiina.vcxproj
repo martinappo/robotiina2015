@@ -110,6 +110,7 @@
     <ClInclude Include="MouseVision.h" />
     <ClInclude Include="ObjectPosition.h" />
     <ClInclude Include="ParallelImageThresholder.h" />
+    <ClInclude Include="refereeCom.h" />
     <ClInclude Include="RobotPosition.h" />
     <ClInclude Include="SimpleImageThresholder.h" />
     <ClInclude Include="Simple-WebSocket-Server\server_ws.hpp" />
@@ -156,6 +157,7 @@
     <ClCompile Include="kdNode2D.cpp" />
     <ClCompile Include="MouseVision.cpp" />
     <ClCompile Include="ObjectPosition.cpp" />
+    <ClCompile Include="refereeCom.cpp" />
     <ClCompile Include="RobotPosition.cpp" />
     <ClCompile Include="Simulator.cpp" />
     <ClCompile Include="SoccerField.cpp" />

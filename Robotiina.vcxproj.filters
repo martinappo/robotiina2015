@@ -112,8 +112,11 @@
     <ClCompile Include="Simulator.cpp">
       <Filter>Simulator</Filter>
     </ClCompile>
-      <ClCompile Include="TargetPosition.cpp">
+    <ClCompile Include="TargetPosition.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="refereeCom.cpp">
+      <Filter>ComModule</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -249,8 +252,11 @@
     <ClInclude Include="Simulator.h">
       <Filter>Simulator</Filter>
     </ClInclude>
-      <ClInclude Include="TargetPosition.h">
+    <ClInclude Include="TargetPosition.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="refereeCom.h">
+      <Filter>ComModule</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

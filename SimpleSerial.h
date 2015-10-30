@@ -63,6 +63,19 @@ public:
 		}
 	}
 
+	std::string readNumberOfCharsAsync(int count, size_t timeout = 50) {
+		using namespace boost;
+		char c;
+		std::string result;
+
+		blockingreader reader(serial, timeout);
+
+		while (reader.read_char(c) && count-- != 0){
+			result += c;
+		}
+		return result;
+	}
+
 protected:
 	boost::asio::io_service &io;
 	boost::asio::serial_port serial;
