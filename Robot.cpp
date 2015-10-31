@@ -73,8 +73,25 @@ std::pair<STATE, std::string> states[] = {
 	std::pair<STATE, std::string>(STATE_MOUSE_VISION, "Mouse Vision"),
 	std::pair<STATE, std::string>(STATE_DISTANCE_CALIBRATE, "dist"),
 	std::pair<STATE, std::string>(STATE_TOGGLE_REFEREE, "Toggle Referee Listener"),
+	std::pair<STATE, std::string>(STATE_GIVE_COMMAND, "Give Referee Command"),
 	//	std::pair<STATE, std::string>(STATE_END_OF_GAME, "End of Game") // this is intentionally left out
 
+};
+
+std::pair<std::string, REFCOMMAND> refCommands[] = {
+	std::pair<std::string, REFCOMMAND>("Start game", START),
+	std::pair<std::string, REFCOMMAND>("Stop game", STOP),
+	std::pair<std::string, REFCOMMAND>("Placed ball", PLACED_BALL),
+	std::pair<std::string, REFCOMMAND>("End half", END_HALF),
+	std::pair<std::string, REFCOMMAND>("Kickoff", KICKOFF),
+	std::pair<std::string, REFCOMMAND>("Indirect free kick", INDIRECT_FREE_KICK),
+	std::pair<std::string, REFCOMMAND>("Direct free kick", DIRECT_FREE_KICK),
+	std::pair<std::string, REFCOMMAND>("Goal kick", GOAL_KICK),
+	std::pair<std::string, REFCOMMAND>("Throw in", THROW_IN),
+	std::pair<std::string, REFCOMMAND>("Corner kick", CORNER_KICK),
+	std::pair<std::string, REFCOMMAND>("Penalty", PENALTY),
+	std::pair<std::string, REFCOMMAND>("Goal", GOAL),
+	std::pair<std::string, REFCOMMAND>("Yellow card", YELLOW_CARD)
 };
 
 DistanceCalculator gDistanceCalculator;
@@ -321,7 +338,14 @@ void Robot::Run()
 //		oss << "Gate Pos: (" << lastBallLocation.distance << "," << lastBallLocation.horizontalAngle << "," << lastBallLocation.horizontalDev << ")";
 */
 		while (refCom->isCommandAvailable()) {
-			std::cout << refCom->getNextCommand() << std::endl;
+			REFCOMMAND command = refCom->getNextCommand();
+			std::cout << command << std::endl;
+
+			switch (command)
+			{
+			case START: if(!autoPilot.running) SetState(STATE_LAUNCH); break;
+			case STOP: if (autoPilot.running) SetState(STATE_LAUNCH); break;
+			}
 		}
 
 
@@ -345,6 +369,7 @@ void Robot::Run()
 				if (refCom->isTogglable()) {
 					STATE_BUTTON("(T)oggle Referee Listener [" + (dynamic_cast<ThreadedClass*>(refCom)->running ? "On" : "Off") + "]", 't', STATE_TOGGLE_REFEREE)
 				}
+				STATE_BUTTON("(G)ive Referee Command", 'g', STATE_GIVE_COMMAND)
 				STATE_BUTTON("Auto(P)ilot [" + (autoPilot.running ? "On" : "Off") + "]", 'p', STATE_LAUNCH)
 				/*
 			createButton(std::string("(M)ouse control [") + (mouseControl == 0 ? "Off" : (mouseControl == 1 ? "Ball" : "Gate")) + "]", [this, &mouseControl]{
@@ -565,6 +590,17 @@ void Robot::Run()
 			tmp->Enable(!tmp->running);
 			last_state = STATE_TOGGLE_REFEREE;
 			state = STATE_NONE;
+		}
+		else if (STATE_GIVE_COMMAND == state) {
+			START_DIALOG
+				for (std::pair < std::string, REFCOMMAND> entry : refCommands) {
+					// objectThresholds[(OBJECT) i] = calibrator->GetObjectThresholds(i, OBJECT_LABELS[(OBJECT) i]);
+					m_pDisplay->createButton(entry.first, '-', [this, entry]{
+						refCom->giveCommand(entry.second);
+					});
+				}
+			STATE_BUTTON("BACK", 8, STATE_NONE)
+				END_DIALOG
 		}
 		else if (STATE_END_OF_GAME == state) {
 			break;

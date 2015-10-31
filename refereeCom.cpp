@@ -66,7 +66,7 @@ LLAPReceiver::~LLAPReceiver()
 {
 	WaitForStop();
 }
-virtual void LLAPReceiver::messageReceived(const std::string & message){
+void LLAPReceiver::messageReceived(const std::string & message){
 	handleMessage(message);
 };
 void LLAPReceiver::handleMessage(const std::string & message){
@@ -80,9 +80,9 @@ void LLAPReceiver::handleMessage(const std::string & message){
 		else if (command == "ENDHALF--") commandQueue.push(END_HALF);
 		else if (command.at(0) == TEAM_MARKER) {
 			command = command.substr(1);
-			if (command == "KICKOFF-") commandQueue.push(KICK_OFF);
+			if (command == "KICKOFF-") commandQueue.push(KICKOFF);
 			else if (command == "IFREEK--") commandQueue.push(INDIRECT_FREE_KICK);
-			else if (command == "DFREEK--") commandQueue.push(INDIRECT_FREE_KICK);
+			else if (command == "DFREEK--") commandQueue.push(DIRECT_FREE_KICK);
 			else if (command == "GOALK---") commandQueue.push(GOAL_KICK);
 			else if (command == "THROWIN-") commandQueue.push(THROW_IN);
 			else if (command == "CORNERK-") commandQueue.push(CORNER_KICK);

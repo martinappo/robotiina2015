@@ -1,8 +1,8 @@
 #pragma once
+#include "types.h"
 #include "SimpleSerial.h"
 #include "ThreadedClass.h"
 #include "ConfigurableModule.h"
-#include "types.h"
 #include <queue>
 
 class RefereeCom: public IRefereeCom, public ConfigurableModule

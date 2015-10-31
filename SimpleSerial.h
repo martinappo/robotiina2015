@@ -2,6 +2,8 @@
 //#include "types.h"
 #include "blockingreader.h"
 #include <boost/asio.hpp>
+#include <boost/array.hpp>
+#include <boost/bind.hpp>
 
 class SimpleSerial {
 public:
