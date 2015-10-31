@@ -133,6 +133,7 @@ bool Robot::Launch(int argc, char* argv[])
 	else {
 		InitHardware();
 	}
+	initRefCom();
 	std::cout << "Starting Robot" << std::endl;
 
 	cv::Size winSize(0, 0);
@@ -180,8 +181,6 @@ void Robot::InitHardware() {
 	wheels->Init();
 	coilBoard = new CoilGun(); //TODO: fix this, to use real coilboard
 	//initCoilboard();
-
-	initRefCom();
 	
 	std::cout << "Done initializing" << std::endl;
 	return;
@@ -194,11 +193,11 @@ void Robot::initRefCom() {
 		ptree pt;
 		read_ini("conf/ports.ini", pt);
 		std::string port = pt.get<std::string>(std::to_string(ID_REF));
-		refCom = new RefereeCom(io, port);
+		refCom = new LLAPReceiver(io, port);
 	}
 	catch (...) { 
-		std::cout << "viga" << std::endl;
-		refCom = NULL;
+		std::cout << "Referee com LLAP reciever couldn't be initialized" << std::endl;
+		refCom = new RefereeCom();
 	}
 }
 /*
@@ -343,7 +342,9 @@ void Robot::Run()
 				STATE_BUTTON("(A)utoCalibrate objects", 'a', STATE_AUTOCALIBRATE)
 				//STATE_BUTTON("(M)anualCalibrate objects", STATE_CALIBRATE)
 				STATE_BUTTON("(C)Change Gate [" + ((int)field.GetTargetGate().getDistance() == (int)(field.blueGate.getDistance()) ? "blue" : "yellow") + "]", 'c', STATE_SELECT_GATE)
-				STATE_BUTTON("(T)oggle Referee Listener [" + (refCom->running ? "On" : "Off") + "]", 't', STATE_TOGGLE_REFEREE)
+				if (refCom->isTogglable()) {
+					STATE_BUTTON("(T)oggle Referee Listener [" + (dynamic_cast<ThreadedClass*>(refCom)->running ? "On" : "Off") + "]", 't', STATE_TOGGLE_REFEREE)
+				}
 				STATE_BUTTON("Auto(P)ilot [" + (autoPilot.running ? "On" : "Off") + "]", 'p', STATE_LAUNCH)
 				/*
 			createButton(std::string("(M)ouse control [") + (mouseControl == 0 ? "Off" : (mouseControl == 1 ? "Ball" : "Gate")) + "]", [this, &mouseControl]{
@@ -560,7 +561,8 @@ void Robot::Run()
 			//cv::putText(frameBGR, "move2:" + std::to_string(move2), cv::Point(frameBGR.cols - 140, 140), 0.5, cv::Scalar(255, 255, 255));
 		}
 		else if (STATE_TOGGLE_REFEREE == state) {
-			refCom->Enable(!refCom->running);
+			ThreadedClass *tmp = dynamic_cast<ThreadedClass*>(refCom);
+			tmp->Enable(!tmp->running);
 			last_state = STATE_TOGGLE_REFEREE;
 			state = STATE_NONE;
 		}

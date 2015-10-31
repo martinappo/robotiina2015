@@ -157,6 +157,14 @@ public:
 
 };
 
+class IRefereeCom {
+public:
+	virtual bool isCommandAvailable() = 0;
+	virtual REFCOMMAND getNextCommand() = 0;
+	virtual void giveCommand(REFCOMMAND command) = 0;
+	virtual bool isTogglable() = 0;
+};
+
 class ICommunicationModule : public IWheelController, public ICoilGun {
 //	virtual bool Init(IWheelController * pWheels, ICoilGun *pCoilGun) = 0;
 
