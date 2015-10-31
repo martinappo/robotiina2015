@@ -124,6 +124,9 @@
     <ClCompile Include="UdpServer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="refereeCom.cpp">
+      <Filter>ComModule</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="robot.h">
@@ -272,6 +275,9 @@
     </ClInclude>
     <ClInclude Include="UdpServer.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="refereeCom.h">
+      <Filter>ComModule</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

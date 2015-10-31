@@ -36,6 +36,7 @@ struct Speed
 	double rotation;
 };
 
+const int ID_REF = 2;
 const int ID_COILGUN = 4;
 
 enum OBJECT
@@ -62,7 +63,24 @@ enum STATE
 	STATE_TEST_COILGUN,
 	STATE_MOUSE_VISION,
 	STATE_DISTANCE_CALIBRATE,
+	STATE_TOGGLE_REFEREE,
 	STATE_END_OF_GAME /* leave this last*/
+};
+
+enum REFCOMMAND
+{
+	START = 0,
+	STOP,
+	PLACED_BALL,
+	END_HALF,
+	KICK_OFF,
+	INDIRECT_FREE_KICK,
+	GOAL_KICK,
+	THROW_IN,
+	CORNER_KICK,
+	PENALTY,
+	GOAL,
+	YELLOW_CARD
 };
 
 class IObjectPosition {
@@ -139,12 +157,15 @@ public:
 
 };
 
-class IPlayCommand {
+class IRefereeCom {
 public:
-	virtual std::string GetPlayCommand() = 0;
+	virtual bool isCommandAvailable() = 0;
+	virtual REFCOMMAND getNextCommand() = 0;
+	virtual void giveCommand(REFCOMMAND command) = 0;
+	virtual bool isTogglable() = 0;
 };
 
-class ICommunicationModule : public IWheelController, public ICoilGun, public IPlayCommand {
+class ICommunicationModule : public IWheelController, public ICoilGun {
 //	virtual bool Init(IWheelController * pWheels, ICoilGun *pCoilGun) = 0;
 
 };

@@ -1,5 +1,6 @@
 #include "types.h"
 #include "Dialog.h"
+#include "refereeCom.h"
 #include <atomic>
 #include <boost/program_options.hpp>
 #include <boost/asio.hpp>
@@ -20,6 +21,7 @@ private:
 	IWheelController * wheels = NULL;
 	ICoilGun *coilBoard = NULL;
 	IDisplay *m_pDisplay = NULL;
+	RefereeCom *refCom = NULL;
 	bool coilBoardPortsOk;
 	bool wheelsPortsOk;
 
@@ -31,6 +33,7 @@ private:
 	void InitSimulator(bool master);
 //	void initWheels();
 //	void initCoilboard();
+	void initRefCom();
 
 	void Run();
     boost::mutex remote_mutex;

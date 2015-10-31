@@ -16,8 +16,7 @@ enum SingleModeDriveStates {
 class SingleModeIdle : public Idle {
 
 	virtual DriveMode step(double dt) {
-		std::string command = m_pCom->GetPlayCommand();
-		if (command == "START") return DRIVEMODE_DRIVE_TO_BALL;
+		if (m_pFieldState->GAME_MODE_START_SINGLE_PLAY) return DRIVEMODE_DRIVE_TO_BALL;
 		return DRIVEMODE_IDLE;
 	}
 };
