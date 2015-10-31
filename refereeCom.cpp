@@ -83,7 +83,7 @@ void LLAPReceiver::Run() {
 				command = command.substr(1);
 				if (command == "KICKOFF-") commandQueue.push(KICK_OFF);
 				else if (command == "IFREEK--") commandQueue.push(INDIRECT_FREE_KICK);
-				else if (command == "DFREEK--") commandQueue.push(INDIRECT_FREE_KICK);
+				else if (command == "DFREEK--") commandQueue.push(DIRECT_FREE_KICK);
 				else if (command == "GOALK---") commandQueue.push(GOAL_KICK);
 				else if (command == "THROWIN-") commandQueue.push(THROW_IN);
 				else if (command == "CORNERK-") commandQueue.push(CORNER_KICK);
