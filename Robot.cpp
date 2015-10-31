@@ -264,6 +264,7 @@ void Robot::Run()
 	*/
 	/* Field state */
 	SoccerField field(m_pDisplay);
+	refCom->setField(&field);
 
 	/* Vision modules */
 	FrontCameraVision visionModule(camera, m_pDisplay, &field);
@@ -699,6 +700,7 @@ void Robot::Run()
 		delete outputVideo;
 	}
 
+	refCom->setField(NULL);
 
 }
 

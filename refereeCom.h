@@ -4,18 +4,21 @@
 #include "ThreadedClass.h"
 #include "ConfigurableModule.h"
 #include <queue>
+#include "FieldState.h"
 
 class RefereeCom: public IRefereeCom, public ConfigurableModule
 {
 public:
-	RefereeCom(const std::string &name = "Referee");
+	RefereeCom(/*FieldState *pFieldState, */const std::string &name = "Referee");
 	bool isCommandAvailable();
 	REFCOMMAND getNextCommand();
 	void giveCommand(REFCOMMAND command);
 
 	virtual bool isTogglable() { return false; }
+	void setField(FieldState *pFieldState){ m_pFieldState = pFieldState; }
 protected:
 	std::queue<REFCOMMAND> commandQueue;
+	FieldState * m_pFieldState = NULL;
 
 	const char ALL_MARKER = 'X';
 	char FIELD_MARKER = 'A';
@@ -30,7 +33,7 @@ private:
 class LLAPReceiver : public RefereeCom, public SimpleSerial, public ThreadedClass
 {
 public:
-	LLAPReceiver(boost::asio::io_service &io_service, std::string port = "port", unsigned int baud_rate = 115200, const std::string &name = "Referee");
+	LLAPReceiver(/*FieldState *pFieldState, */boost::asio::io_service &io_service, std::string port = "port", unsigned int baud_rate = 115200, const std::string &name = "Referee");
 	~LLAPReceiver();
 
 	bool isTogglable() { return true; }

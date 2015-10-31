@@ -1,7 +1,8 @@
 #include "RefereeCom.h"
 
 
-RefereeCom::RefereeCom(const std::string &name): ConfigurableModule(name)
+RefereeCom::RefereeCom(/*FieldState *pFieldState, */const std::string &name) : ConfigurableModule(name)
+/*, m_pFieldState(pFieldState)*/
 {
 	AddSetting("Field", [this]{return std::string(1,this->FIELD_MARKER);}, [this]{this->nextField();});
 	AddSetting("Team", [this]{return std::string(1,this->TEAM_MARKER);}, [this]{this->nextTeam();});
@@ -59,8 +60,8 @@ void RefereeCom::nextRobot() {
 /**********************************
 * HARDWARE RECEIVER IMPLEMENTATION
 ***********************************/
-LLAPReceiver::LLAPReceiver(boost::asio::io_service &io_service, std::string port, unsigned int baud_rate, const std::string &name)
-	: RefereeCom(name), SimpleSerial(io_service, port, baud_rate), ThreadedClass(name) {}
+LLAPReceiver::LLAPReceiver(/*FieldState *pFieldState,*/ boost::asio::io_service &io_service, std::string port, unsigned int baud_rate, const std::string &name)
+	: RefereeCom(/*pFieldState, */name), SimpleSerial(io_service, port, baud_rate), ThreadedClass(name) {}
 
 LLAPReceiver::~LLAPReceiver()
 {
@@ -70,6 +71,9 @@ void LLAPReceiver::messageReceived(const std::string & message){
 	handleMessage(message);
 };
 void LLAPReceiver::handleMessage(const std::string & message){
+	//TODO: update m_pFieldState->gameMode from here directly, add missing start commands there
+	if (m_pFieldState == NULL) return;
+
 	std::string command = message.substr(0, 12);
 	if (command.length() == 12 && command.at(0) == 'a' && command.at(1) == FIELD_MARKER && (command.at(2) == ALL_MARKER || command.at(2) == ROBOT_MARKER)) {
 		if (command.at(2) == ROBOT_MARKER) writeString("a" + std::string(1, FIELD_MARKER) + std::string(1, ROBOT_MARKER) + "ACK------");
