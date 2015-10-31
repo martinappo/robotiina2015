@@ -39,6 +39,13 @@ void Simulator::MessageReceived(const std::string & message){
 		else if (command == "ACK") { // id received
 			stop_send = false;
 		}
+		else if (command == "KCK") {
+			double s, a;
+			ss >> r_id >> s >> a;
+			int _id = atoi(r_id.c_str());
+			balls[_id].speed = s;
+			balls[_id].heading = a;
+		}
 	}
 	else { // slave commands
 		if (command == "ID=") {
@@ -315,7 +322,7 @@ void Simulator::Kick(){
 		balls[minDistIndex].heading = self.getAngle();
 	}
 	else {
-		SendMessage("KCK" + std::to_string(id) + " 600 " + std::to_string(self.getAngle()));
+		SendMessage("KCK " + std::to_string(minDistIndex) + " 600 " + std::to_string(self.getAngle()) + " #");
 	}
 	//balls[minDistIndex] = balls[mNumberOfBalls - 1];
 	//balls[mNumberOfBalls - 1].~BallPosition();
