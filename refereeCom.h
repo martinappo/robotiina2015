@@ -34,6 +34,9 @@ public:
 	~LLAPReceiver();
 
 	bool isTogglable() { return true; }
+	void handleMessage(const std::string & message);
+	virtual void messageReceived(const std::string & message);
+
 protected: 
 	void Run();
 

@@ -66,32 +66,41 @@ LLAPReceiver::~LLAPReceiver()
 {
 	WaitForStop();
 }
+virtual void LLAPReceiver::messageReceived(const std::string & message){
+	handleMessage(message);
+};
+void LLAPReceiver::handleMessage(const std::string & message){
+	std::string command = message.substr(0, 12);
+	if (command.length() == 12 && command.at(0) == 'a' && command.at(1) == FIELD_MARKER && (command.at(2) == ALL_MARKER || command.at(2) == ROBOT_MARKER)) {
+		if (command.at(2) == ROBOT_MARKER) writeString("a" + std::string(1, FIELD_MARKER) + std::string(1, ROBOT_MARKER) + "ACK------");
+		command = command.substr(3);
+		if (command == "START----") commandQueue.push(START);
+		else if (command == "STOP-----") commandQueue.push(STOP);
+		else if (command == "PLACEDBAL") commandQueue.push(PLACED_BALL);
+		else if (command == "ENDHALF--") commandQueue.push(END_HALF);
+		else if (command.at(0) == TEAM_MARKER) {
+			command = command.substr(1);
+			if (command == "KICKOFF-") commandQueue.push(KICK_OFF);
+			else if (command == "IFREEK--") commandQueue.push(INDIRECT_FREE_KICK);
+			else if (command == "DFREEK--") commandQueue.push(INDIRECT_FREE_KICK);
+			else if (command == "GOALK---") commandQueue.push(GOAL_KICK);
+			else if (command == "THROWIN-") commandQueue.push(THROW_IN);
+			else if (command == "CORNERK-") commandQueue.push(CORNER_KICK);
+			else if (command == "PENALTY-") commandQueue.push(PENALTY);
+			else if (command == "GOAL----") commandQueue.push(GOAL);
+			else if (command == "CARDY---") commandQueue.push(YELLOW_CARD);
+		}
+	}
+
+}
 
 void LLAPReceiver::Run() {
+	return;
 	std::cout << "Referee listener starting" << std::endl;
 	std::string command;
 	while (!stop_thread){
 		command = readNumberOfCharsAsync(12);
-		if (command.length() == 12 && command.at(0) == 'a' && command.at(1) == FIELD_MARKER && (command.at(2) == ALL_MARKER || command.at(2) == ROBOT_MARKER)) {
-			if (command.at(2) == ROBOT_MARKER) writeString("a" + std::string(1, FIELD_MARKER) + std::string(1, ROBOT_MARKER) + "ACK------");
-			command = command.substr(3);
-			if (command == "START----") commandQueue.push(START);
-			else if (command == "STOP-----") commandQueue.push(STOP);
-			else if (command == "PLACEDBAL") commandQueue.push(PLACED_BALL);
-			else if (command == "ENDHALF--") commandQueue.push(END_HALF);
-			else if (command.at(0) == TEAM_MARKER) {
-				command = command.substr(1);
-				if (command == "KICKOFF-") commandQueue.push(KICK_OFF);
-				else if (command == "IFREEK--") commandQueue.push(INDIRECT_FREE_KICK);
-				else if (command == "DFREEK--") commandQueue.push(INDIRECT_FREE_KICK);
-				else if (command == "GOALK---") commandQueue.push(GOAL_KICK);
-				else if (command == "THROWIN-") commandQueue.push(THROW_IN);
-				else if (command == "CORNERK-") commandQueue.push(CORNER_KICK);
-				else if (command == "PENALTY-") commandQueue.push(PENALTY);
-				else if (command == "GOAL----") commandQueue.push(GOAL);
-				else if (command == "CARDY---") commandQueue.push(YELLOW_CARD);
-			}
-		}
+		handleMessage(command);
 		std::this_thread::sleep_for(std::chrono::milliseconds(50)); // do not poll serial to fast
 	}
 	std::cout << "Referee listener stoping" << std::endl;
