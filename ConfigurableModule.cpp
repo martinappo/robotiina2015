@@ -25,7 +25,7 @@ void ConfigurableModule::LoadSettings() {
 		read_ini("conf/"+m_sModuleName+".ini", pt);
 		for (auto setting : m_settings) {
 			auto val = pt.get<std::string>(setting.first);
-			if (val != std::get<0>(setting.second)()) { 
+			while (val != std::get<0>(setting.second)()) { 
 				std::get<1>(setting.second)();
 			}
 		}
