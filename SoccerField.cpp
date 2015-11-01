@@ -9,7 +9,8 @@ SoccerField::SoccerField(boost::asio::io_service &io, IDisplay *pDisplay, bool m
 	green = cv::imread("field.png", CV_LOAD_IMAGE_COLOR);   // Read the file
 	field = cv::Mat(green.size(), CV_8UC3, cv::Scalar::all(245));
 	c = cv::Point2d(green.size()) / 2;
-
+	
+	isMaster = master;
 	if (isMaster)
 		initBalls();
 	else SendMessage("ID? #"); // ask slave id

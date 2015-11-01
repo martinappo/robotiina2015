@@ -12,6 +12,16 @@ enum SingleModeDriveStates {
 	DRIVEMODE_RECOVER_CRASH,
 	DRIVEMODE_EXIT,
 
+	//2v2 modes
+	DRIVEMODE_2V2_OFFENSIVE,
+	DRIVEMODE_2V2_DEFENSIVE,
+	DRIVEMODE_2V2_KICKOFF,
+	DRIVEMODE_2V2_AIM_GATE,
+	DRIVEMODE_2V2_KICK,
+	DRIVEMODE_2V2_DRIVE_TO_BALL,
+	DRIVEMODE_2V2_CATCH_BALL,
+	DRIVEMODE_2V2_DRIVE_HOME
+
 };
 class SingleModeIdle : public Idle {
 
@@ -50,6 +60,79 @@ class Kick : public DriveInstruction
 public:
 	virtual void onEnter();
 	Kick() : DriveInstruction("KICK"){};
+	virtual DriveMode step(double dt);
+};
+
+class Offensive : public DriveInstruction
+{
+public:
+	Offensive() : DriveInstruction("2V2_AIM_ALLY"){};
+	virtual DriveMode step(double dt);
+};
+
+class Defensive : public DriveInstruction
+{
+public:
+	Defensive() : DriveInstruction("2V2_AIM_ALLY"){};
+	virtual DriveMode step(double dt);
+};
+
+class KickOff : public DriveInstruction
+{
+private:
+	bool active = false;
+public:
+	KickOff() : DriveInstruction("2V2_KICKOFF"){};
+	virtual void onEnter();
+	virtual DriveMode step(double dt);
+};
+
+class AimGate2v2 : public DriveInstruction
+{
+public:
+	AimGate2v2() : DriveInstruction("2V2_AIM_GATE"){};
+	virtual void onEnter();
+	virtual DriveMode step(double dt);
+};
+
+class Kick2v2 : public DriveInstruction
+{
+public:
+	Kick2v2() : DriveInstruction("2V2_KICK"){};
+	virtual void onEnter();
+	virtual DriveMode step(double dt);
+};
+
+class DriveToBall2v2 : public DriveInstruction
+{
+private:
+	TargetPosition start;
+	BallPosition target;
+	double speed;
+	double rotate;
+	double rotateGate;
+	int desiredDistance = 210;
+public:
+	DriveToBall2v2() : DriveInstruction("2V2_DRIVE_TO_BALL"){};
+	virtual void onEnter();
+	virtual DriveMode step(double dt);
+};
+
+class CatchBall2v2 : public DriveInstruction
+{
+private:
+	boost::posix_time::ptime catchStart;
+public:
+	CatchBall2v2() : DriveInstruction("2V2_CATCH_BALL"){};
+	virtual void onEnter();
+	virtual DriveMode step(double dt);
+};
+
+class DriveHome2v2 : public DriveInstruction
+{
+public:
+	DriveHome2v2() : DriveInstruction("2V2_DRIVE_HOME"){};
+	virtual void onEnter();
 	virtual DriveMode step(double dt);
 };
 
