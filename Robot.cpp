@@ -78,20 +78,31 @@ std::pair<STATE, std::string> states[] = {
 
 };
 
-std::pair<std::string, REFCOMMAND> refCommands[] = {
-	std::pair<std::string, REFCOMMAND>("Start game", START),
-	std::pair<std::string, REFCOMMAND>("Stop game", STOP),
-	std::pair<std::string, REFCOMMAND>("Placed ball", PLACED_BALL),
-	std::pair<std::string, REFCOMMAND>("End half", END_HALF),
-	std::pair<std::string, REFCOMMAND>("Kickoff", KICKOFF),
-	std::pair<std::string, REFCOMMAND>("Indirect free kick", INDIRECT_FREE_KICK),
-	std::pair<std::string, REFCOMMAND>("Direct free kick", DIRECT_FREE_KICK),
-	std::pair<std::string, REFCOMMAND>("Goal kick", GOAL_KICK),
-	std::pair<std::string, REFCOMMAND>("Throw in", THROW_IN),
-	std::pair<std::string, REFCOMMAND>("Corner kick", CORNER_KICK),
-	std::pair<std::string, REFCOMMAND>("Penalty", PENALTY),
-	std::pair<std::string, REFCOMMAND>("Goal", GOAL),
-	std::pair<std::string, REFCOMMAND>("Yellow card", YELLOW_CARD)
+std::pair<std::string, FieldState::GameMode> refCommands[] = {
+	std::pair<std::string, FieldState::GameMode>("Start game", FieldState::GAME_MODE_START_SINGLE_PLAY),
+	std::pair<std::string, FieldState::GameMode>("Stop game", FieldState::GAME_MODE_STOPED),
+	std::pair<std::string, FieldState::GameMode>("Placed ball", FieldState::GAME_MODE_PLACED_BALL),
+	std::pair<std::string, FieldState::GameMode>("End half", FieldState::GAME_MODE_END_HALF),
+
+	std::pair<std::string, FieldState::GameMode>("Our kickoff", FieldState::GAME_MODE_START_OUR_KICK_OFF),
+	std::pair<std::string, FieldState::GameMode>("Our indirect free kick", FieldState::GAME_MODE_START_OUR_INDIRECT_FREE_KICK),
+	std::pair<std::string, FieldState::GameMode>("Our direct free kick", FieldState::GAME_MODE_START_OUR_FREE_KICK),
+	std::pair<std::string, FieldState::GameMode>("Our goal kick", FieldState::GAME_MODE_START_OUR_GOAL_KICK),
+	std::pair<std::string, FieldState::GameMode>("Our throw in", FieldState::GAME_MODE_START_OUR_THROWIN),
+	std::pair<std::string, FieldState::GameMode>("Our corner kick", FieldState::GAME_MODE_START_OUR_CORNER_KICK),
+	std::pair<std::string, FieldState::GameMode>("Our penalty", FieldState::GAME_MODE_START_OUR_PENALTY),
+	std::pair<std::string, FieldState::GameMode>("Our goal", FieldState::GAME_MODE_START_OUR_GOAL),
+	std::pair<std::string, FieldState::GameMode>("Our yellow card", FieldState::GAME_MODE_START_OUR_YELLOW_CARD),
+
+	std::pair<std::string, FieldState::GameMode>("Opponent kickoff", FieldState::GAME_MODE_START_OPPONENT_KICK_OFF),
+	std::pair<std::string, FieldState::GameMode>("Opponent indirect free kick", FieldState::GAME_MODE_START_OPPONENT_INDIRECT_FREE_KICK),
+	std::pair<std::string, FieldState::GameMode>("Opponent direct free kick", FieldState::GAME_MODE_START_OPPONENT_FREE_KICK),
+	std::pair<std::string, FieldState::GameMode>("Opponent goal kick", FieldState::GAME_MODE_START_OPPONENT_GOAL_KICK),
+	std::pair<std::string, FieldState::GameMode>("Opponent throw in", FieldState::GAME_MODE_START_OPPONENT_THROWIN),
+	std::pair<std::string, FieldState::GameMode>("Opponent corner kick", FieldState::GAME_MODE_START_OPPONENT_CORNER_KICK),
+	std::pair<std::string, FieldState::GameMode>("Opponent penalty", FieldState::GAME_MODE_START_OPPONENT_PENALTY),
+	std::pair<std::string, FieldState::GameMode>("Opponent goal", FieldState::GAME_MODE_START_OPPONENT_GOAL),
+	std::pair<std::string, FieldState::GameMode>("Opponent yellow card", FieldState::GAME_MODE_START_OPPONENT_YELLOW_CARD)
 };
 
 DistanceCalculator gDistanceCalculator;
@@ -210,11 +221,11 @@ void Robot::initRefCom() {
 		ptree pt;
 		read_ini("conf/ports.ini", pt);
 		std::string port = pt.get<std::string>(std::to_string(ID_REF));
-		refCom = new LLAPReceiver(io, port);
+		refCom = new LLAPReceiver(NULL, io, port);
 	}
 	catch (...) { 
 		std::cout << "Referee com LLAP reciever couldn't be initialized" << std::endl;
-		refCom = new RefereeCom();
+		refCom = new RefereeCom(NULL);
 	}
 }
 /*
@@ -338,17 +349,6 @@ void Robot::Run()
 			oss << "|[Robot] Gate Pos: - ";
 //		oss << "Gate Pos: (" << lastBallLocation.distance << "," << lastBallLocation.horizontalAngle << "," << lastBallLocation.horizontalDev << ")";
 */
-		while (refCom->isCommandAvailable()) {
-			REFCOMMAND command = refCom->getNextCommand();
-			std::cout << command << std::endl;
-
-			switch (command)
-			{
-			case START: if(!autoPilot.running) SetState(STATE_LAUNCH); break;
-			case STOP: if (autoPilot.running) SetState(STATE_LAUNCH); break;
-			}
-		}
-
 
 		/* Main UI */
 		if (STATE_NONE == state) {
@@ -594,8 +594,7 @@ void Robot::Run()
 		}
 		else if (STATE_GIVE_COMMAND == state) {
 			START_DIALOG
-				for (std::pair < std::string, REFCOMMAND> entry : refCommands) {
-					// objectThresholds[(OBJECT) i] = calibrator->GetObjectThresholds(i, OBJECT_LABELS[(OBJECT) i]);
+				for (std::pair < std::string, FieldState::GameMode> entry : refCommands) {
 					m_pDisplay->createButton(entry.first, '-', [this, entry]{
 						refCom->giveCommand(entry.second);
 					});
