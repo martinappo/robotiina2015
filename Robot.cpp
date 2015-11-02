@@ -76,8 +76,36 @@ std::pair<STATE, std::string> states[] = {
 	std::pair<STATE, std::string>(STATE_MOUSE_VISION, "Mouse Vision"),
 	std::pair<STATE, std::string>(STATE_DISTANCE_CALIBRATE, "dist"),
 	std::pair<STATE, std::string>(STATE_TOGGLE_REFEREE, "Toggle Referee Listener"),
+	std::pair<STATE, std::string>(STATE_GIVE_COMMAND, "Give Referee Command"),
 	//	std::pair<STATE, std::string>(STATE_END_OF_GAME, "End of Game") // this is intentionally left out
 
+};
+
+std::pair<std::string, FieldState::GameMode> refCommands[] = {
+	std::pair<std::string, FieldState::GameMode>("Start game", FieldState::GAME_MODE_START_SINGLE_PLAY),
+	std::pair<std::string, FieldState::GameMode>("Stop game", FieldState::GAME_MODE_STOPED),
+	std::pair<std::string, FieldState::GameMode>("Placed ball", FieldState::GAME_MODE_PLACED_BALL),
+	std::pair<std::string, FieldState::GameMode>("End half", FieldState::GAME_MODE_END_HALF),
+
+	std::pair<std::string, FieldState::GameMode>("Our kickoff", FieldState::GAME_MODE_START_OUR_KICK_OFF),
+	std::pair<std::string, FieldState::GameMode>("Our indirect free kick", FieldState::GAME_MODE_START_OUR_INDIRECT_FREE_KICK),
+	std::pair<std::string, FieldState::GameMode>("Our direct free kick", FieldState::GAME_MODE_START_OUR_FREE_KICK),
+	std::pair<std::string, FieldState::GameMode>("Our goal kick", FieldState::GAME_MODE_START_OUR_GOAL_KICK),
+	std::pair<std::string, FieldState::GameMode>("Our throw in", FieldState::GAME_MODE_START_OUR_THROWIN),
+	std::pair<std::string, FieldState::GameMode>("Our corner kick", FieldState::GAME_MODE_START_OUR_CORNER_KICK),
+	std::pair<std::string, FieldState::GameMode>("Our penalty", FieldState::GAME_MODE_START_OUR_PENALTY),
+	std::pair<std::string, FieldState::GameMode>("Our goal", FieldState::GAME_MODE_START_OUR_GOAL),
+	std::pair<std::string, FieldState::GameMode>("Our yellow card", FieldState::GAME_MODE_START_OUR_YELLOW_CARD),
+
+	std::pair<std::string, FieldState::GameMode>("Opponent kickoff", FieldState::GAME_MODE_START_OPPONENT_KICK_OFF),
+	std::pair<std::string, FieldState::GameMode>("Opponent indirect free kick", FieldState::GAME_MODE_START_OPPONENT_INDIRECT_FREE_KICK),
+	std::pair<std::string, FieldState::GameMode>("Opponent direct free kick", FieldState::GAME_MODE_START_OPPONENT_FREE_KICK),
+	std::pair<std::string, FieldState::GameMode>("Opponent goal kick", FieldState::GAME_MODE_START_OPPONENT_GOAL_KICK),
+	std::pair<std::string, FieldState::GameMode>("Opponent throw in", FieldState::GAME_MODE_START_OPPONENT_THROWIN),
+	std::pair<std::string, FieldState::GameMode>("Opponent corner kick", FieldState::GAME_MODE_START_OPPONENT_CORNER_KICK),
+	std::pair<std::string, FieldState::GameMode>("Opponent penalty", FieldState::GAME_MODE_START_OPPONENT_PENALTY),
+	std::pair<std::string, FieldState::GameMode>("Opponent goal", FieldState::GAME_MODE_START_OPPONENT_GOAL),
+	std::pair<std::string, FieldState::GameMode>("Opponent yellow card", FieldState::GAME_MODE_START_OPPONENT_YELLOW_CARD)
 };
 
 DistanceCalculator gDistanceCalculator;
@@ -213,11 +241,11 @@ void Robot::initRefCom() {
 		ptree pt;
 		read_ini("conf/ports.ini", pt);
 		std::string port = pt.get<std::string>(std::to_string(ID_REF));
-		refCom = new LLAPReceiver(io, port);
+		refCom = new LLAPReceiver(NULL, io, port);
 	}
 	catch (...) { 
 		std::cout << "Referee com LLAP reciever couldn't be initialized" << std::endl;
-		refCom = new RefereeCom();
+		refCom = new RefereeCom(NULL);
 	}
 }
 /*
@@ -270,7 +298,9 @@ void Robot::Run()
 		play_mode = config["play-mode"].as<std::string>();
 
 	/* Field state */
+
 	SoccerField field(io, m_pDisplay, play_mode == "master" || play_mode == "single");
+	refCom->setField(&field);
 
 	/* Vision modules */
 	FrontCameraVision visionModule(camera, m_pDisplay, &field);
@@ -354,10 +384,6 @@ void Robot::Run()
 			oss << "|[Robot] Gate Pos: - ";
 //		oss << "Gate Pos: (" << lastBallLocation.distance << "," << lastBallLocation.horizontalAngle << "," << lastBallLocation.horizontalDev << ")";
 */
-		while (refCom->isCommandAvailable()) {
-			std::cout << refCom->getNextCommand() << std::endl;
-		}
-
 
 		/* Main UI */
 		if (STATE_NONE == state) {
@@ -381,7 +407,9 @@ void Robot::Run()
 				if (refCom->isTogglable()) {
 					STATE_BUTTON("(T)oggle Referee Listener [" + (dynamic_cast<ThreadedClass*>(refCom)->running ? "On" : "Off") + "]", 't', STATE_TOGGLE_REFEREE)
 				}
+				STATE_BUTTON("(G)ive Referee Command", 'g', STATE_GIVE_COMMAND)
 				STATE_BUTTON("Auto(P)ilot [" + (autoPilot->running ? "On" : "Off") + "]", 'p', STATE_LAUNCH)
+
 				/*
 			createButton(std::string("(M)ouse control [") + (mouseControl == 0 ? "Off" : (mouseControl == 1 ? "Ball" : "Gate")) + "]", [this, &mouseControl]{
 				mouseControl = (mouseControl + 1) % 3;
@@ -605,6 +633,16 @@ void Robot::Run()
 			last_state = STATE_TOGGLE_REFEREE;
 			state = STATE_NONE;
 		}
+		else if (STATE_GIVE_COMMAND == state) {
+			START_DIALOG
+				for (std::pair < std::string, FieldState::GameMode> entry : refCommands) {
+					m_pDisplay->createButton(entry.first, '-', [this, entry]{
+						refCom->giveCommand(entry.second);
+					});
+				}
+			STATE_BUTTON("BACK", 8, STATE_NONE)
+				END_DIALOG
+		}
 		else if (STATE_END_OF_GAME == state) {
 			break;
 		}
@@ -704,6 +742,7 @@ void Robot::Run()
 
 	if (autoPilot != NULL)
 		delete autoPilot;
+	refCom->setField(NULL);
 }
 
 

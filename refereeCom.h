@@ -2,20 +2,19 @@
 #include "SimpleSerial.h"
 #include "ThreadedClass.h"
 #include "ConfigurableModule.h"
-#include "types.h"
 #include <queue>
+#include "FieldState.h"
 
-class RefereeCom: public IRefereeCom, public ConfigurableModule
+class RefereeCom: public ConfigurableModule
 {
 public:
-	RefereeCom(const std::string &name = "Referee");
-	bool isCommandAvailable();
-	REFCOMMAND getNextCommand();
-	void giveCommand(REFCOMMAND command);
+	RefereeCom(FieldState *pFieldState, const std::string &name = "Referee");
+	void giveCommand(FieldState::GameMode command);
 
 	virtual bool isTogglable() { return false; }
+	void setField(FieldState *pFieldState){ m_pFieldState = pFieldState; }
 protected:
-	std::queue<REFCOMMAND> commandQueue;
+	FieldState * m_pFieldState = NULL;
 
 	const char ALL_MARKER = 'X';
 	char FIELD_MARKER = 'A';
@@ -30,10 +29,13 @@ private:
 class LLAPReceiver : public RefereeCom, public SimpleSerial, public ThreadedClass
 {
 public:
-	LLAPReceiver(boost::asio::io_service &io_service, std::string port = "port", unsigned int baud_rate = 115200, const std::string &name = "Referee");
+	LLAPReceiver(FieldState *pFieldState, boost::asio::io_service &io_service, std::string port = "port", unsigned int baud_rate = 115200, const std::string &name = "Referee");
 	~LLAPReceiver();
 
 	bool isTogglable() { return true; }
+	void handleMessage(const std::string & message);
+	virtual void messageReceived(const std::string & message);
+
 protected: 
 	void Run();
 

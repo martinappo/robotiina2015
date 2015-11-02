@@ -64,24 +64,26 @@ enum STATE
 	STATE_MOUSE_VISION,
 	STATE_DISTANCE_CALIBRATE,
 	STATE_TOGGLE_REFEREE,
+	STATE_GIVE_COMMAND,
 	STATE_END_OF_GAME /* leave this last*/
 };
-
+/*
 enum REFCOMMAND
 {
 	START = 0,
 	STOP,
 	PLACED_BALL,
 	END_HALF,
-	KICK_OFF,
+	KICKOFF,
 	INDIRECT_FREE_KICK,
+	DIRECT_FREE_KICK,
 	GOAL_KICK,
 	THROW_IN,
 	CORNER_KICK,
 	PENALTY,
 	GOAL,
 	YELLOW_CARD
-};
+}; */
 
 class IObjectPosition {
 public:
@@ -156,14 +158,14 @@ public:
 	virtual void ToggleTribbler(bool start) = 0;
 
 };
-
+/*
 class IRefereeCom {
 public:
 	virtual bool isCommandAvailable() = 0;
 	virtual REFCOMMAND getNextCommand() = 0;
 	virtual void giveCommand(REFCOMMAND command) = 0;
 	virtual bool isTogglable() = 0;
-};
+};*/
 
 class ICommunicationModule : public IWheelController, public ICoilGun {
 //	virtual bool Init(IWheelController * pWheels, ICoilGun *pCoilGun) = 0;
