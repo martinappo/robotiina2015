@@ -4,7 +4,7 @@
 DriveMode DriveToBall::step(double dt)
 {
 
-	auto target = getClosestBall();
+	auto &target = getClosestBall();
 
 	if (target.getDistance() > 10000) return DRIVEMODE_IDLE;
 	if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;

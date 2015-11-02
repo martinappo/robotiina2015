@@ -191,8 +191,9 @@ void Simulator::UpdateRobotPos(){
 	if (self.polarMetricCoords.y > 360) self.polarMetricCoords.y -= 360;
 	if (self.polarMetricCoords.y < -360) self.polarMetricCoords.y += 360;
 
-	self.fieldCoords.x += (int)(v*dt * sin((self.getAngle() + targetSpeed.heading) / 180 * CV_PI));
-	self.fieldCoords.y -= (int)(v*dt * cos((self.getAngle() + targetSpeed.heading) / 180 * CV_PI));
+		
+	self.fieldCoords.x += (v*dt * sin((self.getAngle() + targetSpeed.heading) / 180 * CV_PI));
+	self.fieldCoords.y -= (v*dt * cos((self.getAngle() + targetSpeed.heading) / 180 * CV_PI));
 
 	if (!isMaster && id > 0) {
 		std::stringstream message;
@@ -257,6 +258,7 @@ void Simulator::Drive(double fowardSpeed, double direction, double angularSpeed)
 	if (mNumberOfBalls == 0)
 		return;
 	targetSpeed = { fowardSpeed, direction, angularSpeed };
+	//std::cout << fowardSpeed  << "\t" <<  direction << "\t" << angularSpeed << std::endl;
 	/*
 	self.polarMetricCoords.y += angularSpeed;
 	if (self.polarMetricCoords.y > 360) self.polarMetricCoords.y -= 360;
@@ -318,11 +320,11 @@ void Simulator::Kick(){
 		}
 	}
 	if (isMaster) {
-		balls[minDistIndex].speed = 600;
+		balls[minDistIndex].speed = 1600;
 		balls[minDistIndex].heading = self.getAngle();
 	}
 	else {
-		SendMessage("KCK " + std::to_string(minDistIndex) + " 600 " + std::to_string(self.getAngle()) + " #");
+		SendMessage("KCK " + std::to_string(minDistIndex) + " 1600 " + std::to_string(self.getAngle()) + " #");
 	}
 	//balls[minDistIndex] = balls[mNumberOfBalls - 1];
 	//balls[mNumberOfBalls - 1].~BallPosition();
