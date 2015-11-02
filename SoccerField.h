@@ -5,6 +5,7 @@
 #include "FieldState.h"
 #include "ObjectPosition.h"
 #include "UdpServer.h"
+const int MAX_ROBOTS_NR = 10;
 
 class SoccerField :
 	public UdpServer, ThreadedClass, public FieldState
@@ -21,6 +22,10 @@ public:
 	void initBalls();
 	void Lock(){};
 	void UnLock(){};
+	virtual void MessageReceived(const std::string & message);
+
+	ObjectPosition robots[MAX_ROBOTS_NR];
+
 private:
 	std::atomic_int m_targetGate;
 	IDisplay *m_pDisplay;
@@ -32,6 +37,12 @@ private:
 	cv::Point2d c/*enter*/;
 	void sendState();
 	void recvState();
+	
+	bool isMaster = false;
+	bool isMasterPresent = false;
+	int id = 0;
+	int next_id = 1;
+	bool stop_send = false;
 
 
 };
