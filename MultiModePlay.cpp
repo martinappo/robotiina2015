@@ -6,11 +6,16 @@ class MasterModeIdle : public Idle {
 	virtual DriveMode step(double dt) {
 		switch (m_pFieldState->gameMode) {
 		case FieldState::GAME_MODE_START_OPPONENT_KICK_OFF:
+			return DRIVEMODE_2V2_OPPONENT_KICKOFF;
 		case FieldState::GAME_MODE_START_OPPONENT_THROWIN:
+			return DRIVEMODE_2V2_OPPONENT_KICKOFF;
 		case FieldState::GAME_MODE_START_OPPONENT_FREE_KICK:
+			return DRIVEMODE_2V2_OPPONENT_KICKOFF;
 		case FieldState::GAME_MODE_START_OUR_KICK_OFF:
+			return DRIVEMODE_2V2_KICKOFF;
 		case FieldState::GAME_MODE_START_OUR_FREE_KICK:
 			m_pFieldState->gameMode = FieldState::GAME_MODE_IN_PROGRESS;
+			return DRIVEMODE_2V2_KICKOFF;
 		case FieldState::GAME_MODE_START_OUR_THROWIN:
 			return DRIVEMODE_DRIVE_TO_BALL;
 		}
@@ -22,14 +27,18 @@ class SlaveModeIdle : public Idle {
 	virtual DriveMode step(double dt) {
 		switch (m_pFieldState->gameMode) {
 		case FieldState::GAME_MODE_START_OPPONENT_KICK_OFF:
+			return DRIVEMODE_2V2_DEFENSIVE;
 		case FieldState::GAME_MODE_START_OPPONENT_THROWIN:
+			return DRIVEMODE_2V2_DEFENSIVE;
 		case FieldState::GAME_MODE_START_OPPONENT_FREE_KICK:
+			return DRIVEMODE_2V2_DEFENSIVE;
 		case FieldState::GAME_MODE_START_OUR_KICK_OFF:
+			return DRIVEMODE_2V2_KICKOFF;
 		case FieldState::GAME_MODE_START_OUR_FREE_KICK:
 			m_pFieldState->gameMode = FieldState::GAME_MODE_IN_PROGRESS;
-			return DRIVEMODE_2V2_DEFENSIVE;
+			return DRIVEMODE_2V2_KICKOFF;
 		case FieldState::GAME_MODE_START_OUR_THROWIN:
-			return DRIVEMODE_DRIVE_TO_BALL;
+			return DRIVEMODE_2V2_DEFENSIVE;
 		}
 		return DRIVEMODE_IDLE;
 	}
@@ -107,6 +116,15 @@ public:
 	virtual DriveMode step(double dt);
 };
 
+class OpponentKickoff : public DriveInstruction
+{
+public:
+	OpponentKickoff() : DriveInstruction("2V2_OPPONENT_KICKOFF"){};
+	virtual void onEnter();
+	virtual DriveMode step(double dt);
+private:
+	BallPosition ball;
+};
 
 std::pair<DriveMode, DriveInstruction*> MasterDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_IDLE, new MasterModeIdle()),
@@ -114,6 +132,8 @@ std::pair<DriveMode, DriveInstruction*> MasterDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_AIM_GATE, new AimGate()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_KICK, new Kick()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_CATCH_BALL, new CatchBall()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_KICKOFF, new KickOff()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_OPPONENT_KICKOFF, new OpponentKickoff()),
 };
 
 std::pair<DriveMode, DriveInstruction*> SlaveDriveModes[] = {
@@ -345,4 +365,24 @@ DriveMode DriveHome2v2::step(double dt){
 		}
 	}
 	return DRIVEMODE_2V2_DRIVE_HOME;
+}
+
+/*BEGIN Opponent kickoff*/
+void OpponentKickoff::onEnter(){
+	ball = getClosestBall();
+	std::this_thread::sleep_for(std::chrono::milliseconds(500)); //half second wait.
+}
+
+DriveMode OpponentKickoff::step(double dt){
+
+	if (ball.getDistance() > 500)
+		return DRIVEMODE_2V2_DEFENSIVE;
+	BallPosition newBall = getClosestBall();
+	if (abs(ball.getDistance() - newBall.getDistance()) > 10 || abs(ball.getAngle() - newBall.getAngle()) > 5){ //ball has moved
+		return DRIVEMODE_2V2_OFFENSIVE;
+	}
+	else{
+		std::this_thread::sleep_for(std::chrono::milliseconds(500)); //half second wait.
+		return DRIVEMODE_2V2_OPPONENT_KICKOFF;
+	}
 }
