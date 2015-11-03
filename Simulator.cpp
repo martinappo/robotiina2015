@@ -5,9 +5,11 @@
 #include <time.h>       /* time */
 extern DistanceCalculator gDistanceCalculator;
 
-Simulator::Simulator(boost::asio::io_service &io, bool master, int number_of_balls) :
-	FieldState(number_of_balls), ThreadedClass("Simulator"), UdpServer(io, 31000, master)
-	, isMaster(master), mNumberOfBalls(number_of_balls)
+Simulator::Simulator(boost::asio::io_service &io, bool master, const std::string game_mode) :
+	mNumberOfBalls(game_mode == "master" || game_mode =="slave" ? 1 :11 )
+	,FieldState(game_mode == "master" || game_mode == "slave" ? 1 : 11)
+	,ThreadedClass("Simulator"), UdpServer(io, 31000, master)
+	,isMaster(master)
 {
 	srand(::time(NULL));
 
@@ -15,12 +17,13 @@ Simulator::Simulator(boost::asio::io_service &io, bool master, int number_of_bal
 	self.polarMetricCoords = cv::Point(0, 0);
 	if (isMaster) {
 		// distribute balls uniformly at random
-		if (number_of_balls == 1)  {
+		if (mNumberOfBalls == 1)  {
 			balls[0].fieldCoords = { 0, 0 };
 			balls[0].id = 0;
+			if (game_mode == "master") self.fieldCoords = { 0, -60 };
 		}
 		else{
-			for (int i = 0; i < number_of_balls; i++) {
+			for (int i = 0; i < mNumberOfBalls; i++) {
 				balls[i].fieldCoords.x = (int)(((i % 3) - 1) * 100);// +rand() % 50;
 				balls[i].fieldCoords.y = (int)((i / 3 - 1.5) * 110);// +rand() % 50;
 				balls[i].id = i;
@@ -316,7 +319,7 @@ bool Simulator::BallInTribbler(){
 	else return false;
 }
 
-void Simulator::Kick(){
+void Simulator::Kick(int force){
 	double minDist = INT_MAX;
 	double dist = INT_MAX;
 	int minDistIndex = mNumberOfBalls - 1;
@@ -328,11 +331,11 @@ void Simulator::Kick(){
 		}
 	}
 	if (isMaster) {
-		balls[minDistIndex].speed = 1600;
+		balls[minDistIndex].speed = force*2;
 		balls[minDistIndex].heading = self.getAngle();
 	}
 	else {
-		SendMessage("KCK " + std::to_string(minDistIndex) + " 1600 " + std::to_string(self.getAngle()) + " #");
+		SendMessage("KCK " + std::to_string(minDistIndex) + " "+std::to_string(force*2)+" " + std::to_string(self.getAngle()) + " #");
 	}
 	//balls[minDistIndex] = balls[mNumberOfBalls - 1];
 	//balls[mNumberOfBalls - 1].~BallPosition();

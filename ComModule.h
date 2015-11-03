@@ -14,8 +14,8 @@ public:
 	virtual bool BallInTribbler() {
 		return m_pCoilGun->BallInTribbler();
 	}
-	virtual void Kick() {
-		m_pCoilGun->Kick();
+	virtual void Kick(int force = 800) {
+		m_pCoilGun->Kick(force);
 	}
 	virtual void ToggleTribbler(bool start){
 		m_pCoilGun->ToggleTribbler(start);

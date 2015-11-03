@@ -1,5 +1,8 @@
 #include "MultiModePlay.h"
 #include "SingleModePlay.h"
+#include "DistanceCalculator.h"
+
+extern DistanceCalculator gDistanceCalculator;
 
 class MasterModeIdle : public Idle {
 
@@ -205,9 +208,12 @@ void KickOff::onEnter(){
 DriveMode KickOff::step(double dt){
 	if (active){
 		if (m_pCom->BallInTribbler()) {
-			GatePosition ally;//other robot
+			//ObjectPosition &ally = m_pFieldState->partner;//other robot
+			ObjectPosition ally;
+			ally.polarMetricCoords.x = cv::norm(m_pFieldState->self.fieldCoords - m_pFieldState->GetHomeGate().fieldCoords + cv::Point2d(100,0));
+			ally.polarMetricCoords.y = gDistanceCalculator.angleBetween({ 0, -1 }, m_pFieldState->self.fieldCoords - m_pFieldState->GetHomeGate().fieldCoords) + m_pFieldState->self.getAngle();
 			if (DriveInstruction::aimTarget(ally, 5)){
-				m_pCom->Kick();
+				m_pCom->Kick(200);
 				return DRIVEMODE_2V2_DEFENSIVE;
 			}
 		}
@@ -233,7 +239,7 @@ DriveMode KickOff::step(double dt){
 			return DRIVEMODE_2V2_OFFENSIVE;
 		}
 		else{
-			GatePosition ally;//other robot
+			ObjectPosition &ally = m_pFieldState->partner;//other robot
 			if (DriveInstruction::aimTarget(ally, 5)){
 				for (BallPosition ball : m_pFieldState->balls) {
 					if (ball.getDistance() < 250) { //ball incoming?

@@ -27,7 +27,7 @@ public:
 	const BallPosition& getClosest(){
 		double target_distance = INT_MAX;
 		int target_index = 0;
-		for (int i = 0; i < balls.size(); i++) {
+		for (unsigned i = 0; i < balls.size(); i++) {
 			if (abs(balls[i].fieldCoords.y) > 250) continue; // too far outside of the field
 			if (balls[i].getDistance() < target_distance) {
 				target_index = i;

@@ -22,7 +22,7 @@ public:
 		};
 		return ballInTribbler;
 	};
-	virtual void Kick() {
+	virtual void Kick(int force = 800) {
 		ballInTribbler = false;
 	};
 	virtual ~CoilGun() {
@@ -50,7 +50,7 @@ public:
 		kick = false;
 		Start();
 	};
-	void Kick();
+	void Kick(int force = 800);
 	void ToggleTribbler(bool start);
 	bool BallInTribbler();
 	void Run();

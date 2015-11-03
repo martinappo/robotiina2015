@@ -4,7 +4,7 @@
 #define TRIBBLER_QUEUE_SIZE 30
 #define TRIBBLER_STATE_THRESHOLD 16
 
-void CoilBoard::Kick(){
+void CoilBoard::Kick(int force){
 	boost::posix_time::ptime time2 = boost::posix_time::microsec_clock::local_time();
 	//std::cout << (afterKickTime - time2).total_milliseconds() << std::endl;
 	if ((time2 - afterKickTime).total_milliseconds() < 1500) return;

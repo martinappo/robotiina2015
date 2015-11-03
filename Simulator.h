@@ -8,7 +8,7 @@ const int MAX_ROBOTS = 10;
 class Simulator : public ICamera/*, public IRefereeCom*/, public IWheelController, public ICoilGun, public ThreadedClass, public FieldState, public UdpServer
 {
 public:
-	Simulator(boost::asio::io_service &io, bool master, int number_of_balls);
+	Simulator(boost::asio::io_service &io, bool master, const std::string game_mode);
 	virtual ~Simulator();
 
 	virtual cv::Mat & Capture(bool bFullFrame = false);
@@ -28,7 +28,7 @@ public:
 	virtual GatePosition &GetTargetGate() { return blueGate; };
 	virtual GatePosition &GetHomeGate() { return yellowGate; };
 	virtual bool BallInTribbler();
-	virtual void Kick();
+	virtual void Kick(int force = 800);
 	virtual void ToggleTribbler(bool start) {
 		tribblerRunning = start;
 	};

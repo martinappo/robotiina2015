@@ -30,7 +30,7 @@ private:
 	std::atomic<STATE> last_state;
 	bool ParseOptions(int argc, char* argv[]);
 	void InitHardware();
-	void InitSimulator(bool master, int number_of_balls);
+	void InitSimulator(bool master, const std::string game_mode);
 //	void initWheels();
 //	void initCoilboard();
 	void initRefCom();

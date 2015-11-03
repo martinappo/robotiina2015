@@ -152,7 +152,7 @@ public:
 class ICoilGun {
 public:
 	virtual bool BallInTribbler() = 0;
-	virtual void Kick() = 0;
+	virtual void Kick(int force=800) = 0;
 	virtual void ToggleTribbler(bool start) = 0;
 
 };

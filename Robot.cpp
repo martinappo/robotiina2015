@@ -174,7 +174,7 @@ bool Robot::Launch(int argc, char* argv[])
 	auto _cam = config["camera"].as<std::string>();
 	bool bSimulator = _cam == "simulator" || _cam == "simulator-master";
 	if (bSimulator) {
-		InitSimulator(_cam == "simulator-master", play_mode == "master" || play_mode =="slave" ? 1:11);
+		InitSimulator(_cam == "simulator-master", play_mode);
 	}
 	else {
 		InitHardware();
@@ -204,8 +204,8 @@ bool Robot::Launch(int argc, char* argv[])
 	io_thread.join();
 	return true;
 }
-void Robot::InitSimulator(bool master, int number_of_balls) {
-	pSim = new Simulator(io, master, number_of_balls);
+void Robot::InitSimulator(bool master, const std::string game_mode) {
+	pSim = new Simulator(io, master, game_mode);
 	camera = pSim;
 	wheels = pSim;
 	coilBoard = pSim;
