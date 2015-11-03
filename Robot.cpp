@@ -199,10 +199,7 @@ void Robot::InitHardware() {
 		camera = new Camera(0);
 	std::cout << "Done" << std::endl;
 
-	if (config.count("skip-ports") == 0) {
-		scanner = new ComPortScanner(io);
-	}
-	wheels = new WheelController(scanner);
+	wheels = new WheelController(io);
 	coilBoardPortsOk = false;
 	wheelsPortsOk = false;
 

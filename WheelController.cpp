@@ -8,17 +8,14 @@
 #define deg270 (270.0 * PI / 180.0)
 //#define LIMIT_ACCELERATION
 
-WheelController::WheelController(ComPortScanner *pScanner, int iWheelCount/* = 3*/) : ThreadedClass("WheelController")
-, m_pScanner(pScanner), m_iWheelCount(iWheelCount)
+WheelController::WheelController(boost::asio::io_service &io_service, int iWheelCount/* = 3*/) : ThreadedClass("WheelController"),
+m_iWheelCount(iWheelCount), m_io_service(io_service)
 {
 	if (iWheelCount == 3) {
-		m_vWheels.push_back(std::make_pair<double, SimpleSerial*>(150, NULL));
-		m_vWheels.push_back(std::make_pair<double, SimpleSerial*>(30, NULL));
-		m_vWheels.push_back(std::make_pair<double, SimpleSerial*>(270, NULL));
+		wheelPositions.push_back(30);
+		wheelPositions.push_back(150);
+		wheelPositions.push_back(270);
 	}
-//	for (auto i = 0; i < iWheelCount; i++) {
-//		m_vWheels.push_back(std::make_pair<double, SimpleSerial*>((double)i / m_iWheelCount, NULL));
-//	}
 	targetSpeed = { 0, 0, 0 };
 	m_bPortsInitialized = false;
 	Start();
@@ -27,33 +24,19 @@ WheelController::WheelController(ComPortScanner *pScanner, int iWheelCount/* = 3
 
 void WheelController::Init()
 {
-	if (m_pScanner == NULL || m_bPortsInitialized) return;
-	using boost::property_tree::ptree;
-	ptree pt;
+	std::cout << "Init wheel COM port" << std::endl;
 	try {
-		read_ini("conf/wheels.ini", pt);
-
-		bool bPortsOk = true;
-		for (auto i = 0; i < m_iWheelCount; i++) {
-			auto sPortNum = pt.get<std::string>(std::to_string(i+1));
-			SimpleSerial * pPort = NULL;
-			if (m_pScanner->VerifyPort(sPortNum, i + 1, &pPort)) {
-				m_vWheels[i].second = pPort;
-			}else{
-				bPortsOk = false;
-			}
-		}
-		m_bPortsInitialized = bPortsOk;
+		using boost::property_tree::ptree;
+		ptree pt;
+		read_ini("conf/ports.ini", pt);
+		std::string port = pt.get<std::string>(std::to_string(ID_WHEEL));
+		std::cout << port << std::endl;
+		m_wheelPort = &SimpleSerial(m_io_service, port, 115200);
+		m_bPortsInitialized = true;
 	}
-	catch (std::runtime_error const&e) {
-		std::cout << "Error reading wheel configuration: " << e.what() << std::endl;
-	}
-	if (!m_bPortsInitialized) {
-		std::vector<int> ids;
-		for (auto i = 0; i < m_iWheelCount; i++) {
-			ids.push_back(i+1);
-		}
-		m_pScanner->ScanObject("conf/wheels.ini", ids);
+	catch (...) {
+		std::cout << "Wheel COM port couldn't be initialized" << std::endl;
+		m_bPortsInitialized = false;
 	}
 }
 
@@ -111,13 +94,13 @@ void WheelController::DriveRotate(double velocity, double direction, double rota
 	targetSpeed.rotation = rotate;
 #ifndef LIMIT_ACCELERATION
 	auto speeds = CalculateWheelSpeeds(targetSpeed.velocity, targetSpeed.heading, targetSpeed.rotation);
+	
 	for (auto i = 0; i < m_iWheelCount; i++) {
-		if (m_vWheels[i].second != NULL) {
-			std::ostringstream oss;
-			oss << "sd" << speeds[i] << "\n";
-			m_vWheels[i].second->writeString(oss.str());
-		}
+		std::ostringstream oss;
+		oss << i << ":sd" << speeds[i] << "\n";	
+		m_wheelPort->writeString(oss.str());
 	}
+	
 	//if (w_left != NULL) w_left->SetSpeed(speeds.x);
 	//if (w_right != NULL) w_right->SetSpeed(speeds.y);
 	//if (w_back != NULL) w_back->SetSpeed(speeds.z);
@@ -133,7 +116,7 @@ std::vector<double> WheelController::CalculateWheelSpeeds(double velocity, doubl
 	std::vector<double> speeds = std::vector<double>(m_iWheelCount);
 
 	for (auto i = 0; i < m_iWheelCount; i++) {
-		speeds[i] = velocity * cos((m_vWheels[i].first - direction)* PI / 180.0) + rotate;
+		speeds[i] = velocity * cos((wheelPositions[i] - direction)* PI / 180.0) + rotate;
 	}
 	/*
 	return cv::Point3d(
