@@ -30,7 +30,7 @@ private:
 	std::atomic<STATE> last_state;
 	bool ParseOptions(int argc, char* argv[]);
 	void InitHardware();
-	void InitSimulator(bool master);
+	void InitSimulator(bool master, int number_of_balls);
 //	void initWheels();
 //	void initCoilboard();
 	void initRefCom();
@@ -42,7 +42,7 @@ protected:
 	OBJECT targetGate= NUMBER_OF_OBJECTS; //uselected
 	bool captureFrames = false;
 	std::atomic_bool autoPilotEnabled;
-
+	std::string play_mode = "single";
 public:
     Robot(boost::asio::io_service &io);
 	bool Launch(int argc, char* argv[]);

@@ -168,10 +168,13 @@ Robot::~Robot()
 bool Robot::Launch(int argc, char* argv[])
 {
 	if (!ParseOptions(argc, argv)) return false;
+	if (config.count("play-mode"))
+		play_mode = config["play-mode"].as<std::string>();
+
 	auto _cam = config["camera"].as<std::string>();
 	bool bSimulator = _cam == "simulator" || _cam == "simulator-master";
 	if (bSimulator) {
-		InitSimulator(_cam == "simulator-master");
+		InitSimulator(_cam == "simulator-master", play_mode == "master" || play_mode =="slave" ? 1:11);
 	}
 	else {
 		InitHardware();
@@ -201,8 +204,8 @@ bool Robot::Launch(int argc, char* argv[])
 	io_thread.join();
 	return true;
 }
-void Robot::InitSimulator(bool master) {
-	pSim = new Simulator(io, master);
+void Robot::InitSimulator(bool master, int number_of_balls) {
+	pSim = new Simulator(io, master, number_of_balls);
 	camera = pSim;
 	wheels = pSim;
 	coilBoard = pSim;
@@ -293,13 +296,10 @@ void Robot::Run()
 	boost::filesystem::create_directories(captureDir);
 	}
 	*/
-	std::string play_mode = "single";
-	if (config.count("play-mode")) 
-		play_mode = config["play-mode"].as<std::string>();
 
 	/* Field state */
 
-	SoccerField field(io, m_pDisplay, play_mode == "master" || play_mode == "single");
+	SoccerField field(io, m_pDisplay, play_mode == "master" || play_mode == "single", play_mode == "master" || play_mode == "slave" ? 1 : 11);
 	refCom->setField(&field);
 
 	/* Vision modules */
@@ -674,7 +674,7 @@ void Robot::Run()
 		m_pDisplay->putText( std::string("Sight:") + (field.gateObstructed ? "obst" : "free"), cv::Point(-140, 120), 0.5, cv::Scalar(255, 255, 255));
 		//m_pDisplay->putText( std::string("OnWay:") + (somethingOnWay ? "yes" : "no"), cv::Point(-140, 140), 0.5, cv::Scalar(255, 255, 255));
 		
-		for (int i = 0; i < NUMBER_OF_BALLS; i++) {
+		for (int i = 0; i < field.balls.size(); i++) {
 
 			BallPosition &ball = field.balls[i];
 			m_pDisplay->putText( std::string("Ball") + std::to_string(i) + ": "+ std::to_string(ball.fieldCoords.x) + " : " + std::to_string(ball.fieldCoords.y), cv::Point(-250, i * 15 + 10), 0.3, cv::Scalar(255, 255, 255));

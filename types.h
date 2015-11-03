@@ -45,8 +45,6 @@ enum OBJECT
 };
 
 
-const size_t NUMBER_OF_BALLS = 11;
-
 enum STATE
 {
     STATE_NONE = 0,

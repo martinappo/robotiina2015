@@ -21,7 +21,7 @@ public:
 	};
 
 protected:
-	cv::Point2d lastFieldCoords;
+	cv::Point2d lastFieldCoords = cv::Point2d(INT_MAX, INT_MAX);;
 };
 
 

@@ -36,6 +36,8 @@ bool DriveInstruction::driveToTargetWithAngle(const ObjectPosition &target, doub
 }
 
 const BallPosition &DriveInstruction::getClosestBall(){
+	return  m_pFieldState->balls.getClosest();
+	/*
 	int target_distance = INT_MAX;
 	int target_index = 0;
 	for (int i = 0; i < NUMBER_OF_BALLS; i++) {
@@ -46,6 +48,7 @@ const BallPosition &DriveInstruction::getClosestBall(){
 		}
 	}
 	return m_pFieldState->balls[target_index];
+	*/
 
 }
 

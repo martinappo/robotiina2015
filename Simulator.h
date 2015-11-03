@@ -8,7 +8,7 @@ const int MAX_ROBOTS = 10;
 class Simulator : public ICamera/*, public IRefereeCom*/, public IWheelController, public ICoilGun, public ThreadedClass, public FieldState, public UdpServer
 {
 public:
-	Simulator(boost::asio::io_service &io, bool master);
+	Simulator(boost::asio::io_service &io, bool master, int number_of_balls);
 	virtual ~Simulator();
 
 	virtual cv::Mat & Capture(bool bFullFrame = false);
@@ -52,7 +52,7 @@ protected:
 	ObjectPosition robots[MAX_ROBOTS];
 
 private:
-	int mNumberOfBalls = NUMBER_OF_BALLS;
+	int mNumberOfBalls;
 	int frames = 0;
 	double fps;
 	bool tribblerRunning = false;

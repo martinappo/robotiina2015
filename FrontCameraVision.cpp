@@ -170,7 +170,7 @@ void FrontCameraVision::Run() {
 		
 		//Balls pos
 		cv::Mat rotMat = getRotationMatrix2D(cv::Point(0,0), -m_pState->self.getAngle(), 1);
-		cv::Mat balls(3, NUMBER_OF_BALLS, CV_64FC1);
+		cv::Mat balls(3, m_pState->balls.size(), CV_64FC1);
 		found = ballFinder.Locate(thresholdedImages[BALL], frameHSV, frameBGR, balls);
 		if (found) {
 			balls.row(0) -= frameBGR.size().width / 2;
@@ -187,6 +187,7 @@ void FrontCameraVision::Run() {
 				m_pState->balls[j].polarMetricCoords.y -= m_pState->self.getAngle(); // rotate balls back
 				m_pState->balls[j].isUpdated = true;
 			}
+
 		}
 		/*
 		ObjectPosition *targetGatePos = 0;

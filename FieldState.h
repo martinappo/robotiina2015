@@ -10,6 +10,10 @@ class BallArray {
 public:
 	BallArray(unsigned ballCount){
 		balls.resize(ballCount);
+		// distribute balls uniformly
+		for (unsigned i = 0; i < ballCount; i++) {
+			balls[i].id = i;
+		}
 	}
 	BallPosition& operator[](unsigned j) {
 		return balls[j];
@@ -20,6 +24,22 @@ public:
 	std::vector<BallPosition>::iterator end() {
 		return balls.end();
 	}
+	const BallPosition& getClosest(){
+		double target_distance = INT_MAX;
+		int target_index = 0;
+		for (int i = 0; i < balls.size(); i++) {
+			if (abs(balls[i].fieldCoords.y) > 250) continue; // too far outside of the field
+			if (balls[i].getDistance() < target_distance) {
+				target_index = i;
+				target_distance = balls[i].getDistance();
+			}
+		}
+		return balls[target_index];
+	}
+	size_t size() {
+		return balls.size();
+	}
+
 private:
 	std::vector<BallPosition> balls;
 };
@@ -62,10 +82,10 @@ public:
 		GAME_MODE_IN_PROGRESS
 	};
 	std::atomic_int gameMode;
-	FieldState();
+	FieldState(const int number_of_balls);
 	virtual ~FieldState();
-	BallPosition balls[NUMBER_OF_BALLS]; //All others are distance from self and heading to it
-	//BallArray balls = BallArray(NUMBER_OF_BALLS);
+	//BallPosition balls[number_of_balls]; //All others are distance from self and heading to it
+	BallArray balls;
 	GatePosition blueGate;
 	GatePosition yellowGate;
 	RobotPosition self; //Robot distance on field
@@ -78,7 +98,6 @@ public:
 	void resetBallsUpdateState();
 	virtual void Lock() {};
 	virtual void UnLock() {};
-
 };
 
 class FieldStateLock{

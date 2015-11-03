@@ -3,8 +3,8 @@
 #include <thread>
 #include <boost/system/error_code.hpp>
 
-SoccerField::SoccerField(boost::asio::io_service &io, IDisplay *pDisplay, bool master, int port) :m_pDisplay(pDisplay)
-, UdpServer(io, port, master)
+SoccerField::SoccerField(boost::asio::io_service &io, IDisplay *pDisplay, bool master, int number_of_balls, int port) :m_pDisplay(pDisplay)
+, UdpServer(io, port, master), FieldState(number_of_balls)
 {
 	green = cv::imread("field.png", CV_LOAD_IMAGE_COLOR);   // Read the file
 	field = cv::Mat(green.size(), CV_8UC3, cv::Scalar::all(245));
@@ -38,12 +38,7 @@ GatePosition & SoccerField::GetHomeGate() {
 };
 
 void SoccerField::initBalls() {
-	// distribute balls uniformly
-	for (int i = 0; i < NUMBER_OF_BALLS; i++) {
-		balls[i].fieldCoords.x = (int)(((i % 3) - 1) * 100);
-		balls[i].fieldCoords.y = (int)((i / 3 - 1.5) * 110);
-		balls[i].id = i;
-	}
+
 }
 void SoccerField::sendState(){
 	std::string message = "testing 123";
@@ -68,7 +63,7 @@ void SoccerField::Run(){
 	while (!stop_thread){
 
 		std::stringstream message;
-		message << "STT " << NUMBER_OF_BALLS << " ";
+		message << "STT " << balls.size() << " ";
 
 		sendState();
 		//recvState();
@@ -87,7 +82,7 @@ void SoccerField::Run(){
 			+ self.fieldCoords + c
 			, cv::Scalar(133, 33, 55), 3);
 		
-		for (int i = 0; i < NUMBER_OF_BALLS; i++) {
+		for (int i = 0; i < balls.size(); i++) {
 			BallPosition &_ball = balls[i];
 			cv::circle(field, _ball.fieldCoords + c, 7, cv::Scalar(48, 154, 236), -1);
 			if (isMaster) {
@@ -173,18 +168,18 @@ void SoccerField::MessageReceived(const std::string & message){
 			if (_id != id) {
 				std::string x, y, a;
 				ss >> x >> y;
-				balls[_id].fieldCoords.x = atoi(x.c_str());
-				balls[_id].fieldCoords.y = atoi(y.c_str());
+				balls[_id].fieldCoords.x = atof(x.c_str());
+				balls[_id].fieldCoords.y = atof(y.c_str());
 			}
 		}
 		else if (command == "STT") {
 			int numballs;
 			ss >> numballs;
-			for (int i = 0; i < NUMBER_OF_BALLS; i++) {
+			for (int i = 0; i < balls.size(); i++) {
 				std::string x, y, a;
 				ss >> x >> y;
-				balls[i].fieldCoords.x = atoi(x.c_str());
-				balls[i].fieldCoords.y = atoi(y.c_str());
+				balls[i].fieldCoords.x = atof(x.c_str());
+				balls[i].fieldCoords.y = atof(y.c_str());
 			}
 			std::string r_id;
 			do {
@@ -192,8 +187,8 @@ void SoccerField::MessageReceived(const std::string & message){
 				ss >> r_id >> x >> y;
 				int _id = atoi(r_id.c_str());
 				if (_id != id) {
-					robots[_id].fieldCoords.x = atoi(x.c_str());
-					robots[_id].fieldCoords.y = atoi(y.c_str());
+					robots[_id].fieldCoords.x = atof(x.c_str());
+					robots[_id].fieldCoords.y = atof(y.c_str());
 				}
 
 
