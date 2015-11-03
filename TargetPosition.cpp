@@ -6,7 +6,7 @@ TargetPosition::~TargetPosition()
 }
 
 
-void TargetPosition::updateFieldCoords(cv::Point orgin) {
+void TargetPosition::updateFieldCoords(cv::Point2d orgin) {
 
 }
 

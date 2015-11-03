@@ -17,7 +17,7 @@ RobotPosition::~RobotPosition()
 {
 }
 
-void RobotPosition::updateFieldCoordsNew(cv::Point orgin) {
+void RobotPosition::updateFieldCoordsNew(cv::Point2d orgin) {
 
 
 	double d1 = blueGate.getDistance();
@@ -72,7 +72,7 @@ void RobotPosition::updateFieldCoordsNew(cv::Point orgin) {
 	polarMetricCoords.y = d1 > d2 ? da1 : da2;
 
 }
-void RobotPosition::updateFieldCoords(cv::Point orgin) {
+void RobotPosition::updateFieldCoords(cv::Point2d orgin) {
 
 	updateFieldCoordsNew();
 	return;

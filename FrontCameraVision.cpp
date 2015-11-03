@@ -8,7 +8,7 @@
 #include "AutoCalibrator.h"
 #include <queue>          // std::priority_queue
 #include <functional>     // std::greater
-//#include "kdNode2D.h"
+#include "kdNode2D.h"
 #include "DistanceCalculator.h"
 
 extern DistanceCalculator gDistanceCalculator;
@@ -163,8 +163,8 @@ void FrontCameraVision::Run() {
 		auto c2 = (r2[min_j1] + r2[min_j2]) / 2;
 		circle(frameBGR, c2, 7, color2, -1, 8, 0);
 
-		m_pState->blueGate.updateRawCoordinates(c1, frameBGR.size() / 2);
-		m_pState->yellowGate.updateRawCoordinates(c2, frameBGR.size() / 2);
+		m_pState->blueGate.updateRawCoordinates(c1, cv::Point2d(frameBGR.size() / 2));
+		m_pState->yellowGate.updateRawCoordinates(c2, cv::Point2d(frameBGR.size() / 2));
 
 		m_pState->self.updateFieldCoords();
 		
@@ -184,7 +184,18 @@ void FrontCameraVision::Run() {
 			//cv::warpAffine(balls, rotatedBalls, rotMat, balls.size());
 			rotatedBalls = rotMat * balls;
 			//std::cout << rotatedBalls << std::endl;
-			m_pState->resetBallsUpdateState();;
+			m_pState->resetBallsUpdateState();
+			/*
+			for (int i = 0; i < rotatedBalls.cols; i++){
+				cv::Point2d pos = gDistanceCalculator.getFieldCoordinates(cv::Point(rotatedBalls.col(i)), cv::Point(0, 0)) + (cv::Point2d)m_pState->self.getFieldPos();
+				std::cout << pos << std::endl;
+
+			}
+			std::cout << "==============" << std::endl;
+			for (int i = 0; i < NUMBER_OF_BALLS; i++){
+				std::cout << m_pState->balls[i].fieldCoords << std::endl;
+			}
+			*/
 			/*
 			kdNode2D sortedballs(m_pState->balls, NUMBER_OF_BALLS);
 			std::cout << "##################" << std::endl;
@@ -202,11 +213,11 @@ void FrontCameraVision::Run() {
 			std::vector<int> newBalls; // new balls that are too far from existing ones
 			/* find balls that are close by */
 			for (int i = 0; i < rotatedBalls.cols; i++){
-				cv::Point2d pos = gDistanceCalculator.getFieldCoordinates(cv::Point(rotatedBalls.col(i)), cv::Point(0, 0)) + (cv::Point2d)m_pState->self.getFieldPos();
+				cv::Point2d pos = gDistanceCalculator.getFieldCoordinates(cv::Point2d(rotatedBalls.col(i)), cv::Point(0, 0)) + (cv::Point2d)m_pState->self.getFieldPos();
 				bool ball_found = false;
 				for (int j = 0; j < NUMBER_OF_BALLS; j++) {
 					if (!m_pState->balls[j].isUpdated && cv::norm(pos - m_pState->balls[j].fieldCoords) < 50) {
-						m_pState->balls[j].updateRawCoordinates(cv::Point(rotatedBalls.col(i)), cv::Point(0, 0));
+						m_pState->balls[j].updateRawCoordinates(cv::Point2d(rotatedBalls.col(i)), cv::Point(0, 0));
 						m_pState->balls[j].updateFieldCoords(m_pState->self.getFieldPos());
 						m_pState->balls[j].polarMetricCoords.y -= m_pState->self.getAngle(); // rotate balls back
 						m_pState->balls[j].isUpdated = true;

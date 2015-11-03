@@ -13,7 +13,7 @@ public:
 	std::atomic_bool isUpdated;
 	void predictCoordinates();
 	void setIsUpdated(bool updated);
-	void updateFieldCoords(cv::Point orgin = cv::Point(0, 0));
+	void updateFieldCoords(cv::Point2d orgin = cv::Point2d(0, 0));
 	// for simulator
 	double speed = 0;
 	double heading = 0;

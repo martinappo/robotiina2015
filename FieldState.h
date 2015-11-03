@@ -6,6 +6,23 @@
 #include "RobotPosition.h"
 #include "TargetPosition.h"
 
+class BallArray {
+public:
+	BallArray(unsigned ballCount){
+		balls.resize(ballCount);
+	}
+	BallPosition& operator[](unsigned j) {
+		return balls[j];
+	}
+	std::vector<BallPosition>::iterator begin() {
+		return balls.begin();
+	}
+	std::vector<BallPosition>::iterator end() {
+		return balls.end();
+	}
+private:
+	std::vector<BallPosition> balls;
+};
 class FieldState {
 public:
 	enum GameMode {
@@ -47,7 +64,8 @@ public:
 	std::atomic_int gameMode;
 	FieldState();
 	virtual ~FieldState();
-	BallPosition balls[NUMBER_OF_BALLS]; //All others are distance from self and heading to it
+	//BallPosition balls[NUMBER_OF_BALLS]; //All others are distance from self and heading to it
+	BallArray balls = BallArray(NUMBER_OF_BALLS);
 	GatePosition blueGate;
 	GatePosition yellowGate;
 	RobotPosition self; //Robot distance on field
