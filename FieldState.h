@@ -64,8 +64,8 @@ public:
 	std::atomic_int gameMode;
 	FieldState();
 	virtual ~FieldState();
-	//BallPosition balls[NUMBER_OF_BALLS]; //All others are distance from self and heading to it
-	BallArray balls = BallArray(NUMBER_OF_BALLS);
+	BallPosition balls[NUMBER_OF_BALLS]; //All others are distance from self and heading to it
+	//BallArray balls = BallArray(NUMBER_OF_BALLS);
 	GatePosition blueGate;
 	GatePosition yellowGate;
 	RobotPosition self; //Robot distance on field
