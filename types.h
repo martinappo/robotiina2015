@@ -36,6 +36,7 @@ struct Speed
 	double rotation;
 };
 
+const int ID_WHEEL = 1;
 const int ID_REF = 2;
 const int ID_COILGUN = 4;
 
