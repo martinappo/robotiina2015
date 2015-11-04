@@ -574,7 +574,6 @@ void Robot::Run()
 					coilBoard->ToggleTribbler(false);
 					wheels->Drive(0);
 					autoPilot->Enable(!autoPilot->running);
-					if (autoPilot->running) field.gameMode = FieldState::GAME_MODE_START_SINGLE_PLAY;
 					SetState(STATE_NONE);
 				}
 				catch (...){
