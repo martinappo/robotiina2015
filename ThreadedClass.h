@@ -22,7 +22,10 @@ public:
 		}
 	}
 	boost::atomic<bool> running;
-
+	void Sleep(int ms) {
+		std::chrono::milliseconds dura(10);
+		std::this_thread::sleep_for(dura);
+	}
 protected:
 	boost::thread_group threads;
 	boost::atomic<bool> stop_thread;

@@ -1,4 +1,5 @@
 #pragma once
+#include "types.h"
 #include "SimpleSerial.h"
 #include "ThreadedClass.h"
 #include "ConfigurableModule.h"

@@ -32,7 +32,7 @@ void MouseVision::Run(){
 		//cv::circle(frameBGR, cv::Point(frameBGR.cols - x, frameBGR.rows - y), 8, color, -1);
 
 		frameBGR.copyTo(display);
-		m_pState->blueGate.updateRawCoordinates(cv::Point(x, y), frameBGR.size()/2);
+		m_pState->blueGate.updateRawCoordinates(cv::Point2d(x, y), cv::Point2d(frameBGR.size()/2));
 		//m_pState->yellowGate.updateCoordinates(cv::Point(frameBGR.cols - x, frameBGR.rows - y));
 		m_pState->self.updateFieldCoords();
 		//ballFinder.populateBalls(thresholdedImages, frameHSV, frameBGR, BALL, m_pState);

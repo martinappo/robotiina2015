@@ -17,7 +17,16 @@ enum NewDriveMode {
 	DRIVEMODE_AIM_GATE,
 	DRIVEMODE_KICK,
 	DRIVEMODE_RECOVER_CRASH,
-	DRIVEMODE_EXIT
+	DRIVEMODE_EXIT,
+	//2v2 modes
+	DRIVEMODE_2V2_OFFENSIVE,
+	DRIVEMODE_2V2_DEFENSIVE,
+	DRIVEMODE_2V2_KICKOFF,
+	DRIVEMODE_2V2_AIM_GATE,
+	DRIVEMODE_2V2_KICK,
+	DRIVEMODE_2V2_DRIVE_TO_BALL,
+	DRIVEMODE_2V2_CATCH_BALL,
+	DRIVEMODE_2V2_DRIVE_HOME
 };
 class NewAutoPilot;
 
@@ -40,6 +49,11 @@ public:
 	};
 	virtual NewDriveMode step(double dt) = 0;
 	virtual void onExit(){};
+	const static bool USE_ANGLED_DRIVING = false;
+	bool aimTarget(ObjectPosition &target, double errorMargin = (USE_ANGLED_DRIVING) ? 90 : 10);
+	bool driveToTarget(ObjectPosition &target, double maxDistance = 20);
+	bool driveToTargetWithAngle(ObjectPosition &target, double maxDistance = 20);
+	BallPosition getClosestBall();
 
 };
 class Idle : public DriveInstruction
@@ -137,6 +151,79 @@ public:
 class CoilGun;
 class WheelController;
 
+class Offensive : public DriveInstruction
+{
+public:
+	Offensive() : DriveInstruction("2V2_AIM_ALLY"){};
+	virtual NewDriveMode step(double dt);
+};
+
+class Defensive : public DriveInstruction
+{
+public:
+	Defensive() : DriveInstruction("2V2_AIM_ALLY"){};
+	virtual NewDriveMode step(double dt);
+};
+
+class KickOff : public DriveInstruction
+{
+private:
+	bool active = false;
+public:
+	KickOff() : DriveInstruction("2V2_KICKOFF"){};
+	virtual void onEnter();
+	virtual NewDriveMode step(double dt);
+};
+
+class AimGate2v2 : public DriveInstruction
+{
+public:
+	AimGate2v2() : DriveInstruction("2V2_AIM_GATE"){};
+	virtual void onEnter();
+	virtual NewDriveMode step(double dt);
+};
+
+class Kick2v2 : public DriveInstruction
+{
+public:
+	Kick2v2() : DriveInstruction("2V2_KICK"){};
+	virtual void onEnter();
+	virtual NewDriveMode step(double dt);
+};
+
+class DriveToBall2v2 : public DriveInstruction
+{
+private:
+	TargetPosition start;
+	BallPosition target;
+	double speed;
+	double rotate;
+	double rotateGate;
+	int desiredDistance = 210;
+public:
+	DriveToBall2v2() : DriveInstruction("2V2_DRIVE_TO_BALL"){};
+	virtual void onEnter();
+	virtual NewDriveMode step(double dt);
+};
+
+class CatchBall2v2 : public DriveInstruction
+{
+private:
+	boost::posix_time::ptime catchStart;
+public:
+	CatchBall2v2() : DriveInstruction("2V2_CATCH_BALL"){};
+	virtual void onEnter();
+	virtual NewDriveMode step(double dt);
+};
+
+class DriveHome2v2 : public DriveInstruction
+{
+public:
+	DriveHome2v2() : DriveInstruction("2V2_DRIVE_HOME"){};
+	virtual void onEnter();
+	virtual NewDriveMode step(double dt);
+};
+
 class NewAutoPilot : public IControlModule, public ThreadedClass
 {
 	friend class Idle;
@@ -144,11 +231,21 @@ class NewAutoPilot : public IControlModule, public ThreadedClass
 	friend class CatchBall;
 	friend class LocateBall;
 	friend class LocateHome;
-	friend class DriveToHome;
+	friend class DriveHome;
 	friend class LocateGate;
 	friend class AimGate;
 	friend class Kick;
 	friend class RecoverCrash;
+
+
+	friend class Offensive;
+	friend class Defensive;
+	friend class KickOff;
+	friend class AimGate2v2;
+	friend class Kick2v2;
+	friend class DriveToBall2v2;
+	friend class CatchBall2v2;
+	friend class DriveHome2v2;
 public:
 	std::map<NewDriveMode, DriveInstruction*> driveModes;
 	std::atomic_bool testMode;
@@ -190,8 +287,17 @@ protected:
 	NewDriveMode CatchBall();
 	NewDriveMode LocateGate();
 	NewDriveMode LocateHome();
-	NewDriveMode DriveToHome();
+	NewDriveMode DriveHome();
 	NewDriveMode RecoverCrash();
+
+	NewDriveMode Defensive();
+	NewDriveMode Offensive();
+	NewDriveMode KickOff();
+	NewDriveMode AimGate2v2();
+	NewDriveMode Kick2v2();
+	NewDriveMode DriveToBall2v2();
+	NewDriveMode CatchBall2v2();
+	NewDriveMode DriveHome2v2();
 	void Step();
 public:
 	NewAutoPilot(ICommunicationModule *pComModule, FieldState *pState);

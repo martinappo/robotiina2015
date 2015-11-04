@@ -22,13 +22,16 @@
 #include <boost/date_time/posix_time/posix_time_io.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
-#include "NewAutoPilot.h"
+#include "SingleModePlay.h"
+#include "MultiModePlay.h"
 #include "RobotTracker.h"
 #include "VideoRecorder.h"
 #include "FrontCameraVision.h"
 #include "ComModule.h"
 #include "ManualControl.h"
+#ifdef ENABLE_REMOTE_CONTROL
 #include "RemoteControl.h"
+#endif
 #include "SoccerField.h"
 #include "MouseVision.h"
 
@@ -106,6 +109,17 @@ std::pair<std::string, FieldState::GameMode> refCommands[] = {
 };
 
 DistanceCalculator gDistanceCalculator;
+//TODO: convert to commandline options
+//#define USE_ROBOTIINA_WIFI
+#ifdef USE_ROBOTIINA_WIFI 
+// robotiina wifi
+boost::asio::ip::address bind_addr = boost::asio::ip::address::from_string("10.0.0.6"); // this computer ip
+boost::asio::ip::address brdc_addr = boost::asio::ip::address::from_string("10.0.0.15"); // netmask 255.255.255.240
+#else
+// any local network
+boost::asio::ip::address bind_addr = boost::asio::ip::address::from_string("0.0.0.0"); // all interfaces
+boost::asio::ip::address brdc_addr = boost::asio::ip::address_v4::broadcast(); // local network
+#endif;
 
 std::map<STATE, std::string> STATE_LABELS(states, states + sizeof(states) / sizeof(states[0]));
 
@@ -134,6 +148,7 @@ Robot::~Robot()
 		camera = NULL;
 		wheels = NULL;
 		coilBoard = NULL;
+		refCom = NULL;
 	}
 	if (camera) {
 		delete camera;
@@ -146,7 +161,9 @@ Robot::~Robot()
         delete wheels;
 	if (scanner)
 		delete scanner;
-//	if (m_pDisplay)
+	if (refCom)
+		delete refCom;
+	//	if (m_pDisplay)
 //		delete m_pDisplay;
 }
 
@@ -154,14 +171,17 @@ Robot::~Robot()
 bool Robot::Launch(int argc, char* argv[])
 {
 	if (!ParseOptions(argc, argv)) return false;
-	bool bSimulator = config["camera"].as<std::string>() == "simulator";
+	if (config.count("play-mode"))
+		play_mode = config["play-mode"].as<std::string>();
+
+	auto _cam = config["camera"].as<std::string>();
+	bool bSimulator = _cam == "simulator" || _cam == "simulator-master";
 	if (bSimulator) {
-		InitSimulator();
+		InitSimulator(_cam == "simulator-master", play_mode);
 	}
 	else {
 		InitHardware();
 	}
-	initRefCom();
 	std::cout << "Starting Robot" << std::endl;
 
 	cv::Size winSize(0, 0);
@@ -178,13 +198,19 @@ bool Robot::Launch(int argc, char* argv[])
 	else
 		m_pDisplay = new WebUI(8080);
 	captureFrames = config.count("capture-frames") > 0;
+	std::thread io_thread([&](){
+		io.run();
+	});
 	Run();
+	io.stop();
+	io_thread.join();
 	return true;
 }
-void Robot::InitSimulator() {
-	pSim = new Simulator();
+void Robot::InitSimulator(bool master, const std::string game_mode) {
+	pSim = new Simulator(io, master, game_mode);
 	camera = pSim;
 	wheels = pSim;
+	refCom = pSim;
 	coilBoard = pSim;
 }
 
@@ -206,7 +232,7 @@ void Robot::InitHardware() {
 	wheels->Init();
 	coilBoard = new CoilGun(); //TODO: fix this, to use real coilboard
 	//initCoilboard();
-	
+	initRefCom();
 	std::cout << "Done initializing" << std::endl;
 	return;
 }
@@ -251,8 +277,8 @@ void Robot::Run()
 	//double fps;
 	//int frames = 0;
 	//timer for rotation measure
-	boost::posix_time::ptime lastStepTime;	
-	boost::posix_time::time_duration dt;	
+	boost::posix_time::ptime lastStepTime;
+	boost::posix_time::time_duration dt;
 
 	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
 	boost::posix_time::ptime epoch = boost::posix_time::microsec_clock::local_time();
@@ -267,11 +293,13 @@ void Robot::Run()
 	/*= "videos/" + boost::posix_time::to_simple_string(time) + "/";
 	std::replace(captureDir.begin(), captureDir.end(), ':', '.');
 	if (captureFrames) {
-		boost::filesystem::create_directories(captureDir);
+	boost::filesystem::create_directories(captureDir);
 	}
 	*/
+
 	/* Field state */
-	SoccerField field(m_pDisplay);
+
+	SoccerField field(io, m_pDisplay, play_mode == "master" || play_mode == "single", play_mode == "master" || play_mode == "slave" ? 1 : 11);
 	refCom->setField(&field);
 
 	/* Vision modules */
@@ -287,18 +315,28 @@ void Robot::Run()
 	ComModule comModule(wheels, coilBoard);
 
 	/* Logic modules */
-	NewAutoPilot autoPilot(&comModule, &field);
+	StateMachine *autoPilot = NULL;
+	if (play_mode=="master" || play_mode =="slave"){
+		autoPilot = new MultiModePlay(&comModule, &field, play_mode == "master");
+	}
+	else  {
+		autoPilot = new SingleModePlay(&comModule, &field);
+	}
 
 	ManualControl manualControl(&comModule);
+#ifdef ENABLE_REMOTE_CONTROL
 	RemoteControl remoteControl(io, &comModule);
+#endif
 
 	//RobotTracker tracker(wheels);
 
 	std::stringstream subtitles;
 
 	VideoRecorder videoRecorder("videos/", 30, camera->GetFrameSize(true));
+	//port.get_io_service().run();
 	while (true)
     {
+		//io.poll_one();
 		time = boost::posix_time::microsec_clock::local_time();
 //		boost::posix_time::time_duration::tick_type dt = (time - lastStepTime).total_milliseconds();
 		boost::posix_time::time_duration::tick_type rotateDuration = (time - rotateTime).total_milliseconds();
@@ -307,7 +345,7 @@ void Robot::Run()
 		auto &ballPos = field.balls[0];
 		auto &targetGatePos = field.GetTargetGate();
 
-		autoPilot.UpdateState(&ballPos, &targetGatePos);
+		autoPilot->UpdateState(&ballPos, &targetGatePos);
 		*/
 		/*
 		if (dt > 1000) {
@@ -354,11 +392,13 @@ void Robot::Run()
 				calibrator.Enable(false);
 				visionModule.Enable(true);
 				if (last_state == STATE_TEST){
-					autoPilot.Enable(false);
+					autoPilot->Enable(false);
 				}
 				manualControl.Enable(false);
+#ifdef ENABLE_REMOTE_CONTROL
 				remoteControl.Enable(false);
-				autoPilot.enableTestMode(false);
+#endif
+				autoPilot->enableTestMode(false);
 				distanceCalibrator.Enable(false);
 				wheels->Drive(0);
 				STATE_BUTTON("(A)utoCalibrate objects", 'a', STATE_AUTOCALIBRATE)
@@ -368,7 +408,8 @@ void Robot::Run()
 					STATE_BUTTON("(T)oggle Referee Listener [" + (dynamic_cast<ThreadedClass*>(refCom)->running ? "On" : "Off") + "]", 't', STATE_TOGGLE_REFEREE)
 				}
 				STATE_BUTTON("(G)ive Referee Command", 'g', STATE_GIVE_COMMAND)
-				STATE_BUTTON("Auto(P)ilot [" + (autoPilot.running ? "On" : "Off") + "]", 'p', STATE_LAUNCH)
+				STATE_BUTTON("Auto(P)ilot [" + (autoPilot->running ? "On" : "Off") + "]", 'p', STATE_LAUNCH)
+
 				/*
 			createButton(std::string("(M)ouse control [") + (mouseControl == 0 ? "Off" : (mouseControl == 1 ? "Ball" : "Gate")) + "]", [this, &mouseControl]{
 				mouseControl = (mouseControl + 1) % 3;
@@ -505,12 +546,14 @@ void Robot::Run()
 			manualControl.Enable(true);
 			END_DIALOG
 		}
+#ifdef ENABLE_REMOTE_CONTROL
 		else if (STATE_REMOTE_CONTROL == state) {
 			START_DIALOG;
 			remoteControl.Enable(true);
 			STATE_BUTTON("BACK", 8, STATE_NONE);
 			END_DIALOG
 		}
+#endif
 		else if (STATE_LAUNCH == state) {
 			//if (targetGate == NUMBER_OF_OBJECTS) {
 			//	std::cout << "Select target gate" << std::endl;
@@ -527,7 +570,7 @@ void Robot::Run()
 					//SetState(STATE_SELECT_GATE);
 					coilBoard->ToggleTribbler(false);
 					wheels->Drive(0);
-					autoPilot.Enable(!autoPilot.running);
+					autoPilot->Enable(!autoPilot->running);
 					SetState(STATE_NONE);
 				}
 				catch (...){
@@ -565,11 +608,11 @@ void Robot::Run()
 		}
 		else if (STATE_TEST == state) {
 			START_DIALOG
-				autoPilot.enableTestMode(true);
-				autoPilot.Enable(true);
-				for (const auto d : autoPilot.driveModes) {
+				autoPilot->enableTestMode(true);
+				autoPilot->Enable(true);
+				for (const auto d : autoPilot->driveModes) {
 					m_pDisplay->createButton(d.second->name, '-', [this, &autoPilot, d]{
-						autoPilot.setTestMode(d.first);
+						autoPilot->setTestMode(d.first);
 					});
 				}
 				last_state = STATE_TEST;
@@ -605,7 +648,7 @@ void Robot::Run()
 		 
 		subtitles.str("");
 		//subtitles << oss.str();
-		subtitles << "|" << autoPilot.GetDebugInfo();
+		subtitles << "|" << autoPilot->GetDebugInfo();
 		subtitles << "|" << wheels->GetDebugInfo();
 		if (scanner && scanner->running) {
 			subtitles << "|" << "Please wait, Scanning Ports";
@@ -630,7 +673,7 @@ void Robot::Run()
 		m_pDisplay->putText( std::string("Sight:") + (field.gateObstructed ? "obst" : "free"), cv::Point(-140, 120), 0.5, cv::Scalar(255, 255, 255));
 		//m_pDisplay->putText( std::string("OnWay:") + (somethingOnWay ? "yes" : "no"), cv::Point(-140, 140), 0.5, cv::Scalar(255, 255, 255));
 		
-		for (int i = 0; i < NUMBER_OF_BALLS; i++) {
+		for (int i = 0; i < field.balls.size(); i++) {
 
 			BallPosition &ball = field.balls[i];
 			m_pDisplay->putText( std::string("Ball") + std::to_string(i) + ": "+ std::to_string(ball.fieldCoords.x) + " : " + std::to_string(ball.fieldCoords.y), cv::Point(-250, i * 15 + 10), 0.3, cv::Scalar(255, 255, 255));
@@ -696,8 +739,9 @@ void Robot::Run()
 		delete outputVideo;
 	}
 
+	if (autoPilot != NULL)
+		delete autoPilot;
 	refCom->setField(NULL);
-
 }
 
 
@@ -711,7 +755,10 @@ bool Robot::ParseOptions(int argc, char* argv[])
 		("locate_cursor", "find cursor instead of ball")
 		("skip-ports", "skip ALL COM port checks")
 		("skip-missing-ports", "skip missing COM ports")
-		("save-frames", "Save captured frames to disc");
+		("save-frames", "Save captured frames to disc")
+		("play-mode", po::value<std::string>(), "Play mode: single, opponent, master, slave")
+		("twitter-port", po::value<int>(), "UDP port for communication between robots");
+
 
 	po::store(po::parse_command_line(argc, argv, desc), config);
 	po::notify(config);

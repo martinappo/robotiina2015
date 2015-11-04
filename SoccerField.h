@@ -4,22 +4,25 @@
 #include <boost/thread/mutex.hpp>
 #include "FieldState.h"
 #include "ObjectPosition.h"
+#include "UdpServer.h"
+const int MAX_ROBOTS_NR = 10;
 
 class SoccerField :
-	public ThreadedClass, public FieldState
+	public UdpServer, ThreadedClass, public FieldState
 {
 public:
-	SoccerField(IDisplay *pDisplay);
+	using UdpServer::SendMessage;
+	SoccerField(boost::asio::io_service &io, IDisplay *pDisplay, bool master, int number_of_balls, int port=45000);
 	virtual ~SoccerField();
 	void Run();
-	virtual void SetTargetGate(OBJECT gate) {
-		m_targetGate = gate;
-	};
+	virtual void SetTargetGate(OBJECT gate);
 	virtual GatePosition &GetTargetGate();
 	virtual GatePosition &GetHomeGate();
 	void initBalls();
 	void Lock(){};
 	void UnLock(){};
+	virtual void MessageReceived(const std::string & message);
+
 private:
 	std::atomic_int m_targetGate;
 	IDisplay *m_pDisplay;
@@ -29,5 +32,7 @@ private:
 	cv::Mat green;
 	cv::Mat field;// = cv::Mat(310, 500, CV_8UC3, cv::Scalar::all(245)); // blink display
 	cv::Point2d c/*enter*/;
+
+
 };
 

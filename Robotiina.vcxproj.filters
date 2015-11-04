@@ -43,9 +43,6 @@
     <ClCompile Include="wheelcontroller.cpp">
       <Filter>ComModule</Filter>
     </ClCompile>
-    <ClCompile Include="NewAutoPilot.cpp">
-      <Filter>LogicModule</Filter>
-    </ClCompile>
     <ClCompile Include="remotecontrol.cpp">
       <Filter>ComModule</Filter>
     </ClCompile>
@@ -115,6 +112,18 @@
     <ClCompile Include="TargetPosition.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SingleModePlay.cpp">
+      <Filter>LogicModule</Filter>
+    </ClCompile>
+    <ClCompile Include="StateMachine.cpp">
+      <Filter>LogicModule</Filter>
+    </ClCompile>
+    <ClCompile Include="MultiModePlay.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UdpServer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="refereeCom.cpp">
       <Filter>ComModule</Filter>
     </ClCompile>
@@ -164,9 +173,6 @@
     </ClInclude>
     <ClInclude Include="blockingreader.h">
       <Filter>ComModule</Filter>
-    </ClInclude>
-    <ClInclude Include="NewAutoPilot.h">
-      <Filter>LogicModule</Filter>
     </ClInclude>
     <ClInclude Include="BallFinder.h">
       <Filter>VisionModule</Filter>
@@ -253,6 +259,21 @@
       <Filter>Simulator</Filter>
     </ClInclude>
     <ClInclude Include="TargetPosition.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AutoPlayHelpers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StateMachine.h">
+      <Filter>LogicModule</Filter>
+    </ClInclude>
+    <ClInclude Include="SingleModePlay.h">
+      <Filter>LogicModule</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiModePlay.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UdpServer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="refereeCom.h">

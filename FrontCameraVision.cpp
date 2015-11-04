@@ -8,7 +8,7 @@
 #include "AutoCalibrator.h"
 #include <queue>          // std::priority_queue
 #include <functional>     // std::greater
-//#include "kdNode2D.h"
+#include "kdNode2D.h"
 #include "DistanceCalculator.h"
 
 extern DistanceCalculator gDistanceCalculator;
@@ -163,72 +163,31 @@ void FrontCameraVision::Run() {
 		auto c2 = (r2[min_j1] + r2[min_j2]) / 2;
 		circle(frameBGR, c2, 7, color2, -1, 8, 0);
 
-		m_pState->blueGate.updateRawCoordinates(c1, frameBGR.size() / 2);
-		m_pState->yellowGate.updateRawCoordinates(c2, frameBGR.size() / 2);
+		m_pState->blueGate.updateRawCoordinates(c1, cv::Point2d(frameBGR.size() / 2));
+		m_pState->yellowGate.updateRawCoordinates(c2, cv::Point2d(frameBGR.size() / 2));
 
 		m_pState->self.updateFieldCoords();
 		
 		//Balls pos
 		cv::Mat rotMat = getRotationMatrix2D(cv::Point(0,0), -m_pState->self.getAngle(), 1);
-		cv::Mat balls(3, NUMBER_OF_BALLS, CV_64FC1);
+		cv::Mat balls(3, m_pState->balls.size(), CV_64FC1);
 		found = ballFinder.Locate(thresholdedImages[BALL], frameHSV, frameBGR, balls);
 		if (found) {
 			balls.row(0) -= frameBGR.size().width / 2;
 			balls.row(1) -= frameBGR.size().height / 2;
 			cv::Mat rotatedBalls(balls.size(), balls.type());
 
-			//std::cout << CV_64FC1 << ", " << rotMat.type() << ", " << balls.type() << std::endl;
-			//std::cout << rotMat << std::endl;
-			//std::cout << balls << std::endl;
-
-			//cv::warpAffine(balls, rotatedBalls, rotMat, balls.size());
 			rotatedBalls = rotMat * balls;
-			//std::cout << rotatedBalls << std::endl;
-			m_pState->resetBallsUpdateState();;
-			/*
-			kdNode2D sortedballs(m_pState->balls, NUMBER_OF_BALLS);
-			std::cout << "##################" << std::endl;
-			for (int i = 0; i < rotatedBalls.cols; i++){
-			std::cout << "=============" << std::endl;
-			cv::Point pos = gDistanceCalculator.getFieldCoordinates(cv::Point(rotatedBalls.col(i)), cv::Point(0, 0)) + (cv::Point2d)m_pState->self.getFieldPos();
-			auto nearest = sortedballs.nearest(pos);
-			std::cout << "nearest: " << nearest.second->id << " " << pos << " ->" << nearest.second->fieldCoords <<  std::endl;
-			assert(nearest.second);
-			nearest.second->updateRawCoordinates(cv::Point(rotatedBalls.col(i)), cv::Point(0, 0));
-			nearest.second->updateFieldCoords(m_pState->self.getFieldPos());
-			nearest.second->isUpdated = true;
-			}
-			*/
-			std::vector<int> newBalls; // new balls that are too far from existing ones
+			m_pState->resetBallsUpdateState();
+
 			/* find balls that are close by */
-			for (int i = 0; i < rotatedBalls.cols; i++){
-				cv::Point2d pos = gDistanceCalculator.getFieldCoordinates(cv::Point(rotatedBalls.col(i)), cv::Point(0, 0)) + (cv::Point2d)m_pState->self.getFieldPos();
-				bool ball_found = false;
-				for (int j = 0; j < NUMBER_OF_BALLS; j++) {
-					if (!m_pState->balls[j].isUpdated && cv::norm(pos - m_pState->balls[j].fieldCoords) < 50) {
-						m_pState->balls[j].updateRawCoordinates(cv::Point(rotatedBalls.col(i)), cv::Point(0, 0));
-						m_pState->balls[j].updateFieldCoords(m_pState->self.getFieldPos());
-						m_pState->balls[j].polarMetricCoords.y -= m_pState->self.getAngle(); // rotate balls back
-						m_pState->balls[j].isUpdated = true;
-						ball_found = true;
-						break;
-					}
-				}
-				if (!ball_found) {
-					newBalls.push_back(i);
-				}
+			for (int j = 0; j < rotatedBalls.cols; j++){
+				m_pState->balls[j].updateRawCoordinates(cv::Point2d(rotatedBalls.col(j)), cv::Point(0, 0));
+				m_pState->balls[j].updateFieldCoords(m_pState->self.getFieldPos());
+				m_pState->balls[j].polarMetricCoords.y -= m_pState->self.getAngle(); // rotate balls back
+				m_pState->balls[j].isUpdated = true;
 			}
-			// now update empty slots with new balls
-			for (auto newBall : newBalls){
-				for (int j = 0; j < NUMBER_OF_BALLS; j++) {
-					if (!m_pState->balls[j].isUpdated) {
-						m_pState->balls[j].updateRawCoordinates(cv::Point(rotatedBalls.col(newBall)), cv::Point(0, 0));
-						m_pState->balls[j].updateFieldCoords(m_pState->self.getFieldPos());
-						m_pState->balls[j].isUpdated = true;
-						break;
-					}
-				}
-			}
+
 		}
 		/*
 		ObjectPosition *targetGatePos = 0;

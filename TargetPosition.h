@@ -11,5 +11,5 @@ public:
 	TargetPosition(cv::Point orgin);
 	TargetPosition(BallPosition orgin);
 	virtual ~TargetPosition();
-	void updateFieldCoords(cv::Point orgin);
+	void updateFieldCoords(cv::Point2d orgin);
 };

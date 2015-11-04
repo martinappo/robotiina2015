@@ -46,8 +46,6 @@ enum OBJECT
 };
 
 
-const size_t NUMBER_OF_BALLS = 11;
-
 enum STATE
 {
     STATE_NONE = 0,
@@ -155,7 +153,7 @@ public:
 class ICoilGun {
 public:
 	virtual bool BallInTribbler() = 0;
-	virtual void Kick() = 0;
+	virtual void Kick(int force=800) = 0;
 	virtual void ToggleTribbler(bool start) = 0;
 
 };
