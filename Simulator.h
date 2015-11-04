@@ -63,7 +63,7 @@ private:
 	boost::posix_time::ptime lastStep = time;
 	bool isMaster = false;
 	bool isMasterPresent = false;
-	int id = 0;
+	int id = -1;
 	int next_id = 1;
 	bool stop_send = false;
 	bool ball_in_tribbler = false;

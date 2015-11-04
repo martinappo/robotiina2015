@@ -17,6 +17,7 @@ Simulator::Simulator(boost::asio::io_service &io, bool master, const std::string
 	self.fieldCoords = cv::Point(rand() % 300 - 150, rand() % 460 - 230);
 	self.polarMetricCoords = cv::Point(0, 0);
 	if (isMaster) {
+		id = 0;
 		// distribute balls uniformly at random
 		if (mNumberOfBalls == 1)  {
 			balls[0].fieldCoords = { 0, 0 };
@@ -114,6 +115,9 @@ void Simulator::MessageReceived(const std::string & message){
 			robots[_id].fieldCoords.y = atoi(y.c_str());
 			robots[_id].polarMetricCoords.y = atoi(a.c_str());
 		}
+	}
+	if (id < 0) {
+		SendMessage("ID? #"); // ask slave id again
 	}
 }
 void Simulator::UpdateGatePos(){
