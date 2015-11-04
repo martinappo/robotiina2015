@@ -9,7 +9,7 @@ enum MultiModeDriveStates {
 	DRIVEMODE_2V2_OFFENSIVE = 100,
 	DRIVEMODE_2V2_DEFENSIVE,
 	DRIVEMODE_2V2_KICKOFF,
-	DRIVEMODE_2V2_AIMPARTNER,
+	DRIVEMODE_2V2_AIM_PARTNER,
 	DRIVEMODE_2V2_AIM_GATE,
 	DRIVEMODE_2V2_KICK,
 	DRIVEMODE_2V2_DRIVE_TO_BALL,
@@ -63,15 +63,41 @@ class SlaveModeIdle : public Idle {
 class Offensive : public DriveInstruction
 {
 public:
-	Offensive() : DriveInstruction("2V2_AIM_ALLY"){};
-	virtual DriveMode step(double dt);
+	Offensive() : DriveInstruction("2V2_OFFENSIVE"){};
+	virtual DriveMode step(double dt){
+		if (m_pCom->BallInTribbler()){
+			//ATTACK! -> GOAL!!
+			return DRIVEMODE_2V2_AIM_GATE;
+		}
+		else
+			return DRIVEMODE_2V2_AIM_GATE;
+		return DRIVEMODE_2V2_OFFENSIVE;
+	}
 };
 
 class Defensive : public DriveInstruction
 {
 public:
-	Defensive() : DriveInstruction("2V2_AIM_ALLY"){};
-	virtual DriveMode step(double dt);
+	Defensive() : DriveInstruction("2V2_DEFENSIVE"){};
+	virtual DriveMode step(double dt){
+		auto & target = m_pFieldState->partner;
+		if (abs(m_pFieldState->GetHomeGate().getDistance() - target.getDistance()) > 100){//is ally in defense area?
+			if (m_pFieldState->GetHomeGate().getDistance() > 80)
+				return DRIVEMODE_2V2_DRIVE_HOME;
+			else{
+				BallPosition ball = DriveInstruction::getClosestBall();
+				if (ball.polarMetricCoords.x != INT_MAX)
+					DriveInstruction::aimTarget(ball);
+				//block gate & look for ball
+			}
+		}
+		else{
+			/*active defense
+			positon self between opponent and gate?
+			*/
+		}
+		return DRIVEMODE_2V2_DEFENSIVE;
+	}
 };
 
 class KickOff : public DriveToBall
@@ -85,7 +111,7 @@ public:
 		switch (next)
 		{
 		case DRIVEMODE_AIM_GATE:
-			return DRIVEMODE_2V2_AIMPARTNER;
+			return DRIVEMODE_2V2_AIM_PARTNER;
 		default:
 			return DRIVEMODE_2V2_KICKOFF;
 		} 
@@ -97,12 +123,14 @@ public:
 	AimPartner() : DriveInstruction("2V2_AIM_PARTNER"){};
 	virtual DriveMode step(double dt){
 		auto & target = m_pFieldState->partner;
-
+		std::cout << target.polarMetricCoords.y << std::endl;
 		if (aimTarget(target, 2)){
 			m_pCom->Kick(400);
+			std::cout << "kicked" << std::endl;
 			m_pFieldState->SendMessage("PAS #");
+			std::cout << DRIVEMODE_2V2_DEFENSIVE << std::endl;
 			return DRIVEMODE_2V2_DEFENSIVE;
-		}
+		}else return DRIVEMODE_2V2_AIM_PARTNER;
 	}
 };
 
@@ -111,9 +139,29 @@ class AimGate2v2 : public DriveInstruction
 {
 public:
 	AimGate2v2() : DriveInstruction("2V2_AIM_GATE"){};
-	virtual void onEnter();
-	virtual DriveMode step(double dt);
+	virtual DriveMode step(double dt){
+		ObjectPosition &lastGateLocation = m_pFieldState->GetTargetGate();
+		bool sightObstructed = m_pFieldState->gateObstructed;
+		if (!m_pCom->BallInTribbler()) return DRIVEMODE_2V2_OFFENSIVE;
+		if (aimTarget(lastGateLocation, 2)){
+			if (sightObstructed) { //then move sideways away from gate
+				//std::cout << sightObstructed << std::endl;
+				m_pCom->Drive(45, 90, 0);
+				std::chrono::milliseconds dura(400); // do we need to sleep?
+				std::this_thread::sleep_for(dura);
+			}
+			else {
+				return DRIVEMODE_2V2_KICK;
+			}
+		}
+		else {
+			m_pCom->Drive(0, 0, lastGateLocation.getHeading());
+		}
+		return DRIVEMODE_2V2_AIM_GATE;
+	}
 };
+
+
 
 class Kick2v2 : public DriveInstruction
 {
@@ -152,8 +200,17 @@ class DriveHome2v2 : public DriveInstruction
 {
 public:
 	DriveHome2v2() : DriveInstruction("2V2_DRIVE_HOME"){};
-	virtual void onEnter();
-	virtual DriveMode step(double dt);
+	virtual DriveMode step(double dt){
+		ObjectPosition &lastGateLocation = m_pFieldState->GetHomeGate();
+		if (DriveInstruction::aimTarget(lastGateLocation)){
+			if (DriveInstruction::driveToTarget(lastGateLocation)){
+				if (DriveInstruction::aimTarget(lastGateLocation)){
+					return DRIVEMODE_2V2_DEFENSIVE;
+				}
+			}
+		}
+		return DRIVEMODE_2V2_DRIVE_HOME;
+	}
 };
 
 class OpponentKickoff : public DriveInstruction
@@ -186,18 +243,24 @@ private:
 std::pair<DriveMode, DriveInstruction*> MasterDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_IDLE, new MasterModeIdle()),
 //	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_BALL, new DriveToBall()),
-	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_AIM_GATE, new AimGate()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DEFENSIVE, new Defensive()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_OFFENSIVE, new Offensive()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_AIM_PARTNER, new AimPartner()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_AIM_GATE, new AimGate2v2()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_KICK, new Kick()),
 //	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_CATCH_BALL, new CatchBall()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_KICKOFF, new KickOff()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DRIVE_HOME, new DriveHome2v2()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_OPPONENT_KICKOFF, new OpponentKickoff(true)),
 };
 
 std::pair<DriveMode, DriveInstruction*> SlaveDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_IDLE, new SlaveModeIdle()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DEFENSIVE, new Defensive()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_OFFENSIVE, new Offensive()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_BALL, new DriveToBall()),
-	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_AIM_GATE, new AimGate()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DRIVE_HOME, new DriveHome2v2()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_AIM_GATE, new AimGate2v2()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_KICK, new Kick()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_OPPONENT_KICKOFF, new OpponentKickoff(false)),
 //	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_CATCH_BALL, new CatchBall()),
@@ -216,75 +279,7 @@ MultiModePlay::~MultiModePlay()
 }
 
 
-/*2v2 part*/
-/*BEGIN Offensive*/
-DriveMode Offensive::step(double dt){
-	if (m_pCom->BallInTribbler()){
-		//ATTACK! -> GOAL!!
-		return DRIVEMODE_2V2_AIM_GATE;
-	}
-	else
-		return DRIVEMODE_2V2_CATCH_BALL;
-	return DRIVEMODE_2V2_KICK;
-}
 
-/*BEGIN Defensive*/
-DriveMode Defensive::step(double dt){
-	GatePosition ally;
-	if (abs(m_pFieldState->GetHomeGate().getDistance() - ally.getDistance()) > 100){//is ally in defense area?
-		if (m_pFieldState->GetHomeGate().getDistance() > 80)
-			return DRIVEMODE_2V2_DRIVE_HOME;
-		else{
-			BallPosition ball = DriveInstruction::getClosestBall();
-			if (ball.polarMetricCoords.x != INT_MAX)
-				DriveInstruction::aimTarget(ball);
-			//block gate & look for ball
-		}
-	}
-	else{
-		/*active defense
-		positon self between opponent and gate?
-		*/
-	}
-	return DRIVEMODE_2V2_DEFENSIVE;
-}
-
-
-
-/*BEGIN AimGate2v2*/
-void AimGate2v2::onEnter(){
-}
-DriveMode AimGate2v2::step(double dt){
-
-
-	ObjectPosition &lastGateLocation = m_pFieldState->GetTargetGate();
-	bool sightObstructed = m_pFieldState->gateObstructed;
-
-
-	if (!m_pCom->BallInTribbler()) return DRIVEMODE_2V2_OFFENSIVE;
-
-	int dir = sign(lastGateLocation.getAngle());
-	double angle = lastGateLocation.getAngle();
-	if (angle > 180){
-		angle -= 360;
-	}
-
-	if (abs(angle) < 2) {
-		if (sightObstructed) { //then move sideways away from gate
-			//std::cout << sightObstructed << std::endl;
-			m_pCom->Drive(45, 90, 0);
-			std::chrono::milliseconds dura(400); // do we need to sleep?
-			std::this_thread::sleep_for(dura);
-		}
-		else {
-			return DRIVEMODE_2V2_KICK;
-		}
-	}
-	else {
-		m_pCom->Drive(0, 0, dir*(std::max(cv::norm(angle), 6.0)));
-	}
-	return DRIVEMODE_2V2_AIM_GATE;
-}
 
 /*BEGIN Kick2v2*/
 void Kick2v2::onEnter(){
@@ -359,17 +354,4 @@ DriveMode CatchBall2v2::step(double dt){
 }
 */
 /*BEGIN DriveHome2v2*/
-void DriveHome2v2::onEnter(){
-}
 
-DriveMode DriveHome2v2::step(double dt){
-	ObjectPosition &lastGateLocation = m_pFieldState->GetHomeGate();
-	if (DriveInstruction::aimTarget(lastGateLocation)){
-		if (DriveInstruction::driveToTarget(lastGateLocation)){
-			if (DriveInstruction::aimTarget(lastGateLocation)){
-				return DRIVEMODE_2V2_DEFENSIVE;
-			}
-		}
-	}
-	return DRIVEMODE_2V2_DRIVE_HOME;
-}
