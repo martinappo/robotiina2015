@@ -9,11 +9,7 @@ SoccerField::SoccerField(boost::asio::io_service &io, IDisplay *pDisplay, bool m
 	green = cv::imread("field.png", CV_LOAD_IMAGE_COLOR);   // Read the file
 	field = cv::Mat(green.size(), CV_8UC3, cv::Scalar::all(245));
 	c = cv::Point2d(green.size()) / 2;
-	
-	isMaster = master;
-	if (isMaster)
-		initBalls();
-	else SendMessage("ID? #"); // ask slave id
+
 	Start();
 }
 
@@ -44,15 +40,14 @@ void SoccerField::initBalls() {
 void SoccerField::Run(){
 	while (!stop_thread){
 
-		sendState();
 		//recvState();
 		green.copyTo(field);
 
-
-		std::stringstream message;
-		message << "POS " << " " << self.fieldCoords.x << " " << self.fieldCoords.y << " " << self.getAngle() << " #";
-		SendMessage(message.str());
-
+		{
+			std::stringstream message;
+			message << "POS " << " " << self.fieldCoords.x << " " << self.fieldCoords.y << " " << self.getAngle() << " #";
+			SendMessage(message.str());
+		}
 
 		cv::circle(field, self.rawFieldCoords + c, 24, cv::Scalar(0, 33, 255), 4);
 		cv::circle(field, self.fieldCoords + c, 14, cv::Scalar(133, 33, 55), 4);
@@ -64,10 +59,10 @@ void SoccerField::Run(){
 		for (int i = 0; i < balls.size(); i++) {
 			BallPosition &_ball = balls[i];
 			cv::circle(field, _ball.fieldCoords + c, 7, cv::Scalar(48, 154, 236), -1);
-			if (isMaster) {
-				message << (int)balls[i].fieldCoords.x << " " << (int)balls[i].fieldCoords.y << " ";
+			/*{
+				message << "BAL " <<(int)balls[i].fieldCoords.x << " " << (int)balls[i].fieldCoords.y << " ";
 				//SendMessage(message.str());
-			}
+			}*/
 		}
 		
 		if (blueGate.getDistance() > 0) {
