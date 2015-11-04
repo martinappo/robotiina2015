@@ -31,7 +31,7 @@ void WheelController::Init()
 		read_ini("conf/ports.ini", pt);
 		std::string port = pt.get<std::string>(std::to_string(ID_WHEEL));
 		std::cout << port << std::endl;
-		m_wheelPort = &SimpleSerial(m_io_service, port, 115200);
+		m_wheelPort = new SimpleSerial(m_io_service, port, 115200);
 		m_bPortsInitialized = true;
 	}
 	catch (...) {

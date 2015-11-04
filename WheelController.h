@@ -15,7 +15,7 @@ private:
 	Speed lastSpeed;
 	cv::Point3d robotPos = { 0, 0, 0 }; // x, y, rotation
 	std::vector<int> wheelPositions;
-	boost::asio::io_service m_io_service;
+	boost::asio::io_service &m_io_service;
 	boost::posix_time::ptime stallTime = boost::posix_time::microsec_clock::local_time() + boost::posix_time::seconds(60);
 	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
 	boost::posix_time::ptime lastStep = time;
