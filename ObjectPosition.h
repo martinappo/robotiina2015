@@ -8,6 +8,7 @@ public:
 	//ObjectPosition(const ObjectPosition& that) = delete; // disable copy positions
 	double getDistance() const { return polarMetricCoords.x; };
 	double getAngle() const { return polarMetricCoords.y; };
+	double getHeading() const { return polarMetricCoords.y > 180 ? polarMetricCoords.y -360 : polarMetricCoords.y; };
 	cv::Point2d getFieldPos() { return fieldCoords; };
 	virtual void updateRawCoordinates(const cv::Point2d pos, cv::Point2d orgin = cv::Point2d(0, 0)); // Takes raw coordinates of object from frame
 	virtual ~ObjectPosition(){};

@@ -1,14 +1,21 @@
 #include "StateMachine.h"
 
 bool DriveInstruction::aimTarget(const ObjectPosition &target, double errorMargin){
-	double angle = target.getAngle();
-	if (angle > 180)
-		angle -= 360;
-	if (abs(angle) > errorMargin){
-		m_pCom->Drive(0, 0, angle);
+	double heading = target.getHeading();
+	if (abs(heading) > errorMargin){
+		m_pCom->Drive(0, 0, heading);
 		return false;
 	}
 	else return true;
+}
+bool DriveInstruction::catchTarget(const ObjectPosition &target){
+	if (m_pCom->BallInTribbler()) {
+		m_pCom->Drive(0, 0, 0);
+		return true;
+	}
+	m_pCom->ToggleTribbler(true);
+	m_pCom->Drive(30, 0, target.getHeading());
+	return false;
 }
 
 bool DriveInstruction::driveToTarget(const ObjectPosition &target, double maxDistance){
@@ -16,20 +23,19 @@ bool DriveInstruction::driveToTarget(const ObjectPosition &target, double maxDis
 		return driveToTargetWithAngle(target, maxDistance);
 	double dist = target.getDistance();
 	if (dist > maxDistance){
-		m_pCom->Drive((dist > 50) ? 100 : (std::max(dist, 20.0)));//To Do: set speed based on distance
+		m_pCom->Drive((dist > 50) ? 100 : (std::max(dist, 20.0))); //To Do: set speed based on distance
 		return false;
 	}
 	else return true;
 }
 
 bool DriveInstruction::driveToTargetWithAngle(const ObjectPosition &target, double maxDistance){
-	double angle = target.getAngle();
-	if (angle > 180)
-		angle -= 360;
+	double heading = target.getHeading();
+
 	double dist = target.getDistance();
 	if (dist > maxDistance){
 		double speed = (dist > 50) ? 100 : (std::max(dist, 20.0));
-		m_pCom->Drive(speed, 0, angle*1.5);//To Do: set speed based on distance
+		m_pCom->Drive(speed, 0, heading*1.5);//To Do: set speed based on distance
 		return false;
 	}
 	else return true;

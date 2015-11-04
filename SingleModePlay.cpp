@@ -8,15 +8,22 @@ DriveMode DriveToBall::step(double dt)
 
 	if (target.getDistance() > 10000) return DRIVEMODE_IDLE;
 	if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
-
 	if (aimTarget(target)){
+		std::cout << "Aim1" << std::endl;
 		if (driveToTarget(target)){
+			std::cout << "Drive" << std::endl;
+			m_pCom->ToggleTribbler(true);
 			if (aimTarget(target)){
-				m_pCom->ToggleTribbler(true);
-				return DRIVEMODE_CATCH_BALL;
+				std::cout << "Aim2" << std::endl;
+				if (catchTarget(target)){
+					std::cout << "catch" << std::endl;
+					return DRIVEMODE_AIM_GATE;
+				}
 			}
 		}
 	}
+	std::cout << "Drive0" << std::endl;
+
 	return DRIVEMODE_DRIVE_TO_BALL;
 	
 
@@ -24,6 +31,7 @@ DriveMode DriveToBall::step(double dt)
 
 
 /*BEGIN CatchBall*/
+/*
 void CatchBall::onEnter()
 {
 	DriveInstruction::onEnter();
@@ -47,6 +55,7 @@ DriveMode CatchBall::step(double dt)
 	else ROTATE_AND_DRIVE_TOWARD_TO_TARGET_SLOWLY
 	return DRIVEMODE_CATCH_BALL;
 }
+*/
 /*END CatchBall*/
 
 
@@ -57,7 +66,7 @@ DriveMode AimGate::step(double dt)
 	FIND_TARGET_GATE
 
 
-	if (BALL_IN_TRIBBLER) return DRIVEMODE_DRIVE_TO_BALL;
+	if (!BALL_IN_TRIBBLER) return DRIVEMODE_DRIVE_TO_BALL;
 
 	if (STUCK_IN_STATE(9000)) return DRIVEMODE_KICK;
 
@@ -102,7 +111,7 @@ std::pair<DriveMode, DriveInstruction*> SingleDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_BALL, new DriveToBall()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_AIM_GATE, new AimGate()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_KICK, new Kick()),
-	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_CATCH_BALL, new CatchBall()),
+//	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_CATCH_BALL, new CatchBall()),
 };
 
 SingleModePlay::SingleModePlay(ICommunicationModule *pComModule, FieldState *pState)

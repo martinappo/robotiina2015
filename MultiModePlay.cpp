@@ -4,6 +4,21 @@
 
 extern DistanceCalculator gDistanceCalculator;
 
+enum MultiModeDriveStates {
+	//2v2 modes
+	DRIVEMODE_2V2_OFFENSIVE = 100,
+	DRIVEMODE_2V2_DEFENSIVE,
+	DRIVEMODE_2V2_KICKOFF,
+	DRIVEMODE_2V2_AIMPARTNER,
+	DRIVEMODE_2V2_AIM_GATE,
+	DRIVEMODE_2V2_KICK,
+	DRIVEMODE_2V2_DRIVE_TO_BALL,
+	DRIVEMODE_2V2_CATCH_BALL,
+	DRIVEMODE_2V2_DRIVE_HOME,
+	DRIVEMODE_2V2_OPPONENT_KICKOFF
+
+};
+
 class MasterModeIdle : public Idle {
 
 	virtual DriveMode step(double dt) {
@@ -15,7 +30,6 @@ class MasterModeIdle : public Idle {
 		case FieldState::GAME_MODE_START_OPPONENT_FREE_KICK:
 			return DRIVEMODE_2V2_OPPONENT_KICKOFF;
 		case FieldState::GAME_MODE_START_OUR_KICK_OFF:
-			return DRIVEMODE_2V2_KICKOFF;
 		case FieldState::GAME_MODE_START_OUR_FREE_KICK:
 			m_pFieldState->gameMode = FieldState::GAME_MODE_IN_PROGRESS;
 			return DRIVEMODE_2V2_KICKOFF;
@@ -60,15 +74,38 @@ public:
 	virtual DriveMode step(double dt);
 };
 
-class KickOff : public DriveInstruction
+class KickOff : public DriveToBall
 {
 private:
 	bool active = false;
 public:
-	KickOff() : DriveInstruction("2V2_KICKOFF"){};
-	virtual void onEnter();
-	virtual DriveMode step(double dt);
+	KickOff() : DriveToBall("2V2_KICKOFF"){};
+	virtual DriveMode step(double dt){
+		DriveMode next = __super::step(dt);
+		switch (next)
+		{
+		case DRIVEMODE_AIM_GATE:
+			return DRIVEMODE_2V2_AIMPARTNER;
+		default:
+			return DRIVEMODE_2V2_KICKOFF;
+		} 
+	}
 };
+class AimPartner : public DriveInstruction
+{
+public:
+	AimPartner() : DriveInstruction("2V2_AIM_PARTNER"){};
+	virtual DriveMode step(double dt){
+		auto & target = m_pFieldState->partner;
+
+		if (aimTarget(target, 2)){
+			m_pCom->Kick(400);
+			m_pFieldState->SendMessage("PAS #");
+			return DRIVEMODE_2V2_DEFENSIVE;
+		}
+	}
+};
+
 
 class AimGate2v2 : public DriveInstruction
 {
@@ -85,7 +122,7 @@ public:
 	virtual void onEnter();
 	virtual DriveMode step(double dt);
 };
-
+/*
 class DriveToBall2v2 : public DriveInstruction
 {
 private:
@@ -110,7 +147,7 @@ public:
 	virtual void onEnter();
 	virtual DriveMode step(double dt);
 };
-
+*/
 class DriveHome2v2 : public DriveInstruction
 {
 public:
@@ -122,21 +159,38 @@ public:
 class OpponentKickoff : public DriveInstruction
 {
 public:
-	OpponentKickoff() : DriveInstruction("2V2_OPPONENT_KICKOFF"){};
-	virtual void onEnter();
-	virtual DriveMode step(double dt);
+	OpponentKickoff(bool mode) : DriveInstruction("2V2_OPPONENT_KICKOFF"), mode(mode){};
+	void onEnter(){
+		ball = getClosestBall();
+		std::this_thread::sleep_for(std::chrono::milliseconds(500)); //half second wait.
+	}
+
+	DriveMode OpponentKickoff::step(double dt){
+
+		if (ball.getDistance() > 500)
+			return DRIVEMODE_2V2_DEFENSIVE;
+		const BallPosition& newBall = getClosestBall();
+		if (abs(ball.getDistance() - newBall.getDistance()) > 10 || abs(ball.getAngle() - newBall.getAngle()) > 5){ //ball has moved
+			return DRIVEMODE_2V2_OFFENSIVE;
+		}
+		else{
+			std::this_thread::sleep_for(std::chrono::milliseconds(500)); //half second wait.
+			return DRIVEMODE_2V2_OPPONENT_KICKOFF;
+		}
+	}
 private:
 	BallPosition ball;
+	bool mode;
 };
 
 std::pair<DriveMode, DriveInstruction*> MasterDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_IDLE, new MasterModeIdle()),
-	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_BALL, new DriveToBall()),
+//	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_BALL, new DriveToBall()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_AIM_GATE, new AimGate()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_KICK, new Kick()),
-	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_CATCH_BALL, new CatchBall()),
+//	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_CATCH_BALL, new CatchBall()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_KICKOFF, new KickOff()),
-	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_OPPONENT_KICKOFF, new OpponentKickoff()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_OPPONENT_KICKOFF, new OpponentKickoff(true)),
 };
 
 std::pair<DriveMode, DriveInstruction*> SlaveDriveModes[] = {
@@ -145,7 +199,8 @@ std::pair<DriveMode, DriveInstruction*> SlaveDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_BALL, new DriveToBall()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_AIM_GATE, new AimGate()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_KICK, new Kick()),
-	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_CATCH_BALL, new CatchBall()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_OPPONENT_KICKOFF, new OpponentKickoff(false)),
+//	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_CATCH_BALL, new CatchBall()),
 };
 
 MultiModePlay::MultiModePlay(ICommunicationModule *pComModule, FieldState *pState, bool bMaster) :StateMachine(pComModule, pState,
@@ -194,63 +249,7 @@ DriveMode Defensive::step(double dt){
 	return DRIVEMODE_2V2_DEFENSIVE;
 }
 
-/*BEGIN KickOff*/
-void KickOff::onEnter(){
-	DriveInstruction::onEnter();
-	active = false;
-	m_pCom->Drive(0, 0, 0);
-	for (BallPosition ball : m_pFieldState->balls) {
-		if (ball.getDistance() < 80) {
-			active = true;
-		}
-	}
-}
-DriveMode KickOff::step(double dt){
-	if (active){
-		if (m_pCom->BallInTribbler()) {
-			//ObjectPosition &ally = m_pFieldState->partner;//other robot
-			ObjectPosition ally;
-			ally.polarMetricCoords.x = cv::norm(m_pFieldState->self.fieldCoords - m_pFieldState->GetHomeGate().fieldCoords + cv::Point2d(100,0));
-			ally.polarMetricCoords.y = gDistanceCalculator.angleBetween({ 0, -1 }, m_pFieldState->self.fieldCoords - m_pFieldState->GetHomeGate().fieldCoords) + m_pFieldState->self.getAngle();
-			if (DriveInstruction::aimTarget(ally, 5)){
-				m_pCom->Kick(200);
-				return DRIVEMODE_2V2_DEFENSIVE;
-			}
-		}
-		else{ // get ball
-			BallPosition target = DriveInstruction::getClosestBall();
-			if (target.polarMetricCoords.x == INT_MAX || target.getDistance() > 10000){ // no valid balls
-				//broke
-				//TO DO: something
-				return DRIVEMODE_EXIT;
-			}
-			if (DriveInstruction::aimTarget(target)){
-				if (DriveInstruction::driveToTarget(target)){
-					if (DriveInstruction::aimTarget(target, 13)){
-						m_pCom->ToggleTribbler(true);
-						return DRIVEMODE_2V2_KICKOFF;
-					}
-				}
-			}
-		}
-	}
-	else{
-		if (m_pCom->BallInTribbler()){
-			return DRIVEMODE_2V2_OFFENSIVE;
-		}
-		else{
-			ObjectPosition &ally = m_pFieldState->partner;//other robot
-			if (DriveInstruction::aimTarget(ally, 5)){
-				for (BallPosition ball : m_pFieldState->balls) {
-					if (ball.getDistance() < 250) { //ball incoming?
-						m_pCom->ToggleTribbler(true);//prepare to catch; ride towards ball?
-					}
-				}
-			}
-		}
-	}
-	return DRIVEMODE_2V2_KICKOFF;
-}
+
 
 /*BEGIN AimGate2v2*/
 void AimGate2v2::onEnter(){
@@ -303,6 +302,7 @@ DriveMode Kick2v2::step(double dt){
 }
 
 /*BEGIN DriveToBall2v2*/
+/*
 void DriveToBall2v2::onEnter(){
 	DriveInstruction::onEnter();
 	m_pCom->Drive(0, 0, 0);
@@ -331,8 +331,9 @@ DriveMode DriveToBall2v2::step(double dt){
 	}
 	return DRIVEMODE_2V2_DRIVE_TO_BALL;
 }
-
+*/
 /*BEGIN CatchBall2v2*/
+/*
 void CatchBall2v2::onEnter(){
 	DriveInstruction::onEnter();
 	m_pCom->ToggleTribbler(true);
@@ -356,7 +357,7 @@ DriveMode CatchBall2v2::step(double dt){
 	}
 	return DRIVEMODE_2V2_CATCH_BALL;
 }
-
+*/
 /*BEGIN DriveHome2v2*/
 void DriveHome2v2::onEnter(){
 }
@@ -371,24 +372,4 @@ DriveMode DriveHome2v2::step(double dt){
 		}
 	}
 	return DRIVEMODE_2V2_DRIVE_HOME;
-}
-
-/*BEGIN Opponent kickoff*/
-void OpponentKickoff::onEnter(){
-	ball = getClosestBall();
-	std::this_thread::sleep_for(std::chrono::milliseconds(500)); //half second wait.
-}
-
-DriveMode OpponentKickoff::step(double dt){
-
-	if (ball.getDistance() > 500)
-		return DRIVEMODE_2V2_DEFENSIVE;
-	BallPosition newBall = getClosestBall();
-	if (abs(ball.getDistance() - newBall.getDistance()) > 10 || abs(ball.getAngle() - newBall.getAngle()) > 5){ //ball has moved
-		return DRIVEMODE_2V2_OFFENSIVE;
-	}
-	else{
-		std::this_thread::sleep_for(std::chrono::milliseconds(500)); //half second wait.
-		return DRIVEMODE_2V2_OPPONENT_KICKOFF;
-	}
 }

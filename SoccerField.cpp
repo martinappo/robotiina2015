@@ -2,6 +2,9 @@
 #include <chrono>
 #include <thread>
 #include <boost/system/error_code.hpp>
+#include "DistanceCalculator.h"
+
+extern DistanceCalculator gDistanceCalculator;
 
 SoccerField::SoccerField(boost::asio::io_service &io, IDisplay *pDisplay, bool master, int number_of_balls, int port) :m_pDisplay(pDisplay)
 , UdpServer(io, port, master), FieldState(number_of_balls)
@@ -20,7 +23,12 @@ SoccerField::~SoccerField()
 	boost::system::error_code error;
 
 }
-
+void SoccerField::SetTargetGate(OBJECT gate) {
+	m_targetGate = gate;
+	partner.fieldCoords = GetHomeGate().fieldCoords + cv::Point2d(0, 100);
+	partner.polarMetricCoords.y = gDistanceCalculator.angleBetween(partner.fieldCoords, { 0, -1 });
+	partner.polarMetricCoords.x = cv::norm(self.fieldCoords - partner.fieldCoords);
+};
 GatePosition & SoccerField::GetTargetGate() {
 	if (m_targetGate == BLUE_GATE) return blueGate;
 	else if (m_targetGate == YELLOW_GATE) return yellowGate;
@@ -103,11 +111,16 @@ void SoccerField::MessageReceived(const std::string & message){
 	}
 	else if (command == "BAL") {
 		;
-	} else  if (command == "POS") {
+	}
+	else  if (command == "PAS") {
+		gameMode = GAME_MODE_TAKE_BALL;
+	}
+	else  if (command == "POS") {
 		std::string x, y, a;
 		ss >> x >> y >> a;
 		partner.fieldCoords.x = atoi(x.c_str());
 		partner.fieldCoords.y = atoi(y.c_str());
-		partner.polarMetricCoords.y = atoi(a.c_str());
+		partner.polarMetricCoords.y = gDistanceCalculator.angleBetween(partner.fieldCoords, { 0, -1 });
+		partner.polarMetricCoords.x = cv::norm(self.fieldCoords - partner.fieldCoords);
 	}
 }

@@ -13,7 +13,7 @@ protected:
 	ICommunicationModule *m_pCom;
 public:
 	const std::string name;
-	DriveInstruction(const std::string name) : name(name){
+	DriveInstruction(const std::string &name) : name(name){
 	};
 	void Init(ICommunicationModule *pCom, FieldState *pFieldState){
 		m_pCom = pCom;
@@ -31,6 +31,7 @@ public:
 
 	const static bool USE_ANGLED_DRIVING = false;
 	bool aimTarget(const ObjectPosition &target, double errorMargin = (USE_ANGLED_DRIVING) ? 90 : 10);
+	bool catchTarget(const ObjectPosition &target);
 	bool driveToTarget(const ObjectPosition &target, double maxDistance = 14);
 	bool driveToTargetWithAngle(const ObjectPosition &target, double maxDistance = 14);
 	const BallPosition &getClosestBall();

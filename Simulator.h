@@ -66,6 +66,7 @@ private:
 	int id = 0;
 	int next_id = 1;
 	bool stop_send = false;
+	bool ball_in_tribbler = false;
 
 };
 

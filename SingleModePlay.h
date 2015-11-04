@@ -24,10 +24,10 @@ class SingleModeIdle : public Idle {
 class DriveToBall : public DriveInstruction
 {
 public:
-	DriveToBall() : DriveInstruction("DRIVE_TO_BALL"){};
+	DriveToBall(const std::string &name = "DRIVE_TO_BALL") : DriveInstruction(name){};
 	virtual DriveMode step(double dt);
 };
-
+/*
 class CatchBall : public DriveInstruction
 {
 public:
@@ -36,7 +36,7 @@ public:
 	virtual void onExit();
 	virtual DriveMode step(double dt);
 };
-
+*/
 class AimGate : public DriveInstruction
 {
 public:

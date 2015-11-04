@@ -320,9 +320,11 @@ bool Simulator::BallInTribbler(){
 		if (dist < minDist)
 			minDist = dist;
 	}
-	if (minDist < 15)
-		return true;
-	else return false;
+	bool was_in_tribbler = ball_in_tribbler;
+	if (minDist < (was_in_tribbler ? 25 : 15))
+		ball_in_tribbler= true;
+	else ball_in_tribbler= false;
+	return ball_in_tribbler;
 }
 
 void Simulator::Kick(int force){

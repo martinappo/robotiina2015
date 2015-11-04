@@ -78,8 +78,9 @@ public:
 
 		GAME_MODE_START_OUR_YELLOW_CARD,
 		GAME_MODE_START_OPPONENT_YELLOW_CARD,
-
-		GAME_MODE_IN_PROGRESS
+		/* our states */
+		GAME_MODE_IN_PROGRESS,
+		GAME_MODE_TAKE_BALL, // other robot passed pall
 	};
 	std::atomic_int gameMode;
 	FieldState(const int number_of_balls);
@@ -98,6 +99,7 @@ public:
 	void resetBallsUpdateState();
 	virtual void Lock() {};
 	virtual void UnLock() {};
+	virtual void SendMessage(const std::string message){};
 };
 
 class FieldStateLock{
