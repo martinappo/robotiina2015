@@ -33,14 +33,6 @@ private:
 	cv::Mat green;
 	cv::Mat field;// = cv::Mat(310, 500, CV_8UC3, cv::Scalar::all(245)); // blink display
 	cv::Point2d c/*enter*/;
-	void sendState();
-	void recvState();
-	
-	bool isMaster = false;
-	bool isMasterPresent = false;
-	int id = 0;
-	int next_id = 1;
-	bool stop_send = false;
 
 
 };
