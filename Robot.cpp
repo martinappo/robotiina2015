@@ -148,6 +148,7 @@ Robot::~Robot()
 		camera = NULL;
 		wheels = NULL;
 		coilBoard = NULL;
+		refCom = NULL;
 	}
 	if (camera) {
 		delete camera;
@@ -160,7 +161,9 @@ Robot::~Robot()
         delete wheels;
 	if (scanner)
 		delete scanner;
-//	if (m_pDisplay)
+	if (refCom)
+		delete refCom;
+	//	if (m_pDisplay)
 //		delete m_pDisplay;
 }
 
@@ -179,7 +182,6 @@ bool Robot::Launch(int argc, char* argv[])
 	else {
 		InitHardware();
 	}
-	initRefCom();
 	std::cout << "Starting Robot" << std::endl;
 
 	cv::Size winSize(0, 0);
@@ -208,6 +210,7 @@ void Robot::InitSimulator(bool master, const std::string game_mode) {
 	pSim = new Simulator(io, master, game_mode);
 	camera = pSim;
 	wheels = pSim;
+	refCom = pSim;
 	coilBoard = pSim;
 }
 
@@ -232,7 +235,7 @@ void Robot::InitHardware() {
 	wheels->Init();
 	coilBoard = new CoilGun(); //TODO: fix this, to use real coilboard
 	//initCoilboard();
-	
+	initRefCom();
 	std::cout << "Done initializing" << std::endl;
 	return;
 }

@@ -7,8 +7,9 @@ extern DistanceCalculator gDistanceCalculator;
 
 Simulator::Simulator(boost::asio::io_service &io, bool master, const std::string game_mode) :
 	mNumberOfBalls(game_mode == "master" || game_mode =="slave" ? 1 :11 )
-	,FieldState(game_mode == "master" || game_mode == "slave" ? 1 : 11)
-	,ThreadedClass("Simulator"), UdpServer(io, 31000, master)
+	, FieldState(game_mode == "master" || game_mode == "slave" ? 1 : 11)
+	, ThreadedClass("Simulator"), UdpServer(io, 31000, master)
+	, RefereeCom(NULL)
 	,isMaster(master)
 {
 	srand(::time(NULL));
@@ -86,7 +87,7 @@ void Simulator::MessageReceived(const std::string & message){
 			std::string r_id;
 			do {
 				std::string x, y, a;
-				ss >> r_id >> x  >> y;
+				ss >> r_id >> x >> y;
 				int _id = atoi(r_id.c_str());
 				if (_id != id) {
 					robots[_id].fieldCoords.x = atoi(x.c_str());
@@ -95,6 +96,11 @@ void Simulator::MessageReceived(const std::string & message){
 
 
 			} while (r_id != "99");
+		}
+		else if (command == "REF") {
+			int ref_command;
+			ss >> ref_command;
+			RefereeCom::giveCommand((FieldState::GameMode)ref_command);
 		}
 
 	}
@@ -340,4 +346,10 @@ void Simulator::Kick(int force){
 	//balls[minDistIndex] = balls[mNumberOfBalls - 1];
 	//balls[mNumberOfBalls - 1].~BallPosition();
 	//mNumberOfBalls--;
+}
+void Simulator::giveCommand(FieldState::GameMode command){
+	if (isMaster) {
+		SendMessage("REF " + std::to_string(command) + " #");
+	}
+	__super::giveCommand(command);
 }

@@ -24,8 +24,6 @@ public:
 	void UnLock(){};
 	virtual void MessageReceived(const std::string & message);
 
-	ObjectPosition robots[MAX_ROBOTS_NR];
-
 private:
 	std::atomic_int m_targetGate;
 	IDisplay *m_pDisplay;

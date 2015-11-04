@@ -30,10 +30,6 @@ public:
 	bool IsReal(){
 		return true;
 	}
-	std::string GetPlayCommand(){
-		//throw std::runtime_error("Implement ComModule::GetPlayCommand");
-		return "START";
-	}
 
 protected:
 	IWheelController *m_pWheels;
