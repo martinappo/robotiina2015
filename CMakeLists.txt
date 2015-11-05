@@ -43,7 +43,7 @@ set(SOURCE_FILES Robotiina.cpp Camera.cpp DistanceCalculator.cpp DistanceCalibra
 add_executable(robotiina ${SOURCE_FILES})
 target_link_libraries( robotiina  ${OpenCV_LIBS} ${Boost_LIBRARIES} ${WINSOCK_LIB} ${WINSOCK2_LIB} atomic)
 
-set(WHEELEMULATOR_FILES WheelEmulator.cpp)
-add_executable(wheelemulator ${WHEELEMULATOR_FILES})
-target_link_libraries( wheelemulator ${OpenCV_LIBS} ${Boost_LIBRARIES} ${WINSOCK_LIB})
+#set(WHEELEMULATOR_FILES WheelEmulator.cpp)
+#add_executable(wheelemulator ${WHEELEMULATOR_FILES})
+#target_link_libraries( wheelemulator ${OpenCV_LIBS} ${Boost_LIBRARIES} ${WINSOCK_LIB})
 
