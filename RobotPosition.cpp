@@ -17,7 +17,7 @@ RobotPosition::~RobotPosition()
 {
 }
 
-void RobotPosition::updateFieldCoordsNew(cv::Point orgin) {
+void RobotPosition::updateFieldCoordsNew(cv::Point2d orgin) {
 
 
 	double d1 = blueGate.getDistance();
@@ -68,11 +68,11 @@ void RobotPosition::updateFieldCoordsNew(cv::Point orgin) {
 		if (da2< 0) da2 = 360 + da2;
 	}
 //	if (da2 < 0) da2 += 360;
-	polarMetricCoords.y = (da1 + da2) / 2;
-	//polarMetricCoords.y = d1 > d2 ? da1 : da2;
+	//polarMetricCoords.y = (da1 + da2) / 2;
+	polarMetricCoords.y = d1 > d2 ? da1 : da2;
 
 }
-void RobotPosition::updateFieldCoords(cv::Point orgin) {
+void RobotPosition::updateFieldCoords(cv::Point2d orgin) {
 
 	updateFieldCoordsNew();
 	return;

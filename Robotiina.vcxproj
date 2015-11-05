@@ -91,6 +91,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="autocalibrator.h" />
+    <ClInclude Include="AutoPlayHelpers.h" />
+    <ClInclude Include="MultiModePlay.h" />
+    <ClInclude Include="refereeCom.h" />
+    <ClInclude Include="SingleModePlay.h" />
+    <ClInclude Include="StateMachine.h" />
     <ClInclude Include="BallFinder.h" />
     <ClInclude Include="BallPosition.h" />
     <ClInclude Include="blockingreader.h" />
@@ -120,7 +125,6 @@
     <ClInclude Include="ImageThresholder.h" />
     <ClInclude Include="kalmanFilter.h" />
     <ClInclude Include="ManualControl.h" />
-    <ClInclude Include="NewAutoPilot.h" />
     <ClInclude Include="objectfinder.h" />
     <ClInclude Include="remotecontrol.h" />
     <ClInclude Include="robot.h" />
@@ -131,6 +135,7 @@
     <ClInclude Include="ThreadedClass.h" />
     <ClInclude Include="ThreadedImageThresholder.h" />
     <ClInclude Include="types.h" />
+    <ClInclude Include="UdpServer.h" />
     <ClInclude Include="VideoRecorder.h" />
     <ClInclude Include="WebUI.h" />
     <ClInclude Include="wheel.h" />
@@ -138,6 +143,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="autocalibrator.cpp" />
+    <ClCompile Include="MultiModePlay.cpp" />
+    <ClCompile Include="refereeCom.cpp" />
+    <ClCompile Include="SingleModePlay.cpp" />
+    <ClCompile Include="StateMachine.cpp" />
     <ClCompile Include="BallFinder.cpp" />
     <ClCompile Include="BallPosition.cpp" />
     <ClCompile Include="calibrationconfreader.cpp" />
@@ -163,7 +172,6 @@
     <ClCompile Include="GateFinder.cpp" />
     <ClCompile Include="kalmanFilter.cpp" />
     <ClCompile Include="ManualControl.cpp" />
-    <ClCompile Include="NewAutoPilot.cpp" />
     <ClCompile Include="objectfinder.cpp" />
     <ClCompile Include="remotecontrol.cpp" />
     <ClCompile Include="robot.cpp" />
@@ -171,6 +179,7 @@
     <ClCompile Include="RobotTracker.cpp" />
     <ClCompile Include="TargetPosition.cpp" />
     <ClCompile Include="ThreadedClass.cpp" />
+    <ClCompile Include="UdpServer.cpp" />
     <ClCompile Include="VideoRecorder.cpp" />
     <ClCompile Include="WebUI.cpp" />
     <ClCompile Include="wheel.cpp" />
