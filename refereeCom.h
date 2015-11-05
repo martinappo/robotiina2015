@@ -16,7 +16,8 @@ public:
 	void setField(FieldState *pFieldState){ m_pFieldState = pFieldState; }
 protected:
 	FieldState * m_pFieldState = NULL;
-
+	void handleMessage(const std::string & message);
+	virtual void sendAck(const std::string & message){};
 	const char ALL_MARKER = 'X';
 	char FIELD_MARKER = 'A';
 	char TEAM_MARKER = 'A';
@@ -34,8 +35,10 @@ public:
 	~LLAPReceiver();
 
 	bool isTogglable() { return true; }
-	void handleMessage(const std::string & message);
 	virtual void messageReceived(const std::string & message);
+	virtual void sendAck(const std::string & message){
+		writeString(message);
+	}
 
 protected: 
 	void Run();
