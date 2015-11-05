@@ -24,7 +24,7 @@ public:
 	};
 	virtual DriveMode step1(double dt){
 		if (m_pFieldState->gameMode == FieldState::GAME_MODE_STOPED){
-			m_pCom.drive(0, 0, 0);
+			m_pCom->Drive(0, 0, 0);
 			return DRIVEMODE_IDLE;
 		}
 		return step(dt);
