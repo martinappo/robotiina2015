@@ -429,7 +429,10 @@ void Robot::Run()
 
 					this->last_state = STATE_END_OF_GAME; // force dialog redraw
 				});
-				STATE_BUTTON("(S)ettings", 's', STATE_SETTINGS)
+				std::stringstream sset;
+				sset << " [ robot: " << refCom->FIELD_MARKER << refCom->ROBOT_MARKER << ", team: " << refCom->TEAM_MARKER << "]";
+
+				STATE_BUTTON("(S)ettings" + sset.str(), 's', STATE_SETTINGS)
 					m_pDisplay->createButton("Reinit wheels", '-', [this] {
 					//initPorts();
 					//initWheels();
