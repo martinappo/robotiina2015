@@ -10,6 +10,7 @@
 const int MAX_ROBOTS = 10;
 class Simulator : public ICamera/*, public IRefereeCom*/, public ICommunicationModule, public ThreadedClass, public FieldState, public UdpServer, public RefereeCom
 {
+  using UdpServer::SendMessage;
 public:
 	Simulator(boost::asio::io_service &io, bool master, const std::string game_mode);
 	virtual ~Simulator();

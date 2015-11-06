@@ -1,4 +1,4 @@
-#include "RefereeCom.h"
+#include "refereeCom.h"
 
 
 RefereeCom::RefereeCom(FieldState *pFieldState, const std::string &name) : ConfigurableModule(name), m_pFieldState(pFieldState)

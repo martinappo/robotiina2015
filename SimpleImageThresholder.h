@@ -4,7 +4,7 @@ class SimpleImageThresholder :
 	public ImageThresholder
 {
 public:
-	SimpleImageThresholder::SimpleImageThresholder(ThresholdedImages &images, HSVColorRangeMap &objectMap) : ImageThresholder(images, objectMap){
+	SimpleImageThresholder(ThresholdedImages &images, HSVColorRangeMap &objectMap) : ImageThresholder(images, objectMap){
 	}
 
 	void Start(cv::Mat &frameHSV, std::vector<OBJECT> objectList) {
