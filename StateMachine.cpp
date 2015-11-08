@@ -6,7 +6,10 @@ bool DriveInstruction::aimTarget(const ObjectPosition &target, double errorMargi
 		m_pCom->Drive(0, 0, heading);
 		return false;
 	}
-	else return true;
+	else{
+		m_pCom->Drive(0, 0, 0);
+		return true;
+	}
 }
 bool DriveInstruction::catchTarget(const ObjectPosition &target){
 	if (m_pCom->BallInTribbler()) {
@@ -26,7 +29,10 @@ bool DriveInstruction::driveToTarget(const ObjectPosition &target, double maxDis
 		m_pCom->Drive((dist > 50) ? 100 : (std::max(dist, 20.0))); //To Do: set speed based on distance
 		return false;
 	}
-	else return true;
+	else{
+		m_pCom->Drive(0, 0, 0);
+		return true;
+	}
 }
 
 bool DriveInstruction::driveToTargetWithAngle(const ObjectPosition &target, double maxDistance){

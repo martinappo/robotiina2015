@@ -45,27 +45,13 @@ void RefereeCom::nextRobot() {
 		ROBOT_MARKER = 'A';
 	}
 }
-
-/**********************************
-* HARDWARE RECEIVER IMPLEMENTATION
-***********************************/
-LLAPReceiver::LLAPReceiver(FieldState *pFieldState, boost::asio::io_service &io_service, std::string port, unsigned int baud_rate, const std::string &name)
-	: RefereeCom(pFieldState, name), SimpleSerial(io_service, port, baud_rate), ThreadedClass(name) {}
-
-LLAPReceiver::~LLAPReceiver()
-{
-	WaitForStop();
-}
-void LLAPReceiver::messageReceived(const std::string & message){
-	handleMessage(message);
-};
-void LLAPReceiver::handleMessage(const std::string & message){
+void RefereeCom::handleMessage(const std::string & message){
 	//TODO: update m_pFieldState->gameMode from here directly, add missing start commands there
 	if (m_pFieldState == NULL) return;
 
 	std::string command = message.substr(0, 12);
 	if (command.length() == 12 && command.at(0) == 'a' && command.at(1) == FIELD_MARKER && (command.at(2) == ALL_MARKER || command.at(2) == ROBOT_MARKER)) {
-		if (command.at(2) == ROBOT_MARKER) writeString("a" + std::string(1, FIELD_MARKER) + std::string(1, ROBOT_MARKER) + "ACK------");
+		if (command.at(2) == ROBOT_MARKER) sendAck("a" + std::string(1, FIELD_MARKER) + std::string(1, ROBOT_MARKER) + "ACK------");
 		command = command.substr(3);
 		if (command == "START----") m_pFieldState->gameMode = FieldState::GAME_MODE_START_SINGLE_PLAY;
 		else if (command == "STOP-----") m_pFieldState->gameMode = FieldState::GAME_MODE_STOPED;
@@ -97,6 +83,20 @@ void LLAPReceiver::handleMessage(const std::string & message){
 		}
 	}
 }
+
+/**********************************
+* HARDWARE RECEIVER IMPLEMENTATION
+***********************************/
+LLAPReceiver::LLAPReceiver(FieldState *pFieldState, boost::asio::io_service &io_service, std::string port, unsigned int baud_rate, const std::string &name)
+	: RefereeCom(pFieldState, name), SimpleSerial(io_service, port, baud_rate), ThreadedClass(name) {}
+
+LLAPReceiver::~LLAPReceiver()
+{
+	WaitForStop();
+}
+void LLAPReceiver::messageReceived(const std::string & message){
+	handleMessage(message);
+};
 
 void LLAPReceiver::Run() {
 	return;
