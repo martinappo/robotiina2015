@@ -225,7 +225,7 @@ void Robot::InitHardware() {
 		camera = new Camera(0);
 	std::cout << "Done" << std::endl;
 
-	wheels = new WheelController(io);
+	wheels = new WheelController(io, 4);
 	coilBoardPortsOk = false;
 	wheelsPortsOk = false;
 
