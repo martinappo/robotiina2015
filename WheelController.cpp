@@ -16,6 +16,12 @@ m_iWheelCount(iWheelCount), m_io_service(io_service)
 		wheelPositions.push_back(150);
 		wheelPositions.push_back(270);
 	}
+	else if (iWheelCount == 4) {
+		wheelPositions.push_back(45);
+		wheelPositions.push_back(135);
+		wheelPositions.push_back(225);
+		wheelPositions.push_back(315);
+	}
 	targetSpeed = { 0, 0, 0 };
 	m_bPortsInitialized = false;
 	Start();
