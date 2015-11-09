@@ -357,5 +357,5 @@ void Simulator::giveCommand(FieldState::GameMode command){
 	if (isMaster) {
 		SendMessage("REF " + std::to_string(command) + " #");
 	}
-	__super::giveCommand(command);
+	RefereeCom::giveCommand(command);
 }

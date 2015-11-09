@@ -10,8 +10,8 @@ protected:
 	int predictCount = 0;
 public:
 	KalmanFilter(const cv::Point2i &startPoint);
-	cv::Point2i doFiltering(const cv::Point2i &point);
-	cv::Point2i getPrediction();
+	cv::Point2d doFiltering(const cv::Point2i &point);
+	cv::Point2d getPrediction();
 	void reset(const cv::Point2i &point);
 	
 };

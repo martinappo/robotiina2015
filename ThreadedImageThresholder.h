@@ -7,7 +7,7 @@ class ThreadedImageThresholder :
 	public ThreadedClass, public ImageThresholder
 {
 public:
-	ThreadedImageThresholder::ThreadedImageThresholder(ThresholdedImages &images, HSVColorRangeMap &objectMap) : ThreadedClass("ImageThresholder"), ImageThresholder(images, objectMap){
+	ThreadedImageThresholder(ThresholdedImages &images, HSVColorRangeMap &objectMap) : ThreadedClass("ImageThresholder"), ImageThresholder(images, objectMap){
 		m_iWorkersInProgress = 0;
 		stop_thread = false;
 		running = false;
@@ -20,7 +20,7 @@ public:
 
 	}
 
-	ThreadedImageThresholder::~ThreadedImageThresholder(){
+	~ThreadedImageThresholder(){
 		WaitForStop();
 	};
 

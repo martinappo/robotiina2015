@@ -5,7 +5,7 @@ class TBBImageThresholder :
 	public ImageThresholder, public cv::ParallelLoopBody
 {
 public:
-	TBBImageThresholder::TBBImageThresholder(ThresholdedImages &images, HSVColorRangeMap &objectMap) : ImageThresholder(images, objectMap){
+	TBBImageThresholder(ThresholdedImages &images, HSVColorRangeMap &objectMap) : ImageThresholder(images, objectMap){
 	}
 
 	void Start(cv::Mat &frameHSV, std::vector<OBJECT> objectList) {

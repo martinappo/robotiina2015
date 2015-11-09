@@ -19,6 +19,7 @@ protected:
 	void handleMessage(const std::string & message);
 	virtual void sendAck(const std::string & message){};
 	const char ALL_MARKER = 'X';
+public:
 	char FIELD_MARKER = 'A';
 	char TEAM_MARKER = 'A';
 	char ROBOT_MARKER = 'A';

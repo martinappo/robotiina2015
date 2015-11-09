@@ -17,8 +17,8 @@ MouseVision::MouseVision(ICamera * pCamera, IDisplay *pDisplay, FieldState *pFie
 
 MouseVision::~MouseVision()
 {
-	WaitForStop();
 	m_pDisplay->RemoveEventListener(this);
+	WaitForStop();
 
 }
 

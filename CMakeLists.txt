@@ -38,12 +38,12 @@ include_directories(${Boost_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 #endif()
 
 
-set(SOURCE_FILES Robotiina.cpp Camera.cpp DistanceCalculator.cpp DistanceCalibrator.cpp FrontCameraVision.cpp ImageThresholder.cpp MouseVision.cpp ManualControl.cpp ConfigurableModule.cpp ComModule.cpp StillCamera.cpp Robot.cpp ObjectFinder.cpp ColorCalibrator.cpp AutoCalibrator.cpp WheelController.cpp CalibrationConfReader.cpp Dialog.cpp Wheel.cpp RemoteControl.cpp ComPortScanner.cpp CoilBoard.cpp RobotTracker.cpp ThreadedClass.cpp KalmanFilter.cpp VideoRecorder.cpp NewAutoPilot.cpp GateFinder.cpp BallFinder.cpp SoccerField.cpp ObjectPosition.cpp BallPosition.cpp FieldState.cpp GatePosition.cpp RobotPosition.cpp)
+set(SOURCE_FILES MultiModePlay.cpp SingleModePlay.cpp UdpServer.cpp StateMachine.cpp refereeCom.cpp Simulator.cpp WebUI.cpp Robotiina.cpp Camera.cpp DistanceCalculator.cpp DistanceCalibrator.cpp FrontCameraVision.cpp ImageThresholder.cpp MouseVision.cpp ManualControl.cpp ConfigurableModule.cpp ComModule.cpp Robot.cpp ObjectFinder.cpp ColorCalibrator.cpp AutoCalibrator.cpp WheelController.cpp CalibrationConfReader.cpp Dialog.cpp Wheel.cpp RemoteControl.cpp ComPortScanner.cpp CoilBoard.cpp RobotTracker.cpp ThreadedClass.cpp KalmanFilter.cpp VideoRecorder.cpp GateFinder.cpp BallFinder.cpp SoccerField.cpp ObjectPosition.cpp BallPosition.cpp FieldState.cpp GatePosition.cpp RobotPosition.cpp)
 
 add_executable(robotiina ${SOURCE_FILES})
 target_link_libraries( robotiina  ${OpenCV_LIBS} ${Boost_LIBRARIES} ${WINSOCK_LIB} ${WINSOCK2_LIB} atomic)
 
-set(WHEELEMULATOR_FILES WheelEmulator.cpp)
-add_executable(wheelemulator ${WHEELEMULATOR_FILES})
-target_link_libraries( wheelemulator ${OpenCV_LIBS} ${Boost_LIBRARIES} ${WINSOCK_LIB})
+#set(WHEELEMULATOR_FILES WheelEmulator.cpp)
+#add_executable(wheelemulator ${WHEELEMULATOR_FILES})
+#target_link_libraries( wheelemulator ${OpenCV_LIBS} ${Boost_LIBRARIES} ${WINSOCK_LIB})
 

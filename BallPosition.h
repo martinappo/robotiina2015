@@ -9,6 +9,7 @@ class BallPosition : public ObjectPosition
 {
 public:
 	BallPosition(){};
+	BallPosition(const BallPosition & ballPos){};
 	virtual ~BallPosition();
 	int id;
 	bool isValid;

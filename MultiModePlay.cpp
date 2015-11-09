@@ -107,7 +107,7 @@ private:
 public:
 	KickOff() : DriveToBall("2V2_KICKOFF"){};
 	virtual DriveMode step(double dt){
-		DriveMode next = __super::step(dt);
+		DriveMode next = DriveToBall::step(dt);
 		switch (next)
 		{
 		case DRIVEMODE_AIM_GATE:
@@ -222,7 +222,7 @@ public:
 		std::this_thread::sleep_for(std::chrono::milliseconds(500)); //half second wait.
 	}
 
-	DriveMode OpponentKickoff::step(double dt){
+	DriveMode step(double dt){
 
 		if (ball.getDistance() > 500)
 			return DRIVEMODE_2V2_DEFENSIVE;
@@ -236,7 +236,7 @@ public:
 		}
 	}
 private:
-	BallPosition ball;
+	ObjectPosition ball;
 	bool mode;
 };
 
