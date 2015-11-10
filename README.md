@@ -33,6 +33,8 @@ Robotex 2014 participant
   * cd package/
   * ./install -cam_usb30
 * install  opencv 3.0.0
+  * install gtk+2
+    * sudo apt-get install libgtk2.0-dev
   * download latest opencv 3
     * wget https://github.com/Itseez/opencv/archive/3.0.0.zip
     * unzip 3.0.0.zip
