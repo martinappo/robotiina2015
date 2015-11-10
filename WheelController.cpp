@@ -71,6 +71,8 @@ void WheelController::Drive(double velocity, double direction, double rotate)
 
 void WheelController::DriveRotate(double velocity, double direction, double rotate)
 {
+  	if (m_wheelPort == NULL) return;
+
 	//std::cout << "DriveRotate: " << velocity << std::endl;
 
 	if (abs(velocity) > 190){
