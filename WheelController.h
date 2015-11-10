@@ -53,5 +53,6 @@ public:
 	bool IsReal(){
 		return m_bPortsInitialized;
 	}
+	int id_start = 0;
 
 };

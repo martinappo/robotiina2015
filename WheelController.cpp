@@ -17,10 +17,11 @@ m_iWheelCount(iWheelCount), m_io_service(io_service)
 		wheelPositions.push_back(270);
 	}
 	else if (iWheelCount == 4) {
-		wheelPositions.push_back(45);
+		id_start = 1;
 		wheelPositions.push_back(135);
 		wheelPositions.push_back(225);
 		wheelPositions.push_back(315);
+		wheelPositions.push_back(45);
 	}
 	targetSpeed = { 0, 0, 0 };
 	m_bPortsInitialized = false;
@@ -103,7 +104,7 @@ void WheelController::DriveRotate(double velocity, double direction, double rota
 #ifndef LIMIT_ACCELERATION
 	auto speeds = CalculateWheelSpeeds(targetSpeed.velocity, targetSpeed.heading, targetSpeed.rotation);
 	
-	for (auto i = 0; i < m_iWheelCount; i++) {
+	for (auto i = id_start; i < m_iWheelCount; i++) {
 		std::ostringstream oss;
 		oss << i << ":sd" << speeds[i] << "\n";	
 		m_wheelPort->writeString(oss.str());
