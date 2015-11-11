@@ -18,10 +18,10 @@ m_iWheelCount(iWheelCount), m_io_service(io_service)
 	}
 	else if (iWheelCount == 4) {
 		id_start = 1;
+		wheelPositions.push_back(45);
 		wheelPositions.push_back(135);
 		wheelPositions.push_back(225);
 		wheelPositions.push_back(315);
-		wheelPositions.push_back(45);
 	}
 	targetSpeed = { 0, 0, 0 };
 	m_bPortsInitialized = false;
@@ -102,19 +102,7 @@ void WheelController::DriveRotate(double velocity, double direction, double rota
 	targetSpeed.velocity = velocity; // sin(direction* PI / 180.0)* velocity + rotate;
 	targetSpeed.heading = direction; //cos(direction* PI / 180.0)* velocity + rotate,
 	targetSpeed.rotation = rotate;
-#ifndef LIMIT_ACCELERATION
-	auto speeds = CalculateWheelSpeeds(targetSpeed.velocity, targetSpeed.heading, targetSpeed.rotation);
-	/*
-	for (auto i = id_start; i < m_iWheelCount; i++) {
-		std::ostringstream oss;
-		oss << i << ":sd" << speeds[i] << "\n";	
-		m_wheelPort->writeString(oss.str());
-	}
-	*/
-	//if (w_left != NULL) w_left->SetSpeed(speeds.x);
-	//if (w_right != NULL) w_right->SetSpeed(speeds.y);
-	//if (w_back != NULL) w_back->SetSpeed(speeds.z);
-#endif
+
 	directControl = false;
 	updateSpeed = true;
 	lastUpdate = boost::posix_time::microsec_clock::local_time();
@@ -284,16 +272,12 @@ void WheelController::Run()
 		w_back->SetSpeed(speeds.z);
 		lastStep = now;
 #else
+		std::ostringstream oss;
 		auto speeds = CalculateWheelSpeeds(targetSpeed.velocity, targetSpeed.heading, targetSpeed.rotation);
-		m_wheelPort->writeString("1:sd10\n");
-		/*
 		for (auto i = 0; i < m_iWheelCount; i++) {
-			std::ostringstream oss;
 			oss << i+id_start << ":sd" << (int)speeds[i] << "\n";
 			m_wheelPort->writeString(oss.str());
-			break;
 		}
-		*/
 
 #endif
 		std::this_thread::sleep_for(std::chrono::milliseconds(10)); // do not poll serial to fast
