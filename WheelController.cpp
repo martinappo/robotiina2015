@@ -25,7 +25,7 @@ m_iWheelCount(iWheelCount), m_io_service(io_service)
 	}
 	targetSpeed = { 0, 0, 0 };
 	m_bPortsInitialized = false;
-	Start();
+	
 };
 
 
@@ -38,8 +38,10 @@ void WheelController::Init()
 		read_ini("conf/ports.ini", pt);
 		std::string port = pt.get<std::string>(std::to_string(ID_WHEEL));
 		std::cout << port << std::endl;
-		m_wheelPort = new SimpleSerial(m_io_service, port, 115200);
+		m_wheelPort = new SimpleSerial(m_io_service, port, 19200);
 		m_bPortsInitialized = true;
+		WaitForStop();
+		Start();
 	}
 	catch (...) {
 		std::cout << "Wheel COM port couldn't be initialized" << std::endl;
@@ -72,8 +74,7 @@ void WheelController::Drive(double velocity, double direction, double rotate)
 
 void WheelController::DriveRotate(double velocity, double direction, double rotate)
 {
-  	if (m_wheelPort == NULL) return;
-
+ 
 	//std::cout << "DriveRotate: " << velocity << std::endl;
 
 	if (abs(velocity) > 190){
@@ -103,13 +104,13 @@ void WheelController::DriveRotate(double velocity, double direction, double rota
 	targetSpeed.rotation = rotate;
 #ifndef LIMIT_ACCELERATION
 	auto speeds = CalculateWheelSpeeds(targetSpeed.velocity, targetSpeed.heading, targetSpeed.rotation);
-	
+	/*
 	for (auto i = id_start; i < m_iWheelCount; i++) {
 		std::ostringstream oss;
 		oss << i << ":sd" << speeds[i] << "\n";	
 		m_wheelPort->writeString(oss.str());
 	}
-	
+	*/
 	//if (w_left != NULL) w_left->SetSpeed(speeds.x);
 	//if (w_right != NULL) w_right->SetSpeed(speeds.y);
 	//if (w_back != NULL) w_back->SetSpeed(speeds.z);
@@ -251,9 +252,10 @@ std::string WheelController::GetDebugInfo(){
 
 void WheelController::Run()
 {
+	if (m_wheelPort == NULL) return;
 	while (!stop_thread) {
-		CalculateRobotSpeed();
 #ifdef LIMIT_ACCELERATION
+		CalculateRobotSpeed();
 		boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
 		if (!updateSpeed && (now - lastUpdate).total_milliseconds() > 500) {
 			targetSpeed = {0,0,0};
@@ -281,6 +283,18 @@ void WheelController::Run()
 		w_right->SetSpeed(speeds.y);
 		w_back->SetSpeed(speeds.z);
 		lastStep = now;
+#else
+		auto speeds = CalculateWheelSpeeds(targetSpeed.velocity, targetSpeed.heading, targetSpeed.rotation);
+		m_wheelPort->writeString("1:sd10\n");
+		/*
+		for (auto i = 0; i < m_iWheelCount; i++) {
+			std::ostringstream oss;
+			oss << i+id_start << ":sd" << (int)speeds[i] << "\n";
+			m_wheelPort->writeString(oss.str());
+			break;
+		}
+		*/
+
 #endif
 		std::this_thread::sleep_for(std::chrono::milliseconds(10)); // do not poll serial to fast
 	}

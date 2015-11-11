@@ -174,7 +174,7 @@ bool Robot::Launch(int argc, char* argv[])
 	if (config.count("play-mode"))
 		play_mode = config["play-mode"].as<std::string>();
 
-	auto _cam = config["camera"].as<std::string>();
+	std::string _cam = config.count("camera") >0? config["camera"].as<std::string>():"";
 	bool bSimulator = _cam == "simulator" || _cam == "simulator-master";
 	if (bSimulator) {
 		InitSimulator(_cam == "simulator-master", play_mode);
