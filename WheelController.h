@@ -15,13 +15,12 @@ private:
 	Speed lastSpeed;
 	cv::Point3d robotPos = { 0, 0, 0 }; // x, y, rotation
 	std::vector<int> wheelPositions;
-	boost::asio::io_service &m_io_service;
 	boost::posix_time::ptime stallTime = boost::posix_time::microsec_clock::local_time() + boost::posix_time::seconds(60);
 	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
 	boost::posix_time::ptime lastStep = time;
 	boost::posix_time::ptime lastUpdate = time;
 	std::atomic_bool updateSpeed;
-	SimpleSerial *m_wheelPort = NULL; // angle and pointer to serial port
+	SimpleSerial *m_pComPort;
 	std::atomic_bool m_bPortsInitialized;
 	int m_iWheelCount;
 protected:
@@ -29,8 +28,7 @@ protected:
 	void CalculateRobotSpeed(); // reverse calc
 	std::vector<double> GetWheelSpeeds();
 public:
-	WheelController(boost::asio::io_service &, int iWheelCount = 3);
-	void Init();
+	WheelController(SimpleSerial *port, int iWheelCount = 3);
 	void InitDummyWheels();
 	void Forward(int speed);
 	void rotateBack(int speed);

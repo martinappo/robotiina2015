@@ -31,7 +31,7 @@ public:
 	
 };
 
-class CoilBoard : public CoilGun, public SimpleSerial, public ThreadedClass
+class CoilBoard : public CoilGun, public ThreadedClass
 {
 private:
 	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
@@ -41,10 +41,11 @@ private:
 	//boost::posix_time::time_duration afterKickDuration;
 	std::atomic_bool kick;
 	std::atomic_int ballInTribblerCount;
+	SimpleSerial *m_pComPort;
 	//bool forcedNotInTribbler = false;
 
 public:
-	CoilBoard(boost::asio::io_service &io_service, std::string port = "", unsigned int baud_rate = 115200) : SimpleSerial(io_service, port, baud_rate), ThreadedClass("CoilBoard") {
+	CoilBoard(SimpleSerial *port) : m_pComPort(port), ThreadedClass("CoilBoard") {
 		ballInTribbler = false;
 		ballInTribblerCount = 0;
 		kick = false;
@@ -52,7 +53,7 @@ public:
 	};
 	void Kick(int force = 800);
 	void ToggleTribbler(bool start);
-	bool BallInTribbler();
+	bool BallInTribbler;
 	void Run();
 	virtual ~CoilBoard() {
 		std::cout << "~CoilBoard" << std::endl;
@@ -60,14 +61,3 @@ public:
 	}
 
 };
-
-
-
-
-
-
-
-
-
-
-

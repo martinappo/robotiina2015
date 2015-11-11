@@ -16,24 +16,20 @@ void CoilBoard::Kick(int force){
 }
 
 void CoilBoard::ToggleTribbler(bool start){
+	std::ostringstream oss;
 	if (start) {
-		writeString("m1\n");
+		oss << ID_MAIN_BOARD << ":dm" << 50 << "\n";
 	}
 	else{
-		writeString("m0\n");
+		oss << ID_MAIN_BOARD << ":dm" << 0 << "\n";
 	}
+	m_pComPort->writeString(oss.str());
 	
 	return;
 }
 
-
-bool CoilBoard::BallInTribbler(){
-
-	return ballInTribblerCount > 0;
-}
-
 void CoilBoard::Run(){
-	writeString("c\n");
+	m_pComPort->writeString("c\n");
 	boost::posix_time::time_duration::tick_type waitDuration;
 	while (!stop_thread){
 	try
@@ -42,23 +38,16 @@ void CoilBoard::Run(){
 		//Pinging
 		time = boost::posix_time::microsec_clock::local_time();
 		waitDuration = (time - waitTime).total_milliseconds();
-		std::string line = readLineAsync(10);
-		if(line == "true" || line == "false"/* && !forcedNotInTribbler*/){
-			//std::cout << "ballInTribblerCount " << ballInTribblerCount << " " << line << std::endl;
-			int newcount = ballInTribblerCount + ((line == "true") ? 1 : -1);
-			//std::cout << "ballInTribblerCount " << ballInTribblerCount << " " << newcount << " " << line << std::endl;
-			ballInTribblerCount = std::min(2, std::max(-2, newcount));
- 		}
+		m_pComPort->writeString("bl\n");
+		std::string line = m_pComPort->readLineAsync(10);
+		BallInTribbler = line == "<bl:1>";
 		if (waitDuration > 300){
-			writeString("p\n");
+			m_pComPort->writeString("p\n");
 			waitTime = time;
-			//std::cout << "ping " << waitDuration << std::endl;
-		} else {
-			writeString("b\n");
 		}
 		if (kick) {
 			std::cout << "kick ----->" << std::endl;
-			writeString("k800\n");
+			m_pComPort->writeString("k800\n");
 			kick = false;
 		}
 		/*
@@ -82,9 +71,9 @@ void CoilBoard::Run(){
 	}
 	try
 	{
-
-	writeString("d\n");
-	writeString("m0\n");
+		std::ostringstream oss;
+		oss << ID_MAIN_BOARD << ":dm" << 0 << "\n";
+		m_pComPort->writeString(oss.str());
 	}
 	catch (...){
 		std::cout << "Error writing or reading coliboard (try 2) " << std::endl;
@@ -94,23 +83,3 @@ void CoilBoard::Run(){
 	std::cout << "CoilBoard stoping" << std::endl;
 	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
