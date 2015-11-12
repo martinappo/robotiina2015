@@ -5,7 +5,6 @@ class ComModule :
 {
 public:
 	ComModule(IWheelController * pWheels, ICoilGun *pCoilGun);
-	void Init() {};
 	virtual ~ComModule();
 
 	virtual void Drive(double fowardSpeed, double direction=0, double angularSpeed=0) {

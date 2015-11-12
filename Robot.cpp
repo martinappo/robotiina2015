@@ -225,15 +225,27 @@ void Robot::InitHardware() {
 	else
 		camera = new Camera(0);
 	std::cout << "Done" << std::endl;
-
-	wheels = new WheelController(io, 4);
-	coilBoardPortsOk = false;
-	wheelsPortsOk = false;
-
-	wheels->Init();
-	coilBoard = new CoilGun(); //TODO: fix this, to use real coilboard
-	//initCoilboard();
 	initRefCom();
+	SimpleSerial *serialPort;
+	try {
+		using boost::property_tree::ptree;
+		ptree pt;
+		read_ini("conf/ports.ini", pt);
+		std::string port = pt.get<std::string>(std::to_string(ID_COM));
+		serialPort = new SimpleSerial(io, port, 19200);
+	}
+	catch (...) {
+		coilBoardPortsOk = false;
+		pSim = new Simulator(io, true, "master");
+		wheels = pSim;
+		coilBoard = pSim;
+		std::cout << "" << std::endl;
+		return;
+	}
+	wheels = new WheelController(serialPort, 4);
+	coilBoard = new CoilGun(); //TODO: fix this, to use real coilboard
+	coilBoardPortsOk = true;
+	
 	std::cout << "Done initializing" << std::endl;
 	return;
 }

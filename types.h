@@ -35,10 +35,12 @@ struct Speed
 	double heading;
 	double rotation;
 };
-
-const int ID_WHEEL = 1;
+//for conf file
+const int ID_COM = 1;
 const int ID_REF = 2;
-const int ID_COILGUN = 4;
+
+//for actual ID info is sent to
+const int ID_MAIN_BOARD = 5;
 
 enum OBJECT
 {
@@ -143,7 +145,6 @@ public:
 	virtual void Drive(double fowardSpeed, double direction =0, double angularSpeed=0) = 0;
 	virtual const Speed & GetActualSpeed() = 0;
 	virtual const Speed & GetTargetSpeed() = 0;
-	virtual void Init() = 0;
 	virtual std::string GetDebugInfo() = 0;
 	virtual bool IsReal() = 0;
 

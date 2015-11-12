@@ -8,8 +8,8 @@
 #define deg270 (270.0 * PI / 180.0)
 //#define LIMIT_ACCELERATION
 
-WheelController::WheelController(boost::asio::io_service &io_service, int iWheelCount/* = 3*/) : ThreadedClass("WheelController"),
-m_iWheelCount(iWheelCount), m_io_service(io_service)
+WheelController::WheelController(SimpleSerial *port, int iWheelCount/* = 3*/) : ThreadedClass("WheelController"),
+m_iWheelCount(iWheelCount), m_pComPort(port)
 {
 	if (iWheelCount == 3) {
 		wheelPositions.push_back(30);
@@ -24,30 +24,8 @@ m_iWheelCount(iWheelCount), m_io_service(io_service)
 		wheelPositions.push_back(315);
 	}
 	targetSpeed = { 0, 0, 0 };
-	m_bPortsInitialized = false;
-	
+	m_bPortsInitialized = false;	
 };
-
-
-void WheelController::Init()
-{
-	std::cout << "Init wheel COM port" << std::endl;
-	try {
-		using boost::property_tree::ptree;
-		ptree pt;
-		read_ini("conf/ports.ini", pt);
-		std::string port = pt.get<std::string>(std::to_string(ID_WHEEL));
-		std::cout << port << std::endl;
-		m_wheelPort = new SimpleSerial(m_io_service, port, 19200);
-		m_bPortsInitialized = true;
-		WaitForStop();
-		Start();
-	}
-	catch (...) {
-		std::cout << "Wheel COM port couldn't be initialized" << std::endl;
-		m_bPortsInitialized = false;
-	}
-}
 
 void WheelController::DestroyWheels()
 {
@@ -240,7 +218,7 @@ std::string WheelController::GetDebugInfo(){
 
 void WheelController::Run()
 {
-	if (m_wheelPort == NULL) return;
+	if (m_pComPort == NULL) return;
 	while (!stop_thread) {
 #ifdef LIMIT_ACCELERATION
 		CalculateRobotSpeed();
@@ -276,8 +254,9 @@ void WheelController::Run()
 		auto speeds = CalculateWheelSpeeds(targetSpeed.velocity, targetSpeed.heading, targetSpeed.rotation);
 		for (auto i = 0; i < m_iWheelCount; i++) {
 			oss << i+id_start << ":sd" << (int)speeds[i] << "\n";
+			m_pComPort->writeString(oss.str());
 		}
-		m_wheelPort->writeString(oss.str());
+		m_pComPort->writeString(oss.str());
 
 #endif
 		std::this_thread::sleep_for(std::chrono::milliseconds(50)); // do not poll serial to fast
