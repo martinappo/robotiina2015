@@ -3,7 +3,7 @@
 bool DriveInstruction::aimTarget(const ObjectPosition &target, double errorMargin){
 	double heading = target.getHeading();
 	if (abs(heading) > errorMargin){
-		m_pCom->Drive(0, 0, heading);
+		m_pCom->Drive(0, 0, heading*0.2);
 		return false;
 	}
 	else{

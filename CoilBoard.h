@@ -17,6 +17,7 @@ public:
 	}
 	virtual void ToggleTribbler(bool start){};
 	virtual bool BallInTribbler(){ 
+		return false;
 		if (rand() % 100 > 95){
 			ballInTribbler = !ballInTribbler;
 		};
