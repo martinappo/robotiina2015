@@ -5,9 +5,8 @@
 #include <boost/timer/timer.hpp>
 #include "ThreadedClass.h"
 #include <atomic>
-#include "SimpleSerial.h"
 
-class WheelController : public IWheelController, ThreadedClass {
+class WheelController : public ThreadedClass {
 
 private:
 	Speed targetSpeed; // velocity, heading, rotation
@@ -20,15 +19,14 @@ private:
 	boost::posix_time::ptime lastStep = time;
 	boost::posix_time::ptime lastUpdate = time;
 	std::atomic_bool updateSpeed;
-	SimpleSerial *m_pComPort;
-	std::atomic_bool m_bPortsInitialized;
+	ISerial *m_pComPort;
 	int m_iWheelCount;
 protected:
 	std::vector<double> CalculateWheelSpeeds(double velocity, double direction, double rotate);
 	void CalculateRobotSpeed(); // reverse calc
 	std::vector<double> GetWheelSpeeds();
 public:
-	WheelController(SimpleSerial *port, int iWheelCount = 3);
+	WheelController(ISerial *port, int iWheelCount = 3);
 	void InitDummyWheels();
 	void Forward(int speed);
 	void rotateBack(int speed);
@@ -49,7 +47,7 @@ public:
 	std::string GetDebugInfo();
 	void Run();
 	bool IsReal(){
-		return m_bPortsInitialized;
+		return m_pComPort != NULL;
 	}
 	int id_start = 0;
 

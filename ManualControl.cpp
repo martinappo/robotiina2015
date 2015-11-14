@@ -19,8 +19,8 @@ ManualControl::ManualControl(ICommunicationModule *pComModule) :ConfigurableModu
 //	AddSetting("Rotate Right", []{return ""; }, [this]{this->wheels->Rotate(0, 20); });
 //	AddSetting("Rotate Left", []{return ""; }, [this]{this->wheels->Rotate(1, 20); });
 	AddSetting("Kick", []{return " "; }, [this] {this->m_pComModule->Kick(); });
-	AddSetting("Start tribbler", []{return "z"; }, [this]{this->m_pComModule->ToggleTribbler(true); });
-	AddSetting("Stop tribbler", []{return "x"; }, [this]{this->m_pComModule->ToggleTribbler(false); });
+	AddSetting("Start tribbler", []{return "z"; }, [this]{this->m_pComModule->ToggleTribbler(50); });
+	AddSetting("Stop tribbler", []{return "x"; }, [this]{this->m_pComModule->ToggleTribbler(0); });
 	//Start();
 }
 

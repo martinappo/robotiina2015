@@ -25,9 +25,6 @@
     <ClCompile Include="coilBoard.cpp">
       <Filter>ComModule</Filter>
     </ClCompile>
-    <ClCompile Include="ComPortScanner.cpp">
-      <Filter>ComModule</Filter>
-    </ClCompile>
     <ClCompile Include="GateFinder.cpp">
       <Filter>VisionModule</Filter>
     </ClCompile>
@@ -36,9 +33,6 @@
     </ClCompile>
     <ClCompile Include="objectfinder.cpp">
       <Filter>VisionModule</Filter>
-    </ClCompile>
-    <ClCompile Include="wheel.cpp">
-      <Filter>ComModule</Filter>
     </ClCompile>
     <ClCompile Include="wheelcontroller.cpp">
       <Filter>ComModule</Filter>
@@ -144,9 +138,6 @@
     <ClInclude Include="wheelcontroller.h">
       <Filter>ComModule</Filter>
     </ClInclude>
-    <ClInclude Include="wheel.h">
-      <Filter>ComModule</Filter>
-    </ClInclude>
     <ClInclude Include="simpleserial.h">
       <Filter>ComModule</Filter>
     </ClInclude>
@@ -155,9 +146,6 @@
     </ClInclude>
     <ClInclude Include="GateFinder.h">
       <Filter>VisionModule</Filter>
-    </ClInclude>
-    <ClInclude Include="ComPortScanner.h">
-      <Filter>ComModule</Filter>
     </ClInclude>
     <ClInclude Include="colorcalibrator.h">
       <Filter>VisionModule</Filter>
@@ -170,9 +158,6 @@
     </ClInclude>
     <ClInclude Include="calibrationconfreader.h">
       <Filter>VisionModule</Filter>
-    </ClInclude>
-    <ClInclude Include="blockingreader.h">
-      <Filter>ComModule</Filter>
     </ClInclude>
     <ClInclude Include="BallFinder.h">
       <Filter>VisionModule</Filter>

@@ -8,7 +8,7 @@
 #define deg270 (270.0 * PI / 180.0)
 //#define LIMIT_ACCELERATION
 
-WheelController::WheelController(SimpleSerial *port, int iWheelCount/* = 3*/) : ThreadedClass("WheelController"),
+WheelController::WheelController(ISerial *port, int iWheelCount/* = 3*/) : ThreadedClass("WheelController"),
 m_iWheelCount(iWheelCount), m_pComPort(port)
 {
 	if (iWheelCount == 3) {
@@ -24,7 +24,6 @@ m_iWheelCount(iWheelCount), m_pComPort(port)
 		wheelPositions.push_back(315);
 	}
 	targetSpeed = { 0, 0, 0 };
-	m_bPortsInitialized = false;	
 };
 
 void WheelController::DestroyWheels()

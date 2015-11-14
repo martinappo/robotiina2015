@@ -85,6 +85,15 @@ enum REFCOMMAND
 	GOAL,
 	YELLOW_CARD
 }; */
+class ISerialListener {
+public:
+	virtual void messageReceived(const std::string & message) = 0;
+};
+class ISerial : public ISerialListener{
+public:
+	virtual void writeString(const std::string &s) = 0;
+	virtual void setMessageHandler(ISerialListener* callback) {};
+};
 
 class IObjectPosition {
 public:
@@ -140,24 +149,6 @@ public:
 	virtual const cv::Mat & GetFrame() = 0;
 };
 
-class IWheelController {
-public:
-	virtual void Drive(double fowardSpeed, double direction =0, double angularSpeed=0) = 0;
-	virtual const Speed & GetActualSpeed() = 0;
-	virtual const Speed & GetTargetSpeed() = 0;
-	virtual std::string GetDebugInfo() = 0;
-	virtual bool IsReal() = 0;
-
-
-
-};
-class ICoilGun {
-public:
-	virtual bool BallInTribbler() = 0;
-	virtual void Kick(int force=800) = 0;
-	virtual void ToggleTribbler(bool start) = 0;
-
-};
 /*
 class IRefereeCom {
 public:
@@ -167,8 +158,13 @@ public:
 	virtual bool isTogglable() = 0;
 };*/
 
-class ICommunicationModule : public IWheelController, public ICoilGun {
-//	virtual bool Init(IWheelController * pWheels, ICoilGun *pCoilGun) = 0;
+class ICommunicationModule {
+public:
+	virtual void Drive(double fowardSpeed, double direction = 0, double angularSpeed = 0) = 0;
+	virtual bool BallInTribbler() = 0;
+	virtual void Kick(int force = 800) = 0;
+	virtual void ToggleTribbler(int speed) = 0;
+	virtual std::string GetDebugInfo() = 0;
 
 };
 

@@ -8,7 +8,7 @@
 #include <mutex>
 
 const int MAX_ROBOTS = 10;
-class Simulator : public ICamera/*, public IRefereeCom*/, public ICommunicationModule, public ThreadedClass, public FieldState, public UdpServer, public RefereeCom
+class Simulator : public ICamera, public ISerial, public ThreadedClass, public FieldState, public UdpServer, public RefereeCom
 {
   using UdpServer::SendMessage;
 public:
@@ -40,8 +40,16 @@ public:
 	virtual void MessageReceived(const std::string & message);
 
 	void giveCommand(FieldState::GameMode command);
+	typedef	void(*MessageCallback)(const std::string & message);
+	virtual void writeString(const std::string &s) {};
+	virtual void messageReceived(const std::string & message){};
+	virtual void setMessageHandler(MessageCallback *callback){
+		messageCallback = callback;
+	};
 
 protected:
+	MessageCallback *messageCallback = NULL;
+
 	double orientation;
 	cv::Mat frame = cv::Mat(1024, 1280, CV_8UC3);
 	cv::Mat frame_copy = cv::Mat(1024, 1280, CV_8UC3);

@@ -103,8 +103,8 @@ void LLAPReceiver::Run() {
 	std::cout << "Referee listener starting" << std::endl;
 	std::string command;
 	while (!stop_thread){
-		command = readNumberOfCharsAsync(12);
-		handleMessage(command);
+		//command = readNumberOfCharsAsync(12);
+		//handleMessage(command);
 		std::this_thread::sleep_for(std::chrono::milliseconds(50)); // do not poll serial to fast
 	}
 	std::cout << "Referee listener stoping" << std::endl;

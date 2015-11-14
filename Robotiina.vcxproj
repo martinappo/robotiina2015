@@ -98,12 +98,10 @@
     <ClInclude Include="StateMachine.h" />
     <ClInclude Include="BallFinder.h" />
     <ClInclude Include="BallPosition.h" />
-    <ClInclude Include="blockingreader.h" />
     <ClInclude Include="calibrationconfreader.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="coilBoard.h" />
     <ClInclude Include="colorcalibrator.h" />
-    <ClInclude Include="ComPortScanner.h" />
     <ClInclude Include="ConfigurableModule.h" />
     <ClInclude Include="ComModule.h" />
     <ClInclude Include="dialog.h" />
@@ -138,7 +136,6 @@
     <ClInclude Include="UdpServer.h" />
     <ClInclude Include="VideoRecorder.h" />
     <ClInclude Include="WebUI.h" />
-    <ClInclude Include="wheel.h" />
     <ClInclude Include="wheelcontroller.h" />
   </ItemGroup>
   <ItemGroup>
@@ -153,7 +150,6 @@
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="coilBoard.cpp" />
     <ClCompile Include="colorcalibrator.cpp" />
-    <ClCompile Include="ComPortScanner.cpp" />
     <ClCompile Include="ConfigurableModule.cpp" />
     <ClCompile Include="ComModule.cpp" />
     <ClCompile Include="dialog.cpp" />
@@ -182,7 +178,6 @@
     <ClCompile Include="UdpServer.cpp" />
     <ClCompile Include="VideoRecorder.cpp" />
     <ClCompile Include="WebUI.cpp" />
-    <ClCompile Include="wheel.cpp" />
     <ClCompile Include="wheelcontroller.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

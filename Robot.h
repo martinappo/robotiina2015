@@ -7,19 +7,12 @@
 #include <boost/thread/mutex.hpp>
 
 namespace po = boost::program_options;
-class ObjectFinder;
-class WheelController;
-class CoilGun;
-class ComPortScanner;
-class Simulator;
+
 class Robot {
 private:
 	po::variables_map config;
-	Simulator *pSim = NULL;
-	ICamera *camera = NULL;
-	ComPortScanner *scanner = NULL;
-	IWheelController * wheels = NULL;
-	ICoilGun *coilBoard = NULL;
+	ICamera *m_pCamera = NULL;
+	ISerial *m_pSerial = NULL;
 	IDisplay *m_pDisplay = NULL;
 	RefereeCom *refCom = NULL;
 	bool coilBoardPortsOk;
