@@ -144,8 +144,9 @@ Robot::Robot(boost::asio::io_service &io) : io(io), m_pCamera(0)
 }
 Robot::~Robot()
 {
-	if (dynamic_cast<Simulator*>(m_pCamera) != NULL) {
-		delete m_pCamera;
+	Simulator * pSim = dynamic_cast<Simulator*>(m_pCamera);
+	if (pSim != NULL) {
+		delete pSim;
 		m_pCamera = NULL;
 		m_pSerial = NULL;
 		refCom = NULL;
