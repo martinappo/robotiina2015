@@ -20,7 +20,7 @@ public:
 	virtual double GetFPS();
 	virtual cv::Mat & GetLastFrame(bool bFullFrame = false);
 	virtual void TogglePlay();
-
+	void CalcRobotSpeed(double dt);
 	virtual void Drive(double fowardSpeed, double direction = 0, double angularSpeed = 0);
 	virtual const Speed & GetActualSpeed();
 	virtual const Speed & GetTargetSpeed();
@@ -41,8 +41,8 @@ public:
 
 	void giveCommand(FieldState::GameMode command);
 	typedef	void(*MessageCallback)(const std::string & message);
-	virtual void writeString(const std::string &s) {};
-	virtual void messageReceived(const std::string & message){};
+	virtual void writeString(const std::string &s);
+	//virtual void messageReceived(const std::string & message){};
 	virtual void setMessageHandler(MessageCallback *callback){
 		messageCallback = callback;
 	};
@@ -76,6 +76,6 @@ private:
 	int next_id = 1;
 	bool stop_send = false;
 	bool ball_in_tribbler = false;
-
+	std::vector<std::pair<double, int>> wheelSpeeds;
 };
 

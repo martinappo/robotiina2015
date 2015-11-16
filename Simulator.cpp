@@ -14,6 +14,11 @@ Simulator::Simulator(boost::asio::io_service &io, bool master, const std::string
 {
 	srand(::time(NULL));
 
+	wheelSpeeds.push_back({ 0, 0 });
+	wheelSpeeds.push_back({ 0, 0 });
+	wheelSpeeds.push_back({ 0, 0 });
+	wheelSpeeds.push_back({ 0, 0 });
+
 	self.fieldCoords = cv::Point(rand() % 300 - 150, rand() % 460 - 230);
 	self.polarMetricCoords = cv::Point(0, 0);
 	if (isMaster) {
@@ -37,6 +42,19 @@ Simulator::Simulator(boost::asio::io_service &io, bool master, const std::string
 	};
 	Start();
 }
+void Simulator::writeString(const std::string &s){
+	int id = s[0] - '1'; //string 1...5 -> int 0...4
+	if (id < 4 && s.substr(4,2) == "sd") {
+		wheelSpeeds[id].second = atoi(s.substr(6).c_str());
+	}
+	else if(id==4) {
+		char cmd = s[2];
+		if (cmd == 'k') {
+			Kick(atoi(s.substr(4).c_str()));
+		}
+	}
+}
+
 void Simulator::MessageReceived(const std::string & message){
 	std::stringstream ss(message);
 	std::string command, r_id;
@@ -195,11 +213,16 @@ void Simulator::UpdateBallPos(double dt){
 	}
 
 }
+void 	CalcRobotSpeed(double dt){
+
+}
 
 void Simulator::UpdateRobotPos(){
 	time = boost::posix_time::microsec_clock::local_time();
 
 	double dt = (double)(time - lastStep).total_milliseconds() / 1000.0;
+	CalcRobotSpeed(dt);
+
 	lastStep = time;
 
 	//if (dt < 0.0000001) return;
