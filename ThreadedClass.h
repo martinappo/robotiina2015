@@ -23,7 +23,7 @@ public:
 	}
 	boost::atomic<bool> running;
 	void Sleep(int ms) {
-		std::chrono::milliseconds dura(10);
+		std::chrono::milliseconds dura(ms);
 		std::this_thread::sleep_for(dura);
 	}
 protected:

@@ -1,7 +1,7 @@
 #pragma once
 #include "types.h"
 #include "CoilBoard.h"
-#include "wheelcontroller.h"
+#include "WheelController.h"
 
 class ComModule :
 	public ICommunicationModule
