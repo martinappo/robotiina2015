@@ -120,18 +120,19 @@ void FrontCameraVision::Run() {
 		cv::Point g1, g2;
 		//Blue gate pos
 		bool found = blueGateFinder.Locate(thresholdedImages[BLUE_GATE], frameHSV, frameBGR, g1, r1);
-		if (!found) {
-			m_pDisplay->ShowImage(frameBGR);
-			continue; // nothing to do :(
-		}
+		//if (!found) {
+		//	m_pDisplay->ShowImage(frameBGR);
+		//	continue; // nothing to do :(
+		//}
 		//Yellow gate pos
-		found = yellowGateFinder.Locate(thresholdedImages[YELLOW_GATE], frameHSV, frameBGR, g2, r2);
-		if (!found) {
-			m_pDisplay->ShowImage(frameBGR);
-			continue; // nothing to do :(
-		}
+		found |= yellowGateFinder.Locate(thresholdedImages[YELLOW_GATE], frameHSV, frameBGR, g2, r2);
+		//if (!found) {
+		//	m_pDisplay->ShowImage(frameBGR);
+		//	continue; // nothing to do :(
+		//}
 		// ajust gate positions to ..
 		// find closest points to opposite gate centre
+		if (found) {
 		auto min_i1 = 0, min_j1 = 0, min_i2 = 0, min_j2 = 0;
 		double min_dist1 = INT_MAX, min_dist2 = INT_MAX;
 		for (int i = 0; i < 4; i++){
@@ -167,7 +168,7 @@ void FrontCameraVision::Run() {
 		m_pState->yellowGate.updateRawCoordinates(c2, cv::Point2d(frameBGR.size() / 2));
 
 		m_pState->self.updateFieldCoords();
-		
+		}
 		//Balls pos
 		cv::Mat rotMat = getRotationMatrix2D(cv::Point(0,0), -m_pState->self.getAngle(), 1);
 		cv::Mat balls(3, m_pState->balls.size(), CV_64FC1);

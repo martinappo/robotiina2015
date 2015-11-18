@@ -250,12 +250,12 @@ void WheelController::Run()
 		w_back->SetSpeed(speeds.z);
 		lastStep = now;
 #else
-		std::ostringstream oss;
 		auto speeds = CalculateWheelSpeeds(targetSpeed.velocity, targetSpeed.heading, targetSpeed.rotation);
 		for (auto i = 0; i < m_iWheelCount; i++) {
-			oss << i+id_start << ":sd" << (int)speeds[i] << "\n";
+			std::ostringstream oss;
+			oss << i + id_start << ":sd" << (int)speeds[i] << "\n";
+			//m_pComPort->WriteString(oss.str());
 		}
-		m_pComPort->WriteString(oss.str());
 
 #endif
 		std::this_thread::sleep_for(std::chrono::milliseconds(50)); // do not poll serial to fast

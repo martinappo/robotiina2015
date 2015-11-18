@@ -36,6 +36,8 @@ protected:
 	bool captureFrames = false;
 	std::atomic_bool autoPilotEnabled;
 	std::string play_mode = "single";
+	SimpleSerial *serialPort;
+
 public:
     Robot(boost::asio::io_service &io);
 	bool Launch(int argc, char* argv[]);
