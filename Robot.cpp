@@ -226,15 +226,16 @@ void Robot::InitHardware() {
 		camera = new Camera(0);
 	std::cout << "Done" << std::endl;
 	initRefCom();
-	SimpleSerial *serialPort;
 	try {
 		using boost::property_tree::ptree;
 		ptree pt;
 		read_ini("conf/ports.ini", pt);
 		std::string port = pt.get<std::string>(std::to_string(ID_COM));
+		std::cout << "port: " << port << std::endl;
 		serialPort = new SimpleSerial(io, port, 19200);
 	}
 	catch (...) {
+		throw;
 		coilBoardPortsOk = false;
 		pSim = new Simulator(io, true, "master");
 		wheels = pSim;

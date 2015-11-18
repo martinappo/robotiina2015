@@ -20,7 +20,7 @@ private:
 	boost::posix_time::ptime lastStep = time;
 	boost::posix_time::ptime lastUpdate = time;
 	std::atomic_bool updateSpeed;
-	SimpleSerial *m_pComPort;
+	SimpleSerial *m_pComPort = NULL;
 	std::atomic_bool m_bPortsInitialized;
 	int m_iWheelCount;
 protected:
@@ -49,7 +49,7 @@ public:
 	std::string GetDebugInfo();
 	void Run();
 	bool IsReal(){
-		return m_bPortsInitialized;
+		return m_pComPort != NULL;
 	}
 	int id_start = 0;
 
