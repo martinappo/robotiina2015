@@ -8,7 +8,7 @@
 #define deg270 (270.0 * PI / 180.0)
 //#define LIMIT_ACCELERATION
 
-WheelController::WheelController(SimpleSerial *port, int iWheelCount/* = 3*/) : ThreadedClass("WheelController"),
+WheelController::WheelController(ISerial *port, int iWheelCount/* = 3*/) : ThreadedClass("WheelController"),
 m_iWheelCount(iWheelCount), m_pComPort(port)
 {
 	if (iWheelCount == 3) {
@@ -24,7 +24,6 @@ m_iWheelCount(iWheelCount), m_pComPort(port)
 		wheelPositions.push_back(315);
 	}
 	targetSpeed = { 0, 0, 0 };
-	m_bPortsInitialized = m_pComPort != NULL;	
 	Start();
 };
 
@@ -251,15 +250,16 @@ void WheelController::Run()
 		w_back->SetSpeed(speeds.z);
 		lastStep = now;
 #else
-		std::ostringstream oss;
 		auto speeds = CalculateWheelSpeeds(targetSpeed.velocity, targetSpeed.heading, targetSpeed.rotation);
 		for (auto i = 0; i < m_iWheelCount; i++) {
-			oss << i+id_start << ":sd" << (int)speeds[i] << "\n";
+			std::ostringstream oss;
+			oss << (i + id_start) << ":sd" << (int)speeds[i] << "\n";
+			//std::cout << oss.str() << std::endl;
+			m_pComPort->WriteString(oss.str());
 		}
-		m_pComPort->writeString(oss.str());
 
 #endif
-		std::this_thread::sleep_for(std::chrono::milliseconds(50)); // do not poll serial to fast
+		std::this_thread::sleep_for(std::chrono::milliseconds(100)); // do not poll serial to fast
 	}
 	std::cout << "WheelController stoping" << std::endl;
 	

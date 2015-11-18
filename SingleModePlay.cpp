@@ -10,7 +10,7 @@ DriveMode DriveToBall::step(double dt)
 	if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
 	if (aimTarget(target)){
 		if (driveToTarget(target)){
-			m_pCom->ToggleTribbler(true);
+			m_pCom->ToggleTribbler(50);
 			if (aimTarget(target)){
 				if (catchTarget(target)){
 					return DRIVEMODE_AIM_GATE;
@@ -86,7 +86,7 @@ DriveMode AimGate::step(double dt)
 /*BEGIN Kick*/
 DriveMode Kick::step(double dt)
 {
-	m_pCom->ToggleTribbler(false);
+	m_pCom->ToggleTribbler(0);
 	STOP_DRIVING
 	std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	m_pCom->Kick();

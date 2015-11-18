@@ -8,7 +8,7 @@
 #include <mutex>
 
 const int MAX_ROBOTS = 10;
-class Simulator : public ICamera/*, public IRefereeCom*/, public ICommunicationModule, public ThreadedClass, public FieldState, public UdpServer, public RefereeCom
+class Simulator : public ICamera, public ISerial, public ThreadedClass, public FieldState, public UdpServer, public RefereeCom
 {
   using UdpServer::SendMessage;
 public:
@@ -20,7 +20,7 @@ public:
 	virtual double GetFPS();
 	virtual cv::Mat & GetLastFrame(bool bFullFrame = false);
 	virtual void TogglePlay();
-
+	void CalcRobotSpeed(double dt);
 	virtual void Drive(double fowardSpeed, double direction = 0, double angularSpeed = 0);
 	virtual const Speed & GetActualSpeed();
 	virtual const Speed & GetTargetSpeed();
@@ -37,11 +37,20 @@ public:
 		tribblerRunning = start;
 	};
 
-	virtual void MessageReceived(const std::string & message);
+	virtual void DataReceived(const std::string & message){};//serial
+	virtual void MessageReceived(const std::string & message); // UDP
 
 	void giveCommand(FieldState::GameMode command);
+	typedef	void(*MessageCallback)(const std::string & message);
+	virtual void WriteString(const std::string &s);
+	//virtual void DataReceived(const std::string & message){};
+	virtual void SetMessageHandler(MessageCallback *callback){
+		messageCallback = callback;
+	};
 
 protected:
+	MessageCallback *messageCallback = NULL;
+
 	double orientation;
 	cv::Mat frame = cv::Mat(1024, 1280, CV_8UC3);
 	cv::Mat frame_copy = cv::Mat(1024, 1280, CV_8UC3);
@@ -68,6 +77,6 @@ private:
 	int next_id = 1;
 	bool stop_send = false;
 	bool ball_in_tribbler = false;
-
+	cv::Mat wheelSpeeds = cv::Scalar::all(0.0);
 };
 

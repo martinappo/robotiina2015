@@ -132,7 +132,7 @@ void dance_step(float time, float &move1, float &move2) {
 
 /* END DANCE MOVES */
 
-Robot::Robot(boost::asio::io_service &io) : io(io), camera(0), wheels(0), coilBoard(0)
+Robot::Robot(boost::asio::io_service &io) : io(io), m_pCamera(0)
 {
 	
 	last_state = STATE_END_OF_GAME;
@@ -144,28 +144,21 @@ Robot::Robot(boost::asio::io_service &io) : io(io), camera(0), wheels(0), coilBo
 }
 Robot::~Robot()
 {
-	if (pSim){
+	Simulator * pSim = dynamic_cast<Simulator*>(m_pCamera);
+	if (pSim != NULL) {
 		delete pSim;
-		camera = NULL;
-		wheels = NULL;
-		coilBoard = NULL;
+		m_pCamera = NULL;
+		m_pSerial = NULL;
 		refCom = NULL;
 	}
-	if (camera) {
-		delete camera;
+	if (m_pCamera) {
+		delete m_pCamera;
 	}
-	std::cout << "coilBoard " << coilBoard << std::endl;
-	if (coilBoard)
-		delete coilBoard;
-	std::cout << "wheels " << wheels << std::endl;
-	if(wheels)
-        delete wheels;
-	if (scanner)
-		delete scanner;
 	if (refCom)
 		delete refCom;
-	//	if (m_pDisplay)
-//		delete m_pDisplay;
+	if (m_pSerial)
+		delete m_pSerial;
+
 }
 
 
@@ -195,35 +188,31 @@ bool Robot::Launch(int argc, char* argv[])
 	}
 	// Compose robot from its parts
 	if (config.count("webui") == 0)
-		m_pDisplay = new Dialog("Robotiina", winSize, camera->GetFrameSize());
+		m_pDisplay = new Dialog("Robotiina", winSize, m_pCamera->GetFrameSize());
 	else
 		m_pDisplay = new WebUI(8080);
 	captureFrames = config.count("capture-frames") > 0;
-	std::thread io_thread([&](){
-		io.run();
-	});
+
 	Run();
-	io.stop();
-	io_thread.join();
+
 	return true;
 }
 void Robot::InitSimulator(bool master, const std::string game_mode) {
-	pSim = new Simulator(io, master, game_mode);
-	camera = pSim;
-	wheels = pSim;
+	auto pSim = new Simulator(io, master, game_mode);
+	m_pCamera = pSim;
+	m_pSerial = pSim;
 	refCom = pSim;
-	coilBoard = pSim;
 }
 
 void Robot::InitHardware() {
-	std::cout << "Initializing camera... " << std::endl;
-	if (config.count("camera"))
-		if (config["camera"].as<std::string>() == "ximea")
-			camera = new Camera(CV_CAP_XIAPI);
+	std::cout << "Initializing Camera... " << std::endl;
+	if (config.count("m_pCamera"))
+		if (config["m_pCamera"].as<std::string>() == "ximea")
+			m_pCamera = new Camera(CV_CAP_XIAPI);
 		else
-			camera = new Camera(config["camera"].as<std::string>());
+			m_pCamera = new Camera(config["m_pCamera"].as<std::string>());
 	else
-		camera = new Camera(0);
+		m_pCamera = new Camera(0);
 	std::cout << "Done" << std::endl;
 	initRefCom();
 	try {
@@ -231,21 +220,11 @@ void Robot::InitHardware() {
 		ptree pt;
 		read_ini("conf/ports.ini", pt);
 		std::string port = pt.get<std::string>(std::to_string(ID_COM));
-		std::cout << "port: " << port << std::endl;
-		serialPort = new SimpleSerial(io, port, 19200);
+		m_pSerial = new SimpleSerial(io, port, 19200);
 	}
-	catch (...) {
-		throw;
-		coilBoardPortsOk = false;
-		pSim = new Simulator(io, true, "master");
-		wheels = pSim;
-		coilBoard = pSim;
-		std::cout << "" << std::endl;
-		return;
+	catch (std::exception const&  ex) {
+		std::cout << "com port error: " << ex.what() << std::endl;
 	}
-	wheels = new WheelController(serialPort, 4);
-	coilBoard = new CoilGun(); //TODO: fix this, to use real coilboard
-	coilBoardPortsOk = true;
 	
 	std::cout << "Done initializing" << std::endl;
 	return;
@@ -317,16 +296,16 @@ void Robot::Run()
 	refCom->setField(&field);
 
 	/* Vision modules */
-	FrontCameraVision visionModule(camera, m_pDisplay, &field);
-	//AutoCalibrator visionModule(camera, this);
-	MouseVision mouseVision(camera, m_pDisplay, &field);
+	FrontCameraVision visionModule(m_pCamera, m_pDisplay, &field);
+	//AutoCalibrator visionModule(m_pCamera, this);
+	MouseVision mouseVision(m_pCamera, m_pDisplay, &field);
 
-	AutoCalibrator calibrator(camera, m_pDisplay);
+	AutoCalibrator calibrator(m_pCamera, m_pDisplay);
 
-	DistanceCalibrator distanceCalibrator(camera, m_pDisplay);
+	DistanceCalibrator distanceCalibrator(m_pCamera, m_pDisplay);
 
 	/* Communication modules */
-	ComModule comModule(wheels, coilBoard);
+	ComModule comModule(m_pSerial);
 
 	/* Logic modules */
 	StateMachine *autoPilot = NULL;
@@ -346,7 +325,7 @@ void Robot::Run()
 
 	std::stringstream subtitles;
 
-	VideoRecorder videoRecorder("videos/", 30, camera->GetFrameSize(true));
+	VideoRecorder videoRecorder("videos/", 30, m_pCamera->GetFrameSize(true));
 	//port.get_io_service().run();
 	while (true)
     {
@@ -371,7 +350,7 @@ void Robot::Run()
 #define RECORD_AFTER_PROCESSING
 #ifdef RECORD_AFTER_PROCESSING
 		if (captureFrames) {
-			videoRecorder.RecordFrame(camera->GetLastFrame(true), subtitles.str());
+			videoRecorder.RecordFrame(m_pCamera->GetLastFrame(true), subtitles.str());
 		}
 #endif
 		
@@ -414,7 +393,7 @@ void Robot::Run()
 #endif
 				autoPilot->enableTestMode(false);
 				distanceCalibrator.Enable(false);
-				wheels->Drive(0);
+				comModule.Drive(0);
 				STATE_BUTTON("(A)utoCalibrate objects", 'a', STATE_AUTOCALIBRATE)
 				//STATE_BUTTON("(M)anualCalibrate objects", STATE_CALIBRATE)
 				STATE_BUTTON("(C)Change Gate [" + ((int)field.GetTargetGate().getDistance() == (int)(field.blueGate.getDistance()) ? "blue" : "yellow") + "]", 'c', STATE_SELECT_GATE)
@@ -466,7 +445,7 @@ void Robot::Run()
 					m_pDisplay->ToggleDisplay();
 				});
 				m_pDisplay->createButton("Pause/Play video", 'f', [this] {
-					camera->TogglePlay();
+					m_pCamera->TogglePlay();
 				});
 
 
@@ -585,8 +564,8 @@ void Robot::Run()
 					}
 					*/
 					//SetState(STATE_SELECT_GATE);
-					coilBoard->ToggleTribbler(false);
-					wheels->Drive(0);
+					comModule.ToggleTribbler(0);
+					comModule.Drive(0);
 					autoPilot->Enable(!autoPilot->running);
 					SetState(STATE_NONE);
 				}
@@ -639,7 +618,7 @@ void Robot::Run()
 		else if (STATE_DANCE == state) {
 			float move1, move2;
 			dance_step(((float)(time - epoch).total_milliseconds()), move1, move2);
-			wheels->Drive(move1, move2,0);
+			comModule.Drive(move1, move2,0);
 			//cv::putText(frameBGR, "move1:" + std::to_string(move1), cv::Point(frameBGR.cols - 140, 120), 0.5, cv::Scalar(255, 255, 255));
 			//cv::putText(frameBGR, "move2:" + std::to_string(move2), cv::Point(frameBGR.cols - 140, 140), 0.5, cv::Scalar(255, 255, 255));
 		}
@@ -666,20 +645,12 @@ void Robot::Run()
 		subtitles.str("");
 		//subtitles << oss.str();
 		subtitles << "|" << autoPilot->GetDebugInfo();
-		subtitles << "|" << wheels->GetDebugInfo();
-		if (scanner && scanner->running) {
-			subtitles << "|" << "Please wait, Scanning Ports";
+		subtitles << "|" << comModule.GetDebugInfo();
+		if (!comModule.IsReal()) {
+			subtitles << "|" << "WARNING: Serial not connected!";
 		}
-		else {
-			if (!wheels->IsReal()) {
-				subtitles << "|" << "WARNING: real wheels not connected!";
-			}
-			if (!coilBoardPortsOk) {
-				subtitles << "   " << "WARNING: coilgun not connected!";
-			}
-		} 
 
-		m_pDisplay->putText( "fps: " + std::to_string(camera->GetFPS()), cv::Point(-140, 20), 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putText( "fps: " + std::to_string(m_pCamera->GetFPS()), cv::Point(-140, 20), 0.5, cv::Scalar(255, 255, 255));
 		//assert(STATE_END_OF_GAME != state);
 		m_pDisplay->putText( "state: " + STATE_LABELS[state], cv::Point(-140, 40), 0.5, cv::Scalar(255, 255, 255));
 		//m_pDisplay->putText( std::string("Ball:") + (ballPos.getDistance() > 0 ? "yes" : "no"), cv::Point(-140, 60), 0.5, cv::Scalar(255, 255, 255));
@@ -697,19 +668,19 @@ void Robot::Run()
 		}
 
 		m_pDisplay->putText("robot x:" + std::to_string(field.self.fieldCoords.x) + " y: " + std::to_string(field.self.fieldCoords.y) + " r: " + std::to_string(field.self.getAngle()), cv::Point(-250, 200), 0.4, cv::Scalar(255, 255, 255));
-		if (pSim != NULL)
-			m_pDisplay->putText("simul x:" + std::to_string(pSim->self.fieldCoords.x) + " y: " + std::to_string(pSim->self.fieldCoords.y) + " r: " + std::to_string(pSim->self.getAngle()), cv::Point(-250, 220), 0.4, cv::Scalar(255, 255, 255));
+//		if (pSim != NULL)
+//			m_pDisplay->putText("simul x:" + std::to_string(pSim->self.fieldCoords.x) + " y: " + std::to_string(pSim->self.fieldCoords.y) + " r: " + std::to_string(pSim->self.getAngle()), cv::Point(-250, 220), 0.4, cv::Scalar(255, 255, 255));
 
 
 
 		//m_pDisplay->putText( "border: " + std::to_string(borderDistance.distance), cv::Point(-140, 280), 0.5, cv::Scalar(255, 255, 255));
 
 		m_pDisplay->putText("Blue gate d: " + std::to_string((int)field.blueGate.getDistance()) + " a: " + std::to_string(field.blueGate.getAngle()), cv::Point(-250, 260), 0.4, cv::Scalar(255, 255, 255));
-		if (pSim != NULL)
-			m_pDisplay->putText("Blue gate d: " + std::to_string((int)pSim->blueGate.getDistance()) + " a: " + std::to_string(pSim->blueGate.getAngle()), cv::Point(-250, 280), 0.4, cv::Scalar(255, 255, 255));
+//		if (pSim != NULL)
+//			m_pDisplay->putText("Blue gate d: " + std::to_string((int)pSim->blueGate.getDistance()) + " a: " + std::to_string(pSim->blueGate.getAngle()), cv::Point(-250, 280), 0.4, cv::Scalar(255, 255, 255));
 		m_pDisplay->putText("Yell gate d: " + std::to_string((int)field.yellowGate.getDistance()) + " a: " + std::to_string(field.yellowGate.getAngle()), cv::Point(-250, 310), 0.4, cv::Scalar(255, 255, 255));
-		if (pSim != NULL)
-			m_pDisplay->putText("Yell gate d: " + std::to_string((int)pSim->yellowGate.getDistance()) + " a: " + std::to_string(pSim->yellowGate.getAngle()), cv::Point(-250, 330), 0.4, cv::Scalar(255, 255, 255));
+//		if (pSim != NULL)
+//			m_pDisplay->putText("Yell gate d: " + std::to_string((int)pSim->yellowGate.getDistance()) + " a: " + std::to_string(pSim->yellowGate.getAngle()), cv::Point(-250, 330), 0.4, cv::Scalar(255, 255, 255));
 
 		
 
@@ -730,7 +701,7 @@ void Robot::Run()
 		/* robot tracker */
 		cv::Point2i center(-100, 200);
 		double velocity = 0, direction = 0, rotate = 0;
-		auto speed = wheels->GetTargetSpeed();
+		auto speed = comModule.GetTargetSpeed();
 
 		/*
 		//Draw circle
@@ -767,7 +738,7 @@ bool Robot::ParseOptions(int argc, char* argv[])
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("help", "produce help message")
-		("camera", po::value<std::string>(), "set camera index or path")
+		("camera", po::value<std::string>(), "set m_pCamera index or path")
 		("app-size", po::value<std::string>(), "main window size: width x height")
 		("locate_cursor", "find cursor instead of ball")
 		("skip-ports", "skip ALL COM port checks")

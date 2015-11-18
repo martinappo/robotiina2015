@@ -16,7 +16,7 @@ bool DriveInstruction::catchTarget(const ObjectPosition &target){
 		m_pCom->Drive(0, 0, 0);
 		return true;
 	}
-	m_pCom->ToggleTribbler(true);
+	m_pCom->ToggleTribbler(50);
 	m_pCom->Drive(30, 0, target.getHeading());
 	return false;
 }

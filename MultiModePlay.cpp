@@ -284,11 +284,11 @@ MultiModePlay::~MultiModePlay()
 /*BEGIN Kick2v2*/
 void Kick2v2::onEnter(){
 	DriveInstruction::onEnter();
-	m_pCom->ToggleTribbler(false);
+	m_pCom->ToggleTribbler(0);
 }
 
 DriveMode Kick2v2::step(double dt){
-	m_pCom->ToggleTribbler(false);
+	m_pCom->ToggleTribbler(0);
 	m_pCom->Drive(0, 0, 0);
 	std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	m_pCom->Kick();
@@ -303,7 +303,7 @@ void DriveToBall2v2::onEnter(){
 	m_pCom->Drive(0, 0, 0);
 	std::chrono::milliseconds dura(200);
 	std::this_thread::sleep_for(dura);
-	m_pCom->ToggleTribbler(false);
+	m_pCom->ToggleTribbler(0);
 
 	target = DriveInstruction::getClosestBall();
 }

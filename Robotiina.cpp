@@ -47,6 +47,11 @@ int main(int argc, char *argv[])
 	}*/
 
     boost::asio::io_service io;
+	std::thread io_thread([&](){
+		io.run();
+	});
+
+
     Robot robotiina(io);
 //    RemoteControl sr(io, &robotiina);
 
@@ -69,6 +74,9 @@ int main(int argc, char *argv[])
 	{
 		std::cout << "ups, did not see that coming."<< std::endl;
 	}
+	io.stop();
+	io_thread.join();
+
 //    sr.Stop();
     return 0;
 
