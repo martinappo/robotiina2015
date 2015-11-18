@@ -94,7 +94,7 @@ LLAPReceiver::~LLAPReceiver()
 {
 	WaitForStop();
 }
-void LLAPReceiver::messageReceived(const std::string & message){
+void LLAPReceiver::DataReceived(const std::string & message){
 	handleMessage(message);
 };
 

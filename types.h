@@ -87,12 +87,12 @@ enum REFCOMMAND
 }; */
 class ISerialListener {
 public:
-	virtual void messageReceived(const std::string & message) = 0;
+	virtual void DataReceived(const std::string & message) = 0;
 };
 class ISerial : public ISerialListener{
 public:
-	virtual void writeString(const std::string &s) = 0;
-	virtual void setMessageHandler(ISerialListener* callback) {};
+	virtual void WriteString(const std::string &s) = 0;
+	virtual void SetMessageHandler(ISerialListener* callback) {};
 };
 
 class IObjectPosition {

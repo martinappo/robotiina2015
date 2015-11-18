@@ -37,13 +37,14 @@ public:
 		tribblerRunning = start;
 	};
 
-	virtual void MessageReceived(const std::string & message);
+	virtual void DataReceived(const std::string & message){};//serial
+	virtual void MessageReceived(const std::string & message); // UDP
 
 	void giveCommand(FieldState::GameMode command);
 	typedef	void(*MessageCallback)(const std::string & message);
-	virtual void writeString(const std::string &s);
-	//virtual void messageReceived(const std::string & message){};
-	virtual void setMessageHandler(MessageCallback *callback){
+	virtual void WriteString(const std::string &s);
+	//virtual void DataReceived(const std::string & message){};
+	virtual void SetMessageHandler(MessageCallback *callback){
 		messageCallback = callback;
 	};
 
@@ -76,6 +77,6 @@ private:
 	int next_id = 1;
 	bool stop_send = false;
 	bool ball_in_tribbler = false;
-	std::vector<std::pair<double, int>> wheelSpeeds;
+	cv::Mat wheelSpeeds = cv::Scalar::all(0.0);
 };
 

@@ -8,7 +8,7 @@ void CoilBoard::Kick(int force){
 	boost::posix_time::ptime time2 = boost::posix_time::microsec_clock::local_time();
 	//std::cout << (afterKickTime - time2).total_milliseconds() << std::endl;
 	if ((time2 - afterKickTime).total_milliseconds() < 1500) return;
-	//writeString("k800\n");
+	//WriteString("k800\n");
 	kick = true; // set flag, so that we do not corrupt writing in Run method
 	//forcedNotInTribbler = true;
 	afterKickTime = time2; //reset timer
@@ -18,13 +18,13 @@ void CoilBoard::Kick(int force){
 void CoilBoard::ToggleTribbler(int speed){
 	std::ostringstream oss;
 	oss << ID_MAIN_BOARD << ":dm" << speed << "\n";
-	if(m_pComPort) m_pComPort->writeString(oss.str());
+	if(m_pComPort) m_pComPort->WriteString(oss.str());
 	
 	return;
 }
 
 void CoilBoard::Run(){
-	if(m_pComPort) m_pComPort->writeString("c\n");
+	if(m_pComPort) m_pComPort->WriteString("5:c\n");
 	boost::posix_time::time_duration::tick_type waitDuration;
 	while (!stop_thread){
 	try
@@ -33,14 +33,14 @@ void CoilBoard::Run(){
 		//Pinging
 		time = boost::posix_time::microsec_clock::local_time();
 		waitDuration = (time - waitTime).total_milliseconds();
-		if(m_pComPort) m_pComPort->writeString("bl\n");
+		if(m_pComPort) m_pComPort->WriteString("5:bl\n");
 		if (waitDuration > 300){
-			if(m_pComPort) m_pComPort->writeString("p\n");
+			if(m_pComPort) m_pComPort->WriteString("5:p\n");
 			waitTime = time;
 		}
 		if (kick) {
 			std::cout << "kick ----->" << std::endl;
-			if(m_pComPort) m_pComPort->writeString("k800\n");
+			if(m_pComPort) m_pComPort->WriteString("5:k800\n");
 			kick = false;
 		}
 		/*
@@ -66,7 +66,7 @@ void CoilBoard::Run(){
 	{
 		std::ostringstream oss;
 		oss << ID_MAIN_BOARD << ":dm" << 0 << "\n";
-		if(m_pComPort) m_pComPort->writeString(oss.str());
+		if(m_pComPort) m_pComPort->WriteString(oss.str());
 	}
 	catch (...){
 		std::cout << "Error writing or reading coliboard (try 2) " << std::endl;

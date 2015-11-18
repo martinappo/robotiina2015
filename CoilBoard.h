@@ -25,7 +25,7 @@ public:
 		ballInTribblerCount = 0;
 		kick = false;
 		if (m_pComPort) {
-			m_pComPort->setMessageHandler(this);
+			m_pComPort->SetMessageHandler(this);
 		}
 		Start();
 	};
@@ -34,12 +34,12 @@ public:
 	bool BallInTribbler() { return ballInTribbler; }
 	void Run();
 	virtual ~CoilBoard() {
-		if (m_pComPort) m_pComPort->setMessageHandler(NULL);
+		if (m_pComPort) m_pComPort->SetMessageHandler(NULL);
 		std::cout << "~CoilBoard" << std::endl;
 		WaitForStop();
 	}
 
-	void messageReceived(const std::string & message){
+	void DataReceived(const std::string & message){
 		if (message.substr(0, 4) == "<bl:")
 		ballInTribbler = message.substr(4, 1) == "1";
 	}

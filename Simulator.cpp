@@ -3,6 +3,8 @@
 #include <chrono>
 #include <thread>
 #include <time.h>       /* time */
+#include <boost/algorithm/string.hpp>
+
 extern DistanceCalculator gDistanceCalculator;
 
 Simulator::Simulator(boost::asio::io_service &io, bool master, const std::string game_mode) :
@@ -13,12 +15,12 @@ Simulator::Simulator(boost::asio::io_service &io, bool master, const std::string
 	,isMaster(master)
 {
 	srand(::time(NULL));
-
+	/*
 	wheelSpeeds.push_back({ 0, 0 });
 	wheelSpeeds.push_back({ 0, 0 });
 	wheelSpeeds.push_back({ 0, 0 });
 	wheelSpeeds.push_back({ 0, 0 });
-
+	*/
 	self.fieldCoords = cv::Point(rand() % 300 - 150, rand() % 460 - 230);
 	self.polarMetricCoords = cv::Point(0, 0);
 	if (isMaster) {
@@ -42,17 +44,24 @@ Simulator::Simulator(boost::asio::io_service &io, bool master, const std::string
 	};
 	Start();
 }
-void Simulator::writeString(const std::string &s){
-	int id = s[0] - '1'; //string 1...5 -> int 0...4
-	if (id < 4 && s.substr(4,2) == "sd") {
-		wheelSpeeds[id].second = atoi(s.substr(6).c_str());
-	}
-	else if(id==4) {
-		char cmd = s[2];
-		if (cmd == 'k') {
-			Kick(atoi(s.substr(4).c_str()));
+void Simulator::WriteString(const std::string &command){
+
+	std::vector<std::string> tokens;
+	boost::split(tokens, command, boost::is_any_of("\n"));
+	for (std::string s : tokens){
+		if (s.empty()) continue;
+		int id = s[0] - '1'; //string 1...5 -> int 0...4
+		if (id < 4 && s.substr(2, 2) == "sd") {
+			wheelSpeeds.at<double>(id,0) = atoi(s.substr(2).c_str());
+		}
+		else if (id == 4) {
+			char cmd = s[2];
+			if (cmd == 'k') {
+				Kick(atoi(s.substr(4).c_str()));
+			}
 		}
 	}
+	
 }
 
 void Simulator::MessageReceived(const std::string & message){
@@ -213,8 +222,18 @@ void Simulator::UpdateBallPos(double dt){
 	}
 
 }
-void 	CalcRobotSpeed(double dt){
+void Simulator::CalcRobotSpeed(double dt){
+	cv::Mat rotMatrix = (cv::Mat_<double>(4, 4) <<
+		cos(45 / CV_PI), sin(45 / CV_PI), 0.1, 0,
+		cos(135 / CV_PI), sin(135 / CV_PI), 0.1, 0,
+		cos(225 / CV_PI), sin(225 / CV_PI), 0.1, 0,
+		cos(315 / CV_PI), sin(315 / CV_PI), 0.1, 0);
 
+	cv::Mat robotSpeed = rotMatrix.inv() * wheelSpeeds;
+	std::cout << "==============" << std::endl;
+	std::cout << wheelSpeeds << std::endl;
+	std::cout << "--------------" << std::endl;
+	std::cout << robotSpeed << std::endl;
 }
 
 void Simulator::UpdateRobotPos(){

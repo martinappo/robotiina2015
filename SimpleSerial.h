@@ -17,12 +17,12 @@ public:
 #endif
 	}
 
-	void writeString(const std::string &s)	{
+	void WriteString(const std::string &s)	{
 		boost::asio::write(serial, boost::asio::buffer(s.c_str(), s.size()));
 	}
 
-	virtual void messageReceived(const std::string & message){};
-	virtual void setMessageHandler(ISerialListener* callback) {
+	virtual void DataReceived(const std::string & message){};
+	virtual void SetMessageHandler(ISerialListener* callback) {
 		messageCallback = callback;
 	};
 
@@ -45,9 +45,9 @@ protected:
 		{ // read completed, so process the data
 			std::string message = std::string(read_msg_.begin(), read_msg_.end()).substr(0, bytes_transferred);
 			//std::cout << "udp packet:" << message << std::endl;
-			messageReceived(message);
+			DataReceived(message);
 			if (messageCallback != NULL) {
-				messageCallback->messageReceived(message);
+				messageCallback->DataReceived(message);
 			}
 
 			read_start(); // start waiting for another asynchronous read again

@@ -24,6 +24,7 @@ m_iWheelCount(iWheelCount), m_pComPort(port)
 		wheelPositions.push_back(315);
 	}
 	targetSpeed = { 0, 0, 0 };
+	Start();
 };
 
 void WheelController::DestroyWheels()
@@ -253,9 +254,8 @@ void WheelController::Run()
 		auto speeds = CalculateWheelSpeeds(targetSpeed.velocity, targetSpeed.heading, targetSpeed.rotation);
 		for (auto i = 0; i < m_iWheelCount; i++) {
 			oss << i+id_start << ":sd" << (int)speeds[i] << "\n";
-			m_pComPort->writeString(oss.str());
 		}
-		m_pComPort->writeString(oss.str());
+		m_pComPort->WriteString(oss.str());
 
 #endif
 		std::this_thread::sleep_for(std::chrono::milliseconds(50)); // do not poll serial to fast
