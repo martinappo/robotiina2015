@@ -52,7 +52,10 @@ void Simulator::WriteString(const std::string &command){
 		if (s.empty()) continue;
 		int id = s[0] - '1'; //string 1...5 -> int 0...4
 		if (id < 4 && s.substr(2, 2) == "sd") {
-			wheelSpeeds.at<double>(id,0) = atoi(s.substr(2).c_str());
+			wheelSpeeds.at<double>(id,0) = atoi(s.substr(4).c_str());
+//			std::cout << "zzzzzzzzzzzzz" << std::endl;
+//			std::cout << wheelSpeeds << std::endl;
+//			std::cout << "xxxxxxxxxxxxx" << std::endl;
 		}
 		else if (id == 4) {
 			char cmd = s[2];
@@ -231,6 +234,8 @@ void Simulator::CalcRobotSpeed(double dt){
 
 	cv::Mat robotSpeed = rotMatrix.inv() * wheelSpeeds;
 	std::cout << "==============" << std::endl;
+	std::cout << rotMatrix << std::endl;
+	std::cout << "oooooooooooooo" << std::endl;
 	std::cout << wheelSpeeds << std::endl;
 	std::cout << "--------------" << std::endl;
 	std::cout << robotSpeed << std::endl;
