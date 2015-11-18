@@ -42,6 +42,8 @@ public:
 
 	void giveCommand(FieldState::GameMode command);
 	typedef	void(*MessageCallback)(const std::string & message);
+	void SendCommand(int id, const std::string &cmd, int param = INT_MAX){};
+
 	virtual void WriteString(const std::string &s);
 	//virtual void DataReceived(const std::string & message){};
 	virtual void SetMessageHandler(MessageCallback *callback){
@@ -77,6 +79,6 @@ private:
 	int next_id = 1;
 	bool stop_send = false;
 	bool ball_in_tribbler = false;
-	cv::Mat wheelSpeeds;// = cv::Scalar::all(0.0);
+	cv::Mat wheelSpeeds = cv::Scalar::all(0.0);
 };
 

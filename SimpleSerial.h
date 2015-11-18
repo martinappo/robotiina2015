@@ -20,6 +20,14 @@ public:
 #endif
 	}
 
+	void SendCommand(int id, const std::string &cmd, int param=INT_MAX)	{
+		std::ostringstream oss;
+
+		oss << id << ":" << cmd;
+		if (param < INT_MAX) oss << param;
+		oss << "\n";
+		WriteString(oss.str());
+	}
 	void WriteString(const std::string &s)	{
 		std::lock_guard<std::mutex> lock(writeLock);
 		boost::asio::write(serial, boost::asio::buffer(s.c_str(), s.size()));

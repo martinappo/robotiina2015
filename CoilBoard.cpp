@@ -72,17 +72,11 @@ void CoilBoard::Run(){
 	try
 	{
 		std::ostringstream oss;
-		oss << ID_MAIN_BOARD << ":fs" << 1 << "\n";
-		if(m_pComPort) m_pComPort->WriteString(oss.str());
-			Sleep(50);
-		std::ostringstream oss;
-		oss << ID_MAIN_BOARD << ":dm" << 0 << "\n";
-		if(m_pComPort) m_pComPort->WriteString(oss.str());
-			Sleep(50);
+
+		if (m_pComPort) m_pComPort->SendCommand(ID_MAIN_BOARD, "fs", 1);
+		if (m_pComPort) m_pComPort->SendCommand(ID_MAIN_BOARD, "dm", 0);
 		for(int i = 0; i< 20; i++) {
-			std::ostringstream oss;
-			oss << ID_MAIN_BOARD << ":k" << 800+ (i*50) << "\n";
-			if(m_pComPort) m_pComPort->WriteString(oss.str());
+			if (m_pComPort) m_pComPort->SendCommand(ID_MAIN_BOARD, "k", 800 + (i * 50));
 			Sleep(200);
 		}
 		Sleep(1000);

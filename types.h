@@ -91,6 +91,7 @@ public:
 };
 class ISerial : public ISerialListener{
 public:
+	virtual void SendCommand(int id, const std::string &cmd, int param = INT_MAX) = 0;
 	virtual void WriteString(const std::string &s) = 0;
 	virtual void SetMessageHandler(ISerialListener* callback) {};
 };
