@@ -253,12 +253,13 @@ void WheelController::Run()
 		auto speeds = CalculateWheelSpeeds(targetSpeed.velocity, targetSpeed.heading, targetSpeed.rotation);
 		for (auto i = 0; i < m_iWheelCount; i++) {
 			std::ostringstream oss;
-			oss << i + id_start << ":sd" << (int)speeds[i] << "\n";
-			//m_pComPort->WriteString(oss.str());
+			oss << (i + id_start) << ":sd" << (int)speeds[i] << "\n";
+			//std::cout << oss.str() << std::endl;
+			m_pComPort->WriteString(oss.str());
 		}
 
 #endif
-		std::this_thread::sleep_for(std::chrono::milliseconds(50)); // do not poll serial to fast
+		std::this_thread::sleep_for(std::chrono::milliseconds(100)); // do not poll serial to fast
 	}
 	std::cout << "WheelController stoping" << std::endl;
 	

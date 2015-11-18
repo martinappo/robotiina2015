@@ -40,7 +40,8 @@ void CoilBoard::Run(){
 		}
 		if (kick) {
 			std::cout << "kick ----->" << std::endl;
-			if(m_pComPort) m_pComPort->WriteString("5:k800\n");
+			if (m_pComPort) m_pComPort->WriteString("5:k\n");
+			if (m_pComPort) m_pComPort->WriteString("5:c\n");
 			kick = false;
 		}
 		/*

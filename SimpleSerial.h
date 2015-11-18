@@ -3,6 +3,7 @@
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <boost/bind.hpp>
+#include <mutex>
 
 class SimpleSerial: public ISerial {
 public:
@@ -18,6 +19,7 @@ public:
 	}
 
 	void WriteString(const std::string &s)	{
+		std::lock_guard<std::mutex> lock(writeLock);
 		boost::asio::write(serial, boost::asio::buffer(s.c_str(), s.size()));
 	}
 
@@ -27,6 +29,7 @@ public:
 	};
 
 protected:
+	std::mutex writeLock;
 	ISerialListener *messageCallback = NULL;
 	static const int max_read_length = 512; // maximum amount of data to read in one operation
 
