@@ -226,13 +226,18 @@ void Simulator::UpdateBallPos(double dt){
 
 }
 void Simulator::CalcRobotSpeed(double dt){
+
+	//Ax = b, rotMatrix * [vx, vy, omeg] = v1, v2, v3, v4
+
+	//x = inv(A' * A) * A' * b
+
 	cv::Mat rotMatrix = (cv::Mat_<double>(4, 4) <<
 		cos(45 / CV_PI), sin(45 / CV_PI), 0.1, 0,
 		cos(135 / CV_PI), sin(135 / CV_PI), 0.1, 0,
 		cos(225 / CV_PI), sin(225 / CV_PI), 0.1, 0,
 		cos(315 / CV_PI), sin(315 / CV_PI), 0.1, 0);
 
-	cv::Mat robotSpeed = rotMatrix.inv() * wheelSpeeds;
+	cv::Mat robotSpeed =  rotMatrix.inv(cv::DECOMP_SVD) * wheelSpeeds;
 	std::cout << "==============" << std::endl;
 	std::cout << rotMatrix << std::endl;
 	std::cout << "oooooooooooooo" << std::endl;
