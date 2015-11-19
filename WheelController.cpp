@@ -3,26 +3,12 @@
 #include <boost/property_tree/ini_parser.hpp>
 #include <thread>
 
-cv::Mat wheelsFwd = (cv::Mat_<double>(4, 3) <<
-	cos(45.0 / 180 * CV_PI), sin(45.0 / 180 * CV_PI), 1,
-	cos(135.0 / 180 * CV_PI), sin(135.0 / 180 * CV_PI), 1,
-	cos(225.0 / 180 * CV_PI), sin(225.0 / 180 * CV_PI), 1,
-	cos(315.0 / 180 * CV_PI), sin(315.0 / 180 * CV_PI), 1);
+cv::Mat wheelsFwd = (cv::Mat_<double>(4, 4) <<
+	cos(45.0 / 180 * CV_PI), sin(45.0 / 180 * CV_PI), 1, 0,
+	cos(135.0 / 180 * CV_PI), sin(135.0 / 180 * CV_PI), 1, 0,
+	cos(225.0 / 180 * CV_PI), sin(225.0 / 180 * CV_PI), 1, 0,
+	cos(315.0 / 180 * CV_PI), sin(315.0 / 180 * CV_PI), 1, 0);
 
-cv::Mat wheelsFwdInv = wheelsFwd.inv(cv::DECOMP_SVD);
-
-cv::Mat wheelsSideWays = (cv::Mat_<double>(4, 3) <<
-	cos(135.0 / 180 * CV_PI), sin(135.0 / 180 * CV_PI), 1,
-	cos(225.0 / 180 * CV_PI), sin(225 / 180 * CV_PI), 1,
-	cos(315 / 180 * CV_PI), sin(315 / 180 * CV_PI), 1,
-	cos(45 / 180 * CV_PI), sin(45 / 180 * CV_PI), 1);
-
-cv::Mat wheelsSideWaysInv = wheelsSideWays.inv(cv::DECOMP_SVD);
-
-cv::Mat rotBack = (cv::Mat_<double>(3, 3) <<
-	cos(-45 / 180 * CV_PI), -sin(-45 / 180 * CV_PI), 0,
-	sin(-45 / 180 * CV_PI), cos(-45 / 180 * CV_PI), 0,
-	1,1, 1);
 
 
 //#define LIMIT_ACCELERATION
@@ -91,6 +77,7 @@ void WheelController::DriveRotate(double velocity, double direction, double rota
 	targetSpeedXYW.at<double>(0) = sin(direction* CV_PI / 180.0)* velocity;
 	targetSpeedXYW.at<double>(1) = cos(direction* CV_PI / 180.0)* velocity;
 	targetSpeedXYW.at<double>(2) = rotate;
+	targetSpeedXYW.at<double>(3) = 0;
 
 	directControl = false;
 	updateSpeed = true;
@@ -102,6 +89,7 @@ void WheelController::Drive(const cv::Point2d &speed, double angularSpeed){
 	targetSpeedXYW.at<double>(0) = speed.x;
 	targetSpeedXYW.at<double>(1) = speed.y;
 	targetSpeedXYW.at<double>(2) = angularSpeed;
+	targetSpeedXYW.at<double>(3) = 0;
 
 }
 

@@ -9,7 +9,7 @@
 class WheelController : public ThreadedClass {
 
 private:
-	cv::Mat targetSpeedXYW = cv::Mat_<double>(3,1); //x ,y, w (rotation)
+	cv::Mat targetSpeedXYW = cv::Mat_<double>(4,1); //x ,y, w (rotation)
 	Speed targetSpeed; // velocity, heading, rotation
 	Speed actualSpeed; // velocity, heading, rotation.
 	Speed lastSpeed;

@@ -7,17 +7,32 @@
 #include <chrono>
 #include <thread>
 
+#define DUMP_SERIAL
+
+#ifdef DUMP_SERIAL
+#include <fstream>
+#endif
+
+
 class SimpleSerial: public ISerial {
 public:
 
 	SimpleSerial(boost::asio::io_service &io_service, const std::string & port, unsigned int baud_rate) : io(io_service), serial(io, port) {
 		serial.set_option(boost::asio::serial_port_base::baud_rate(baud_rate));
 		read_start();
+#ifdef DUMP_SERIAL
+		log.open("seral.log");
+#endif
+
 	}
 	virtual ~SimpleSerial(){
 #ifdef WIN32	
 		serial.close();
 #endif
+#ifdef DUMP_SERIAL
+		log.close();
+#endif
+
 	}
 
 	void SendCommand(int id, const std::string &cmd, int param=INT_MAX)	{
@@ -31,7 +46,11 @@ public:
 	void WriteString(const std::string &s)	{
 		std::lock_guard<std::mutex> lock(writeLock);
 		boost::asio::write(serial, boost::asio::buffer(s.c_str(), s.size()));
-		std::cout << "serial> " << s << std::endl;
+#ifdef DUMP_SERIAL
+//		std::cout << "serial> " << s << std::endl;
+		log << s;
+#endif
+
 		std::chrono::milliseconds dura(50);
 		std::this_thread::sleep_for(dura);
  	}
@@ -42,6 +61,9 @@ public:
 	};
 
 protected:
+#ifdef DUMP_SERIAL
+	std::ofstream log;
+#endif
 	std::mutex writeLock;
 	ISerialListener *messageCallback = NULL;
 	static const int max_read_length = 512; // maximum amount of data to read in one operation
