@@ -9,8 +9,8 @@ ManualControl::ManualControl(ICommunicationModule *pComModule) :ConfigurableModu
 	AddSetting("Turn Left", []{return "r"; }, [this] {this->rotation -= 10; });
 	AddSetting("Turn Right", []{return "l"; }, [this]{this->rotation += 10; });
 
-	AddSetting("Move Left", []{return "a"; }, [this] {this->speed.x += 10; });
-	AddSetting("Move Right", []{return "d"; }, [this]{this->speed.x -= 10; });
+	AddSetting("Move Left", []{return "a"; }, [this] {this->speed.x -= 10; });
+	AddSetting("Move Right", []{return "d"; }, [this]{this->speed.x += 10; });
 
 	AddSetting("Move Forward", []{return "w"; }, [this]{this->speed.y += 10; });
 	AddSetting("Move Back", []{return "s"; }, [this]{this->speed.y -= 10; });
