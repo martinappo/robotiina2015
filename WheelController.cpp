@@ -88,9 +88,9 @@ void WheelController::DriveRotate(double velocity, double direction, double rota
 	targetSpeed.heading = direction; //cos(direction* PI / 180.0)* velocity + rotate,
 	targetSpeed.rotation = rotate;
 	
-	targetSpeedXYW.at<double>(0) = sin(direction* CV_PI / 180.0)* velocity + rotate;
-	targetSpeedXYW.at<double>(1) = cos(direction* CV_PI / 180.0)* velocity + rotate;
-	targetSpeedXYW.at<double>(2) = rotate / 180 * CV_PI;
+	targetSpeedXYW.at<double>(0) = sin(direction* CV_PI / 180.0)* velocity;
+	targetSpeedXYW.at<double>(1) = cos(direction* CV_PI / 180.0)* velocity;
+	targetSpeedXYW.at<double>(2) = rotate;
 
 	directControl = false;
 	updateSpeed = true;
@@ -101,7 +101,7 @@ void WheelController::DriveRotate(double velocity, double direction, double rota
 void WheelController::Drive(const cv::Point2d &speed, double angularSpeed){
 	targetSpeedXYW.at<double>(0) = speed.x;
 	targetSpeedXYW.at<double>(1) = speed.y;
-	targetSpeedXYW.at<double>(2) = angularSpeed / 180 * CV_PI;
+	targetSpeedXYW.at<double>(2) = angularSpeed;
 
 }
 
