@@ -6,6 +6,10 @@
 #include <boost/algorithm/string.hpp>
 
 extern DistanceCalculator gDistanceCalculator;
+extern cv::Mat wheelsFwdInv;
+extern cv::Mat wheelsSideWaysInv;
+extern cv::Mat rotBack;
+
 
 Simulator::Simulator(boost::asio::io_service &io, bool master, const std::string game_mode) :
 	mNumberOfBalls(game_mode == "master" || game_mode =="slave" ? 1 :11 )
@@ -243,36 +247,15 @@ void Simulator::UpdateRobotPos(){
 
 	double dt = (double)(time - lastStep).total_milliseconds() / 1000.0;
 	//CalcRobotSpeed(dt);
-	cv::Mat rotMatrix = (cv::Mat_<double>(4, 3) <<
-		cos(45 / 180 * CV_PI), sin(45 / 180 * CV_PI), 1,
-		cos(135 / 180 * CV_PI), sin(135 / 180 * CV_PI),1,
-		cos(225 / 180 * CV_PI), sin(225 / 180 * CV_PI), 1,
-		cos(315 / 180 * CV_PI), sin(315 / 180 * CV_PI), 1);
-
-	cv::Mat robotSpeed = rotMatrix.inv(cv::DECOMP_SVD) * wheelSpeeds;
-
-	cv::Mat rotMatrix2 = (cv::Mat_<double>(4, 3) <<
-		cos(135 / 180 * CV_PI), sin(135 / 180 * CV_PI), 1,
-		cos(225 / 180 * CV_PI), sin(225 / 180 * CV_PI), 1,
-		cos(315 / 180 * CV_PI), sin(315 / 180 * CV_PI), 1,
-		cos(45 / 180 * CV_PI), sin(45 / 180 * CV_PI), 1);
-
-	cv::Mat robotSpeed2 = rotMatrix2.inv(cv::DECOMP_SVD) * wheelSpeeds;
-
-	std::cout << "==============" << std::endl;
-	std::cout << rotMatrix << std::endl;
-	std::cout << "oooooooooooooo" << std::endl;
-	std::cout << wheelSpeeds << std::endl;
-	std::cout << "--------------" << std::endl;
-	std::cout << robotSpeed << std::endl;
-	std::cout << ".............." << std::endl;
-	std::cout << robotSpeed2 << std::endl;
+	/*
+	cv::Mat robotSpeed = wheelsFwdInv.inv(cv::DECOMP_SVD) * wheelSpeeds;
+	cv::Mat robotSpeed2 = (wheelsSideWaysInv.inv(cv::DECOMP_SVD) * wheelSpeeds);// *rotBack;
 
 	lastStep = time;
 	self.fieldCoords.x += robotSpeed.at<double>(0)*dt;
 	self.fieldCoords.y += robotSpeed.at<double>(1)*dt;
 	//self.polarMetricCoords.y += (robotSpeed.at<double>(2)*dt)/CV_PI * 180;
-
+	*/
 	//if (dt < 0.0000001) return;
 	/*
 	double v = targetSpeed.velocity;

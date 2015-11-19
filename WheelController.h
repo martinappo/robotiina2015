@@ -9,6 +9,7 @@
 class WheelController : public ThreadedClass {
 
 private:
+	cv::Mat targetSpeedXYW = cv::Mat_<double>(3,1); //x ,y, w (rotation)
 	Speed targetSpeed; // velocity, heading, rotation
 	Speed actualSpeed; // velocity, heading, rotation.
 	Speed lastSpeed;
@@ -36,6 +37,7 @@ public:
 	void Rotate(bool direction, double speed);
 	void Drive(double velocity, double direction = 0, double angularSpeed = 0);
 	void DriveRotate(double velocity, double direction, double rotate);
+	virtual void Drive(const cv::Point2d &speed, double angularSpeed = 0);
 	void Stop();
 
 	const Speed & GetActualSpeed();
@@ -49,6 +51,6 @@ public:
 	bool IsReal(){
 		return m_pComPort != NULL;
 	}
-	int id_start = 0;
+	int id_start = 1;
 
 };

@@ -13,8 +13,7 @@ public:
 protected:
 	ICommunicationModule *m_pComModule;
 	// accelerations
-	double speed = 0;
-	double direction = 0;
+	cv::Point2d speed = 0;
 	double rotation = 0;
 	boost::posix_time::ptime last_tick;
 };
