@@ -20,54 +20,66 @@ void CoilBoard::ToggleTribbler(int speed){
 	oss << ID_MAIN_BOARD << ":dm" << speed << "\n";
 	if(m_pComPort) m_pComPort->WriteString(oss.str());
 	
+	
 	return;
 }
 
 void CoilBoard::Run(){
+	if(m_pComPort) m_pComPort->WriteString("5:dm0\n");
+	if(m_pComPort) m_pComPort->WriteString("5:fs0\n");
 	if(m_pComPort) m_pComPort->WriteString("5:c\n");
 	boost::posix_time::time_duration::tick_type waitDuration;
 	while (!stop_thread){
-	try
-	{
-	
-		//Pinging
-		time = boost::posix_time::microsec_clock::local_time();
-		waitDuration = (time - waitTime).total_milliseconds();
-		if(m_pComPort) m_pComPort->WriteString("5:bl\n");
-		if (waitDuration > 300){
-			if(m_pComPort) m_pComPort->WriteString("5:p\n");
-			waitTime = time;
+		try
+		{
+		
+			//Pinging
+			time = boost::posix_time::microsec_clock::local_time();
+			waitDuration = (time - waitTime).total_milliseconds();
+			//if(m_pComPort) m_pComPort->WriteString("5:bl\n");
+			if (waitDuration > 300){
+				if(m_pComPort) m_pComPort->WriteString("5:p\n");
+				waitTime = time;
+			}
+			if (kick) {
+				std::cout << "kick ----->" << std::endl;
+				if (m_pComPort) m_pComPort->WriteString("5:k\n");
+				Sleep(100);
+				if (m_pComPort) m_pComPort->WriteString("5:c\n");
+				kick = false;
+			}
+			/*
+			//Forcing ballintribler false after kick
+			boost::posix_time::time_duration::tick_type afterKickDuration = (time - afterKickTime).total_milliseconds();
+			if (afterKickDuration > 1000 && forcedNotInTribbler){
+				//forcedNotInTribbler = false;
+			}
+			else if (forcedNotInTribbler){
+				ballInTribblerCount = -1;
+			}
+			*/
+			;
+			Sleep(50);
 		}
-		if (kick) {
-			std::cout << "kick ----->" << std::endl;
-			if (m_pComPort) m_pComPort->WriteString("5:k\n");
-			if (m_pComPort) m_pComPort->WriteString("5:c\n");
-			kick = false;
+		catch (...){
+			std::cout << "Error writing or reading coilboard " << std::endl;
+			stop_thread = true;
 		}
-		/*
-		//Forcing ballintribler false after kick
-		boost::posix_time::time_duration::tick_type afterKickDuration = (time - afterKickTime).total_milliseconds();
-		if (afterKickDuration > 1000 && forcedNotInTribbler){
-			//forcedNotInTribbler = false;
-		}
-		else if (forcedNotInTribbler){
-			ballInTribblerCount = -1;
-		}
-		*/
-		std::chrono::milliseconds dura(10);
-		std::this_thread::sleep_for(dura);
-	}
-	catch (...){
-		std::cout << "Error writing or reading coilboard " << std::endl;
-		stop_thread = true;
-	}
 
 	}
+			std::cout << "Coilboard stoping " << std::endl;
+	
 	try
 	{
 		std::ostringstream oss;
-		oss << ID_MAIN_BOARD << ":dm" << 0 << "\n";
-		if(m_pComPort) m_pComPort->WriteString(oss.str());
+
+		if (m_pComPort) m_pComPort->SendCommand(ID_MAIN_BOARD, "fs", 1);
+		if (m_pComPort) m_pComPort->SendCommand(ID_MAIN_BOARD, "dm", 0);
+		for(int i = 0; i< 20; i++) {
+			if (m_pComPort) m_pComPort->SendCommand(ID_MAIN_BOARD, "k", 800 + (i * 50));
+			Sleep(200);
+		}
+		Sleep(1000);
 	}
 	catch (...){
 		std::cout << "Error writing or reading coliboard (try 2) " << std::endl;

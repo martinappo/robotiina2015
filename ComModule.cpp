@@ -1,6 +1,4 @@
 #include "ComModule.h"
-#include "coilBoard.h"
-#include "wheelcontroller.h"
 
 ComModule::ComModule(ISerial *pSerialPort)
 {

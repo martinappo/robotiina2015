@@ -42,6 +42,8 @@ public:
 
 	void giveCommand(FieldState::GameMode command);
 	typedef	void(*MessageCallback)(const std::string & message);
+	void SendCommand(int id, const std::string &cmd, int param = INT_MAX){};
+
 	virtual void WriteString(const std::string &s);
 	//virtual void DataReceived(const std::string & message){};
 	virtual void SetMessageHandler(MessageCallback *callback){

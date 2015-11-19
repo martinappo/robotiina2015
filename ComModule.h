@@ -1,7 +1,7 @@
 #pragma once
 #include "types.h"
 #include "CoilBoard.h"
-#include "wheelcontroller.h"
+#include "WheelController.h"
 
 class ComModule :
 	public ICommunicationModule
@@ -13,6 +13,10 @@ public:
 	virtual void Drive(double fowardSpeed, double direction=0, double angularSpeed=0) {
 		m_pWheels->Drive(fowardSpeed, direction, angularSpeed);
 	};
+	virtual void Drive(const cv::Point2d &speed, double angularSpeed = 0){
+		m_pWheels->Drive(speed, angularSpeed);
+	}
+
 	virtual bool BallInTribbler() {
 		return m_pCoilGun->BallInTribbler();
 	}

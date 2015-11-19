@@ -6,6 +6,10 @@
 #include <boost/algorithm/string.hpp>
 
 extern DistanceCalculator gDistanceCalculator;
+extern cv::Mat wheelsFwdInv;
+extern cv::Mat wheelsSideWaysInv;
+extern cv::Mat rotBack;
+
 
 Simulator::Simulator(boost::asio::io_service &io, bool master, const std::string game_mode) :
 	mNumberOfBalls(game_mode == "master" || game_mode =="slave" ? 1 :11 )
@@ -226,40 +230,38 @@ void Simulator::UpdateBallPos(double dt){
 
 }
 void Simulator::CalcRobotSpeed(double dt){
-
-	//Ax = b, rotMatrix * [vx, vy, omeg] = v1, v2, v3, v4
-
-	//x = inv(A' * A) * A' * b
-
-	cv::Mat rotMatrix = (cv::Mat_<double>(4, 4) <<
-		cos(45 / CV_PI), sin(45 / CV_PI), 0.1, 0,
-		cos(135 / CV_PI), sin(135 / CV_PI), 0.1, 0,
-		cos(225 / CV_PI), sin(225 / CV_PI), 0.1, 0,
-		cos(315 / CV_PI), sin(315 / CV_PI), 0.1, 0);
-
-	cv::Mat robotSpeed =  rotMatrix.inv(cv::DECOMP_SVD) * wheelSpeeds;
+	/*
 	std::cout << "==============" << std::endl;
 	std::cout << rotMatrix << std::endl;
 	std::cout << "oooooooooooooo" << std::endl;
 	std::cout << wheelSpeeds << std::endl;
 	std::cout << "--------------" << std::endl;
 	std::cout << robotSpeed << std::endl;
+	}
+
+	*/
 }
 
 void Simulator::UpdateRobotPos(){
 	time = boost::posix_time::microsec_clock::local_time();
 
 	double dt = (double)(time - lastStep).total_milliseconds() / 1000.0;
-	CalcRobotSpeed(dt);
+	//CalcRobotSpeed(dt);
+	/*
+	cv::Mat robotSpeed = wheelsFwdInv.inv(cv::DECOMP_SVD) * wheelSpeeds;
+	cv::Mat robotSpeed2 = (wheelsSideWaysInv.inv(cv::DECOMP_SVD) * wheelSpeeds);// *rotBack;
 
 	lastStep = time;
-
+	self.fieldCoords.x += robotSpeed.at<double>(0)*dt;
+	self.fieldCoords.y += robotSpeed.at<double>(1)*dt;
+	//self.polarMetricCoords.y += (robotSpeed.at<double>(2)*dt)/CV_PI * 180;
+	*/
 	//if (dt < 0.0000001) return;
-
+	/*
 	double v = targetSpeed.velocity;
 	double w = targetSpeed.rotation;
 
-
+	
 	self.polarMetricCoords.y += w * dt;
 	if (self.polarMetricCoords.y > 360) self.polarMetricCoords.y -= 360;
 	if (self.polarMetricCoords.y < -360) self.polarMetricCoords.y += 360;
@@ -267,7 +269,7 @@ void Simulator::UpdateRobotPos(){
 		
 	self.fieldCoords.x += (v*dt * sin((self.getAngle() + targetSpeed.heading) / 180 * CV_PI));
 	self.fieldCoords.y -= (v*dt * cos((self.getAngle() + targetSpeed.heading) / 180 * CV_PI));
-
+	*/
 	if (!isMaster && id > 0) {
 		std::stringstream message;
 		message << "POS " << id << " " << self.fieldCoords.x << " " << self.fieldCoords.y << " " << self.getAngle() << " #";

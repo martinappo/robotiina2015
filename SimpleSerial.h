@@ -4,6 +4,8 @@
 #include <boost/array.hpp>
 #include <boost/bind.hpp>
 #include <mutex>
+#include <chrono>
+#include <thread>
 
 class SimpleSerial: public ISerial {
 public:
@@ -18,10 +20,21 @@ public:
 #endif
 	}
 
+	void SendCommand(int id, const std::string &cmd, int param=INT_MAX)	{
+		std::ostringstream oss;
+
+		oss << id << ":" << cmd;
+		if (param < INT_MAX) oss << param;
+		oss << "\n";
+		WriteString(oss.str());
+	}
 	void WriteString(const std::string &s)	{
 		std::lock_guard<std::mutex> lock(writeLock);
 		boost::asio::write(serial, boost::asio::buffer(s.c_str(), s.size()));
-	}
+		std::cout << "serial> " << s << std::endl;
+		std::chrono::milliseconds dura(50);
+		std::this_thread::sleep_for(dura);
+ 	}
 
 	virtual void DataReceived(const std::string & message){};
 	virtual void SetMessageHandler(ISerialListener* callback) {
