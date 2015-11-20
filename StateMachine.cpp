@@ -24,11 +24,9 @@ bool DriveInstruction::catchTarget(const ObjectPosition &target){
 }
 
 bool DriveInstruction::driveToTarget(const ObjectPosition &target, double maxDistance){
-
 	if (USE_ANGLED_DRIVING)
 		return driveToTargetWithAngle(target, maxDistance);
 	double dist = target.getDistance();
-		
 	if (dist > maxDistance){
 		std::cout << ", ball to far: " << dist << " target: " << maxDistance;
 		m_pCom->Drive(std::min(100.0, std::max(20.0, dist)), 0, 0);
