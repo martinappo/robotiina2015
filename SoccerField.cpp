@@ -7,7 +7,7 @@
 extern DistanceCalculator gDistanceCalculator;
 
 SoccerField::SoccerField(boost::asio::io_service &io, IDisplay *pDisplay, bool master, int number_of_balls, int port) :m_pDisplay(pDisplay)
-, UdpServer(io, port, master), FieldState(number_of_balls)
+, UdpServer(io, port, master), FieldState(number_of_balls), ThreadedClass("SoccerField")
 {
 	green = cv::imread("field.png", CV_LOAD_IMAGE_COLOR);   // Read the file
 	field = cv::Mat(green.size(), CV_8UC3, cv::Scalar::all(245));

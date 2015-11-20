@@ -8,7 +8,7 @@
 */
 
 Dialog::Dialog(const std::string &title, const cv::Size &ptWindowSize, const cv::Size &ptCamSize, int flags/* = CV_WINDOW_AUTOSIZE*/)
-	: windowSize(ptWindowSize), camSize(ptCamSize)
+	: windowSize(ptWindowSize), camSize(ptCamSize), ThreadedClass("Dialog")
 {
 	cv::Size windowSizeDefault = cv::Size((int)((double)camSize.width / 0.7), (int)((double)camSize.height / 0.7));
 

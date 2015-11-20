@@ -243,8 +243,11 @@ void Simulator::UpdateRobotPos(){
 	self.polarMetricCoords.y += (robotSpeed.at<double>(2)*dt);
 	if (self.polarMetricCoords.y > 360) self.polarMetricCoords.y -= 360;
 	if (self.polarMetricCoords.y < -360) self.polarMetricCoords.y += 360;
-	self.fieldCoords.x += robotSpeed.at<double>(0)*dt * sin((self.getAngle()) / 180 * CV_PI);
-	self.fieldCoords.y -= robotSpeed.at<double>(1)*dt * cos((self.getAngle()) / 180 * CV_PI);
+	cv::Mat rotMat = getRotationMatrix2D(cv::Point(0, 0), self.getAngle(), 1);
+	cv::Mat rotatedSpeed = rotMat * robotSpeed;
+
+	self.fieldCoords.x += rotatedSpeed.at<double>(0)*dt;
+	self.fieldCoords.y -= rotatedSpeed.at<double>(1)*dt;
 	
 
 	if (!isMaster && id > 0) {
