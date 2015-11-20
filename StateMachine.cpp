@@ -5,7 +5,7 @@ bool DriveInstruction::aimTarget(const ObjectPosition &target, double errorMargi
 	double heading = target.getHeading();
 	if (abs(heading) > errorMargin){
 		std::cout << ", rotating: " << heading;
-		m_pCom->Drive(0, 0, heading);
+		m_pCom->Drive(0, 0, -heading);
 		return false;
 	}
 	else{
@@ -30,11 +30,12 @@ bool DriveInstruction::driveToTarget(const ObjectPosition &target, double maxDis
 	double dist = target.getDistance();
 		
 	if (dist > maxDistance){
-		std::cout << ", ball to far: " << dist << "target: " << maxDistance;
+		std::cout << ", ball to far: " << dist << " target: " << maxDistance;
+		m_pCom->Drive(std::min(100.0, std::max(20.0, dist)), 0, 0);
 		return false;
 	}
 	else{
-		std::cout << ", ball near: " << dist << "target: " << maxDistance;
+		std::cout << ", ball near: " << dist << " target: " << maxDistance;
 		m_pCom->Drive(0, 0, 0);
 		return true;
 	}
