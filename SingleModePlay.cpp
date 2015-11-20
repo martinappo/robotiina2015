@@ -5,13 +5,18 @@ DriveMode DriveToBall::step(double dt)
 {
 
 	auto &target = getClosestBall();
-	std::cout<<target.getDistance() << target.getAngle() << std::endl;
+//	std::cout<<target.getDistance() << target.getAngle() << std::endl;
 	if (target.getDistance() > 10000) return DRIVEMODE_IDLE;
 	if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
+	std::cout << "aimtarget0, " << std::endl;
 	if (aimTarget(target)){
+		std::cout << "aimTarget1, ";
 		if (driveToTarget(target)){
+			std::cout << "driveToTarget, ";
 			if (aimTarget(target)){
-				if (catchTarget(target)){
+				std::cout << "aimTarget2, ";
+				if (catchTarget(target)) {
+					std::cout << "catchTarget, ";
 					return DRIVEMODE_AIM_GATE;
 				}
 			}
