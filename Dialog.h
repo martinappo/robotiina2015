@@ -17,9 +17,11 @@ public:
 	virtual void ShowImage(const cv::Mat &image, bool main = true);
 	void ClearDisplay();
 	virtual void AddEventListener(IUIEventListener *pEventListener){
+		boost::mutex::scoped_lock lock(click_mutex); //allow one command at a time
 		m_EventListeners.push_back(pEventListener);
 	};
 	virtual void RemoveEventListener(IUIEventListener *pEventListener){
+		boost::mutex::scoped_lock lock(click_mutex); //allow one command at a time
 		std::remove_if(m_EventListeners.begin(), m_EventListeners.end(), [pEventListener](IUIEventListener *p){return p = pEventListener; });
 	};
 	std::vector<IUIEventListener*> m_EventListeners;
@@ -34,7 +36,7 @@ public:
 	};
 
 protected:
-    void mouseClicked(int x, int y);
+	void mouseClicked(int event, int x, int y);
 	std::atomic_int mouseX;
 	std::atomic_int mouseY;
 

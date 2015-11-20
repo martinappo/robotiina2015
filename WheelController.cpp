@@ -208,7 +208,7 @@ void WheelController::Run()
 		for (auto i = 0; i < speeds.rows; i++) {
 			oss << (i + id_start) << ":sd" << (int)speeds.at<double>(i) << "\n";
 		}
-		std::cout << oss.str() << std::endl;
+		//std::cout << oss.str() << std::endl;
 		m_pComPort->WriteString(oss.str());
 
 #endif
