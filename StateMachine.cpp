@@ -66,7 +66,7 @@ const BallPosition &DriveInstruction::getClosestBall(){
 
 
 StateMachine::StateMachine(ICommunicationModule *pComModule, FieldState *pState, 
-	const std::map<DriveMode, DriveInstruction*> &driveModes) :driveModes(driveModes)
+	const std::map<DriveMode, DriveInstruction*> &driveModes) :driveModes(driveModes), ThreadedClass("Autopilot/StateMachine")
 {
 	m_pComModule = pComModule;
 	m_pFieldState = pState;
