@@ -12,11 +12,7 @@ DriveMode DriveToBall::step(double dt)
 		if (driveToTarget(target)){
 			std::cout << "driveToTarget, ";
 			if (aimTarget(target)){
-				std::cout << "aimTarget2, ";
-				if (catchTarget(target)) {
-					std::cout << "catchTarget, ";
-					return DRIVEMODE_AIM_GATE;
-				}
+				return DRIVEMODE_CATCH_BALL;
 			}
 		}
 	}
@@ -25,7 +21,6 @@ DriveMode DriveToBall::step(double dt)
 
 
 /*BEGIN CatchBall*/
-/*
 void CatchBall::onEnter()
 {
 	DriveInstruction::onEnter();
@@ -49,7 +44,7 @@ DriveMode CatchBall::step(double dt)
 	else ROTATE_AND_DRIVE_TOWARD_TO_TARGET_SLOWLY
 	return DRIVEMODE_CATCH_BALL;
 }
-*/
+
 /*END CatchBall*/
 
 
