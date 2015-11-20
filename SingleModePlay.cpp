@@ -8,7 +8,7 @@ DriveMode DriveToBall::step(double dt)
 //	std::cout<<target.getDistance() << target.getAngle() << std::endl;
 	if (target.getDistance() > 10000) return DRIVEMODE_IDLE;
 	if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
-	std::cout << "aimtarget0, " << std::endl;
+	std::cout << std::endl << "aimtarget0, " ;
 	if (aimTarget(target)){
 		std::cout << "aimTarget1, ";
 		if (driveToTarget(target)){
