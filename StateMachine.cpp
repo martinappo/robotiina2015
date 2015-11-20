@@ -1,9 +1,10 @@
 #include "StateMachine.h"
 
 bool DriveInstruction::aimTarget(const ObjectPosition &target, double errorMargin){
-	m_pCom->ToggleTribbler(0);
+	//m_pCom->ToggleTribbler(0);
 	double heading = target.getHeading();
 	if (abs(heading) > errorMargin){
+		std::cout << ", rotating: " << heading;
 		m_pCom->Drive(0, 0, heading);
 		return false;
 	}
@@ -17,7 +18,7 @@ bool DriveInstruction::catchTarget(const ObjectPosition &target){
 		m_pCom->Drive(0, 0, 0);
 		return true;
 	}
-	m_pCom->ToggleTribbler(100);
+	//m_pCom->ToggleTribbler(100);
 	m_pCom->Drive(30, 0, target.getHeading());
 	return false;
 }
@@ -27,9 +28,11 @@ bool DriveInstruction::driveToTarget(const ObjectPosition &target, double maxDis
 		return driveToTargetWithAngle(target, maxDistance);
 	double dist = target.getDistance();
 	if (dist > maxDistance){
+		std::cout << ", ball to far: " << dist << "target: " << maxDistance;
 		return false;
 	}
 	else{
+		std::cout << ", ball near: " << dist << "target: " << maxDistance;
 		m_pCom->Drive(0, 0, 0);
 		return true;
 	}
