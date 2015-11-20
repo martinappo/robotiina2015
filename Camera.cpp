@@ -101,6 +101,7 @@ cv::Mat &Camera::Capture(bool bFullFrame){
 #ifndef DOUBLE_BUFFERING
 		if (cap->isOpened()){
 			*cap >> *m_pFrame;
+			*m_pFrame = flip(*m_pFrame, 0)
 		}
 #else
 		if (bCaptureNextFrame) {
@@ -143,6 +144,8 @@ void Camera::Run(){
 
 		if (cap->isOpened()) {
 			*cap >> nextFrame;
+			 cv::flip(nextFrame, nextFrame, 1);
+
 		}
 		else {
 			bCaptureNextFrame = false;

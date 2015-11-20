@@ -86,7 +86,7 @@ double DistanceCalculator::getDistance(const cv::Point2d &pos, const cv::Point2d
 	//return (8E-8)*pow(dist, 4) - (6E-5)*pow(dist, 3) + 0.0167*pow(dist, 2) - 1.5818 * dist + 72.791;
 
 	//y = 13,136e^0,008x
-	return 13.13*exp(0.008 * dist);
+	//return 13.13*exp(0.008 * dist);
 
 	double minDif = INT_MAX;
 	int index = 0;
