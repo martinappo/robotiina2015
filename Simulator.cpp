@@ -237,7 +237,7 @@ void Simulator::UpdateRobotPos(){
 	if (dt > 1000) return;
 	cv::Mat robotSpeed = cv::Mat_<double>(3, 1);
 	cv::solve(wheelAngles, wheelSpeeds, robotSpeed, cv::DECOMP_SVD);
-	std::cout << robotSpeed << std::endl;
+	//std::cout << robotSpeed << std::endl;
 
 	
 	self.polarMetricCoords.y += (robotSpeed.at<double>(2)*dt);
