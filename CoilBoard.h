@@ -40,8 +40,9 @@ public:
 	}
 
 	void DataReceived(const std::string & message){
-		if (message.substr(0, 4) == "<bl:")
-		ballInTribbler = message.substr(4, 1) == "1";
+		if (message.length() < 7) return; // partial message
+		if (message.substr(0, 6) == "<5:bl:")
+		ballInTribbler = message.substr(6, 1) == "1";
 	}
 protected:
 	std::atomic_bool ballInTribbler;
