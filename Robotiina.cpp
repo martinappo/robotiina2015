@@ -49,9 +49,12 @@ int main(int argc, char *argv[])
 	stop_io = false;
     boost::asio::io_service io;
 	std::thread io_thread([&](){
-		while (!stop_io) {
+		while (!stop_io) 
+		{
+			io.reset();
 			io.run();
 		}
+		std::cout << "io stopting" << std::endl;
 	});
 
 
