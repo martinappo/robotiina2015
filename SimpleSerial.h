@@ -15,6 +15,11 @@
 
 
 class SimpleSerial: public ISerial {
+protected:
+#ifdef DUMP_SERIAL
+	std::ofstream log;
+#endif
+
 public:
 
 	SimpleSerial(boost::asio::io_service &io_service, const std::string & port, unsigned int baud_rate) : io(io_service), serial(io, port) {
@@ -48,6 +53,7 @@ public:
 		boost::asio::write(serial, boost::asio::buffer(s.c_str(), s.size()));
 #ifdef DUMP_SERIAL
 		log << s;
+		log.flush();
 #endif
 		std::chrono::milliseconds dura(50);
 		std::this_thread::sleep_for(dura);
@@ -59,9 +65,7 @@ public:
 	};
 
 protected:
-#ifdef DUMP_SERIAL
-	std::ofstream log;
-#endif
+
 	std::mutex writeLock;
 	ISerialListener *messageCallback = NULL;
 	static const int max_read_length = 512; // maximum amount of data to read in one operation
