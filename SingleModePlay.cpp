@@ -30,7 +30,7 @@ void CatchBall::onEnter()
 }
 void CatchBall::onExit()
 {
-	STOP_TRIBBLER
+	//DO_NOT_STOP_TRIBBLER
 }
 DriveMode CatchBall::step(double dt)
 {
@@ -40,7 +40,7 @@ DriveMode CatchBall::step(double dt)
 
 	//std::cout << catchDuration << std::endl;
 	if (BALL_IN_TRIBBLER)  return DRIVEMODE_AIM_GATE;
-	else if (STUCK_IN_STATE(2000)) return DRIVEMODE_DRIVE_TO_BALL;
+	else if (STUCK_IN_STATE(6000)) return DRIVEMODE_DRIVE_TO_BALL;
 	else ROTATE_AND_DRIVE_TOWARD_TO_TARGET_SLOWLY
 	return DRIVEMODE_CATCH_BALL;
 }
@@ -58,7 +58,12 @@ DriveMode AimGate::step(double dt)
 	if (!BALL_IN_TRIBBLER) return DRIVEMODE_DRIVE_TO_BALL;
 
 	if (STUCK_IN_STATE(9000)) return DRIVEMODE_KICK;
+	
+	if (aimTarget(target, 2)){
+		return DRIVEMODE_KICK;
+	}
 
+/*
 	//Turn robot to gate
 	if (aimTarget(target, 2)){
 		if (SIGHT_OBSTRUCTED) { //then move sideways away from gate
@@ -73,7 +78,7 @@ DriveMode AimGate::step(double dt)
 		ROTATE_AND_DRIVE_TOWARD_TO_TARGET_GATE
 	}
 	return DRIVEMODE_AIM_GATE;
-
+*/
 }
 
 

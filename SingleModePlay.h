@@ -16,6 +16,7 @@ enum SingleModeDriveStates {
 class SingleModeIdle : public Idle {
 
 	virtual DriveMode step(double dt) {
+		m_pCom->ToggleTribbler(0);
 		if (m_pFieldState->GAME_MODE_START_SINGLE_PLAY) return DRIVEMODE_DRIVE_TO_BALL;
 		return DRIVEMODE_IDLE;
 	}
