@@ -221,6 +221,7 @@ void Robot::InitHardware() {
 		read_ini("conf/ports.ini", pt);
 		std::string port = pt.get<std::string>(std::to_string(ID_COM));
 		m_pSerial = new SimpleSerial(io, port, 19200);
+		Sleep(100);
 	}
 	catch (std::exception const&  ex) {
 		std::cout << "com port error: " << ex.what() << std::endl;

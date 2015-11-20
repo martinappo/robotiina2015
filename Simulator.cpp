@@ -235,16 +235,19 @@ void Simulator::UpdateRobotPos(){
 
 	lastStep = time;
 	if (dt > 1000) return;
-	cv::Mat robotSpeed = cv::Mat_<double>(4, 1);
+	cv::Mat robotSpeed = cv::Mat_<double>(3, 1);
 	cv::solve(wheelAngles, wheelSpeeds, robotSpeed, cv::DECOMP_SVD);
-	std::cout << robotSpeed << std::endl;
+	//std::cout << robotSpeed << std::endl;
 
 	
 	self.polarMetricCoords.y += (robotSpeed.at<double>(2)*dt);
 	if (self.polarMetricCoords.y > 360) self.polarMetricCoords.y -= 360;
 	if (self.polarMetricCoords.y < -360) self.polarMetricCoords.y += 360;
-	self.fieldCoords.x += robotSpeed.at<double>(0)*dt * sin((self.getAngle()) / 180 * CV_PI);
-	self.fieldCoords.y -= robotSpeed.at<double>(1)*dt * cos((self.getAngle()) / 180 * CV_PI);
+	cv::Mat rotMat = getRotationMatrix2D(cv::Point(0, 0), self.getAngle(), 1);
+	cv::Mat rotatedSpeed = rotMat * robotSpeed;
+
+	self.fieldCoords.x += rotatedSpeed.at<double>(0)*dt;
+	self.fieldCoords.y -= rotatedSpeed.at<double>(1)*dt;
 	
 
 	if (!isMaster && id > 0) {

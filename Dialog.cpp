@@ -8,7 +8,7 @@
 */
 
 Dialog::Dialog(const std::string &title, const cv::Size &ptWindowSize, const cv::Size &ptCamSize, int flags/* = CV_WINDOW_AUTOSIZE*/)
-	: windowSize(ptWindowSize), camSize(ptCamSize)
+	: windowSize(ptWindowSize), camSize(ptCamSize), ThreadedClass("Dialog")
 {
 	cv::Size windowSizeDefault = cv::Size((int)((double)camSize.width / 0.7), (int)((double)camSize.height / 0.7));
 
@@ -137,14 +137,45 @@ void Dialog::KeyPressed(int key){
 	}
 }
 
-void Dialog::mouseClicked(int x, int y) {
+void Dialog::mouseClicked(int event, int x, int y) {
 	boost::mutex::scoped_lock lock(click_mutex); //allow one command at a time
-	unsigned int index = (int)(round((float)y / m_buttonHeight) - 1);
-    if (index < m_buttons.size()){
-        auto button = m_buttons[index];
-		std::get<2>(button)();
-        m_close = true;
-    }
+
+	mouseX = x;
+	mouseY = y;
+	bool bMainArea = x < camSize.width && y < camSize.height;
+	cv::Point scaled;
+	cv::Point offset;
+	cv::Size size;
+	cv::Size target;
+
+	if (bMainArea) {
+		cam1_roi.locateROI(size, offset);
+		size = cam1_roi.size();
+		target = cam1_area.size();
+	}
+	else {
+		cam2_roi.locateROI(size, offset);
+		size = cam2_roi.size();
+		target = cam2_area.size();
+	}
+	scaled.x = (int)((double)(x - offset.x) / size.width * target.width);
+	scaled.y = (int)((double)(y - offset.y) / size.height * target.height);
+
+	for (auto pListener : m_EventListeners){
+		if (pListener->OnMouseEvent(event, (float)(scaled.x), (float)(scaled.y), 0, bMainArea)) {
+			return; // event was handled
+		}
+	}
+	
+
+	if (event == cv::EVENT_LBUTTONUP){
+		unsigned int index = (int)(round((float)y / m_buttonHeight) - 1);
+		if (index < m_buttons.size()){
+			auto button = m_buttons[index];
+			std::get<2>(button)();
+			m_close = true;
+		}
+	}
 
 }
 void Dialog::Run(){
@@ -152,35 +183,9 @@ void Dialog::Run(){
 	//cvSetWindowProperty(m_title.c_str(), CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
 	cv::moveWindow(m_title, 0, 0);
 	cv::setMouseCallback(m_title, [](int event, int x, int y, int flags, void* self) {
-		bool bMainArea = x < ((Dialog*)self)->camSize.width && y < ((Dialog*)self)->camSize.height;
-		cv::Point scaled;
-		cv::Point offset;
-		cv::Size size;
-		cv::Size target;
 
-		if (bMainArea) {
-			((Dialog*)self)->cam1_roi.locateROI(size, offset);
-			size = ((Dialog*)self)->cam1_roi.size();
-			target = ((Dialog*)self)->cam1_area.size();
-		}
-		else {
-			((Dialog*)self)->cam2_roi.locateROI(size, offset);
-			size = ((Dialog*)self)->cam2_roi.size();
-			target = ((Dialog*)self)->cam2_area.size();
-		}
-		scaled.x = (int)((double)(x - offset.x) / size.width * target.width);
-		scaled.y = (int)((double)(y - offset.y) / size.height * target.height);
-		for (auto pListener : ((Dialog*)self)->m_EventListeners){
-			if (pListener->OnMouseEvent(event, (float)(scaled.x), (float)(scaled.y), flags, bMainArea)) {
-				return; // event was handled
-			}
-		}
+		((Dialog*)self)->mouseClicked(event, x, y);
 
-		((Dialog*)self)->mouseX = x;
-		((Dialog*)self)->mouseY = y;
-		if (event == cv::EVENT_LBUTTONUP){
-			((Dialog*)self)->mouseClicked(x, y);
-		}
 	}, this);
 
 	while (!stop_thread) {

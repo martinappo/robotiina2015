@@ -19,6 +19,7 @@ m_iWheelCount(iWheelCount), m_pComPort(port)
 {
 	targetSpeed = { 0, 0, 0 };
 	Start();
+	Drive(0);
 };
 
 void WheelController::DestroyWheels()
@@ -78,7 +79,6 @@ void WheelController::DriveRotate(double velocity, double direction, double rota
 	targetSpeedXYW.at<double>(0) = sin(direction* CV_PI / 180.0)* velocity;
 	targetSpeedXYW.at<double>(1) = cos(direction* CV_PI / 180.0)* velocity;
 	targetSpeedXYW.at<double>(2) = rotate;
-	targetSpeedXYW.at<double>(3) = 0;
 
 	directControl = false;
 	updateSpeed = true;
@@ -90,7 +90,6 @@ void WheelController::Drive(const cv::Point2d &speed, double angularSpeed){
 	targetSpeedXYW.at<double>(0) = speed.x;
 	targetSpeedXYW.at<double>(1) = speed.y;
 	targetSpeedXYW.at<double>(2) = angularSpeed;
-	targetSpeedXYW.at<double>(3) = 0;
 
 }
 
@@ -209,7 +208,7 @@ void WheelController::Run()
 		for (auto i = 0; i < speeds.rows; i++) {
 			oss << (i + id_start) << ":sd" << (int)speeds.at<double>(i) << "\n";
 		}
-		std::cout << oss.str() << std::endl;
+		//std::cout << oss.str() << std::endl;
 		m_pComPort->WriteString(oss.str());
 
 #endif

@@ -57,3 +57,4 @@ Release/
 distance_conf.ini
 *.bak
 *.veg
+*.log

@@ -2,7 +2,7 @@
 #include <chrono>
 #include <thread>
 
-ManualControl::ManualControl(ICommunicationModule *pComModule) :ConfigurableModule("ManualControl")
+ManualControl::ManualControl(ICommunicationModule *pComModule) :ConfigurableModule("ManualControl"), ThreadedClass("ManualControl")
 {
 	m_pComModule = pComModule;
 

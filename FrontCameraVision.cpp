@@ -14,7 +14,7 @@
 extern DistanceCalculator gDistanceCalculator;
 
 
-FrontCameraVision::FrontCameraVision(ICamera *pCamera, IDisplay *pDisplay, FieldState *pFieldState) : ConfigurableModule("FrontCameraVision")
+FrontCameraVision::FrontCameraVision(ICamera *pCamera, IDisplay *pDisplay, FieldState *pFieldState) : ConfigurableModule("FrontCameraVision"), ThreadedClass("FrontCameraVision")
 {
 	m_pCamera = pCamera;
 	m_pDisplay = pDisplay;
