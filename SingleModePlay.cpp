@@ -97,7 +97,7 @@ std::pair<DriveMode, DriveInstruction*> SingleDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_BALL, new DriveToBall()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_AIM_GATE, new AimGate()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_KICK, new Kick()),
-//	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_CATCH_BALL, new CatchBall()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_CATCH_BALL, new CatchBall()),
 };
 
 SingleModePlay::SingleModePlay(ICommunicationModule *pComModule, FieldState *pState)
