@@ -10,7 +10,6 @@ DriveMode DriveToBall::step(double dt)
 	if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
 	if (aimTarget(target)){
 		if (driveToTarget(target)){
-			m_pCom->ToggleTribbler(50);
 			if (aimTarget(target)){
 				if (catchTarget(target)){
 					return DRIVEMODE_AIM_GATE;
@@ -19,8 +18,6 @@ DriveMode DriveToBall::step(double dt)
 		}
 	}
 	return DRIVEMODE_DRIVE_TO_BALL;
-	
-
 } 
 
 
@@ -69,7 +66,6 @@ DriveMode AimGate::step(double dt)
 		if (SIGHT_OBSTRUCTED) { //then move sideways away from gate
 			DRIVE_SIDEWAYS
 			//m_pCom->Drive(45, 90, 0);
-
 		}
 		else {
 			return DRIVEMODE_KICK;
@@ -86,13 +82,11 @@ DriveMode AimGate::step(double dt)
 /*BEGIN Kick*/
 DriveMode Kick::step(double dt)
 {
-	m_pCom->ToggleTribbler(0);
 	STOP_DRIVING
 	std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	m_pCom->Kick();
 	std::this_thread::sleep_for(std::chrono::milliseconds(500)); //half second wait.
 	return DRIVEMODE_DRIVE_TO_BALL;
-
 }
 void Kick::onEnter()
 {

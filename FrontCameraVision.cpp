@@ -169,7 +169,7 @@ void FrontCameraVision::Run() {
 
 		m_pState->self.updateFieldCoords();
 		}
-		//Balls pos
+		//Balls pos 
 		cv::Mat rotMat = getRotationMatrix2D(cv::Point(0,0), -m_pState->self.getAngle(), 1);
 		cv::Mat balls(3, m_pState->balls.size(), CV_64FC1);
 		found = ballFinder.Locate(thresholdedImages[BALL], frameHSV, frameBGR, balls);
