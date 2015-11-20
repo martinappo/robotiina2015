@@ -3,26 +3,13 @@
 #include <boost/property_tree/ini_parser.hpp>
 #include <thread>
 
-cv::Mat wheelsFwd = (cv::Mat_<double>(4, 3) <<
-	cos(135.0 / 180 * CV_PI), sin(135.0 / 180 * CV_PI), 1,
-	cos(225.0 / 180 * CV_PI), sin(225.0 / 180 * CV_PI), 1,
-	cos(315.0 / 180 * CV_PI), sin(315.0 / 180 * CV_PI), 1,
-	cos(45.0 / 180 * CV_PI), sin(45.0 / 180 * CV_PI), 1);
 
-cv::Mat wheelsFwdInv = wheelsFwd.inv(cv::DECOMP_SVD);
+cv::Mat wheelAngles = (cv::Mat_<double>(4, 3) <<
+	-sin(45.0 / 180 * CV_PI),  cos(45.0 / 180 * CV_PI), 1,
+	-sin(135.0 / 180 * CV_PI), cos(135.0 / 180 * CV_PI), 1,
+	-sin(225.0 / 180 * CV_PI), cos(225.0 / 180 * CV_PI), 1,
+	-sin(315.0 / 180 * CV_PI), cos(315.0 / 180 * CV_PI), 1);
 
-cv::Mat wheelsSideWays = (cv::Mat_<double>(4, 3) <<
-	cos(135.0 / 180 * CV_PI), sin(135.0 / 180 * CV_PI), 1,
-	cos(225.0 / 180 * CV_PI), sin(225 / 180 * CV_PI), 1,
-	cos(315 / 180 * CV_PI), sin(315 / 180 * CV_PI), 1,
-	cos(45 / 180 * CV_PI), sin(45 / 180 * CV_PI), 1);
-
-cv::Mat wheelsSideWaysInv = wheelsSideWays.inv(cv::DECOMP_SVD);
-
-cv::Mat rotBack = (cv::Mat_<double>(3, 3) <<
-	cos(-45 / 180 * CV_PI), -sin(-45 / 180 * CV_PI), 0,
-	sin(-45 / 180 * CV_PI), cos(-45 / 180 * CV_PI), 0,
-	1,1, 1);
 
 
 //#define LIMIT_ACCELERATION
@@ -91,6 +78,7 @@ void WheelController::DriveRotate(double velocity, double direction, double rota
 	targetSpeedXYW.at<double>(0) = sin(direction* CV_PI / 180.0)* velocity;
 	targetSpeedXYW.at<double>(1) = cos(direction* CV_PI / 180.0)* velocity;
 	targetSpeedXYW.at<double>(2) = rotate;
+	targetSpeedXYW.at<double>(3) = 0;
 
 	directControl = false;
 	updateSpeed = true;
@@ -102,25 +90,10 @@ void WheelController::Drive(const cv::Point2d &speed, double angularSpeed){
 	targetSpeedXYW.at<double>(0) = speed.x;
 	targetSpeedXYW.at<double>(1) = speed.y;
 	targetSpeedXYW.at<double>(2) = angularSpeed;
+	targetSpeedXYW.at<double>(3) = 0;
 
 }
 
-std::vector<double> WheelController::CalculateWheelSpeeds(double velocity, double direction, double rotate)
-{
-	std::vector<double> speeds = std::vector<double>(m_iWheelCount);
-
-	for (auto i = 0; i < m_iWheelCount; i++) {
-		speeds[i] = velocity * cos((wheelPositions[i] - direction)* PI / 180.0) + rotate;
-	}
-	/*
-	return cv::Point3d(
-		(velocity*cos((150 - direction) * PI / 180.0)) + rotate,
-		((velocity*cos((30 - direction)  * PI / 180.0)) + rotate),
-		(velocity*cos((270 - direction)  * PI / 180.0)) + rotate
-	);
-	*/
-	return speeds; // make member variable to avoid copy
-}
 void WheelController::Stop()
 {
 	Drive(0,0,0);
@@ -183,7 +156,7 @@ std::string WheelController::GetDebugInfo(){
 	std::ostringstream oss;
 	oss.precision(4);
 	oss << "[WheelController] target: " << "velocity: " << targetSpeed.velocity << ", heading: " << targetSpeed.heading << ", rotate: " << targetSpeed.rotation << "|";
-	oss << "[WheelController] actual: " << "vx: " << targetSpeedXYW.at<double>(0) << ", vy: " << targetSpeedXYW.at<double>(1) << ", rotate: " << targetSpeedXYW.at<double>(2) << "|";
+	oss << "[WheelController] target: " << "vx: " << targetSpeedXYW.at<double>(0) << ", vy: " << targetSpeedXYW.at<double>(1) << ", rotate: " << targetSpeedXYW.at<double>(2) << "|";
 	/*
 	cv::Point3d speeds = GetWheelSpeeds();
 	auto speeds2 = CalculateWheelSpeeds(targetSpeed.velocity, targetSpeed.heading, targetSpeed.rotation);
@@ -230,14 +203,14 @@ void WheelController::Run()
 		lastStep = now;
 #else
 		//auto speeds = CalculateWheelSpeeds(targetSpeed.velocity, targetSpeed.heading, targetSpeed.rotation);
-		cv::Mat speeds = wheelsFwd * targetSpeedXYW; 
-		std::cout << targetSpeedXYW << std::endl;
+		cv::Mat speeds = wheelAngles * targetSpeedXYW; 
+		//std::cout << targetSpeedXYW << std::endl;
+		std::ostringstream oss;
 		for (auto i = 0; i < speeds.rows; i++) {
-			std::ostringstream oss;
 			oss << (i + id_start) << ":sd" << (int)speeds.at<double>(i) << "\n";
-			std::cout << oss.str() << std::endl;
-			m_pComPort->WriteString(oss.str());
 		}
+		std::cout << oss.str() << std::endl;
+		m_pComPort->WriteString(oss.str());
 
 #endif
 		std::this_thread::sleep_for(std::chrono::milliseconds(100)); // do not poll serial to fast

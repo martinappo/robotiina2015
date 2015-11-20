@@ -20,7 +20,6 @@ public:
 	virtual double GetFPS();
 	virtual cv::Mat & GetLastFrame(bool bFullFrame = false);
 	virtual void TogglePlay();
-	void CalcRobotSpeed(double dt);
 	virtual void Drive(double fowardSpeed, double direction = 0, double angularSpeed = 0);
 	virtual const Speed & GetActualSpeed();
 	virtual const Speed & GetTargetSpeed();

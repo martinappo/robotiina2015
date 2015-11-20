@@ -6,9 +6,7 @@
 #include <boost/algorithm/string.hpp>
 
 extern DistanceCalculator gDistanceCalculator;
-extern cv::Mat wheelsFwdInv;
-extern cv::Mat wheelsSideWaysInv;
-extern cv::Mat rotBack;
+extern cv::Mat wheelAngles;
 
 
 Simulator::Simulator(boost::asio::io_service &io, bool master, const std::string game_mode) :
@@ -229,47 +227,26 @@ void Simulator::UpdateBallPos(double dt){
 	}
 
 }
-void Simulator::CalcRobotSpeed(double dt){
-	/*
-	std::cout << "==============" << std::endl;
-	std::cout << rotMatrix << std::endl;
-	std::cout << "oooooooooooooo" << std::endl;
-	std::cout << wheelSpeeds << std::endl;
-	std::cout << "--------------" << std::endl;
-	std::cout << robotSpeed << std::endl;
-	}
-
-	*/
-}
 
 void Simulator::UpdateRobotPos(){
 	time = boost::posix_time::microsec_clock::local_time();
 
 	double dt = (double)(time - lastStep).total_milliseconds() / 1000.0;
-	//CalcRobotSpeed(dt);
-	/*
-	cv::Mat robotSpeed = wheelsFwdInv.inv(cv::DECOMP_SVD) * wheelSpeeds;
-	cv::Mat robotSpeed2 = (wheelsSideWaysInv.inv(cv::DECOMP_SVD) * wheelSpeeds);// *rotBack;
 
 	lastStep = time;
-	self.fieldCoords.x += robotSpeed.at<double>(0)*dt;
-	self.fieldCoords.y += robotSpeed.at<double>(1)*dt;
-	//self.polarMetricCoords.y += (robotSpeed.at<double>(2)*dt)/CV_PI * 180;
-	*/
-	//if (dt < 0.0000001) return;
-	/*
-	double v = targetSpeed.velocity;
-	double w = targetSpeed.rotation;
+	if (dt > 1000) return;
+	cv::Mat robotSpeed = cv::Mat_<double>(4, 1);
+	cv::solve(wheelAngles, wheelSpeeds, robotSpeed, cv::DECOMP_SVD);
+	std::cout << robotSpeed << std::endl;
 
 	
-	self.polarMetricCoords.y += w * dt;
+	self.polarMetricCoords.y += (robotSpeed.at<double>(2)*dt);
 	if (self.polarMetricCoords.y > 360) self.polarMetricCoords.y -= 360;
 	if (self.polarMetricCoords.y < -360) self.polarMetricCoords.y += 360;
+	self.fieldCoords.x += robotSpeed.at<double>(0)*dt * sin((self.getAngle()) / 180 * CV_PI);
+	self.fieldCoords.y -= robotSpeed.at<double>(1)*dt * cos((self.getAngle()) / 180 * CV_PI);
+	
 
-		
-	self.fieldCoords.x += (v*dt * sin((self.getAngle() + targetSpeed.heading) / 180 * CV_PI));
-	self.fieldCoords.y -= (v*dt * cos((self.getAngle() + targetSpeed.heading) / 180 * CV_PI));
-	*/
 	if (!isMaster && id > 0) {
 		std::stringstream message;
 		message << "POS " << id << " " << self.fieldCoords.x << " " << self.fieldCoords.y << " " << self.getAngle() << " #";
