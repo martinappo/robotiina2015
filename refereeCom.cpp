@@ -88,24 +88,11 @@ void RefereeCom::handleMessage(const std::string & message){
 * HARDWARE RECEIVER IMPLEMENTATION
 ***********************************/
 LLAPReceiver::LLAPReceiver(FieldState *pFieldState, boost::asio::io_service &io_service, std::string port, unsigned int baud_rate, const std::string &name)
-	: RefereeCom(pFieldState, name), SimpleSerial(io_service, port, baud_rate), ThreadedClass(name) {}
+	: RefereeCom(pFieldState, name), SimpleSerial(io_service, port, baud_rate) {}
 
 LLAPReceiver::~LLAPReceiver()
 {
-	WaitForStop();
 }
 void LLAPReceiver::DataReceived(const std::string & message){
 	handleMessage(message);
 };
-
-void LLAPReceiver::Run() {
-	return;
-	std::cout << "Referee listener starting" << std::endl;
-	std::string command;
-	while (!stop_thread){
-		//command = readNumberOfCharsAsync(12);
-		//handleMessage(command);
-		std::this_thread::sleep_for(std::chrono::milliseconds(50)); // do not poll serial to fast
-	}
-	std::cout << "Referee listener stoping" << std::endl;
-}

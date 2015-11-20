@@ -49,6 +49,7 @@ public:
 		WriteString(oss.str());
 	}
 	void WriteString(const std::string &s)	{
+		return;
 		std::lock_guard<std::mutex> lock(writeLock);
 		boost::asio::write(serial, boost::asio::buffer(s.c_str(), s.size()));
 #ifdef DUMP_SERIAL
@@ -84,7 +85,7 @@ protected:
 		if (!error)
 		{ // read completed, so process the data
 			std::string message = std::string(read_msg_.begin(), read_msg_.end()).substr(0, bytes_transferred);
-			//std::cout << "udp packet:" << message << std::endl;
+			std::cout << "serial packet:" << message << std::endl;
 			DataReceived(message);
 			if (messageCallback != NULL) {
 				messageCallback->DataReceived(message);

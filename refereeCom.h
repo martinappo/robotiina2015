@@ -29,7 +29,7 @@ private:
 	void nextRobot();
 };
 
-class LLAPReceiver : public RefereeCom, public SimpleSerial, public ThreadedClass
+class LLAPReceiver : public RefereeCom, public SimpleSerial
 {
 public:
 	LLAPReceiver(FieldState *pFieldState, boost::asio::io_service &io_service, std::string port = "port", unsigned int baud_rate = 115200, const std::string &name = "Referee");
@@ -40,9 +40,5 @@ public:
 	virtual void sendAck(const std::string & message){
 		WriteString(message);
 	}
-
-protected: 
-	void Run();
-
 };
 

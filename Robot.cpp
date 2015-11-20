@@ -75,7 +75,6 @@ std::pair<STATE, std::string> states[] = {
 	std::pair<STATE, std::string>(STATE_DANCE, "Dance"),
 	std::pair<STATE, std::string>(STATE_MOUSE_VISION, "Mouse Vision"),
 	std::pair<STATE, std::string>(STATE_DISTANCE_CALIBRATE, "dist"),
-	std::pair<STATE, std::string>(STATE_TOGGLE_REFEREE, "Toggle Referee Listener"),
 	std::pair<STATE, std::string>(STATE_GIVE_COMMAND, "Give Referee Command"),
 	//	std::pair<STATE, std::string>(STATE_END_OF_GAME, "End of Game") // this is intentionally left out
 
@@ -224,7 +223,7 @@ void Robot::InitHardware() {
 		//Sleep(100);
 	}
 	catch (std::exception const&  ex) {
-		std::cout << "com port error: " << ex.what() << std::endl;
+		std::cout << "Main board com port fail: " << ex.what() << std::endl;
 	}
 	
 	std::cout << "Done initializing" << std::endl;
@@ -398,9 +397,6 @@ void Robot::Run()
 				STATE_BUTTON("(A)utoCalibrate objects", 'a', STATE_AUTOCALIBRATE)
 				//STATE_BUTTON("(M)anualCalibrate objects", STATE_CALIBRATE)
 				STATE_BUTTON("(C)Change Gate [" + ((int)field.GetTargetGate().getDistance() == (int)(field.blueGate.getDistance()) ? "blue" : "yellow") + "]", 'c', STATE_SELECT_GATE)
-				if (refCom->isTogglable()) {
-					STATE_BUTTON("(T)oggle Referee Listener [" + (dynamic_cast<ThreadedClass*>(refCom)->running ? "On" : "Off") + "]", 't', STATE_TOGGLE_REFEREE)
-				}
 				STATE_BUTTON("(G)ive Referee Command", 'g', STATE_GIVE_COMMAND)
 				STATE_BUTTON("Auto(P)ilot [" + (autoPilot->running ? "On" : "Off") + "]", 'p', STATE_LAUNCH)
 
@@ -623,12 +619,6 @@ void Robot::Run()
 			//cv::putText(frameBGR, "move1:" + std::to_string(move1), cv::Point(frameBGR.cols - 140, 120), 0.5, cv::Scalar(255, 255, 255));
 			//cv::putText(frameBGR, "move2:" + std::to_string(move2), cv::Point(frameBGR.cols - 140, 140), 0.5, cv::Scalar(255, 255, 255));
 		}
-		else if (STATE_TOGGLE_REFEREE == state) {
-			ThreadedClass *tmp = dynamic_cast<ThreadedClass*>(refCom);
-			tmp->Enable(!tmp->running);
-			last_state = STATE_TOGGLE_REFEREE;
-			state = STATE_NONE;
-		}
 		else if (STATE_GIVE_COMMAND == state) {
 			START_DIALOG
 				for (std::pair < std::string, FieldState::GameMode> entry : refCommands) {
@@ -658,16 +648,16 @@ void Robot::Run()
 		//m_pDisplay->putText( std::string("Gate:") + (targetGatePos.getDistance() >0 ? "yes" : "no"), cv::Point(-140, 80), 0.5, cv::Scalar(255, 255, 255));
 
 		
-//		m_pDisplay->putText( std::string("Trib:") + (coilBoard->BallInTribbler() ? "yes" : "no"), cv::Point(-140, 100), 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putText( std::string("Trib:") + (comModule.BallInTribbler() ? "yes" : "no"), cv::Point(-140, 100), 0.5, cv::Scalar(255, 255, 255));
 		m_pDisplay->putText( std::string("Sight:") + (field.gateObstructed ? "obst" : "free"), cv::Point(-140, 120), 0.5, cv::Scalar(255, 255, 255));
 		//m_pDisplay->putText( std::string("OnWay:") + (somethingOnWay ? "yes" : "no"), cv::Point(-140, 140), 0.5, cv::Scalar(255, 255, 255));
-		
+		/*
 		for (int i = 0; i < field.balls.size(); i++) {
 
 			BallPosition &ball = field.balls[i];
 			m_pDisplay->putText( std::string("Ball") + std::to_string(i) + ": "+ std::to_string(ball.polarMetricCoords.x) + " : " + std::to_string(ball.polarMetricCoords.y), cv::Point(-250, i * 15 + 10), 0.3, cv::Scalar(255, 255, 255));
 		}
-
+		*/
 		m_pDisplay->putText("robot x:" + std::to_string(field.self.fieldCoords.x) + " y: " + std::to_string(field.self.fieldCoords.y) + " r: " + std::to_string(field.self.getAngle()), cv::Point(-250, 200), 0.4, cv::Scalar(255, 255, 255));
 //		if (pSim != NULL)
 //			m_pDisplay->putText("simul x:" + std::to_string(pSim->self.fieldCoords.x) + " y: " + std::to_string(pSim->self.fieldCoords.y) + " r: " + std::to_string(pSim->self.getAngle()), cv::Point(-250, 220), 0.4, cv::Scalar(255, 255, 255));
