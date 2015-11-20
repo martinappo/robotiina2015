@@ -28,7 +28,7 @@ public:
 		double target_distance = INT_MAX;
 		int target_index = 0;
 		for (unsigned i = 0; i < balls.size(); i++) {
-			if (abs(balls[i].fieldCoords.y) > 250) continue; // too far outside of the field
+			//if (abs(balls[i].fieldCoords.y) > 250) continue; // too far outside of the field
 			if (balls[i].getDistance() < target_distance) {
 				target_index = i;
 				target_distance = balls[i].getDistance();

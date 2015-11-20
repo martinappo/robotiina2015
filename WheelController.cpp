@@ -4,10 +4,10 @@
 #include <thread>
 
 cv::Mat wheelsFwd = (cv::Mat_<double>(4, 3) <<
-	cos(45.0 / 180 * CV_PI), sin(45.0 / 180 * CV_PI), 1,
 	cos(135.0 / 180 * CV_PI), sin(135.0 / 180 * CV_PI), 1,
 	cos(225.0 / 180 * CV_PI), sin(225.0 / 180 * CV_PI), 1,
-	cos(315.0 / 180 * CV_PI), sin(315.0 / 180 * CV_PI), 1);
+	cos(315.0 / 180 * CV_PI), sin(315.0 / 180 * CV_PI), 1,
+	cos(45.0 / 180 * CV_PI), sin(45.0 / 180 * CV_PI), 1);
 
 cv::Mat wheelsFwdInv = wheelsFwd.inv(cv::DECOMP_SVD);
 
