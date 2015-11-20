@@ -78,6 +78,6 @@ private:
 	int next_id = 1;
 	bool stop_send = false;
 	bool ball_in_tribbler = false;
-	cv::Mat wheelSpeeds = cv::Scalar::all(0.0);
+	cv::Mat wheelSpeeds;// = cv::Scalar::all(0.0);
 };
 

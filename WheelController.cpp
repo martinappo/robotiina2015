@@ -3,11 +3,13 @@
 #include <boost/property_tree/ini_parser.hpp>
 #include <thread>
 
+
 cv::Mat wheelAngles = (cv::Mat_<double>(4, 3) <<
 	-sin(45.0 / 180 * CV_PI),  cos(45.0 / 180 * CV_PI), 1,
 	-sin(135.0 / 180 * CV_PI), cos(135.0 / 180 * CV_PI), 1,
 	-sin(225.0 / 180 * CV_PI), cos(225.0 / 180 * CV_PI), 1,
 	-sin(315.0 / 180 * CV_PI), cos(315.0 / 180 * CV_PI), 1);
+
 
 
 //#define LIMIT_ACCELERATION
@@ -17,6 +19,7 @@ m_iWheelCount(iWheelCount), m_pComPort(port)
 {
 	targetSpeed = { 0, 0, 0 };
 	Start();
+	Drive(0);
 };
 
 void WheelController::DestroyWheels()

@@ -9,7 +9,6 @@ extern DistanceCalculator gDistanceCalculator;
 extern cv::Mat wheelAngles;
 
 
-
 Simulator::Simulator(boost::asio::io_service &io, bool master, const std::string game_mode) :
 	mNumberOfBalls(game_mode == "master" || game_mode =="slave" ? 1 :11 )
 	, FieldState(game_mode == "master" || game_mode == "slave" ? 1 : 11)
@@ -233,11 +232,13 @@ void Simulator::UpdateRobotPos(){
 	time = boost::posix_time::microsec_clock::local_time();
 
 	double dt = (double)(time - lastStep).total_milliseconds() / 1000.0;
+
 	lastStep = time;
 	if (dt > 1000) return;
 	cv::Mat robotSpeed = cv::Mat_<double>(4, 1);
 	cv::solve(wheelAngles, wheelSpeeds, robotSpeed, cv::DECOMP_SVD);
 	std::cout << robotSpeed << std::endl;
+
 	
 	self.polarMetricCoords.y += (robotSpeed.at<double>(2)*dt);
 	if (self.polarMetricCoords.y > 360) self.polarMetricCoords.y -= 360;
