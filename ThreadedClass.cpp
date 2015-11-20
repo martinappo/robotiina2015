@@ -5,6 +5,7 @@
 ThreadedClass::ThreadedClass(const std::string &name): name(name)
 {
 	stop_thread = false;
+	running = false;
 }
 
 void ThreadedClass::Start()

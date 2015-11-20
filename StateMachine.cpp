@@ -1,6 +1,7 @@
 #include "StateMachine.h"
 
 bool DriveInstruction::aimTarget(const ObjectPosition &target, double errorMargin){
+	m_pCom->ToggleTribbler(0);
 	double heading = target.getHeading();
 	if (abs(heading) > errorMargin){
 		m_pCom->Drive(0, 0, heading);
@@ -16,20 +17,23 @@ bool DriveInstruction::catchTarget(const ObjectPosition &target){
 		m_pCom->Drive(0, 0, 0);
 		return true;
 	}
-	m_pCom->ToggleTribbler(50);
+	m_pCom->ToggleTribbler(100);
 	m_pCom->Drive(30, 0, target.getHeading());
 	return false;
 }
 
 bool DriveInstruction::driveToTarget(const ObjectPosition &target, double maxDistance){
+
 	if (USE_ANGLED_DRIVING)
 		return driveToTargetWithAngle(target, maxDistance);
 	double dist = target.getDistance();
+		
 	if (dist > maxDistance){
-		m_pCom->Drive((dist > 50) ? 100 : (std::max(dist, 20.0))); //To Do: set speed based on distance
+		std::cout << "Returning false on: " << dist << std::endl;
 		return false;
 	}
 	else{
+		std::cout << "Returning TRUE on: " << dist << std::endl; //TODO debug:j22b ikka samasse steiti
 		m_pCom->Drive(0, 0, 0);
 		return true;
 	}
@@ -112,11 +116,8 @@ void StateMachine::Run()
 			std::cout << "Invalid drive mode from :" << old->second->name << ", reverting to idle" << std::endl;
 			curDriveMode = driveModes.find(DRIVEMODE_IDLE);
 		}
-		std::cout << "state change :" << old->second->name << " ->" << curDriveMode->second->name << std::endl;
-
+		std::cout << "state change :" << old->second->name << " ->" << curDriveMode->second->name << std::endl; //TODO debug: miks siia ei j6ua?
 		curDriveMode->second->onEnter();
-
-
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 	}
@@ -139,7 +140,5 @@ StateMachine::~StateMachine()
 	for (auto &mode : driveModes){
 		delete mode.second;
 	}
-	//m_pCom->ToggleTribbler(false);
-
 }
 
