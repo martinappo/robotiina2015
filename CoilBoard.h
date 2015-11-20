@@ -5,6 +5,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 #include "ThreadedClass.h"
+#include <mutex>
 
 class CoilBoard : public ThreadedClass, public ISerialListener
 {
@@ -16,6 +17,7 @@ private:
 	//boost::posix_time::time_duration afterKickDuration;
 	std::atomic_bool kick;
 	std::atomic_int ballInTribblerCount;
+	std::mutex lock;
 	ISerial *m_pComPort;
 	//bool forcedNotInTribbler = false;
 
@@ -40,12 +42,24 @@ public:
 	}
 
 	void DataReceived(const std::string & message){
-		if (message.length() < 7) return; // partial message
-		if (message.substr(0, 6) == "<5:bl:")
-		ballInTribbler = message.substr(6, 1) == "1";
+		std::lock_guard<std::mutex> lock(lock);
+		if (message.empty()) return;
+		std::string m = last_message + message;
+		if (m.length() < 3) return;
+		auto eol = m.rfind('\n');
+		if (eol == std::string::npos){
+			// no end-of-line found, store it for future
+			last_message = m;
+		}
+		else {
+			ballInTribbler = m.substr(eol-2, 1) == "1";
+			last_message = message;
+		}
+
 	}
 protected:
 	std::atomic_bool ballInTribbler;
+	std::string last_message;
 
 
 };

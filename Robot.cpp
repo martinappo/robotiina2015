@@ -329,7 +329,7 @@ void Robot::Run()
 	//port.get_io_service().run();
 	while (true)
     {
-		io.poll_one();
+		//io.poll_one();
 		time = boost::posix_time::microsec_clock::local_time();
 //		boost::posix_time::time_duration::tick_type dt = (time - lastStepTime).total_milliseconds();
 		boost::posix_time::time_duration::tick_type rotateDuration = (time - rotateTime).total_milliseconds();

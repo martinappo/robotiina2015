@@ -45,10 +45,13 @@ int main(int argc, char *argv[])
 		}
 
 	}*/
-
+	std::atomic_bool stop_io;
+	stop_io = false;
     boost::asio::io_service io;
 	std::thread io_thread([&](){
-		io.run();
+		while (!stop_io) {
+			io.run();
+		}
 	});
 
 
@@ -74,6 +77,7 @@ int main(int argc, char *argv[])
 	{
 		std::cout << "ups, did not see that coming."<< std::endl;
 	}
+	stop_io = true;
 	io.stop();
 	io_thread.join();
 
