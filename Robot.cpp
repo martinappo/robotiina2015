@@ -206,11 +206,11 @@ void Robot::InitSimulator(bool master, const std::string game_mode) {
 
 void Robot::InitHardware() {
 	std::cout << "Initializing Camera... " << std::endl;
-	if (config.count("m_pCamera"))
-		if (config["m_pCamera"].as<std::string>() == "ximea")
+	if (config.count("camera"))
+		if (config["camera"].as<std::string>() == "ximea")
 			m_pCamera = new Camera(CV_CAP_XIAPI);
 		else
-			m_pCamera = new Camera(config["m_pCamera"].as<std::string>());
+			m_pCamera = new Camera(config["camera"].as<std::string>());
 	else
 		m_pCamera = new Camera(0);
 	std::cout << "Done" << std::endl;

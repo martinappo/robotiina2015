@@ -23,17 +23,13 @@ bool DriveInstruction::catchTarget(const ObjectPosition &target){
 }
 
 bool DriveInstruction::driveToTarget(const ObjectPosition &target, double maxDistance){
-
 	if (USE_ANGLED_DRIVING)
 		return driveToTargetWithAngle(target, maxDistance);
 	double dist = target.getDistance();
-		
 	if (dist > maxDistance){
-		std::cout << "Returning false on: " << dist << std::endl;
 		return false;
 	}
 	else{
-		std::cout << "Returning TRUE on: " << dist << std::endl; //TODO debug:j22b ikka samasse steiti
 		m_pCom->Drive(0, 0, 0);
 		return true;
 	}
