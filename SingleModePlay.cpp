@@ -34,8 +34,6 @@ void CatchBall::onExit()
 }
 DriveMode CatchBall::step(double dt)
 {
-
-
 	FIND_TARGET_BALL
 
 	if (STUCK_IN_STATE(3000)) return DRIVEMODE_DRIVE_TO_BALL;
@@ -53,31 +51,15 @@ DriveMode AimGate::step(double dt)
 {
 
 	FIND_TARGET_GATE
-
-
-	if (!BALL_IN_TRIBBLER) return DRIVEMODE_DRIVE_TO_BALL;
-
-	//if (STUCK_IN_STATE(9000)) return DRIVEMODE_KICK;
-	
-	if (aimTarget(target, 2)){
+	if (!BALL_IN_TRIBBLER) return DRIVEMODE_DRIVE_TO_BALL;	
+	double errorMargin;
+	if (target.getDistance() > 200){
+		errorMargin = 10;
+	}
+	else errorMargin = 20;
+	if (aimTarget(target, errorMargin)){
 		return DRIVEMODE_KICK;
 	}
-
-/*
-	//Turn robot to gate
-	if (aimTarget(target, 2)){
-		if (SIGHT_OBSTRUCTED) { //then move sideways away from gate
-			DRIVE_SIDEWAYS
-			//m_pCom->Drive(45, 90, 0);
-		}
-		else {
-			return DRIVEMODE_KICK;
-		}
-	}
-	else {
-		ROTATE_AND_DRIVE_TOWARD_TO_TARGET_GATE
-	}
-*/
 	return DRIVEMODE_AIM_GATE;
 
 }
