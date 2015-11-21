@@ -23,7 +23,7 @@ bool DriveInstruction::catchTarget(const ObjectPosition &target){
 	std::cout << ", catchTarget: " << heading;
 	
 	//m_pCom->ToggleTribbler(100);
-	m_pCom->Drive(20, 0, - sign(heading) * std::min(20.0, fabs(heading)));
+	m_pCom->Drive(70, 0, 0);
 	return false;
 }
 
