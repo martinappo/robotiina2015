@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 	std::thread io_thread([&](){
 		while (!stop_io) 
 		{
-			io.reset();
+			//io.reset();
 			io.run();
 		}
 		std::cout << "io stopting" << std::endl;
