@@ -50,8 +50,7 @@ bool DriveInstruction::driveToTargetWithAngle(const ObjectPosition &target, doub
 
 	double dist = target.getDistance();
 	if (dist > maxDistance){
-		double speed = (dist > 50) ? 100 : (std::max(dist, 20.0));
-		m_pCom->Drive(speed, 0, heading*1.5);//To Do: set speed based on distance
+		m_pCom->Drive(std::min(100.0, std::max(20.0, dist)), heading, -heading*0.3);//To Do: set speed based on distance
 		return false;
 	}
 	else return true;

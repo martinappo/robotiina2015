@@ -32,7 +32,7 @@ public:
 	virtual DriveMode step(double dt) = 0;
 	virtual void onExit(){};
 
-	const static bool USE_ANGLED_DRIVING = false;
+	const static bool USE_ANGLED_DRIVING = true;
 	bool aimTarget(const ObjectPosition &target, double errorMargin = (USE_ANGLED_DRIVING) ? 90 : 10);
 	bool catchTarget(const ObjectPosition &target);
 	bool driveToTarget(const ObjectPosition &target, double maxDistance = 50);

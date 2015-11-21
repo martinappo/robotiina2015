@@ -7,11 +7,9 @@ DriveMode DriveToBall::step(double dt)
 	if (target.getDistance() > 10000) return DRIVEMODE_IDLE;
 	if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
 	std::cout << std::endl << "aimtarget0, " ;
-	if (aimTarget(target)){
-		std::cout << "aimTarget1, ";
+	if (aimTarget(target,10)){
 		if (driveToTarget(target)){
-			std::cout << "driveToTarget, ";
-			if (aimTarget(target)){
+			if (aimTarget(target,2)){
 				return DRIVEMODE_CATCH_BALL;
 			}
 		}
@@ -54,11 +52,11 @@ DriveMode AimGate::step(double dt)
 	if (!BALL_IN_TRIBBLER) return DRIVEMODE_DRIVE_TO_BALL;	
 	double errorMargin;
 	if (target.getDistance() > 200){
-		errorMargin = 10;
+		errorMargin = 5;
 	}
-	else errorMargin = 20;
+	else errorMargin = 10;
 	if (aimTarget(target, errorMargin)){
-		return DRIVEMODE_KICK;
+		return DRIVEMODE_IDLE;
 	}
 	return DRIVEMODE_AIM_GATE;
 
