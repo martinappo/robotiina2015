@@ -52,7 +52,13 @@ public:
 		}
 		else if (m.length() > 3 ){
 			ballInTribbler = m.substr(eol-2, 1) == "1";
-			last_message = m.substr(eol+1);
+			if (m.length > eol + 1) {
+				last_message = m.substr(eol + 1);
+			}
+			else {
+				last_message = "";
+			}
+
 		} else {
 			last_message = m;
 		}
