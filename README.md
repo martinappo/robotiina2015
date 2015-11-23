@@ -26,8 +26,28 @@ Robotex 2014 participant
 
 * install cmake, gcc and git
  * sudo apt-get install build-essential cmake git 
-* install  opencv 2.4.9, boost 1.55.0
- * sudo apt-get install libopencv-dev
+* install ximea sdk
+ * dowload sdk (XIMEA_Linux_SP.tgz) from http://www.ximea.com/support/documents/4
+  * wget http://www.ximea.com/support/attachments/271/XIMEA_Linux_SP.tgz
+  * tar -zxvf XIMEA_Linux_SP.tgz
+  * cd package/
+  * ./install -cam_usb30
+* install  opencv 3.0.0
+  * install gtk+2
+    * sudo apt-get install libgtk2.0-dev
+  * download latest opencv 3
+    * wget https://github.com/Itseez/opencv/archive/3.0.0.zip
+    * unzip 3.0.0.zip
+    * cd opencv-3.0.0/
+  * build using cmake
+    * mkdir opencv-3.0.0
+    * cd opencv-3.0.0/ 
+    * cmake -D WITH_XIMEA=YES -D CMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX:PATH=/usr ..
+    * make
+  * install using checkinstall
+    * sudo apt-get install checkinstall
+    * sudo checkinstall
+* install boost >= 1.55.0
  * sudo apt-get install libboost-all-dev
 * clone repro
  * git clone https://github.com/martinappo/robotiina2015

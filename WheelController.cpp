@@ -3,59 +3,24 @@
 #include <boost/property_tree/ini_parser.hpp>
 #include <thread>
 
-#define deg150 (150.0 * PI / 180.0)
-#define deg30 (30.0 * PI / 180.0)
-#define deg270 (270.0 * PI / 180.0)
+
+cv::Mat wheelAngles = (cv::Mat_<double>(4, 3) <<
+	-sin(45.0 / 180 * CV_PI),  cos(45.0 / 180 * CV_PI), 1,
+	-sin(135.0 / 180 * CV_PI), cos(135.0 / 180 * CV_PI), 1,
+	-sin(225.0 / 180 * CV_PI), cos(225.0 / 180 * CV_PI), 1,
+	-sin(315.0 / 180 * CV_PI), cos(315.0 / 180 * CV_PI), 1);
+
+
+
 //#define LIMIT_ACCELERATION
 
-WheelController::WheelController(ComPortScanner *pScanner, int iWheelCount/* = 3*/) : ThreadedClass("WheelController")
-, m_pScanner(pScanner), m_iWheelCount(iWheelCount)
+WheelController::WheelController(ISerial *port, int iWheelCount/* = 3*/) : ThreadedClass("WheelController"),
+m_iWheelCount(iWheelCount), m_pComPort(port)
 {
-	if (iWheelCount == 3) {
-		m_vWheels.push_back(std::make_pair<double, SimpleSerial*>(150, NULL));
-		m_vWheels.push_back(std::make_pair<double, SimpleSerial*>(30, NULL));
-		m_vWheels.push_back(std::make_pair<double, SimpleSerial*>(270, NULL));
-	}
-//	for (auto i = 0; i < iWheelCount; i++) {
-//		m_vWheels.push_back(std::make_pair<double, SimpleSerial*>((double)i / m_iWheelCount, NULL));
-//	}
 	targetSpeed = { 0, 0, 0 };
-	m_bPortsInitialized = false;
 	Start();
+	Drive(0);
 };
-
-
-void WheelController::Init()
-{
-	if (m_pScanner == NULL || m_bPortsInitialized) return;
-	using boost::property_tree::ptree;
-	ptree pt;
-	try {
-		read_ini("conf/wheels.ini", pt);
-
-		bool bPortsOk = true;
-		for (auto i = 0; i < m_iWheelCount; i++) {
-			auto sPortNum = pt.get<std::string>(std::to_string(i+1));
-			SimpleSerial * pPort = NULL;
-			if (m_pScanner->VerifyPort(sPortNum, i + 1, &pPort)) {
-				m_vWheels[i].second = pPort;
-			}else{
-				bPortsOk = false;
-			}
-		}
-		m_bPortsInitialized = bPortsOk;
-	}
-	catch (std::runtime_error const&e) {
-		std::cout << "Error reading wheel configuration: " << e.what() << std::endl;
-	}
-	if (!m_bPortsInitialized) {
-		std::vector<int> ids;
-		for (auto i = 0; i < m_iWheelCount; i++) {
-			ids.push_back(i+1);
-		}
-		m_pScanner->ScanObject("conf/wheels.ini", ids);
-	}
-}
 
 void WheelController::DestroyWheels()
 {
@@ -82,6 +47,7 @@ void WheelController::Drive(double velocity, double direction, double rotate)
 
 void WheelController::DriveRotate(double velocity, double direction, double rotate)
 {
+ 
 	//std::cout << "DriveRotate: " << velocity << std::endl;
 
 	if (abs(velocity) > 190){
@@ -109,41 +75,24 @@ void WheelController::DriveRotate(double velocity, double direction, double rota
 	targetSpeed.velocity = velocity; // sin(direction* PI / 180.0)* velocity + rotate;
 	targetSpeed.heading = direction; //cos(direction* PI / 180.0)* velocity + rotate,
 	targetSpeed.rotation = rotate;
-#ifndef LIMIT_ACCELERATION
-	auto speeds = CalculateWheelSpeeds(targetSpeed.velocity, targetSpeed.heading, targetSpeed.rotation);
-	for (auto i = 0; i < m_iWheelCount; i++) {
-		if (m_vWheels[i].second != NULL) {
-			std::ostringstream oss;
-			oss << "sd" << speeds[i] << "\n";
-			m_vWheels[i].second->writeString(oss.str());
-		}
-	}
-	//if (w_left != NULL) w_left->SetSpeed(speeds.x);
-	//if (w_right != NULL) w_right->SetSpeed(speeds.y);
-	//if (w_back != NULL) w_back->SetSpeed(speeds.z);
-#endif
+	
+	targetSpeedXYW.at<double>(0) = sin(direction* CV_PI / 180.0)* velocity;
+	targetSpeedXYW.at<double>(1) = cos(direction* CV_PI / 180.0)* velocity;
+	targetSpeedXYW.at<double>(2) = rotate;
+
 	directControl = false;
 	updateSpeed = true;
 	lastUpdate = boost::posix_time::microsec_clock::local_time();
 
 	
 }
-std::vector<double> WheelController::CalculateWheelSpeeds(double velocity, double direction, double rotate)
-{
-	std::vector<double> speeds = std::vector<double>(m_iWheelCount);
+void WheelController::Drive(const cv::Point2d &speed, double angularSpeed){
+	targetSpeedXYW.at<double>(0) = speed.x;
+	targetSpeedXYW.at<double>(1) = speed.y;
+	targetSpeedXYW.at<double>(2) = angularSpeed;
 
-	for (auto i = 0; i < m_iWheelCount; i++) {
-		speeds[i] = velocity * cos((m_vWheels[i].first - direction)* PI / 180.0) + rotate;
-	}
-	/*
-	return cv::Point3d(
-		(velocity*cos((150 - direction) * PI / 180.0)) + rotate,
-		((velocity*cos((30 - direction)  * PI / 180.0)) + rotate),
-		(velocity*cos((270 - direction)  * PI / 180.0)) + rotate
-	);
-	*/
-	return speeds; // make member variable to avoid copy
 }
+
 void WheelController::Stop()
 {
 	Drive(0,0,0);
@@ -189,46 +138,7 @@ std::vector<double> WheelController::GetWheelSpeeds()
 	return speeds; //cv::Point3d(w_left->GetSpeed(), w_right->GetSpeed(), w_back->GetSpeed());
 }
 
-void WheelController::CalculateRobotSpeed()
-{
-	
-	lastSpeed = actualSpeed;
-	std::vector<double> _speeds = GetWheelSpeeds();
-	cv::Point3d speeds = cv::Point3d(_speeds[0], _speeds[1], _speeds[2]);
-	double a, b, c, u, v, w;
-	/*
-	a = x *[cos(u) * cos(y) + sin(u) * sin(y)] + z
-	b = x *[cos(v) * cos(y) + sin(v) * sin(y)] + z
-	c = x *[cos(w) * cos(y) + sin(w) * sin(y)] + z
-	*/
-	if (abs(speeds.z - speeds.x) > 0.0000001) { // c - a == 0
-		a = speeds.x; b = speeds.y; c = speeds.z;
-		u = deg150; v = deg30; w = deg270;
-	}
-	else if (abs(speeds.x - speeds.y) > 0.0000001) {
-		a = speeds.y; b = speeds.z; c = speeds.x;
-		u = deg30; v = deg270; w = deg30;
-	}
-	else if (abs(speeds.z - speeds.y) > 0.0000001) {
-		a = speeds.z; b = speeds.x; c = speeds.y;
-		u = deg270; v = deg30; w = deg150;
-	}
-	else {
-		// all equal, rotation only
-		actualSpeed.velocity = 0;
-		actualSpeed.heading = 0;
-		actualSpeed.rotation = speeds.x;
-		return;
 
-	}
-	double s = (b - a) / (c - a);
-	double directionInRad = atan(((cos(v) - cos(u)) - s * (cos(w) - cos(u))) / (s * (sin(w) - sin(u)) - (sin(v) - sin(u))));
-	//if (directionInRad < 0) directionInRad += 2 * PI;
-	actualSpeed.heading = directionInRad / PI * 180;
-	actualSpeed.velocity = (a - c) / ((cos(u) - cos(w)) * cos(directionInRad) + (sin(u) - sin(w)) * sin(directionInRad));
-	actualSpeed.rotation = c - (actualSpeed.velocity  * cos(w - directionInRad));
-
-}
 
 const Speed &  WheelController::GetTargetSpeed()
 {
@@ -245,7 +155,7 @@ std::string WheelController::GetDebugInfo(){
 	std::ostringstream oss;
 	oss.precision(4);
 	oss << "[WheelController] target: " << "velocity: " << targetSpeed.velocity << ", heading: " << targetSpeed.heading << ", rotate: " << targetSpeed.rotation << "|";
-	oss << "[WheelController] actual: " << "velocity: " << actualSpeed.velocity << ", heading: " << actualSpeed.heading << ", rotate: " << actualSpeed.rotation << "|";
+	oss << "[WheelController] target: " << "vx: " << targetSpeedXYW.at<double>(0) << ", vy: " << targetSpeedXYW.at<double>(1) << ", rotate: " << targetSpeedXYW.at<double>(2) << "|";
 	/*
 	cv::Point3d speeds = GetWheelSpeeds();
 	auto speeds2 = CalculateWheelSpeeds(targetSpeed.velocity, targetSpeed.heading, targetSpeed.rotation);
@@ -259,9 +169,10 @@ std::string WheelController::GetDebugInfo(){
 
 void WheelController::Run()
 {
+	if (m_pComPort == NULL) return;
 	while (!stop_thread) {
-		CalculateRobotSpeed();
 #ifdef LIMIT_ACCELERATION
+		CalculateRobotSpeed();
 		boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
 		if (!updateSpeed && (now - lastUpdate).total_milliseconds() > 500) {
 			targetSpeed = {0,0,0};
@@ -289,8 +200,19 @@ void WheelController::Run()
 		w_right->SetSpeed(speeds.y);
 		w_back->SetSpeed(speeds.z);
 		lastStep = now;
+#else
+		//auto speeds = CalculateWheelSpeeds(targetSpeed.velocity, targetSpeed.heading, targetSpeed.rotation);
+		cv::Mat speeds = wheelAngles * targetSpeedXYW; 
+		//std::cout << targetSpeedXYW << std::endl;
+		std::ostringstream oss;
+		for (auto i = 0; i < speeds.rows; i++) {
+			oss << (i + id_start) << ":sd" << (int)speeds.at<double>(i) << "\n";
+		}
+		//std::cout << oss.str() << std::endl;
+		m_pComPort->WriteString(oss.str());
+
 #endif
-		std::this_thread::sleep_for(std::chrono::milliseconds(10)); // do not poll serial to fast
+		std::this_thread::sleep_for(std::chrono::milliseconds(100)); // do not poll serial to fast
 	}
 	std::cout << "WheelController stoping" << std::endl;
 	

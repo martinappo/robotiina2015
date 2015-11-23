@@ -4,7 +4,7 @@ class ParallelImageThresholder :
 	public ImageThresholder
 {
 public:
-	ParallelImageThresholder::ParallelImageThresholder(ThresholdedImages &images, HSVColorRangeMap &objectMap) : ImageThresholder(images, objectMap){
+	ParallelImageThresholder(ThresholdedImages &images, HSVColorRangeMap &objectMap) : ImageThresholder(images, objectMap){
 	}
 	void Start(cv::Mat &frameHSV, std::vector<OBJECT> objectList) {
 		for (auto &object : objectList) {

@@ -5,10 +5,12 @@
 ThreadedClass::ThreadedClass(const std::string &name): name(name)
 {
 	stop_thread = false;
+	running = false;
 }
 
 void ThreadedClass::Start()
 {
+	//assert(!name.empty());
 	stop_thread = false;
 	running = true;
 	threads.create_thread(boost::bind(&ThreadedClass::Run, this));

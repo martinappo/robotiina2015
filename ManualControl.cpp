@@ -2,39 +2,40 @@
 #include <chrono>
 #include <thread>
 
-ManualControl::ManualControl(ICommunicationModule *pComModule) :ConfigurableModule("ManualControl")
+ManualControl::ManualControl(ICommunicationModule *pComModule) :ConfigurableModule("ManualControl"), ThreadedClass("ManualControl")
 {
 	m_pComModule = pComModule;
 
-	AddSetting("Turn Left", []{return "a"; }, [this] {this->rotation -= 3; });
-	AddSetting("Turn Right", []{return "d"; }, [this]{this->rotation += 3; });
+	AddSetting("Turn Left", []{return "r"; }, [this] {this->rotation -= 10; });
+	AddSetting("Turn Right", []{return "l"; }, [this]{this->rotation += 10; });
 
-	AddSetting("Move Left", []{return "A"; }, [this] {this->speed += 3; this->direction = -90; });
-	AddSetting("Move Right", []{return "D"; }, [this]{this->speed += 3; this->direction = 90; });
+	AddSetting("Move Left", []{return "a"; }, [this] {this->speed.x -= 10; });
+	AddSetting("Move Right", []{return "d"; }, [this]{this->speed.x += 10; });
 
-	AddSetting("Move Forward", []{return "w"; }, [this]{this->speed += 13; });
-	AddSetting("Move Back", []{return "s"; }, [this]{this->speed -= 13; });
+	AddSetting("Move Forward", []{return "w"; }, [this]{this->speed.y += 10; });
+	AddSetting("Move Back", []{return "s"; }, [this]{this->speed.y -= 10; });
+	AddSetting("Stop (space)", []{return "q"; }, [this]{this->speed = cv::Point2d(0,0); });
 
 //	AddSetting("Rotate Right", []{return ""; }, [this]{this->wheels->Rotate(0, 20); });
 //	AddSetting("Rotate Left", []{return ""; }, [this]{this->wheels->Rotate(1, 20); });
-	AddSetting("Kick", []{return " "; }, [this] {this->m_pComModule->Kick(); });
-	AddSetting("Start tribbler", []{return "z"; }, [this]{this->m_pComModule->ToggleTribbler(true); });
-	AddSetting("Stop tribbler", []{return "x"; }, [this]{this->m_pComModule->ToggleTribbler(false); });
+	AddSetting("Kick", []{return "k"; }, [this] {this->m_pComModule->Kick(); });
+	AddSetting("Start tribbler", []{return "z"; }, [this]{this->m_pComModule->ToggleTribbler(100); });
+	AddSetting("Stop tribbler", []{return "x"; }, [this]{this->m_pComModule->ToggleTribbler(0); });
 	//Start();
 }
 
 
 void ManualControl::Run(){
 	while (!stop_thread){
-		m_pComModule->Drive(speed, direction, rotation);
-		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		m_pComModule->Drive(speed, rotation);
 		boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
-		if ((time - last_tick).total_milliseconds() > 100){
-			rotation -= sign(rotation);
-			speed -= sign(speed);
-			last_tick = time;
-			if (abs(speed) < 1) direction = 0;
-		}
+		double dt = (double)((time - last_tick).total_milliseconds())/400;
+
+		rotation -= sign(rotation);
+		speed.x -= sign(speed.x)*dt;
+		speed.y -= sign(speed.y)*dt;
+		last_tick = time;
+		Sleep(100);
 	}
 }
 

@@ -45,8 +45,19 @@ int main(int argc, char *argv[])
 		}
 
 	}*/
-
+	std::atomic_bool stop_io;
+	stop_io = false;
     boost::asio::io_service io;
+	std::thread io_thread([&](){
+		while (!stop_io) 
+		{
+			io.reset();
+			io.run();
+		}
+		std::cout << "io stopting" << std::endl;
+	});
+
+
     Robot robotiina(io);
 //    RemoteControl sr(io, &robotiina);
 
@@ -69,6 +80,10 @@ int main(int argc, char *argv[])
 	{
 		std::cout << "ups, did not see that coming."<< std::endl;
 	}
+	stop_io = true;
+	io.stop();
+	io_thread.join();
+
 //    sr.Stop();
     return 0;
 

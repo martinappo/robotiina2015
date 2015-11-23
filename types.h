@@ -35,16 +35,18 @@ struct Speed
 	double heading;
 	double rotation;
 };
+//for conf file
+const int ID_COM = 1;
+const int ID_REF = 2;
 
-const int ID_COILGUN = 4;
+//for actual ID info is sent to
+const int ID_MAIN_BOARD = 5;
 
 enum OBJECT
 {
     BALL = 0, BLUE_GATE, YELLOW_GATE, FIELD, INNER_BORDER, OUTER_BORDER, NUMBER_OF_OBJECTS, SIGHT_MASK
 };
 
-
-const size_t NUMBER_OF_BALLS = 11;
 
 enum STATE
 {
@@ -62,7 +64,35 @@ enum STATE
 	STATE_TEST_COILGUN,
 	STATE_MOUSE_VISION,
 	STATE_DISTANCE_CALIBRATE,
+	STATE_GIVE_COMMAND,
 	STATE_END_OF_GAME /* leave this last*/
+};
+/*
+enum REFCOMMAND
+{
+	START = 0,
+	STOP,
+	PLACED_BALL,
+	END_HALF,
+	KICKOFF,
+	INDIRECT_FREE_KICK,
+	DIRECT_FREE_KICK,
+	GOAL_KICK,
+	THROW_IN,
+	CORNER_KICK,
+	PENALTY,
+	GOAL,
+	YELLOW_CARD
+}; */
+class ISerialListener {
+public:
+	virtual void DataReceived(const std::string & message) = 0;
+};
+class ISerial : public ISerialListener{
+public:
+	virtual void SendCommand(int id, const std::string &cmd, int param = INT_MAX) = 0;
+	virtual void WriteString(const std::string &s) = 0;
+	virtual void SetMessageHandler(ISerialListener* callback) {};
 };
 
 class IObjectPosition {
@@ -119,28 +149,24 @@ public:
 	virtual const cv::Mat & GetFrame() = 0;
 };
 
-class IWheelController {
+/*
+class IRefereeCom {
 public:
-	virtual void Drive(double fowardSpeed, double direction =0, double angularSpeed=0) = 0;
-	virtual const Speed & GetActualSpeed() = 0;
-	virtual const Speed & GetTargetSpeed() = 0;
-	virtual void Init() = 0;
-	virtual std::string GetDebugInfo() = 0;
-	virtual bool IsReal() = 0;
+	virtual bool isCommandAvailable() = 0;
+	virtual REFCOMMAND getNextCommand() = 0;
+	virtual void giveCommand(REFCOMMAND command) = 0;
+	virtual bool isTogglable() = 0;
+};*/
 
-
-
-};
-class ICoilGun {
+class ICommunicationModule {
 public:
+	virtual void Drive(double fowardSpeed, double direction = 0, double angularSpeed = 0) = 0;
+	// needed for spinAroundDribbler https://github.com/kallaspriit/soccervision/blob/80840c921ad0935ed2e0718ed405613af3e51aa1/src/Robot.cpp#L385
+	virtual void Drive(const cv::Point2d &speed, double angularSpeed = 0) = 0; /* x,y speed components */
 	virtual bool BallInTribbler() = 0;
-	virtual void Kick() = 0;
-	virtual void ToggleTribbler(bool start) = 0;
-
-};
-
-class ICommunicationModule : public IWheelController, public ICoilGun {
-//	virtual bool Init(IWheelController * pWheels, ICoilGun *pCoilGun) = 0;
+	virtual void Kick(int force = 800) = 0;
+	virtual void ToggleTribbler(int speed) = 0;
+	virtual std::string GetDebugInfo() = 0;
 
 };
 

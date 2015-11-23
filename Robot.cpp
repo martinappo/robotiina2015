@@ -22,13 +22,16 @@
 #include <boost/date_time/posix_time/posix_time_io.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
-#include "NewAutoPilot.h"
+#include "SingleModePlay.h"
+#include "MultiModePlay.h"
 #include "RobotTracker.h"
 #include "VideoRecorder.h"
 #include "FrontCameraVision.h"
 #include "ComModule.h"
 #include "ManualControl.h"
+#ifdef ENABLE_REMOTE_CONTROL
 #include "RemoteControl.h"
+#endif
 #include "SoccerField.h"
 #include "MouseVision.h"
 
@@ -72,11 +75,51 @@ std::pair<STATE, std::string> states[] = {
 	std::pair<STATE, std::string>(STATE_DANCE, "Dance"),
 	std::pair<STATE, std::string>(STATE_MOUSE_VISION, "Mouse Vision"),
 	std::pair<STATE, std::string>(STATE_DISTANCE_CALIBRATE, "dist"),
+	std::pair<STATE, std::string>(STATE_GIVE_COMMAND, "Give Referee Command"),
 	//	std::pair<STATE, std::string>(STATE_END_OF_GAME, "End of Game") // this is intentionally left out
 
 };
 
+std::pair<std::string, FieldState::GameMode> refCommands[] = {
+	std::pair<std::string, FieldState::GameMode>("Start game", FieldState::GAME_MODE_START_SINGLE_PLAY),
+	std::pair<std::string, FieldState::GameMode>("Stop game", FieldState::GAME_MODE_STOPED),
+	std::pair<std::string, FieldState::GameMode>("Placed ball", FieldState::GAME_MODE_PLACED_BALL),
+	std::pair<std::string, FieldState::GameMode>("End half", FieldState::GAME_MODE_END_HALF),
+
+	std::pair<std::string, FieldState::GameMode>("Our kickoff", FieldState::GAME_MODE_START_OUR_KICK_OFF),
+	std::pair<std::string, FieldState::GameMode>("Our indirect free kick", FieldState::GAME_MODE_START_OUR_INDIRECT_FREE_KICK),
+	std::pair<std::string, FieldState::GameMode>("Our direct free kick", FieldState::GAME_MODE_START_OUR_FREE_KICK),
+	std::pair<std::string, FieldState::GameMode>("Our goal kick", FieldState::GAME_MODE_START_OUR_GOAL_KICK),
+	std::pair<std::string, FieldState::GameMode>("Our throw in", FieldState::GAME_MODE_START_OUR_THROWIN),
+	std::pair<std::string, FieldState::GameMode>("Our corner kick", FieldState::GAME_MODE_START_OUR_CORNER_KICK),
+	std::pair<std::string, FieldState::GameMode>("Our penalty", FieldState::GAME_MODE_START_OUR_PENALTY),
+	std::pair<std::string, FieldState::GameMode>("Our goal", FieldState::GAME_MODE_START_OUR_GOAL),
+	std::pair<std::string, FieldState::GameMode>("Our yellow card", FieldState::GAME_MODE_START_OUR_YELLOW_CARD),
+/*
+	std::pair<std::string, FieldState::GameMode>("Opponent kickoff", FieldState::GAME_MODE_START_OPPONENT_KICK_OFF),
+	std::pair<std::string, FieldState::GameMode>("Opponent indirect free kick", FieldState::GAME_MODE_START_OPPONENT_INDIRECT_FREE_KICK),
+	std::pair<std::string, FieldState::GameMode>("Opponent direct free kick", FieldState::GAME_MODE_START_OPPONENT_FREE_KICK),
+	std::pair<std::string, FieldState::GameMode>("Opponent goal kick", FieldState::GAME_MODE_START_OPPONENT_GOAL_KICK),
+	std::pair<std::string, FieldState::GameMode>("Opponent throw in", FieldState::GAME_MODE_START_OPPONENT_THROWIN),
+	std::pair<std::string, FieldState::GameMode>("Opponent corner kick", FieldState::GAME_MODE_START_OPPONENT_CORNER_KICK),
+	std::pair<std::string, FieldState::GameMode>("Opponent penalty", FieldState::GAME_MODE_START_OPPONENT_PENALTY),
+	std::pair<std::string, FieldState::GameMode>("Opponent goal", FieldState::GAME_MODE_START_OPPONENT_GOAL),
+	std::pair<std::string, FieldState::GameMode>("Opponent yellow card", FieldState::GAME_MODE_START_OPPONENT_YELLOW_CARD)
+*/
+};
+
 DistanceCalculator gDistanceCalculator;
+//TODO: convert to commandline options
+//#define USE_ROBOTIINA_WIFI
+#ifdef USE_ROBOTIINA_WIFI 
+// robotiina wifi
+boost::asio::ip::address bind_addr = boost::asio::ip::address::from_string("10.0.0.6"); // this computer ip
+boost::asio::ip::address brdc_addr = boost::asio::ip::address::from_string("10.0.0.15"); // netmask 255.255.255.240
+#else
+// any local network
+boost::asio::ip::address bind_addr = boost::asio::ip::address::from_string("0.0.0.0"); // all interfaces
+boost::asio::ip::address brdc_addr = boost::asio::ip::address_v4::broadcast(); // local network
+#endif
 
 std::map<STATE, std::string> STATE_LABELS(states, states + sizeof(states) / sizeof(states[0]));
 
@@ -88,7 +131,7 @@ void dance_step(float time, float &move1, float &move2) {
 
 /* END DANCE MOVES */
 
-Robot::Robot(boost::asio::io_service &io) : io(io), camera(0), wheels(0), coilBoard(0)
+Robot::Robot(boost::asio::io_service &io) : io(io), m_pCamera(0)
 {
 	
 	last_state = STATE_END_OF_GAME;
@@ -100,34 +143,34 @@ Robot::Robot(boost::asio::io_service &io) : io(io), camera(0), wheels(0), coilBo
 }
 Robot::~Robot()
 {
-	if (pSim){
+	Simulator * pSim = dynamic_cast<Simulator*>(m_pCamera);
+	if (pSim != NULL) {
 		delete pSim;
-		camera = NULL;
-		wheels = NULL;
-		coilBoard = NULL;
+		m_pCamera = NULL;
+		m_pSerial = NULL;
+		refCom = NULL;
 	}
-	if (camera) {
-		delete camera;
+	if (m_pCamera) {
+		delete m_pCamera;
 	}
-	std::cout << "coilBoard " << coilBoard << std::endl;
-	if (coilBoard)
-		delete coilBoard;
-	std::cout << "wheels " << wheels << std::endl;
-	if(wheels)
-        delete wheels;
-	if (scanner)
-		delete scanner;
-//	if (m_pDisplay)
-//		delete m_pDisplay;
+	if (refCom)
+		delete refCom;
+	if (m_pSerial)
+		delete m_pSerial;
+
 }
 
 
 bool Robot::Launch(int argc, char* argv[])
 {
 	if (!ParseOptions(argc, argv)) return false;
-	bool bSimulator = config["camera"].as<std::string>() == "simulator";
+	if (config.count("play-mode"))
+		play_mode = config["play-mode"].as<std::string>();
+
+	std::string _cam = config.count("camera") >0? config["camera"].as<std::string>():"";
+	bool bSimulator = _cam == "simulator" || _cam == "simulator-master";
 	if (bSimulator) {
-		InitSimulator();
+		InitSimulator(_cam == "simulator-master", play_mode);
 	}
 	else {
 		InitHardware();
@@ -144,43 +187,62 @@ bool Robot::Launch(int argc, char* argv[])
 	}
 	// Compose robot from its parts
 	if (config.count("webui") == 0)
-		m_pDisplay = new Dialog("Robotiina", winSize, camera->GetFrameSize());
+		m_pDisplay = new Dialog("Robotiina", winSize, m_pCamera->GetFrameSize());
 	else
 		m_pDisplay = new WebUI(8080);
 	captureFrames = config.count("capture-frames") > 0;
+
 	Run();
+
 	return true;
 }
-void Robot::InitSimulator() {
-	pSim = new Simulator();
-	camera = pSim;
-	wheels = pSim;
-	coilBoard = pSim;
+void Robot::InitSimulator(bool master, const std::string game_mode) {
+	auto pSim = new Simulator(io, master, game_mode);
+	m_pCamera = pSim;
+	m_pSerial = pSim;
+	refCom = pSim;
 }
 
 void Robot::InitHardware() {
-	std::cout << "Initializing camera... " << std::endl;
+	std::cout << "Initializing Camera... " << std::endl;
 	if (config.count("camera"))
 		if (config["camera"].as<std::string>() == "ximea")
-			camera = new Camera(CV_CAP_XIAPI);
+			m_pCamera = new Camera(CV_CAP_XIAPI);
 		else
-			camera = new Camera(config["camera"].as<std::string>());
+			m_pCamera = new Camera(config["camera"].as<std::string>());
 	else
-		camera = new Camera(0);
+		m_pCamera = new Camera(0);
 	std::cout << "Done" << std::endl;
-
-	if (config.count("skip-ports") == 0) {
-		scanner = new ComPortScanner(io);
+	initRefCom();
+	try {
+		using boost::property_tree::ptree;
+		ptree pt;
+		read_ini("conf/ports.ini", pt);
+		std::string port = pt.get<std::string>(std::to_string(ID_COM));
+		m_pSerial = new SimpleSerial(io, port, 19200);
+		//Sleep(100);
 	}
-	wheels = new WheelController(scanner);
-	coilBoardPortsOk = false;
-	wheelsPortsOk = false;
-
-	wheels->Init();
-	coilBoard = new CoilGun(); //TODO: fix this, to use real coilboard
-	//initCoilboard();
+	catch (std::exception const&  ex) {
+		std::cout << "Main board com port fail: " << ex.what() << std::endl;
+	}
+	
 	std::cout << "Done initializing" << std::endl;
 	return;
+}
+
+void Robot::initRefCom() {
+	std::cout << "Init referee communications" << std::endl;
+	try {
+		using boost::property_tree::ptree;
+		ptree pt;
+		read_ini("conf/ports.ini", pt);
+		std::string port = pt.get<std::string>(std::to_string(ID_REF));
+		refCom = new LLAPReceiver(NULL, io, port);
+	}
+	catch (...) { 
+		std::cout << "Referee com LLAP reciever couldn't be initialized" << std::endl;
+		refCom = new RefereeCom(NULL);
+	}
 }
 /*
 void Robot::initCoilboard() {
@@ -208,8 +270,8 @@ void Robot::Run()
 	//double fps;
 	//int frames = 0;
 	//timer for rotation measure
-	boost::posix_time::ptime lastStepTime;	
-	boost::posix_time::time_duration dt;	
+	boost::posix_time::ptime lastStepTime;
+	boost::posix_time::time_duration dt;
 
 	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
 	boost::posix_time::ptime epoch = boost::posix_time::microsec_clock::local_time();
@@ -224,37 +286,50 @@ void Robot::Run()
 	/*= "videos/" + boost::posix_time::to_simple_string(time) + "/";
 	std::replace(captureDir.begin(), captureDir.end(), ':', '.');
 	if (captureFrames) {
-		boost::filesystem::create_directories(captureDir);
+	boost::filesystem::create_directories(captureDir);
 	}
 	*/
+
 	/* Field state */
-	SoccerField field(m_pDisplay);
+
+	SoccerField field(io, m_pDisplay, play_mode == "master" || play_mode == "single", play_mode == "master" || play_mode == "slave" ? 1 : 11);
+	refCom->setField(&field);
 
 	/* Vision modules */
-	FrontCameraVision visionModule(camera, m_pDisplay, &field);
-	//AutoCalibrator visionModule(camera, this);
-	MouseVision mouseVision(camera, m_pDisplay, &field);
+	FrontCameraVision visionModule(m_pCamera, m_pDisplay, &field);
+	//AutoCalibrator visionModule(m_pCamera, this);
+	MouseVision mouseVision(m_pCamera, m_pDisplay, &field);
 
-	AutoCalibrator calibrator(camera, m_pDisplay);
+	AutoCalibrator calibrator(m_pCamera, m_pDisplay);
 
-	DistanceCalibrator distanceCalibrator(camera, m_pDisplay);
+	DistanceCalibrator distanceCalibrator(m_pCamera, m_pDisplay);
 
 	/* Communication modules */
-	ComModule comModule(wheels, coilBoard);
+	ComModule comModule(m_pSerial);
 
 	/* Logic modules */
-	NewAutoPilot autoPilot(&comModule, &field);
+	StateMachine *autoPilot = NULL;
+	if (play_mode=="master" || play_mode =="slave"){
+		autoPilot = new MultiModePlay(&comModule, &field, play_mode == "master");
+	}
+	else  {
+		autoPilot = new SingleModePlay(&comModule, &field);
+	}
 
 	ManualControl manualControl(&comModule);
+#ifdef ENABLE_REMOTE_CONTROL
 	RemoteControl remoteControl(io, &comModule);
+#endif
 
 	//RobotTracker tracker(wheels);
 
 	std::stringstream subtitles;
 
-	VideoRecorder videoRecorder("videos/", 30, camera->GetFrameSize(true));
+	VideoRecorder videoRecorder("videos/", 30, m_pCamera->GetFrameSize(true));
+	//port.get_io_service().run();
 	while (true)
     {
+		//io.poll_one();
 		time = boost::posix_time::microsec_clock::local_time();
 //		boost::posix_time::time_duration::tick_type dt = (time - lastStepTime).total_milliseconds();
 		boost::posix_time::time_duration::tick_type rotateDuration = (time - rotateTime).total_milliseconds();
@@ -263,7 +338,7 @@ void Robot::Run()
 		auto &ballPos = field.balls[0];
 		auto &targetGatePos = field.GetTargetGate();
 
-		autoPilot.UpdateState(&ballPos, &targetGatePos);
+		autoPilot->UpdateState(&ballPos, &targetGatePos);
 		*/
 		/*
 		if (dt > 1000) {
@@ -275,7 +350,7 @@ void Robot::Run()
 #define RECORD_AFTER_PROCESSING
 #ifdef RECORD_AFTER_PROCESSING
 		if (captureFrames) {
-			videoRecorder.RecordFrame(camera->GetLastFrame(true), subtitles.str());
+			videoRecorder.RecordFrame(m_pCamera->GetLastFrame(true), subtitles.str());
 		}
 #endif
 		
@@ -302,7 +377,6 @@ void Robot::Run()
 			oss << "|[Robot] Gate Pos: - ";
 //		oss << "Gate Pos: (" << lastBallLocation.distance << "," << lastBallLocation.horizontalAngle << "," << lastBallLocation.horizontalDev << ")";
 */
-		/*
 
 		/* Main UI */
 		if (STATE_NONE == state) {
@@ -311,17 +385,21 @@ void Robot::Run()
 				calibrator.Enable(false);
 				visionModule.Enable(true);
 				if (last_state == STATE_TEST){
-					autoPilot.Enable(false);
+					autoPilot->Enable(false);
 				}
 				manualControl.Enable(false);
+#ifdef ENABLE_REMOTE_CONTROL
 				remoteControl.Enable(false);
-				autoPilot.enableTestMode(false);
+#endif
+				autoPilot->enableTestMode(false);
 				distanceCalibrator.Enable(false);
-				wheels->Drive(0);
+				comModule.Drive(0);
 				STATE_BUTTON("(A)utoCalibrate objects", 'a', STATE_AUTOCALIBRATE)
 				//STATE_BUTTON("(M)anualCalibrate objects", STATE_CALIBRATE)
 				STATE_BUTTON("(C)Change Gate [" + ((int)field.GetTargetGate().getDistance() == (int)(field.blueGate.getDistance()) ? "blue" : "yellow") + "]", 'c', STATE_SELECT_GATE)
-				STATE_BUTTON("Auto(P)ilot [" + (autoPilot.running ? "On" : "Off") + "]", 'p', STATE_LAUNCH)
+				STATE_BUTTON("(G)ive Referee Command", 'g', STATE_GIVE_COMMAND)
+				STATE_BUTTON("Auto(P)ilot [" + (autoPilot->running ? "On" : "Off") + "]", 'p', STATE_LAUNCH)
+
 				/*
 			createButton(std::string("(M)ouse control [") + (mouseControl == 0 ? "Off" : (mouseControl == 1 ? "Ball" : "Gate")) + "]", [this, &mouseControl]{
 				mouseControl = (mouseControl + 1) % 3;
@@ -341,7 +419,10 @@ void Robot::Run()
 
 					this->last_state = STATE_END_OF_GAME; // force dialog redraw
 				});
-				STATE_BUTTON("(S)ettings", 's', STATE_SETTINGS)
+				std::stringstream sset;
+				sset << " [ robot: " << refCom->FIELD_MARKER << refCom->ROBOT_MARKER << ", team: " << refCom->TEAM_MARKER << "]";
+
+				STATE_BUTTON("(S)ettings" + sset.str(), 's', STATE_SETTINGS)
 					m_pDisplay->createButton("Reinit wheels", '-', [this] {
 					//initPorts();
 					//initWheels();
@@ -361,7 +442,7 @@ void Robot::Run()
 					m_pDisplay->ToggleDisplay();
 				});
 				m_pDisplay->createButton("Pause/Play video", 'f', [this] {
-					camera->TogglePlay();
+					m_pCamera->TogglePlay();
 				});
 
 
@@ -435,6 +516,13 @@ void Robot::Run()
 						this->last_state = STATE_END_OF_GAME; // force dialog redraw
 					});
 				}
+				pModule = static_cast<IConfigurableModule*>(refCom);
+				for (auto setting : pModule->GetSettings()){
+					m_pDisplay->createButton(setting.first + ": " + std::get<0>(setting.second)(), '-', [this, setting]{
+						std::get<1>(setting.second)();
+						this->last_state = STATE_END_OF_GAME; // force dialog redraw
+					});
+				}
 				STATE_BUTTON("BACK", 8, STATE_NONE)
 			END_DIALOG
 		}
@@ -451,12 +539,14 @@ void Robot::Run()
 			manualControl.Enable(true);
 			END_DIALOG
 		}
+#ifdef ENABLE_REMOTE_CONTROL
 		else if (STATE_REMOTE_CONTROL == state) {
 			START_DIALOG;
 			remoteControl.Enable(true);
 			STATE_BUTTON("BACK", 8, STATE_NONE);
 			END_DIALOG
 		}
+#endif
 		else if (STATE_LAUNCH == state) {
 			//if (targetGate == NUMBER_OF_OBJECTS) {
 			//	std::cout << "Select target gate" << std::endl;
@@ -471,9 +561,9 @@ void Robot::Run()
 					}
 					*/
 					//SetState(STATE_SELECT_GATE);
-					coilBoard->ToggleTribbler(false);
-					wheels->Drive(0);
-					autoPilot.Enable(!autoPilot.running);
+					comModule.ToggleTribbler(0);
+					comModule.Drive(0);
+					autoPilot->Enable(!autoPilot->running);
 					SetState(STATE_NONE);
 				}
 				catch (...){
@@ -511,11 +601,11 @@ void Robot::Run()
 		}
 		else if (STATE_TEST == state) {
 			START_DIALOG
-				autoPilot.enableTestMode(true);
-				autoPilot.Enable(true);
-				for (const auto d : autoPilot.driveModes) {
+				autoPilot->enableTestMode(true);
+				autoPilot->Enable(true);
+				for (const auto d : autoPilot->driveModes) {
 					m_pDisplay->createButton(d.second->name, '-', [this, &autoPilot, d]{
-						autoPilot.setTestMode(d.first);
+						autoPilot->setTestMode(d.first);
 					});
 				}
 				last_state = STATE_TEST;
@@ -525,9 +615,19 @@ void Robot::Run()
 		else if (STATE_DANCE == state) {
 			float move1, move2;
 			dance_step(((float)(time - epoch).total_milliseconds()), move1, move2);
-			wheels->Drive(move1, move2,0);
+			comModule.Drive(move1, move2,0);
 			//cv::putText(frameBGR, "move1:" + std::to_string(move1), cv::Point(frameBGR.cols - 140, 120), 0.5, cv::Scalar(255, 255, 255));
 			//cv::putText(frameBGR, "move2:" + std::to_string(move2), cv::Point(frameBGR.cols - 140, 140), 0.5, cv::Scalar(255, 255, 255));
+		}
+		else if (STATE_GIVE_COMMAND == state) {
+			START_DIALOG
+				for (std::pair < std::string, FieldState::GameMode> entry : refCommands) {
+					m_pDisplay->createButton(entry.first, '-', [this, entry]{
+						refCom->giveCommand(entry.second);
+					});
+				}
+			STATE_BUTTON("BACK", 8, STATE_NONE)
+				END_DIALOG
 		}
 		else if (STATE_END_OF_GAME == state) {
 			break;
@@ -535,51 +635,43 @@ void Robot::Run()
 		 
 		subtitles.str("");
 		//subtitles << oss.str();
-		subtitles << "|" << autoPilot.GetDebugInfo();
-		subtitles << "|" << wheels->GetDebugInfo();
-		if (scanner && scanner->running) {
-			subtitles << "|" << "Please wait, Scanning Ports";
+		subtitles << "|" << autoPilot->GetDebugInfo();
+		subtitles << "|" << comModule.GetDebugInfo();
+		if (!comModule.IsReal()) {
+			subtitles << "|" << "WARNING: Serial not connected!";
 		}
-		else {
-			if (!wheels->IsReal()) {
-				subtitles << "|" << "WARNING: real wheels not connected!";
-			}
-			if (!coilBoardPortsOk) {
-				subtitles << "   " << "WARNING: coilgun not connected!";
-			}
-		} 
 
-		m_pDisplay->putText( "fps: " + std::to_string(camera->GetFPS()), cv::Point(-140, 20), 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putText( "fps: " + std::to_string(m_pCamera->GetFPS()), cv::Point(-140, 20), 0.5, cv::Scalar(255, 255, 255));
 		//assert(STATE_END_OF_GAME != state);
 		m_pDisplay->putText( "state: " + STATE_LABELS[state], cv::Point(-140, 40), 0.5, cv::Scalar(255, 255, 255));
 		//m_pDisplay->putText( std::string("Ball:") + (ballPos.getDistance() > 0 ? "yes" : "no"), cv::Point(-140, 60), 0.5, cv::Scalar(255, 255, 255));
 		//m_pDisplay->putText( std::string("Gate:") + (targetGatePos.getDistance() >0 ? "yes" : "no"), cv::Point(-140, 80), 0.5, cv::Scalar(255, 255, 255));
 
 		
-//		m_pDisplay->putText( std::string("Trib:") + (coilBoard->BallInTribbler() ? "yes" : "no"), cv::Point(-140, 100), 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putText( std::string("Trib:") + (comModule.BallInTribbler() ? "yes" : "no"), cv::Point(-140, 100), 0.5, cv::Scalar(255, 255, 255));
 		m_pDisplay->putText( std::string("Sight:") + (field.gateObstructed ? "obst" : "free"), cv::Point(-140, 120), 0.5, cv::Scalar(255, 255, 255));
 		//m_pDisplay->putText( std::string("OnWay:") + (somethingOnWay ? "yes" : "no"), cv::Point(-140, 140), 0.5, cv::Scalar(255, 255, 255));
-		
-		for (int i = 0; i < NUMBER_OF_BALLS; i++) {
+		/*
+		for (int i = 0; i < field.balls.size(); i++) {
 
 			BallPosition &ball = field.balls[i];
-			m_pDisplay->putText( std::string("Ball") + std::to_string(i) + ": "+ std::to_string(ball.fieldCoords.x) + " : " + std::to_string(ball.fieldCoords.y), cv::Point(-250, i * 15 + 10), 0.3, cv::Scalar(255, 255, 255));
+			m_pDisplay->putText( std::string("Ball") + std::to_string(i) + ": "+ std::to_string(ball.polarMetricCoords.x) + " : " + std::to_string(ball.polarMetricCoords.y), cv::Point(-250, i * 15 + 10), 0.3, cv::Scalar(255, 255, 255));
 		}
-
+		*/
 		m_pDisplay->putText("robot x:" + std::to_string(field.self.fieldCoords.x) + " y: " + std::to_string(field.self.fieldCoords.y) + " r: " + std::to_string(field.self.getAngle()), cv::Point(-250, 200), 0.4, cv::Scalar(255, 255, 255));
-		if (pSim != NULL)
-			m_pDisplay->putText("simul x:" + std::to_string(pSim->self.fieldCoords.x) + " y: " + std::to_string(pSim->self.fieldCoords.y) + " r: " + std::to_string(pSim->self.getAngle()), cv::Point(-250, 220), 0.4, cv::Scalar(255, 255, 255));
+//		if (pSim != NULL)
+//			m_pDisplay->putText("simul x:" + std::to_string(pSim->self.fieldCoords.x) + " y: " + std::to_string(pSim->self.fieldCoords.y) + " r: " + std::to_string(pSim->self.getAngle()), cv::Point(-250, 220), 0.4, cv::Scalar(255, 255, 255));
 
 
 
 		//m_pDisplay->putText( "border: " + std::to_string(borderDistance.distance), cv::Point(-140, 280), 0.5, cv::Scalar(255, 255, 255));
 
 		m_pDisplay->putText("Blue gate d: " + std::to_string((int)field.blueGate.getDistance()) + " a: " + std::to_string(field.blueGate.getAngle()), cv::Point(-250, 260), 0.4, cv::Scalar(255, 255, 255));
-		if (pSim != NULL)
-			m_pDisplay->putText("Blue gate d: " + std::to_string((int)pSim->blueGate.getDistance()) + " a: " + std::to_string(pSim->blueGate.getAngle()), cv::Point(-250, 280), 0.4, cv::Scalar(255, 255, 255));
+//		if (pSim != NULL)
+//			m_pDisplay->putText("Blue gate d: " + std::to_string((int)pSim->blueGate.getDistance()) + " a: " + std::to_string(pSim->blueGate.getAngle()), cv::Point(-250, 280), 0.4, cv::Scalar(255, 255, 255));
 		m_pDisplay->putText("Yell gate d: " + std::to_string((int)field.yellowGate.getDistance()) + " a: " + std::to_string(field.yellowGate.getAngle()), cv::Point(-250, 310), 0.4, cv::Scalar(255, 255, 255));
-		if (pSim != NULL)
-			m_pDisplay->putText("Yell gate d: " + std::to_string((int)pSim->yellowGate.getDistance()) + " a: " + std::to_string(pSim->yellowGate.getAngle()), cv::Point(-250, 330), 0.4, cv::Scalar(255, 255, 255));
+//		if (pSim != NULL)
+//			m_pDisplay->putText("Yell gate d: " + std::to_string((int)pSim->yellowGate.getDistance()) + " a: " + std::to_string(pSim->yellowGate.getAngle()), cv::Point(-250, 330), 0.4, cv::Scalar(255, 255, 255));
 
 		
 
@@ -600,7 +692,7 @@ void Robot::Run()
 		/* robot tracker */
 		cv::Point2i center(-100, 200);
 		double velocity = 0, direction = 0, rotate = 0;
-		auto speed = wheels->GetTargetSpeed();
+		auto speed = comModule.GetTargetSpeed();
 
 		/*
 		//Draw circle
@@ -626,7 +718,9 @@ void Robot::Run()
 		delete outputVideo;
 	}
 
-
+	if (autoPilot != NULL)
+		delete autoPilot;
+	refCom->setField(NULL);
 }
 
 
@@ -635,12 +729,15 @@ bool Robot::ParseOptions(int argc, char* argv[])
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("help", "produce help message")
-		("camera", po::value<std::string>(), "set camera index or path")
+		("camera", po::value<std::string>(), "set m_pCamera index or path")
 		("app-size", po::value<std::string>(), "main window size: width x height")
 		("locate_cursor", "find cursor instead of ball")
 		("skip-ports", "skip ALL COM port checks")
 		("skip-missing-ports", "skip missing COM ports")
-		("save-frames", "Save captured frames to disc");
+		("save-frames", "Save captured frames to disc")
+		("play-mode", po::value<std::string>(), "Play mode: single, opponent, master, slave")
+		("twitter-port", po::value<int>(), "UDP port for communication between robots");
+
 
 	po::store(po::parse_command_line(argc, argv, desc), config);
 	po::notify(config);

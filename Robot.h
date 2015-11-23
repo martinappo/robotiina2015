@@ -1,25 +1,20 @@
 #include "types.h"
 #include "Dialog.h"
+#include "refereeCom.h"
 #include <atomic>
 #include <boost/program_options.hpp>
 #include <boost/asio.hpp>
 #include <boost/thread/mutex.hpp>
 
 namespace po = boost::program_options;
-class ObjectFinder;
-class WheelController;
-class CoilGun;
-class ComPortScanner;
-class Simulator;
+
 class Robot {
 private:
 	po::variables_map config;
-	Simulator *pSim = NULL;
-	ICamera *camera = NULL;
-	ComPortScanner *scanner = NULL;
-	IWheelController * wheels = NULL;
-	ICoilGun *coilBoard = NULL;
+	ICamera *m_pCamera = NULL;
+	ISerial *m_pSerial = NULL;
 	IDisplay *m_pDisplay = NULL;
+	RefereeCom *refCom = NULL;
 	bool coilBoardPortsOk;
 	bool wheelsPortsOk;
 
@@ -28,9 +23,10 @@ private:
 	std::atomic<STATE> last_state;
 	bool ParseOptions(int argc, char* argv[]);
 	void InitHardware();
-	void InitSimulator();
+	void InitSimulator(bool master, const std::string game_mode);
 //	void initWheels();
 //	void initCoilboard();
+	void initRefCom();
 
 	void Run();
     boost::mutex remote_mutex;
@@ -39,6 +35,8 @@ protected:
 	OBJECT targetGate= NUMBER_OF_OBJECTS; //uselected
 	bool captureFrames = false;
 	std::atomic_bool autoPilotEnabled;
+	std::string play_mode = "single";
+	SimpleSerial *serialPort;
 
 public:
     Robot(boost::asio::io_service &io);

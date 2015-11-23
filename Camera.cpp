@@ -16,6 +16,16 @@ void Camera::Init() {
 	paused = false;
 	frameCount = (int)(cap->get(CV_CAP_PROP_FRAME_COUNT));
 
+	//	cap->set(CV_CAP_PROP_GAIN, 0.5);
+//	cap->set(CV_CAP_PROP_EXPOSURE, 2);
+	//  [[960 x 960 from (175, 60)]] 
+//	cap->set(CV_CAP_PROP_XI_MANUAL_WB, 1);
+//	cap->set(CV_CAP_PROP_FRAME_WIDTH  , 960);    
+//	cap->set(CV_CAP_PROP_FRAME_HEIGHT , 960);
+    
+//	cap->set(CV_CAP_PROP_XI_OFFSET_X, 128);    
+//	cap->set(CV_CAP_PROP_XI_OFFSET_Y, 32);    
+	
 	*cap >> frame;
 	frameSize = cv::Size(frame.size());
 
@@ -28,6 +38,7 @@ void Camera::Init() {
 		auto _roi = roi;
 		roi = cv::Rect(0, 0, frameSize.width, frameSize.height);
 		std::cout << "Camera ROI [" << _roi << "] is bigger than frame size [" << frameSize << "], using full frame" << std::endl;
+		std::cout << "Camera ROI [" << roi << "]" << std::endl;
 	}
 	frame1_roi = frame1(roi);
 	frame2_roi = frame2(roi);
@@ -90,6 +101,7 @@ cv::Mat &Camera::Capture(bool bFullFrame){
 #ifndef DOUBLE_BUFFERING
 		if (cap->isOpened()){
 			*cap >> *m_pFrame;
+			*m_pFrame = flip(*m_pFrame, 0)
 		}
 #else
 		if (bCaptureNextFrame) {
@@ -132,11 +144,13 @@ void Camera::Run(){
 
 		if (cap->isOpened()) {
 			*cap >> nextFrame;
+			 cv::flip(nextFrame, nextFrame, 1);
+
 		}
 		else {
 			bCaptureNextFrame = false;
 		}
-		if (cap->get(CV_CAP_PROP_POS_FRAMES) >= frameCount){ //restartVideo
+		if (frameCount >0 && cap->get(CV_CAP_PROP_POS_FRAMES) >= frameCount){ //restartVideo
 			cap->set(CV_CAP_PROP_POS_FRAMES, 0);
 			continue;
 
