@@ -143,7 +143,7 @@ void Dialog::KeyPressed(int key){
 	}
 }
 
-void Dialog::mouseClicked(int event, int x, int y) {
+void Dialog::mouseClicked(int event, int x, int y, int flag) { 
 	boost::mutex::scoped_lock lock(click_mutex); //allow one command at a time
 
 	mouseX = x;
@@ -168,7 +168,8 @@ void Dialog::mouseClicked(int event, int x, int y) {
 	scaled.y = (int)((double)(y - offset.y) / size.height * target.height);
 
 	for (auto pListener : m_EventListeners){
-		if (pListener->OnMouseEvent(event, (float)(scaled.x), (float)(scaled.y), 0, bMainArea)) {
+
+		if (pListener->OnMouseEvent(event, (float)(scaled.x), (float)(scaled.y), flag, bMainArea)) {
 			return; // event was handled
 		}
 	}
@@ -189,9 +190,7 @@ void Dialog::Run(){
 	//cvSetWindowProperty(m_title.c_str(), CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
 	cv::moveWindow(m_title, 0, 0);
 	cv::setMouseCallback(m_title, [](int event, int x, int y, int flags, void* self) {
-
-		((Dialog*)self)->mouseClicked(event, x, y);
-
+		((Dialog*)self)->mouseClicked(event, x, y, flags);
 	}, this);
 
 	while (!stop_thread) {

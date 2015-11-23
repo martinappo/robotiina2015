@@ -37,7 +37,7 @@ public:
 	};
 
 protected:
-	void mouseClicked(int event, int x, int y);
+	void mouseClicked(int event, int x, int y, int flag);
 	std::atomic_int mouseX;
 	std::atomic_int mouseY;
 
