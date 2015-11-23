@@ -120,7 +120,6 @@ void AutoCalibrator::mouseClicked(int x, int y, int flags) {
 			hue.push_back(imgHSV.at<cv::Vec3b>(i).val[0]);
 			sat.push_back(imgHSV.at<cv::Vec3b>(i).val[1]);
 			val.push_back(imgHSV.at<cv::Vec3b>(i).val[2]);
-
         }
     }
 	//get 5% and 95% percenties
@@ -128,8 +127,8 @@ void AutoCalibrator::mouseClicked(int x, int y, int flags) {
 	std::sort(sat.begin(), sat.end());
 	std::sort(val.begin(), val.end());
 
-	int min_index = (int)(hue.size() * 0.05);
-	int max_index = (int)(hue.size() * 0.95);
+	int min_index =  (int)(hue.size() * 0.03);
+	int max_index =  (int)(hue.size() * 0.97);
 
 	if ((flags & cv::EVENT_FLAG_CTRLKEY)) {
 		range.hue.low = std::min(range.hue.low, hue[min_index]);
@@ -208,7 +207,7 @@ void AutoCalibrator::Run() {
 			cv::putText(display, "Please wait, clustering", cv::Point(200, 220), cv::FONT_HERSHEY_DUPLEX, 0.9, cv::Scalar(23, 40, 245));
 			m_pDisplay->ShowImage(display);
 
-			DetectThresholds(32);
+			DetectThresholds(16);
 			screenshot_mode = THRESHOLDING;
 			//clustered.copyTo(display);
 			m_pDisplay->ShowImage(display);
@@ -235,7 +234,7 @@ void AutoCalibrator::DetectThresholds(int number_of_objects){
     int origRows = img.rows;
     cv::Mat colVec = img.reshape(1, img.rows*img.cols); // change to a Nx3 column vector
     cv::Mat colVecD;
-    int attempts = 1;
+    int attempts = 2;
 
     double eps = 0.1;
     colVec.convertTo(colVecD, CV_32FC3, 1.0/255.0); // convert to floating point

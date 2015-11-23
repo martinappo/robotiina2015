@@ -34,3 +34,6 @@ void WebUI::RemoveEventListener(IUIEventListener *pEventListener)
 void WebUI::putText(const std::string &text, cv::Point pos, double fontScale, cv::Scalar color)
 {
 }
+void WebUI::putShadowedText(const std::string &text, cv::Point pos, double fontScale, cv::Scalar color)
+{
+}

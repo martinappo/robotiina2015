@@ -26,6 +26,7 @@ public:
 	};
 	std::vector<IUIEventListener*> m_EventListeners;
 	virtual void putText(const std::string &text, cv::Point pos, double fontScale, cv::Scalar color);
+	virtual void putShadowedText(const std::string &text, cv::Point pos, double fontScale, cv::Scalar color);
 	void Run();
 	virtual ~Dialog();
 	virtual void SwapDisplays(){
@@ -36,7 +37,7 @@ public:
 	};
 
 protected:
-	void mouseClicked(int event, int x, int y);
+	void mouseClicked(int event, int x, int y, int flag);
 	std::atomic_int mouseX;
 	std::atomic_int mouseY;
 
