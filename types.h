@@ -119,6 +119,7 @@ public:
 	virtual void AddEventListener(IUIEventListener *pEventListener) = 0;
 	virtual void RemoveEventListener(IUIEventListener *pEventListener) = 0;
 	virtual void putText(const std::string &text, cv::Point pos, double fontScale, cv::Scalar color) = 0;
+	virtual void putShadowedText(const std::string &text, cv::Point pos, double fontScale, cv::Scalar color) = 0;
 	virtual void SwapDisplays() = 0;
 	virtual void ToggleDisplay() = 0;
 	virtual ~IDisplay(){};

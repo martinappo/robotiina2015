@@ -92,10 +92,15 @@ void Dialog::putText(const std::string &text, cv::Point pos, double fontScale, c
 	//cv::putText(display, text, pos, cv::FONT_HERSHEY_DUPLEX, fontScale, color);
 }
 
+void Dialog::putShadowedText(const std::string &text, cv::Point pos, double fontScale, cv::Scalar color) {
+	putText(text, cv::Point(pos.x + 0.2, pos.y + 0.2), fontScale, color);
+	putText(text, pos, fontScale, cv::Scalar(0, 0,0));
+}
+
 
 int Dialog::Draw() {
 	boost::mutex::scoped_lock lock(click_mutex); //allow one command at a time
-	//cv::Mat image;
+	//cv::Mat image
 	//background.copyTo(image);
     //int window_width = image.cols;
     //int window_height = image.rows;
@@ -112,8 +117,9 @@ int Dialog::Draw() {
 
     int i = 0;
     for (const auto& button : m_buttons) {
-		cv::putText(display, std::get<0>(button), cv::Point(30, (++i)*m_buttonHeight), cv::FONT_HERSHEY_DUPLEX, fontScale, cv::Scalar(255, 255, 255));
-
+		++i;
+		cv::putText(display, std::get<0>(button), cv::Point(31, (i)*m_buttonHeight), cv::FONT_HERSHEY_DUPLEX, fontScale, cv::Scalar(0, 0, 0));
+		cv::putText(display, std::get<0>(button), cv::Point(30, (i)*m_buttonHeight), cv::FONT_HERSHEY_DUPLEX, fontScale, cv::Scalar(255, 255, 255));
     }
 	for (const auto& text : m_texts) {
 		cv::putText(display, std::get<1>(text.second), std::get<0>(text.second), cv::FONT_HERSHEY_DUPLEX, std::get<2>(text.second), std::get<3>(text.second));

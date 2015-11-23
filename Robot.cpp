@@ -494,7 +494,7 @@ void Robot::Run()
 				distanceCalibrator.Enable(true);
 				STATE_BUTTON("BACK", 8, STATE_NONE)
 			END_DIALOG 
-			m_pDisplay->putText(distanceCalibrator.message, cv::Point(250, 220), 0.5, cv::Scalar(0, 0, 255));
+			m_pDisplay->putShadowedText(distanceCalibrator.message, cv::Point(250, 220), 0.5, cv::Scalar(0, 0, 255));
 		}else if (STATE_SELECT_GATE == state) {
 			START_DIALOG
 				m_pDisplay->createButton(OBJECT_LABELS[BLUE_GATE], '-', [&field, this]{
@@ -616,8 +616,8 @@ void Robot::Run()
 			float move1, move2;
 			dance_step(((float)(time - epoch).total_milliseconds()), move1, move2);
 			comModule.Drive(move1, move2,0);
-			//cv::putText(frameBGR, "move1:" + std::to_string(move1), cv::Point(frameBGR.cols - 140, 120), 0.5, cv::Scalar(255, 255, 255));
-			//cv::putText(frameBGR, "move2:" + std::to_string(move2), cv::Point(frameBGR.cols - 140, 140), 0.5, cv::Scalar(255, 255, 255));
+			//cv::putShadowedText(frameBGR, "move1:" + std::to_string(move1), cv::Point(frameBGR.cols - 140, 120), 0.5, cv::Scalar(255, 255, 255));
+			//cv::putShadowedText(frameBGR, "move2:" + std::to_string(move2), cv::Point(frameBGR.cols - 140, 140), 0.5, cv::Scalar(255, 255, 255));
 		}
 		else if (STATE_GIVE_COMMAND == state) {
 			START_DIALOG
@@ -639,44 +639,44 @@ void Robot::Run()
 		subtitles << "|" << comModule.GetDebugInfo();
 		if (!comModule.IsReal()) {
 			subtitles << "|" << "WARNING: Serial not connected!";
-		}
+		} 
 
-		m_pDisplay->putText( "fps: " + std::to_string(m_pCamera->GetFPS()), cv::Point(-140, 20), 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putShadowedText( "fps: " + std::to_string(m_pCamera->GetFPS()), cv::Point(-140, 20), 0.5, cv::Scalar(255, 255, 255));
 		//assert(STATE_END_OF_GAME != state);
-		m_pDisplay->putText( "state: " + STATE_LABELS[state], cv::Point(-140, 40), 0.5, cv::Scalar(255, 255, 255));
-		//m_pDisplay->putText( std::string("Ball:") + (ballPos.getDistance() > 0 ? "yes" : "no"), cv::Point(-140, 60), 0.5, cv::Scalar(255, 255, 255));
-		//m_pDisplay->putText( std::string("Gate:") + (targetGatePos.getDistance() >0 ? "yes" : "no"), cv::Point(-140, 80), 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putShadowedText( "state: " + STATE_LABELS[state], cv::Point(-140, 40), 0.5, cv::Scalar(255, 255, 255));
+		//m_pDisplay->putShadowedText( std::string("Ball:") + (ballPos.getDistance() > 0 ? "yes" : "no"), cv::Point(-140, 60), 0.5, cv::Scalar(255, 255, 255));
+		//m_pDisplay->putShadowedText( std::string("Gate:") + (targetGatePos.getDistance() >0 ? "yes" : "no"), cv::Point(-140, 80), 0.5, cv::Scalar(255, 255, 255));
 
 		
-		m_pDisplay->putText( std::string("Trib:") + (comModule.BallInTribbler() ? "yes" : "no"), cv::Point(-140, 100), 0.5, cv::Scalar(255, 255, 255));
-		m_pDisplay->putText( std::string("Sight:") + (field.gateObstructed ? "obst" : "free"), cv::Point(-140, 120), 0.5, cv::Scalar(255, 255, 255));
-		//m_pDisplay->putText( std::string("OnWay:") + (somethingOnWay ? "yes" : "no"), cv::Point(-140, 140), 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putShadowedText( std::string("Trib:") + (comModule.BallInTribbler() ? "yes" : "no"), cv::Point(-140, 100), 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putShadowedText( std::string("Sight:") + (field.gateObstructed ? "obst" : "free"), cv::Point(-140, 120), 0.5, cv::Scalar(255, 255, 255));
+		//m_pDisplay->putShadowedText( std::string("OnWay:") + (somethingOnWay ? "yes" : "no"), cv::Point(-140, 140), 0.5, cv::Scalar(255, 255, 255));
 		/*
 		for (int i = 0; i < field.balls.size(); i++) {
 
 			BallPosition &ball = field.balls[i];
-			m_pDisplay->putText( std::string("Ball") + std::to_string(i) + ": "+ std::to_string(ball.polarMetricCoords.x) + " : " + std::to_string(ball.polarMetricCoords.y), cv::Point(-250, i * 15 + 10), 0.3, cv::Scalar(255, 255, 255));
+			m_pDisplay->putShadowedText( std::string("Ball") + std::to_string(i) + ": "+ std::to_string(ball.polarMetricCoords.x) + " : " + std::to_string(ball.polarMetricCoords.y), cv::Point(-250, i * 15 + 10), 0.3, cv::Scalar(255, 255, 255));
 		}
 		*/
-		m_pDisplay->putText("robot x:" + std::to_string(field.self.fieldCoords.x) + " y: " + std::to_string(field.self.fieldCoords.y) + " r: " + std::to_string(field.self.getAngle()), cv::Point(-250, 200), 0.4, cv::Scalar(255, 255, 255));
+		m_pDisplay->putShadowedText("robot x:" + std::to_string(field.self.fieldCoords.x) + " y: " + std::to_string(field.self.fieldCoords.y) + " r: " + std::to_string(field.self.getAngle()), cv::Point(-250, 200), 0.4, cv::Scalar(255, 255, 255));
 //		if (pSim != NULL)
-//			m_pDisplay->putText("simul x:" + std::to_string(pSim->self.fieldCoords.x) + " y: " + std::to_string(pSim->self.fieldCoords.y) + " r: " + std::to_string(pSim->self.getAngle()), cv::Point(-250, 220), 0.4, cv::Scalar(255, 255, 255));
+//			m_pDisplay->putShadowedText("simul x:" + std::to_string(pSim->self.fieldCoords.x) + " y: " + std::to_string(pSim->self.fieldCoords.y) + " r: " + std::to_string(pSim->self.getAngle()), cv::Point(-250, 220), 0.4, cv::Scalar(255, 255, 255));
 
 
 
-		//m_pDisplay->putText( "border: " + std::to_string(borderDistance.distance), cv::Point(-140, 280), 0.5, cv::Scalar(255, 255, 255));
+		//m_pDisplay->putShadowedText( "border: " + std::to_string(borderDistance.distance), cv::Point(-140, 280), 0.5, cv::Scalar(255, 255, 255));
 
-		m_pDisplay->putText("Blue gate d: " + std::to_string((int)field.blueGate.getDistance()) + " a: " + std::to_string(field.blueGate.getAngle()), cv::Point(-250, 260), 0.4, cv::Scalar(255, 255, 255));
+		m_pDisplay->putShadowedText("Blue gate d: " + std::to_string((int)field.blueGate.getDistance()) + " a: " + std::to_string(field.blueGate.getAngle()), cv::Point(-250, 260), 0.4, cv::Scalar(255, 255, 255));
 //		if (pSim != NULL)
-//			m_pDisplay->putText("Blue gate d: " + std::to_string((int)pSim->blueGate.getDistance()) + " a: " + std::to_string(pSim->blueGate.getAngle()), cv::Point(-250, 280), 0.4, cv::Scalar(255, 255, 255));
-		m_pDisplay->putText("Yell gate d: " + std::to_string((int)field.yellowGate.getDistance()) + " a: " + std::to_string(field.yellowGate.getAngle()), cv::Point(-250, 310), 0.4, cv::Scalar(255, 255, 255));
+//			m_pDisplay->putShadowedText("Blue gate d: " + std::to_string((int)pSim->blueGate.getDistance()) + " a: " + std::to_string(pSim->blueGate.getAngle()), cv::Point(-250, 280), 0.4, cv::Scalar(255, 255, 255));
+		m_pDisplay->putShadowedText("Yell gate d: " + std::to_string((int)field.yellowGate.getDistance()) + " a: " + std::to_string(field.yellowGate.getAngle()), cv::Point(-250, 310), 0.4, cv::Scalar(255, 255, 255));
 //		if (pSim != NULL)
-//			m_pDisplay->putText("Yell gate d: " + std::to_string((int)pSim->yellowGate.getDistance()) + " a: " + std::to_string(pSim->yellowGate.getAngle()), cv::Point(-250, 330), 0.4, cv::Scalar(255, 255, 255));
+//			m_pDisplay->putShadowedText("Yell gate d: " + std::to_string((int)pSim->yellowGate.getDistance()) + " a: " + std::to_string(pSim->yellowGate.getAngle()), cv::Point(-250, 330), 0.4, cv::Scalar(255, 255, 255));
 
 		
 
 		
-		//TODO: fix putText newline thing
+		//TODO: fix putShadowedText newline thing
 		std::vector<std::string> subtitles2;
 		std::string subtitles3 = subtitles.str();
 
@@ -685,7 +685,7 @@ void Robot::Run()
 		int j = 0;
 		for (auto s : subtitles2) {
 			if (s.empty()) s = " "; // opencv 3 crashes on empty string
-			m_pDisplay->putText( s, cv::Point(10, -150 + j), 0.5, cv::Scalar(255, 255, 255));
+			m_pDisplay->putShadowedText( s, cv::Point(10, -150 + j), 0.5, cv::Scalar(255, 255, 255));
 			j += 20;
 		}
 

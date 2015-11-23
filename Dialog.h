@@ -26,6 +26,7 @@ public:
 	};
 	std::vector<IUIEventListener*> m_EventListeners;
 	virtual void putText(const std::string &text, cv::Point pos, double fontScale, cv::Scalar color);
+	virtual void putShadowedText(const std::string &text, cv::Point pos, double fontScale, cv::Scalar color);
 	void Run();
 	virtual ~Dialog();
 	virtual void SwapDisplays(){
