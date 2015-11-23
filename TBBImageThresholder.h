@@ -1,6 +1,6 @@
 #pragma once
 #include "types.h"
-//#define USE_INRANGE
+#define USE_INRANGE
 class TBBImageThresholder :
 	public ImageThresholder, public cv::ParallelLoopBody
 {
@@ -73,6 +73,6 @@ public:
 protected:
 	cv::Mat frameHSV;
 	std::vector<OBJECT> objectList;
-	int diff = 2;
+	int diff = 12;
 };
 

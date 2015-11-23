@@ -60,8 +60,8 @@ void DistanceCalculator::loadConf(){
 cv::Point2d DistanceCalculator::getPolarCoordinates(const cv::Point2d &pos, const cv::Point2d &orgin) const {
 	double distanceInCm = getDistance(orgin, pos);
 	double angle = angleBetween(pos - orgin, { 0, -1 });
-
-	return { distanceInCm, angle };
+	// flip angle alony y axis
+	return { distanceInCm, -angle };
 };
 
 cv::Point2d DistanceCalculator::getFieldCoordinates(const cv::Point2d &pos, const cv::Point2d &orgin) const {

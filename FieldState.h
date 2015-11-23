@@ -24,7 +24,7 @@ public:
 	std::vector<BallPosition>::iterator end() {
 		return balls.end();
 	}
-	const BallPosition& getClosest(){
+	const BallPosition& getClosest(int *index=NULL){
 		double target_distance = INT_MAX;
 		int target_index = 0;
 		for (unsigned i = 0; i < balls.size(); i++) {
@@ -34,6 +34,7 @@ public:
 				target_distance = balls[i].getDistance();
 			}
 		}
+		if (index != NULL) *index = target_index;
 		return balls[target_index];
 	}
 	size_t size() {

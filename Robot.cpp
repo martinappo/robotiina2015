@@ -668,6 +668,10 @@ void Robot::Run()
 		m_pDisplay->putShadowedText( std::string("Trib:") + (comModule.BallInTribbler() ? "yes" : "no"), cv::Point(-140, 100), 0.5, cv::Scalar(255, 255, 255));
 		m_pDisplay->putShadowedText( std::string("Sight:") + (field.gateObstructed ? "obst" : "free"), cv::Point(-140, 120), 0.5, cv::Scalar(255, 255, 255));
 		//m_pDisplay->putShadowedText( std::string("OnWay:") + (somethingOnWay ? "yes" : "no"), cv::Point(-140, 140), 0.5, cv::Scalar(255, 255, 255));
+		
+		const BallPosition &ball = field.balls.getClosest();
+		m_pDisplay->putShadowedText(std::string("Ball")+ ": " + std::to_string(ball.polarMetricCoords.x) + " : " + std::to_string(ball.polarMetricCoords.y), cv::Point(-250, 140), 0.4, cv::Scalar(255, 255, 255));
+
 		/*
 		for (int i = 0; i < field.balls.size(); i++) {
 

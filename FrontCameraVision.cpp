@@ -134,41 +134,41 @@ void FrontCameraVision::Run() {
 		// ajust gate positions to ..
 		// find closest points to opposite gate centre
 		if (found) {
-		auto min_i1 = 0, min_j1 = 0, min_i2 = 0, min_j2 = 0;
-		double min_dist1 = INT_MAX, min_dist2 = INT_MAX;
-		for (int i = 0; i < 4; i++){
-			double dist1 = cv::norm(r1[i] - (cv::Point2f)g2);
-			double dist2 = cv::norm(r2[i] - (cv::Point2f)g1);
-			if (dist1 < min_dist1) {
-				min_dist1 = dist1;
-				min_i1 = i;
+			auto min_i1 = 0, min_j1 = 0, min_i2 = 0, min_j2 = 0;
+			double min_dist1 = INT_MAX, min_dist2 = INT_MAX;
+			for (int i = 0; i < 4; i++){
+				double dist1 = cv::norm(r1[i] - (cv::Point2f)g2);
+				double dist2 = cv::norm(r2[i] - (cv::Point2f)g1);
+				if (dist1 < min_dist1) {
+					min_dist1 = dist1;
+					min_i1 = i;
+				}
+				if (dist2 < min_dist2) {
+					min_dist2 = dist2;
+					min_j1 = i;
+				}
 			}
-			if (dist2 < min_dist2) {
-				min_dist2 = dist2;
-				min_j1 = i;
-			}
-		}
-		auto next = (min_i1 + 1) % 4;
-		auto prev = (min_i1 + 3) % 4;
-		// find longest side
-		min_i2 = (cv::norm(r1[min_i1] - r1[next]) > cv::norm(r1[min_i1] - r1[prev])) ? next : prev;
-		next = (min_j1 + 1) % 4;
-		prev = (min_j1 + 3) % 4;
-		// find longest side
-		min_j2 = (cv::norm(r2[min_j1] - r2[next]) > cv::norm(r2[min_j1] - r2[prev])) ? next : prev;
-		cv::Scalar color4(0, 0, 0);
+			auto next = (min_i1 + 1) % 4;
+			auto prev = (min_i1 + 3) % 4;
+			// find longest side
+			min_i2 = (cv::norm(r1[min_i1] - r1[next]) > cv::norm(r1[min_i1] - r1[prev])) ? next : prev;
+			next = (min_j1 + 1) % 4;
+			prev = (min_j1 + 3) % 4;
+			// find longest side
+			min_j2 = (cv::norm(r2[min_j1] - r2[next]) > cv::norm(r2[min_j1] - r2[prev])) ? next : prev;
+			cv::Scalar color4(0, 0, 0);
 
-		cv::Scalar color2(0, 0, 255);
+			cv::Scalar color2(0, 0, 255);
 
-		auto c1 = (r1[min_i1] + r1[min_i2]) / 2;
-		circle(frameBGR, c1, 12, color4, -1, 12, 0);
-		auto c2 = (r2[min_j1] + r2[min_j2]) / 2;
-		circle(frameBGR, c2, 7, color2, -1, 8, 0);
+			auto c1 = (r1[min_i1] + r1[min_i2]) / 2;
+			circle(frameBGR, c1, 12, color4, -1, 12, 0);
+			auto c2 = (r2[min_j1] + r2[min_j2]) / 2;
+			circle(frameBGR, c2, 7, color2, -1, 8, 0);
 
-		m_pState->blueGate.updateRawCoordinates(c1, cv::Point2d(frameBGR.size() / 2));
-		m_pState->yellowGate.updateRawCoordinates(c2, cv::Point2d(frameBGR.size() / 2));
+			m_pState->blueGate.updateRawCoordinates(c1, cv::Point2d(frameBGR.size() / 2));
+			m_pState->yellowGate.updateRawCoordinates(c2, cv::Point2d(frameBGR.size() / 2));
 
-		m_pState->self.updateFieldCoords();
+			m_pState->self.updateFieldCoords();
 		}
 		//Balls pos 
 		cv::Mat rotMat = getRotationMatrix2D(cv::Point(0,0), -m_pState->self.getAngle(), 1);
@@ -189,7 +189,11 @@ void FrontCameraVision::Run() {
 				m_pState->balls[j].polarMetricCoords.y -= m_pState->self.getAngle(); // rotate balls back
 				m_pState->balls[j].isUpdated = true;
 			}
-
+			int ball_idx = 0;
+			const BallPosition &ball = m_pState->balls.getClosest(&ball_idx);
+			cv::Rect bounding_rect = cv::Rect(cv::Point(balls.at<double>(0, ball_idx), balls.at<double>(1, ball_idx)) - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2), 
+				cv::Point(balls.at<double>(0, ball_idx), balls.at<double>(1, ball_idx)) + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
+			rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), cv::Scalar(255, 0, 0), 2, 8, 0);
 		}
 		/*
 		ObjectPosition *targetGatePos = 0;
@@ -197,6 +201,7 @@ void FrontCameraVision::Run() {
 		else if (targetGate == YELLOW_GATE && YellowGateFound) targetGatePos = &yellowGatePos;
 		// else leave to NULL
 		*/
+
 		if (gateObstructionDetectionEnabled) {
 			// step 3.2
 			int count = countNonZero(thresholdedImages[SIGHT_MASK]);
