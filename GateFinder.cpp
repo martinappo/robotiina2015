@@ -14,7 +14,7 @@ GateFinder::~GateFinder()
 extern void drawLine(cv::Mat & img, cv::Mat & img2, cv::Vec4f line, int thickness, CvScalar color, bool nightVision = false);
 
 bool GateFinder::Locate(cv::Mat &imgThresholded, cv::Mat &frameHSV, cv::Mat &frameBGR, cv::Point &center, cv::Point2f *bounds) {
-	int smallestGateArea = 1000;
+	int smallestGateArea = 100;
 	double growGateHeight = 1.2;
 	center = cv::Point(-1, -1);
 	//cv::Mat imgThresholded = HSVRanges[target]; // reference counted, I think

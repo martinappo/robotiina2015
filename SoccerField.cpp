@@ -73,8 +73,8 @@ void SoccerField::Run(){
 			}*/
 		}
 		
-		if (blueGate.getDistance() > 0) {
-			cv::circle(field, blueGate.fieldCoords + c, 14, cv::Scalar(236, 137, 48), 7);
+		if (!std::isnan(blueGate.getDistance())) {
+				cv::circle(field, blueGate.fieldCoords + c, 14, cv::Scalar(236, 137, 48), 7);
 			cv::circle(field, blueGate.fieldCoords + c, (int)(blueGate.polarMetricCoords.x), cv::Scalar(236, 137, 48), 2);
 
 			cv::line(field, self.fieldCoords + c,
@@ -84,7 +84,7 @@ void SoccerField::Run(){
 				, cv::Scalar(236, 137, 48), 3);
 		}
 
-		if (yellowGate.getDistance() > 0) {
+		if (!std::isnan(yellowGate.getDistance())) {
 			cv::circle(field, yellowGate.fieldCoords + c, 14, cv::Scalar(61, 255, 244), 7);
 			cv::circle(field, yellowGate.fieldCoords + c, (int)(yellowGate.polarMetricCoords.x), cv::Scalar(61, 255, 244), 2);
 

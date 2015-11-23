@@ -41,16 +41,16 @@ cv::Point2d KalmanFilter::doFiltering(const cv::Point2i &point) {
 
 	//The update phase
 	estimated = KF.correct(measurement);
-//	cv::Point statePt((int)(estimated.at<float>(0)), (int)(estimated.at<float>(1)));
-//	return statePt;
-	return cv::Point2d(estimated);
+	cv::Point statePt((int)(estimated.at<float>(0)), (int)(estimated.at<float>(1)));
+	return statePt;
+//	return cv::Point2d(estimated);
   
 }
 
 cv::Point2d KalmanFilter::getPrediction() {
 	cv::Mat prediction = KF.predict();
-	//cv::Point2d(prediction.at<float>(0), prediction.at<float>(1));
-	return cv::Point2d(prediction);
+	return cv::Point2d(prediction.at<float>(0), prediction.at<float>(1));
+	//return cv::Point2d(prediction);
 }
 
 

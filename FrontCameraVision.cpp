@@ -120,12 +120,13 @@ void FrontCameraVision::Run() {
 		cv::Point g1, g2;
 		//Blue gate pos
 		bool found = blueGateFinder.Locate(thresholdedImages[BLUE_GATE], frameHSV, frameBGR, g1, r1);
+
 		//if (!found) {
 		//	m_pDisplay->ShowImage(frameBGR);
 		//	continue; // nothing to do :(
 		//}
 		//Yellow gate pos
-		found |= yellowGateFinder.Locate(thresholdedImages[YELLOW_GATE], frameHSV, frameBGR, g2, r2);
+		found &= yellowGateFinder.Locate(thresholdedImages[YELLOW_GATE], frameHSV, frameBGR, g2, r2);
 		//if (!found) {
 		//	m_pDisplay->ShowImage(frameBGR);
 		//	continue; // nothing to do :(

@@ -34,7 +34,7 @@ void RobotPosition::updateFieldCoordsNew(cv::Point2d orgin) {
 	if (abs(d1 - d2) > 1){
 		pos.y = d1 < d2 ? -1 : 1;
 	}
-	fieldCoords = cv::Point(60 * pos.x, 100 * pos.y);
+	//fieldCoords = cv::Point(60 * pos.x, 100 * pos.y);
 	double aa = a > 180 ? a - 180: a;
 	double a11 = asin(d2 * sin(abs(aa / 180 * CV_PI)) / 460) / CV_PI * 180;
 	double a12 = asin(d1 * sin(abs(aa / 180 * CV_PI)) / 460) / CV_PI * 180;
@@ -55,7 +55,7 @@ void RobotPosition::updateFieldCoordsNew(cv::Point2d orgin) {
 //	x2 = x1; y2 = y1;
 	fieldCoords.x = (x1 + x2) / 2;
 	fieldCoords.y = (y1 + y2) / 2;
-
+	fieldCoords = filter.doFiltering(fieldCoords);
 	// no that we know robot position, we can calculate it's angle to blue or yellow gate on the field
 	double angleToBlueGate = DistanceCalculator::angleBetween(fieldCoords - blueGate.fieldCoords, { 0, 1 });
 	double angleToYellowGate = DistanceCalculator::angleBetween(fieldCoords - yellowGate.fieldCoords, { 0, 1 });

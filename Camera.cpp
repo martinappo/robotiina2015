@@ -1,6 +1,5 @@
 #include "Camera.h"
 #include <opencv2/opencv.hpp>
-#include <chrono>
 #include <thread>
 #define DOUBLE_BUFFERING
 
@@ -15,17 +14,19 @@ Camera::Camera(const std::string &device) {
 void Camera::Init() {
 	paused = false;
 	frameCount = (int)(cap->get(CV_CAP_PROP_FRAME_COUNT));
+	cap->set(CV_CAP_PROP_FPS, 60);
 
 	//	cap->set(CV_CAP_PROP_GAIN, 0.5);
 //	cap->set(CV_CAP_PROP_EXPOSURE, 2);
 	//  [[960 x 960 from (175, 60)]] 
 //	cap->set(CV_CAP_PROP_XI_MANUAL_WB, 1);
-//	cap->set(CV_CAP_PROP_FRAME_WIDTH  , 960);    
-//	cap->set(CV_CAP_PROP_FRAME_HEIGHT , 960);
-    
-//	cap->set(CV_CAP_PROP_XI_OFFSET_X, 128);    
-//	cap->set(CV_CAP_PROP_XI_OFFSET_Y, 32);    
 	
+	cap->set(CV_CAP_PROP_FRAME_WIDTH  , 1280);    
+	cap->set(CV_CAP_PROP_FRAME_HEIGHT , 1024);
+	/*
+	cap->set(CV_CAP_PROP_XI_OFFSET_X, 128);    
+	cap->set(CV_CAP_PROP_XI_OFFSET_Y, 32);    
+	*/
 	*cap >> frame;
 	frameSize = cv::Size(frame.size());
 
@@ -58,7 +59,6 @@ void Camera::Init() {
 	}
 
 	/*
-	cap->set(CV_CAP_PROP_FPS, 60);
 	cap->set(CV_CAP_PROP_FRAME_WIDTH, 1280);
 	cap->set(CV_CAP_PROP_FRAME_HEIGHT, 720);
 	*/
@@ -101,7 +101,7 @@ cv::Mat &Camera::Capture(bool bFullFrame){
 #ifndef DOUBLE_BUFFERING
 		if (cap->isOpened()){
 			*cap >> *m_pFrame;
-			*m_pFrame = flip(*m_pFrame, 0)
+			//cv::flip(*m_pFrame, *m_pFrame, 1);
 		}
 #else
 		if (bCaptureNextFrame) {
@@ -112,11 +112,11 @@ cv::Mat &Camera::Capture(bool bFullFrame){
 		}
 #endif
 	}
-		if (frames > 10) {
-			time = boost::posix_time::microsec_clock::local_time();
-			boost::posix_time::time_duration::tick_type dt2 = (time - lastCapture2).total_milliseconds();
-			fps = 1000.0 * frames / dt2;
-			lastCapture2 = time;
+		if (frames > 4) {
+			double t2 = (double)cv::getTickCount();
+			double dt = (t2 - time) / cv::getTickFrequency();
+			fps = frames / dt;
+			time = t2;
 			frames = 0;
 		}
 		else {
@@ -144,7 +144,7 @@ void Camera::Run(){
 
 		if (cap->isOpened()) {
 			*cap >> nextFrame;
-			 cv::flip(nextFrame, nextFrame, 1);
+			 //cv::flip(nextFrame, nextFrame, 1);
 
 		}
 		else {

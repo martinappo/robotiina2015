@@ -265,8 +265,25 @@ void Robot::initCoilboard() {
 	}
 }
 */
+void Robot::RunCaptureTest()
+{
+	cv::Mat frameBGR = m_pCamera->Capture();
+	std::cout << frameBGR.type() << std::endl;
+	while (true)
+	{
+		frameBGR = m_pCamera->Capture();
+		//cvtColor(frameBGR, frameBGR, cv::COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
+		//m_pDisplay->ShowImage(frameBGR);
+		//m_pDisplay->putText("fps: " + std::to_string(m_pCamera->GetFPS()), cv::Point(-140, 20), 0.5, cv::Scalar(255, 255, 255));
+		cv::putText(frameBGR, std::to_string(m_pCamera->GetFPS()), cv::Point(140, 20), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(0, 0, 0));
+		cv::imshow("frame", frameBGR);
+		cv::waitKey(1);
+	}
+}
 void Robot::Run()
 {
+	//RunCaptureTest();
+	//return;
 	//double fps;
 	//int frames = 0;
 	//timer for rotation measure

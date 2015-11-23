@@ -53,5 +53,5 @@ public:
 		last_state = (STATE)state;
         state = new_state;
     }
-
+	void RunCaptureTest();
 };

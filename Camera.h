@@ -1,6 +1,5 @@
 #pragma  once
 #include "types.h"
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include "ThreadedClass.h"
 
 class Camera: public ICamera, public ThreadedClass
@@ -22,10 +21,7 @@ private:
 	bool flip = false;
 	double fps;
 	int frames = 0;
-	boost::posix_time::time_duration dt;
-	boost::posix_time::ptime lastCapture2;
-	boost::posix_time::ptime lastCapture;
-	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
+	double time = 0;
 	int frameCount;
 
 protected:
