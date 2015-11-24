@@ -23,14 +23,14 @@ bool DriveInstruction::catchTarget(const ObjectPosition &target){
 	std::cout << ", catchTarget: " << heading;
 	
 	//m_pCom->ToggleTribbler(100);
-	m_pCom->Drive(70, 0, 0);
+	//m_pCom->Drive(10, 0, 0);
 	return false;
 }
 
 bool DriveInstruction::driveToTarget(const ObjectPosition &target, double maxDistance){
 
-	if (USE_ANGLED_DRIVING)
-		return driveToTargetWithAngle(target, maxDistance);
+//	if (USE_ANGLED_DRIVING)
+//		return driveToTargetWithAngle(target, maxDistance);
 	double dist = target.getDistance();
 		
 	if (dist > maxDistance){
@@ -40,7 +40,7 @@ bool DriveInstruction::driveToTarget(const ObjectPosition &target, double maxDis
 	}
 	else{
 		std::cout << ", ball near: " << dist << " target: " << maxDistance;
-		m_pCom->Drive(0, 0, 0);
+		m_pCom->Drive(20, 0, 0);
 		return true;
 	}
 }

@@ -24,5 +24,5 @@ public:
 	void Stop();
 	void RecordFrame(const cv::Mat &frame, const std::string subtitle);
 	~VideoRecorder();
-	bool isRecording;
+	std::atomic_bool isRecording;
 };

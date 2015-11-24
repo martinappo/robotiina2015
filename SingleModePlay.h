@@ -25,6 +25,7 @@ class SingleModeIdle : public Idle {
 class DriveToBall : public DriveInstruction
 {
 public:
+	virtual void onEnter();
 	DriveToBall(const std::string &name = "DRIVE_TO_BALL") : DriveInstruction(name){};
 	virtual DriveMode step(double dt);
 };
