@@ -8,8 +8,7 @@ ComModule::ComModule(ISerial *pSerialPort)
 }
 
 
-ComModule::~ComModule()
-{
-	delete m_pWheels;
+ComModule::~ComModule(){
+	//delete m_pWheels;
 	delete m_pCoilGun;
 }

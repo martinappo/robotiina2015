@@ -6,7 +6,7 @@
 #include "ThreadedClass.h"
 #include <atomic>
 
-class WheelController : public ThreadedClass {
+class WheelController {
 
 private:
 	cv::Mat targetSpeedXYW = cv::Mat_<double>(3,1); //x ,y, w (rotation)
@@ -22,6 +22,7 @@ private:
 	std::atomic_bool updateSpeed;
 	ISerial *m_pComPort;
 	int m_iWheelCount;
+	void sendCommand();
 protected:
 	std::vector<double> CalculateWheelSpeeds(double velocity, double direction, double rotate);
 	void CalculateRobotSpeed(); // reverse calc
@@ -33,13 +34,11 @@ public:
 	void rotateBack(int speed);
 	bool directControl = false;
     void MoveTo(const CvPoint &);
-
 	void Rotate(bool direction, double speed);
 	void Drive(double velocity, double direction = 0, double angularSpeed = 0);
 	void DriveRotate(double velocity, double direction, double rotate);
 	virtual void Drive(const cv::Point2d &speed, double angularSpeed = 0);
 	void Stop();
-
 	const Speed & GetActualSpeed();
 	const Speed & GetTargetSpeed();
 	bool IsStalled();
@@ -47,7 +46,6 @@ public:
 	virtual ~WheelController();
 	void DestroyWheels();
 	std::string GetDebugInfo();
-	void Run();
 	bool IsReal(){
 		return m_pComPort != NULL;
 	}

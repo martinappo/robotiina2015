@@ -2,27 +2,20 @@
 #include <algorithm>    // std::min
 
 bool DriveInstruction::aimTarget(const ObjectPosition &target, double errorMargin){
-	//m_pCom->ToggleTribbler(0);
 	double heading = target.getHeading();
 	if (fabs(heading) > errorMargin){
-		std::cout << ", rotating: " << heading ;
-		m_pCom->Drive(0, 0,  -sign(heading) * std::min(20.0, fabs(heading)));
+		m_pCom->Drive(0, 0,  -sign(heading) * std::min(20.0, std::max(fabs(heading), 5.0)));
 		return false;
 	}
-	else{
-		m_pCom->Drive(0, 0, 0);
-		return true;
-	}
+	return true;
 }
+
 bool DriveInstruction::catchTarget(const ObjectPosition &target){
 	if (m_pCom->BallInTribbler()) {
 		m_pCom->Drive(0, 0, 0);
 		return true;
 	}
 	double heading =  target.getHeading();
-	std::cout << ", catchTarget: " << heading;
-	
-	//m_pCom->ToggleTribbler(100);
 	m_pCom->Drive(70, 0, 0);
 	return false;
 }
@@ -38,16 +31,11 @@ bool DriveInstruction::driveToTarget(const ObjectPosition &target, double maxDis
 		m_pCom->Drive(std::min(100.0, std::max(20.0, dist)), 0, 0);
 		return false;
 	}
-	else{
-		std::cout << ", ball near: " << dist << " target: " << maxDistance;
-		m_pCom->Drive(0, 0, 0);
-		return true;
-	}
+	return true;
 }
 
 bool DriveInstruction::driveToTargetWithAngle(const ObjectPosition &target, double maxDistance){
 	double heading = target.getHeading();
-
 	double dist = target.getDistance();
 	if (dist > maxDistance){
 		m_pCom->Drive(std::min(100.0, std::max(20.0, dist)), heading, -heading*0.3);//To Do: set speed based on distance
@@ -58,19 +46,6 @@ bool DriveInstruction::driveToTargetWithAngle(const ObjectPosition &target, doub
 
 const BallPosition &DriveInstruction::getClosestBall(){
 	return  m_pFieldState->balls.getClosest();
-	/*
-	int target_distance = INT_MAX;
-	int target_index = 0;
-	for (int i = 0; i < NUMBER_OF_BALLS; i++) {
-		if (abs(m_pFieldState->balls[i].fieldCoords.y) > 250) continue; // too far outside of the field
-		if (m_pFieldState->balls[i].getDistance() < target_distance) {
-			target_index = i;
-			target_distance = m_pFieldState->balls[i].getDistance();
-		}
-	}
-	return m_pFieldState->balls[target_index];
-	*/
-
 }
 
 
