@@ -22,8 +22,8 @@ bool DriveInstruction::catchTarget(const ObjectPosition &target){
 
 bool DriveInstruction::driveToTarget(const ObjectPosition &target, double maxDistance){
 
-	if (USE_ANGLED_DRIVING)
-		return driveToTargetWithAngle(target, maxDistance);
+	//if (USE_ANGLED_DRIVING)
+	//	return driveToTargetWithAngle(target, maxDistance);
 	double dist = target.getDistance();
 		
 	if (dist > maxDistance){
@@ -34,14 +34,32 @@ bool DriveInstruction::driveToTarget(const ObjectPosition &target, double maxDis
 	return true;
 }
 
-bool DriveInstruction::driveToTargetWithAngle(const ObjectPosition &target, double maxDistance){
+bool DriveInstruction::driveToTargetWithAngle(const ObjectPosition &target, double maxDistance, double errorMargin){
 	double heading = target.getHeading();
-	double dist = target.getDistance();
-	if (dist > maxDistance){
-		m_pCom->Drive(std::min(100.0, std::max(20.0, dist)), heading, -heading*0.3);//To Do: set speed based on distance
-		return false;
+	double dist = target.getDistance();	
+	double speed = 0;
+	double direction = 0;
+	double angularSpeed = 0;
+	bool onPoint = false;
+	if (fabs(heading) > errorMargin){
+		if (dist > maxDistance){
+			speed = std::min(100.0, std::max(20.0, dist));
+			direction = heading; //drive towards target
+			angularSpeed = sign(heading) * 4; //meanwhile rotate slowly to face the target
+		}
+		else{ //at location but facing wrong way
+			angularSpeed = heading * 0.5; //rotate
+		}
 	}
-	else return true;
+	else{
+		if (dist > maxDistance){
+			speed = std::min(100.0, std::max(20.0, dist));
+			direction = heading; //drive towards target
+		}
+		else onPoint = true;
+	}
+	m_pCom->Drive(speed, direction, angularSpeed);
+	return onPoint;
 }
 
 const BallPosition &DriveInstruction::getClosestBall(){
