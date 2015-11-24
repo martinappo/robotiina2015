@@ -258,6 +258,8 @@ void Simulator::UpdateRobotPos(){
 
 	UpdateGatePos();
 	UpdateBallPos(dt);
+	UpdateBallIntTribbler();
+
 
 	{
 		std::lock_guard<std::mutex> lock(mutex);
@@ -266,7 +268,17 @@ void Simulator::UpdateRobotPos(){
 
 }
 
-
+void Simulator::UpdateBallIntTribbler(){
+	bool was_in_tribbler = ball_in_tribbler;
+	BallInTribbler();
+	bool is_in_tribbler = ball_in_tribbler;
+	if (!was_in_tribbler && is_in_tribbler) {
+		DataReceived("<5:bl:1>");
+	}
+	else if (was_in_tribbler && !is_in_tribbler) {
+		DataReceived("<5:bl:1>");
+	}
+}
 Simulator::~Simulator()
 {
 	WaitForStop();

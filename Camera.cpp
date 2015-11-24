@@ -55,6 +55,9 @@ void Camera::Init() {
 
 
 	if (frameCount == 1) { // image
+#ifndef VIRTUAL_FLIP
+		cv::flip(frame, frame, 1);
+#endif
 		return;
 	}
 
@@ -92,6 +95,7 @@ cv::Mat &Camera::GetLastFrame(bool bFullFrame){
 }
 
 cv::Mat &Camera::Capture(bool bFullFrame) {
+
 
 	if (frameCount == 1) { // image
 		frame.copyTo(frame1); // return clean copy

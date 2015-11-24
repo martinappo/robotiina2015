@@ -61,6 +61,7 @@ protected:
 	void UpdateGatePos();
 	void UpdateBallPos(double dt);
 	void UpdateRobotPos();
+	void UpdateBallIntTribbler();
 	std::mutex mutex;
 	ObjectPosition robots[MAX_ROBOTS];
 
