@@ -91,7 +91,7 @@ cv::Mat &Camera::GetLastFrame(bool bFullFrame){
 	return *m_pFrame;
 }
 
-cv::Mat &Camera::Capture(bool bFullFrame){
+cv::Mat &Camera::Capture(bool bFullFrame) {
 
 	if (frameCount == 1) { // image
 		frame.copyTo(frame1); // return clean copy

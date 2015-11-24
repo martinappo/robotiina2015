@@ -25,7 +25,6 @@
 #include "SingleModePlay.h"
 #include "MultiModePlay.h"
 #include "RobotTracker.h"
-#include "VideoRecorder.h"
 #include "FrontCameraVision.h"
 #include "ComModule.h"
 #include "ManualControl.h"
@@ -342,41 +341,8 @@ void Robot::Run()
 
 	std::stringstream subtitles;
 
-	VideoRecorder videoRecorder("videos/", 30, m_pCamera->GetFrameSize(true));
-	//port.get_io_service().run();
 	while (true)
     {
-		//io.poll_one();
-		time = boost::posix_time::microsec_clock::local_time();
-//		boost::posix_time::time_duration::tick_type dt = (time - lastStepTime).total_milliseconds();
-		boost::posix_time::time_duration::tick_type rotateDuration = (time - rotateTime).total_milliseconds();
-
-		/*
-		auto &ballPos = field.balls[0];
-		auto &targetGatePos = field.GetTargetGate();
-
-		autoPilot->UpdateState(&ballPos, &targetGatePos);
-		*/
-		/*
-		if (dt > 1000) {
-			fps = 1000.0 * frames / dt;
-			lastStepTime = time;
-			frames = 0;
-		}
-		*/
-#define RECORD_AFTER_PROCESSING
-#ifdef RECORD_AFTER_PROCESSING
-		if (captureFrames) {
-			videoRecorder.RecordFrame(m_pCamera->GetLastFrame(true), subtitles.str());
-		}
-#endif
-		
-#ifndef RECORD_AFTER_PROCESSING
-		if (captureFrames) {
-			videoRecorder.RecordFrame(cam1_area, subtitles.str());
-		}
-#endif
-
 
 		std::ostringstream oss;
 		oss.precision(4);
@@ -426,13 +392,8 @@ void Robot::Run()
 			//				STATE_BUTTON("(D)ance", STATE_DANCE)
 				//STATE_BUTTON("(D)ance", STATE_DANCE)
 				STATE_BUTTON("(R)emote Control", 'r', STATE_REMOTE_CONTROL)
-				m_pDisplay->createButton(std::string("Save video: ") + (captureFrames ? "on" : "off"), 'v', [this, &captureDir, &time, &videoRecorder]{
-					if (this->captureFrames) {
-						// save old video
-					}
-
-					this->captureFrames = !this->captureFrames;
-					this->captureFrames ? videoRecorder.Start() : videoRecorder.Stop();
+				m_pDisplay->createButton(std::string("Save video: ") + (visionModule.captureFrames() ? "on" : "off"), 'v', [this, &visionModule]{
+					visionModule.captureFrames(!visionModule.captureFrames());
 
 					this->last_state = STATE_END_OF_GAME; // force dialog redraw
 				});
@@ -589,32 +550,6 @@ void Robot::Run()
 					SetState(STATE_AUTOCALIBRATE); // no conf
 				}
 			//}
-		}
-		else if (STATE_RUN == state) {
-			START_DIALOG
-				m_pDisplay->createButton(std::string("Save video: ") + (captureFrames ? "on" : "off"), '-', [this, &captureDir, &time, &videoRecorder]{
-					if (this->captureFrames) {
-						// save old video
-					}
-
-					this->captureFrames = !this->captureFrames;
-					this->captureFrames ? videoRecorder.Start() : videoRecorder.Stop();
-
-					this->last_state = STATE_NONE; // force dialog redraw
-				});
-				/*
-				createButton(std::string("Mouse control: ") + (dynamic_cast<MouseFinder*>(finder) == NULL ? "off" : "on"), [this]{
-					bool isMouse = dynamic_cast<MouseFinder*>(finder) != NULL;
-					delete this->finder;
-					this->finder = isMouse ? new ObjectFinder() : new MouseFinder();
-					this->last_state = STATE_NONE;
-				});
-				*/
-				STATE_BUTTON("(B)ack", 8, STATE_NONE)
-				STATE_BUTTON("E(x)it", 27, STATE_END_OF_GAME)
-			END_DIALOG			
-			
-			
 		}
 		else if (STATE_TEST == state) {
 			START_DIALOG

@@ -10,6 +10,8 @@
 #include <functional>     // std::greater
 #include "kdNode2D.h"
 #include "DistanceCalculator.h"
+#include "VideoRecorder.h"
+
 
 extern DistanceCalculator gDistanceCalculator;
 
@@ -25,6 +27,7 @@ FrontCameraVision::FrontCameraVision(ICamera *pCamera, IDisplay *pDisplay, Field
 	ADD_BOOL_SETTING(gateObstructionDetectionEnabled);
 	ADD_BOOL_SETTING(borderDetectionEnabled);
 	ADD_BOOL_SETTING(nightVisionEnabled);
+	videoRecorder = new VideoRecorder("videos/", 30, m_pCamera->GetFrameSize(true));
 	LoadSettings();
 	Start();
 }
@@ -33,10 +36,27 @@ FrontCameraVision::FrontCameraVision(ICamera *pCamera, IDisplay *pDisplay, Field
 FrontCameraVision::~FrontCameraVision()
 {
 	WaitForStop();
+	if (videoRecorder != NULL) {
+		videoRecorder->Stop();
+		delete videoRecorder;
+		videoRecorder = NULL;
+	}
+}
+bool FrontCameraVision::captureFrames(){
+	return videoRecorder->isRecording;
 }
 
+void FrontCameraVision::captureFrames(bool start){
+	if (start) {
+		videoRecorder->Start();
+	}
+	else {
+		videoRecorder->Stop();
+	}
+}
 void FrontCameraVision::Run() {
 	ThresholdedImages thresholdedImages;
+
 
 	try {
 		CalibrationConfReader calibrator;
@@ -73,7 +93,11 @@ void FrontCameraVision::Run() {
 	bool somethingOnWay = false;
 
 	while (!stop_thread){
+
 		cv::Mat frameBGR = m_pCamera->Capture();
+		if (videoRecorder->isRecording){
+			videoRecorder->RecordFrame(frameBGR, "");
+		}
 		/**************************************************/
 		/*	STEP 1. Convert picture to HSV colorspace	  */
 		/**************************************************/
