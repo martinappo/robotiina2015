@@ -57,8 +57,8 @@ void RobotPosition::updateFieldCoordsNew(cv::Point2d orgin) {
 	fieldCoords.y = (y1 + y2) / 2;
 	fieldCoords = filter.doFiltering(fieldCoords);
 	// no that we know robot position, we can calculate it's angle to blue or yellow gate on the field
-	double angleToBlueGate = DistanceCalculator::angleBetween(fieldCoords - blueGate.fieldCoords, { 0, 1 });
-	double angleToYellowGate = DistanceCalculator::angleBetween(fieldCoords - yellowGate.fieldCoords, { 0, 1 });
+	double angleToBlueGate = DistanceCalculator::angleBetween(fieldCoords - blueGate.fieldCoords, { 0, -1 });
+	double angleToYellowGate = DistanceCalculator::angleBetween(fieldCoords - yellowGate.fieldCoords, { 0, -1 });
 	// now add real gate angle to this angle
 	auto da1 = (angleToBlueGate - blueGate.getAngle());
 	auto da2 = (angleToYellowGate - yellowGate.getAngle());
