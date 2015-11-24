@@ -63,6 +63,7 @@ void Dialog::ShowImage(const cv::Mat &image, bool main) {
 	if (!m_bMainCamEnabled && main) return;
 	boost::mutex::scoped_lock lock(display_mutex); //allow one command at a time
 	if (main){
+
 #ifndef VIRTUAL_FLIP
 		//cv::flip(image, image, 1);
 #endif
