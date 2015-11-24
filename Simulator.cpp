@@ -23,7 +23,7 @@ Simulator::Simulator(boost::asio::io_service &io, bool master, const std::string
 	wheelSpeeds.push_back({ 0, 0 });
 	wheelSpeeds.push_back({ 0, 0 });
 	*/
-	self.fieldCoords = cv::Point(rand() % 300 - 150, rand() % 460 - 230);
+	self.fieldCoords = cv::Point(100, 100); //cv::Point(rand() % 300 - 150, rand() % 460 - 230);
 	self.polarMetricCoords = cv::Point(0, 0);
 	if (isMaster) {
 		id = 0;
@@ -164,8 +164,8 @@ void Simulator::UpdateGatePos(){
 	for (int s = -1; s < 2; s += 2){
 		cv::Point2d shift1(s * 10, -20);
 		cv::Point2d shift2(s * 10, 20);
-		double a1 = gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - (blueGate.fieldCoords + shift1)) + self.getAngle();
-		double a2 = gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - (yellowGate.fieldCoords + shift2)) + self.getAngle();
+		double a1 = -gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - (blueGate.fieldCoords + shift1)) + self.getAngle();
+		double a2 = -gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - (yellowGate.fieldCoords + shift2)) + self.getAngle();
 
 		double d1 = gDistanceCalculator.getDistanceInverted(self.fieldCoords, blueGate.fieldCoords + shift1);
 		double d2 = gDistanceCalculator.getDistanceInverted(self.fieldCoords, yellowGate.fieldCoords + shift2);
@@ -198,7 +198,7 @@ void Simulator::UpdateBallPos(double dt){
 			message << (int)balls[i].fieldCoords.x << " " << (int)balls[i].fieldCoords.y << " ";
 			//SendMessage(message.str());
 		}
-		double a = gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - balls[i].fieldCoords) + self.getAngle();
+		double a = -gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - balls[i].fieldCoords) + self.getAngle();
 		double d = gDistanceCalculator.getDistanceInverted(self.fieldCoords, balls[i].fieldCoords);
 		double x = d*sin(a / 180 * CV_PI);
 		double y = d*cos(a / 180 * CV_PI);
@@ -211,7 +211,7 @@ void Simulator::UpdateBallPos(double dt){
 	// draw shared robots
 	for (int i = 0; i < MAX_ROBOTS; i++) {
 		if (abs(robots[i].fieldCoords.x) > 1000) continue;
-		double a = gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - robots[i].fieldCoords) + self.getAngle();
+		double a = -gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - robots[i].fieldCoords) + self.getAngle();
 		double d = gDistanceCalculator.getDistanceInverted(self.fieldCoords, robots[i].fieldCoords);
 		double x = d*sin(a / 180 * CV_PI);
 		double y = d*cos(a / 180 * CV_PI);
@@ -240,7 +240,7 @@ void Simulator::UpdateRobotPos(){
 	//std::cout << robotSpeed << std::endl;
 
 	
-	self.polarMetricCoords.y += (robotSpeed.at<double>(2)*dt);
+	self.polarMetricCoords.y -= (robotSpeed.at<double>(2)*dt);
 	if (self.polarMetricCoords.y > 360) self.polarMetricCoords.y -= 360;
 	if (self.polarMetricCoords.y < -360) self.polarMetricCoords.y += 360;
 	cv::Mat rotMat = getRotationMatrix2D(cv::Point(0, 0), self.getAngle(), 1);
