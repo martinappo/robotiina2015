@@ -4,7 +4,7 @@
 #include <math.h> 
 #include <functional>
 #include <atomic>
-
+//#define VIRTUAL_FLIP
 #ifdef WIN32
 	#define _WIN32_WINNT 0x0600 // vista for socket.cancel()
 /*

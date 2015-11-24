@@ -195,7 +195,7 @@ void FrontCameraVision::Run() {
 			m_pState->self.updateFieldCoords();
 		}
 		//Balls pos 
-		cv::Mat rotMat = getRotationMatrix2D(cv::Point(0,0), +m_pState->self.getAngle(), 1);
+		cv::Mat rotMat = getRotationMatrix2D(cv::Point(0,0), -m_pState->self.getAngle(), 1);
 		cv::Mat balls(3, m_pState->balls.size(), CV_64FC1);
 		found = ballFinder.Locate(thresholdedImages[BALL], frameHSV, frameBGR, balls);
 		if (found) {
@@ -210,7 +210,7 @@ void FrontCameraVision::Run() {
 			for (int j = 0; j < rotatedBalls.cols; j++){
 				m_pState->balls[j].updateRawCoordinates(cv::Point2d(rotatedBalls.col(j)), cv::Point(0, 0));
 				m_pState->balls[j].updateFieldCoords(m_pState->self.getFieldPos());
-				m_pState->balls[j].polarMetricCoords.y += m_pState->self.getAngle(); // rotate balls back
+				m_pState->balls[j].polarMetricCoords.y -= m_pState->self.getAngle(); // rotate balls back
 				m_pState->balls[j].isUpdated = true;
 			}
 			int ball_idx = 0;

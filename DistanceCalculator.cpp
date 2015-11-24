@@ -61,7 +61,11 @@ cv::Point2d DistanceCalculator::getPolarCoordinates(const cv::Point2d &pos, cons
 	double distanceInCm = getDistance(orgin, pos);
 	double angle = angleBetween(pos - orgin, { 0, 1 });
 	// flip angle alony y axis
-	return { distanceInCm, -angle };
+#ifndef VIRTUAL_FLIP
+	return{ distanceInCm, angle};
+#else
+	return { distanceInCm, -angle + 360 };
+#endif
 };
 
 cv::Point2d DistanceCalculator::getFieldCoordinates(const cv::Point2d &pos, const cv::Point2d &orgin) const {

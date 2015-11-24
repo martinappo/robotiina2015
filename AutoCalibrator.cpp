@@ -3,7 +3,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 
-AutoCalibrator::AutoCalibrator(ICamera * pCamera, IDisplay *pDisplay)
+AutoCalibrator::AutoCalibrator(ICamera * pCamera, IDisplay *pDisplay) :ThreadedClass("AutoCalibrator")
 {
     range = {{0,179},{0,255},{0,255}};
 	m_pCamera = pCamera;

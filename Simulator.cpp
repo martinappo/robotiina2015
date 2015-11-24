@@ -164,8 +164,8 @@ void Simulator::UpdateGatePos(){
 	for (int s = -1; s < 2; s += 2){
 		cv::Point2d shift1(s * 10, -20);
 		cv::Point2d shift2(s * 10, 20);
-		double a1 = -gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - (blueGate.fieldCoords + shift1)) + self.getAngle();
-		double a2 = -gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - (yellowGate.fieldCoords + shift2)) + self.getAngle();
+		double a1 = gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - (blueGate.fieldCoords + shift1)) - self.getAngle();
+		double a2 = gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - (yellowGate.fieldCoords + shift2)) - self.getAngle();
 
 		double d1 = gDistanceCalculator.getDistanceInverted(self.fieldCoords, blueGate.fieldCoords + shift1);
 		double d2 = gDistanceCalculator.getDistanceInverted(self.fieldCoords, yellowGate.fieldCoords + shift2);
@@ -198,7 +198,7 @@ void Simulator::UpdateBallPos(double dt){
 			message << (int)balls[i].fieldCoords.x << " " << (int)balls[i].fieldCoords.y << " ";
 			//SendMessage(message.str());
 		}
-		double a = -gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - balls[i].fieldCoords) + self.getAngle();
+		double a = gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - balls[i].fieldCoords) - self.getAngle();
 		double d = gDistanceCalculator.getDistanceInverted(self.fieldCoords, balls[i].fieldCoords);
 		double x = d*sin(a / 180 * CV_PI);
 		double y = d*cos(a / 180 * CV_PI);
@@ -240,7 +240,7 @@ void Simulator::UpdateRobotPos(){
 	//std::cout << robotSpeed << std::endl;
 
 	
-	self.polarMetricCoords.y -= (robotSpeed.at<double>(2)*dt);
+	self.polarMetricCoords.y += (robotSpeed.at<double>(2)*dt);
 	if (self.polarMetricCoords.y > 360) self.polarMetricCoords.y -= 360;
 	if (self.polarMetricCoords.y < -360) self.polarMetricCoords.y += 360;
 	cv::Mat rotMat = getRotationMatrix2D(cv::Point(0, 0), self.getAngle(), 1);
@@ -285,6 +285,9 @@ cv::Mat & Simulator::Capture(bool bFullFrame){
 	}
 
 	std::lock_guard<std::mutex> lock(mutex);
+#ifdef VIRTUAL_FLIP
+	cv::flip(frame_copy, frame_copy, 1);
+#endif
 	frame_copy.copyTo(frame_copy2);
 	return frame_copy2;
 }
