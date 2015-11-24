@@ -65,7 +65,7 @@ void RobotPosition::updateFieldCoordsNew(cv::Point2d orgin) {
 	// for taking average, they must have same sign
 	if (abs(da1 - da2) > 180) {
 		if (da1 < 0) da1 = 360 + da1;
-		if (da2< 0) da2 = 360 + da2;
+		if (da2 < 0) da2 = 360 + da2;
 	}
 //	if (da2 < 0) da2 += 360;
 	//polarMetricCoords.y = (da1 + da2) / 2;

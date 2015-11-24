@@ -10,6 +10,8 @@
 #include <functional>     // std::greater
 #include "kdNode2D.h"
 #include "DistanceCalculator.h"
+#include "VideoRecorder.h"
+
 
 extern DistanceCalculator gDistanceCalculator;
 
@@ -25,6 +27,7 @@ FrontCameraVision::FrontCameraVision(ICamera *pCamera, IDisplay *pDisplay, Field
 	ADD_BOOL_SETTING(gateObstructionDetectionEnabled);
 	ADD_BOOL_SETTING(borderDetectionEnabled);
 	ADD_BOOL_SETTING(nightVisionEnabled);
+	videoRecorder = new VideoRecorder("videos/", 30, m_pCamera->GetFrameSize(true));
 	LoadSettings();
 	Start();
 }
@@ -33,10 +36,27 @@ FrontCameraVision::FrontCameraVision(ICamera *pCamera, IDisplay *pDisplay, Field
 FrontCameraVision::~FrontCameraVision()
 {
 	WaitForStop();
+	if (videoRecorder != NULL) {
+		videoRecorder->Stop();
+		delete videoRecorder;
+		videoRecorder = NULL;
+	}
+}
+bool FrontCameraVision::captureFrames(){
+	return videoRecorder->isRecording;
 }
 
+void FrontCameraVision::captureFrames(bool start){
+	if (start) {
+		videoRecorder->Start();
+	}
+	else {
+		videoRecorder->Stop();
+	}
+}
 void FrontCameraVision::Run() {
 	ThresholdedImages thresholdedImages;
+
 
 	try {
 		CalibrationConfReader calibrator;
@@ -73,7 +93,11 @@ void FrontCameraVision::Run() {
 	bool somethingOnWay = false;
 
 	while (!stop_thread){
+
 		cv::Mat frameBGR = m_pCamera->Capture();
+		if (videoRecorder->isRecording){
+			videoRecorder->RecordFrame(frameBGR, "");
+		}
 		/**************************************************/
 		/*	STEP 1. Convert picture to HSV colorspace	  */
 		/**************************************************/
@@ -171,7 +195,7 @@ void FrontCameraVision::Run() {
 			m_pState->self.updateFieldCoords();
 		}
 		//Balls pos 
-		cv::Mat rotMat = getRotationMatrix2D(cv::Point(0,0), -m_pState->self.getAngle(), 1);
+		cv::Mat rotMat = getRotationMatrix2D(cv::Point(0,0), +m_pState->self.getAngle(), 1);
 		cv::Mat balls(3, m_pState->balls.size(), CV_64FC1);
 		found = ballFinder.Locate(thresholdedImages[BALL], frameHSV, frameBGR, balls);
 		if (found) {
@@ -186,7 +210,7 @@ void FrontCameraVision::Run() {
 			for (int j = 0; j < rotatedBalls.cols; j++){
 				m_pState->balls[j].updateRawCoordinates(cv::Point2d(rotatedBalls.col(j)), cv::Point(0, 0));
 				m_pState->balls[j].updateFieldCoords(m_pState->self.getFieldPos());
-				m_pState->balls[j].polarMetricCoords.y -= m_pState->self.getAngle(); // rotate balls back
+				m_pState->balls[j].polarMetricCoords.y += m_pState->self.getAngle(); // rotate balls back
 				m_pState->balls[j].isUpdated = true;
 			}
 			int ball_idx = 0;

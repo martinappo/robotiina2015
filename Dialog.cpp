@@ -62,6 +62,9 @@ Dialog::~Dialog(){
 void Dialog::ShowImage(const cv::Mat &image, bool main) {
 	if (!m_bMainCamEnabled && main) return;
 	boost::mutex::scoped_lock lock(display_mutex); //allow one command at a time
+	if (main){
+		cv::flip(image, image, 1);
+	}
 	image.copyTo(main ? cam1_area : cam2_area);
 	//	resize(image, cam_area, cv::Size(CAM_WIDTH, CAM_HEIGHT));//resize image
 	//resize(image, display, cv::Size(WINDOW_WIDTH, WINDOW_HEIGHT));//resize image

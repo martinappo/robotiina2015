@@ -3,7 +3,7 @@
 #include "ThreadedClass.h"
 #include "ConfigurableModule.h"
 #include "FieldState.h"
-
+class VideoRecorder;
 class FrontCameraVision :
 	public ConfigurableModule, public IVisionModule, public ThreadedClass
 {
@@ -21,12 +21,14 @@ protected:
 	bool gateObstructionDetectionEnabled = false;
 	bool borderDetectionEnabled = false;
 	bool nightVisionEnabled = false;
+	VideoRecorder *videoRecorder  = NULL;
 
 public:
 	FrontCameraVision(ICamera * pCamera, IDisplay *pDisplay, FieldState *pFieldState);
 	virtual ~FrontCameraVision();
 	void Run();
 	const cv::Mat & GetFrame() { return m_pCamera->Capture();  }
-
+	bool captureFrames();
+	void captureFrames(bool start);
 };
 

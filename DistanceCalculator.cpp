@@ -59,7 +59,7 @@ void DistanceCalculator::loadConf(){
 }
 cv::Point2d DistanceCalculator::getPolarCoordinates(const cv::Point2d &pos, const cv::Point2d &orgin) const {
 	double distanceInCm = getDistance(orgin, pos);
-	double angle = angleBetween(pos - orgin, { 0, -1 });
+	double angle = angleBetween(pos - orgin, { 0, 1 });
 	// flip angle alony y axis
 	return { distanceInCm, -angle };
 };
@@ -75,8 +75,9 @@ cv::Point2d DistanceCalculator::getFieldCoordinates(const cv::Point2d &pos, cons
 
 }
 double DistanceCalculator::getDistanceInverted(const cv::Point2d &pos, const cv::Point2d &orgin) const{
-	double dist = cv::norm(pos - orgin);
-	return 125 * log(dist / 13.13);
+	double dist_cm = cv::norm(pos - orgin);
+	double dist_px = 125 * log(dist_cm / 13.13);
+	return dist_px < 0 ? 0 : dist_px;
 
 }
 double DistanceCalculator::getDistance(const cv::Point2d &pos, const cv::Point2d &orgin) const{
@@ -86,7 +87,7 @@ double DistanceCalculator::getDistance(const cv::Point2d &pos, const cv::Point2d
 	//return (8E-8)*pow(dist, 4) - (6E-5)*pow(dist, 3) + 0.0167*pow(dist, 2) - 1.5818 * dist + 72.791;
 
 	//y = 13,136e^0,008x
-	//return 13.13*exp(0.008 * dist);
+	return 13.13*exp(0.008 * dist);
 
 	double minDif = INT_MAX;
 	int index = 0;
@@ -117,4 +118,5 @@ double DistanceCalculator::getDistance(const cv::Point2d &pos, const cv::Point2d
 		}
 		*/
 	}
+	return INT_MAX;
 }
