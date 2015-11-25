@@ -60,16 +60,23 @@ void Simulator::WriteString(const std::string &command){
 //			std::cout << "xxxxxxxxxxxxx" << std::endl;
 		}
 		else if (id == 4) {
-			char cmd = s[2];
-			if (cmd == 'k') {
-				Kick(atoi(s.substr(4).c_str()));
+			if (s[2] == 'k') {
+				Kick(atoi(s.substr(3).c_str()));
 			}
+			else if (s[2] == 'd' && s[3] == 'm') {
+				ToggleTribbler(atoi(s.substr(4).c_str()) > 0);
+			}
+			
 		}
 	}
 	
 }
-
-void Simulator::MessageReceived(const std::string & message){
+void Simulator::DataReceived(const std::string & message) {//serial
+	if (messageCallback != NULL) {
+		messageCallback->DataReceived(message);
+	}
+}
+void Simulator::MessageReceived(const std::string & message){ //udp
 	std::stringstream ss(message);
 	std::string command, r_id;
 	ss >> command;
@@ -198,10 +205,15 @@ void Simulator::UpdateBallPos(double dt){
 			message << (int)balls[i].fieldCoords.x << " " << (int)balls[i].fieldCoords.y << " ";
 			//SendMessage(message.str());
 		}
-		double a = gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - balls[i].fieldCoords) - self.getAngle();
+		double a = gDistanceCalculator.angleBetween(cv::Point(0, 1), self.fieldCoords - balls[i].fieldCoords) - self.getAngle();
+		double a2 = gDistanceCalculator.angleBetween(cv::Point(0, 1), self.fieldCoords - balls[i].fieldCoords) + self.getAngle();
 		double d = gDistanceCalculator.getDistanceInverted(self.fieldCoords, balls[i].fieldCoords);
-		double x = d*sin(a / 180 * CV_PI);
-		double y = d*cos(a / 180 * CV_PI);
+		double x = -d*sin(a / 180 * CV_PI);
+		double y = -d*cos(a / 180 * CV_PI);
+		balls[i].polarMetricCoords.x = cv::norm(self.fieldCoords - balls[i].fieldCoords);
+		if (a > 360) a -= 360;
+		if (a < 0) a += 360;
+		balls[i].polarMetricCoords.y = a;
 		cv::Scalar color(48, 154, 236);
 		cv::circle(frame, cv::Point(x, y) + cv::Point(frame.size() / 2), 12, color, -1);
 	}
@@ -246,7 +258,7 @@ void Simulator::UpdateRobotPos(){
 	cv::Mat rotMat = getRotationMatrix2D(cv::Point(0, 0), self.getAngle(), 1);
 	cv::Mat rotatedSpeed = rotMat * robotSpeed;
 
-	self.fieldCoords.x += rotatedSpeed.at<double>(0)*dt;
+	self.fieldCoords.x -= rotatedSpeed.at<double>(0)*dt;
 	self.fieldCoords.y -= rotatedSpeed.at<double>(1)*dt;
 	
 
@@ -273,10 +285,10 @@ void Simulator::UpdateBallIntTribbler(){
 	BallInTribbler();
 	bool is_in_tribbler = ball_in_tribbler;
 	if (!was_in_tribbler && is_in_tribbler) {
-		DataReceived("<5:bl:1>");
+		DataReceived("<5:bl:1>\n");
 	}
 	else if (was_in_tribbler && !is_in_tribbler) {
-		DataReceived("<5:bl:1>");
+		DataReceived("<5:bl:0>\n");
 	}
 }
 Simulator::~Simulator()
@@ -367,11 +379,14 @@ bool Simulator::BallInTribbler(){
 	if (!tribblerRunning) return false;
 	double minDist = INT_MAX;
 	double dist = INT_MAX;
+	int minIndex = -1;
 	for (int i = 0; i < mNumberOfBalls; i++){
 		dist = cv::norm(self.fieldCoords - balls[i].fieldCoords);
 		//std::cout << dist << std::endl;
-		if (dist < minDist)
+		if (dist < minDist && fabs(balls[i].getHeading()) < 10){
 			minDist = dist;
+			minIndex = i;
+		}
 	}
 	bool was_in_tribbler = ball_in_tribbler;
 	if (minDist < (was_in_tribbler ? 25 : 15))

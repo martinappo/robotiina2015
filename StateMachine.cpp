@@ -22,8 +22,8 @@ bool DriveInstruction::catchTarget(const ObjectPosition &target){
 	double heading =  target.getHeading();
 	std::cout << ", catchTarget: " << heading;
 	
-	//m_pCom->ToggleTribbler(100);
-	//m_pCom->Drive(10, 0, 0);
+	m_pCom->ToggleTribbler(100);
+	m_pCom->Drive(20, 0, 0);
 	return false;
 }
 

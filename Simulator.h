@@ -36,21 +36,20 @@ public:
 		tribblerRunning = start;
 	};
 
-	virtual void DataReceived(const std::string & message){};//serial
+	virtual void DataReceived(const std::string & message);//serial
 	virtual void MessageReceived(const std::string & message); // UDP
 
 	void giveCommand(FieldState::GameMode command);
-	typedef	void(*MessageCallback)(const std::string & message);
 	void SendCommand(int id, const std::string &cmd, int param = INT_MAX){};
 
 	virtual void WriteString(const std::string &s);
 	//virtual void DataReceived(const std::string & message){};
-	virtual void SetMessageHandler(MessageCallback *callback){
+	virtual void SetMessageHandler(ISerialListener *callback){
 		messageCallback = callback;
 	};
 
 protected:
-	MessageCallback *messageCallback = NULL;
+	ISerialListener *messageCallback = NULL;
 
 	double orientation;
 	cv::Mat frame = cv::Mat(1024, 1280, CV_8UC3);

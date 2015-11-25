@@ -37,7 +37,7 @@ public:
 			std::cout << "RemoveEventListener: " << "unknow class" << std::endl;
 		}
 		boost::mutex::scoped_lock lock(click_mutex); //allow one command at a time
-		std::remove_if(m_EventListeners.begin(), m_EventListeners.end(), [pEventListener](IUIEventListener *p){return p = pEventListener; });
+		std::remove_if(m_EventListeners.begin(), m_EventListeners.end(), [pEventListener](IUIEventListener *p){return p == pEventListener; });
 		std::cout << "count: " << m_EventListeners.size() << std::endl;
 	};
 	std::vector<IUIEventListener*> m_EventListeners;
