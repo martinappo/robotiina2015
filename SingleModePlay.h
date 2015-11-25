@@ -28,6 +28,10 @@ public:
 	virtual void onEnter();
 	DriveToBall(const std::string &name = "DRIVE_TO_BALL") : DriveInstruction(name){};
 	virtual DriveMode step(double dt);
+protected:
+	virtual DriveMode stepNaive(double dt);
+	virtual DriveMode stepAngled(double dt);
+	virtual DriveMode stepPenatalizeRotation(double dt);
 };
 
 class CatchBall : public DriveInstruction

@@ -61,8 +61,23 @@ bool DriveInstruction::driveToTargetWithAngle(const ObjectPosition &target, doub
 	return onPoint;
 }
 
-const BallPosition &DriveInstruction::getClosestBall(){
-	return  m_pFieldState->balls.getClosest();
+
+const BallPosition &DriveInstruction::getClosestBall(bool includeHeading){
+	return  m_pFieldState->balls.getClosest(includeHeading);
+	/*
+	int target_distance = INT_MAX;
+	int target_index = 0;
+	for (int i = 0; i < NUMBER_OF_BALLS; i++) {
+		if (abs(m_pFieldState->balls[i].fieldCoords.y) > 250) continue; // too far outside of the field
+		if (m_pFieldState->balls[i].getDistance() < target_distance) {
+			target_index = i;
+			target_distance = m_pFieldState->balls[i].getDistance();
+		}
+	}
+	return m_pFieldState->balls[target_index];
+	*/
+
+
 }
 
 
