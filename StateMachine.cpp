@@ -5,7 +5,7 @@ bool DriveInstruction::aimTarget(const ObjectPosition &target, double errorMargi
 	//m_pCom->ToggleTribbler(0);
 	double heading = target.getHeading();
 	if (fabs(heading) > errorMargin){
-		std::cout << ", rotating to: " << heading ;
+		//std::cout << ", rotating to: " << heading ;
 		m_pCom->Drive(0, 0, -sign(heading) * std::min(20.0, fabs(heading))*0.5);
 		return false;
 	}
@@ -20,7 +20,7 @@ bool DriveInstruction::catchTarget(const ObjectPosition &target){
 		return true;
 	}
 	double heading =  target.getHeading();
-	std::cout << ", catchTarget: " << heading;
+	//std::cout << ", catchTarget: " << heading;
 	
 	m_pCom->ToggleTribbler(100);
 	m_pCom->Drive(20, 0, 0);
@@ -34,12 +34,12 @@ bool DriveInstruction::driveToTarget(const ObjectPosition &target, double maxDis
 	double dist = target.getDistance();
 		
 	if (dist > maxDistance){
-		std::cout << ", ball to far: " << dist << " target: " << maxDistance;
+		//std::cout << ", ball to far: " << dist << " target: " << maxDistance;
 		m_pCom->Drive(std::min(100.0, std::max(20.0, dist)), 0, 0);
 		return false;
 	}
 	else{
-		std::cout << ", ball near: " << dist << " target: " << maxDistance;
+		//std::cout << ", ball near: " << dist << " target: " << maxDistance;
 		m_pCom->Drive(20, 0, 0);
 		return true;
 	}
@@ -69,7 +69,7 @@ bool DriveInstruction::driveToTargetWithAngle(const ObjectPosition &target, doub
 		}
 		else onPoint = true;
 	}
-	m_pCom->Drive(speed, direction, angularSpeed);
+	m_pCom->Drive(speed, -direction, angularSpeed);
 	return onPoint;
 }
 
@@ -136,15 +136,15 @@ void StateMachine::Run()
 		//m_pCom->Stop();
 		curDriveMode = driveModes.find(newMode);
 		if (curDriveMode == driveModes.end()) {
-			std::cout << "Invalid drive mode from :" << old->second->name << ", reverting to idle" << std::endl;
+			//std::cout << "Invalid drive mode from :" << old->second->name << ", reverting to idle" << std::endl;
 			curDriveMode = driveModes.find(DRIVEMODE_IDLE);
 		}
-		std::cout << "state change :" << old->second->name << " ->" << curDriveMode->second->name << std::endl; //TODO debug: miks siia ei j6ua?
+		//std::cout << "state change :" << old->second->name << " ->" << curDriveMode->second->name << std::endl; //TODO debug: miks siia ei j6ua?
 		curDriveMode->second->onEnter();
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 	}
-	std::cout << "StateMachine stoping" << std::endl;
+	//std::cout << "StateMachine stoping" << std::endl;
 
 }
 

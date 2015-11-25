@@ -33,7 +33,7 @@ public:
 			double curDist = balls[i].getDistance();
 			if(includeHeading)
 				curDist += alpha * curDist * sin(fabs(balls[i].getHeading()) / 180 * CV_PI);
-			std::cout << "getClosest: " << (includeHeading ? 1 : 0) << " " << balls[i].getDistance() << ", " << balls[i].getHeading() << " -> " << curDist << std::endl;
+			//std::cout << "getClosest: " << (includeHeading ? 1 : 0) << " " << balls[i].getDistance() << ", " << balls[i].getHeading() << " -> " << curDist << std::endl;
 			if (curDist < target_distance) {
 				target_index = i;
 				target_distance = curDist;

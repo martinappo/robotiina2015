@@ -18,7 +18,7 @@ DriveMode DriveToBall::stepNaive(double dt)
 	auto &target = getClosestBall();
 	if (target.getDistance() > 10000) return DRIVEMODE_IDLE;
 	if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
-	std::cout << std::endl << "aimtarget0, " ;
+	//std::cout << std::endl << "aimtarget0, " ;
 
 	if (aimTarget(target,10)){
 		if (driveToTarget(target)){
@@ -50,7 +50,7 @@ DriveMode DriveToBall::stepPenatalizeRotation(double dt)
 	}
 	if (target.getDistance() > 10000) return DRIVEMODE_IDLE;
 	if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
-	std::cout << std::endl << "aimtarget0, ";
+	//std::cout << std::endl << "aimtarget0, ";
 	if (aimTarget(target, 10)){
 		if (driveToTarget(target)){
 			if (aimTarget(target, 2)){
@@ -97,7 +97,7 @@ DriveMode CatchBall::step(double dt)
 {
 	FIND_TARGET_BALL
 
-	std::cout << std::endl << "catchTarget0, ";
+	//std::cout << std::endl << "catchTarget0, ";
 	if (STUCK_IN_STATE(3000)) return DRIVEMODE_DRIVE_TO_BALL;
 	if(catchTarget(target)) {
 		return DRIVEMODE_AIM_GATE;
