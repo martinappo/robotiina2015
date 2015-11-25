@@ -14,19 +14,22 @@ Camera::Camera(const std::string &device): ThreadedClass("Camera") {
 void Camera::Init() {
 	paused = false;
 	frameCount = (int)(cap->get(CV_CAP_PROP_FRAME_COUNT));
-	cap->set(CV_CAP_PROP_FPS, 60);
+	//cap->set(CV_CAP_PROP_FPS, 60);
 
 	//	cap->set(CV_CAP_PROP_GAIN, 0.5);
 //	cap->set(CV_CAP_PROP_EXPOSURE, 2);
 	//  [[960 x 960 from (175, 60)]] 
 //	cap->set(CV_CAP_PROP_XI_MANUAL_WB, 1);
 	
-	cap->set(CV_CAP_PROP_FRAME_WIDTH  , 1280);    
-	cap->set(CV_CAP_PROP_FRAME_HEIGHT , 1024);
-	/*
-	cap->set(CV_CAP_PROP_XI_OFFSET_X, 128);    
-	cap->set(CV_CAP_PROP_XI_OFFSET_Y, 32);    
-	*/
+	cap->set(CV_CAP_PROP_FRAME_WIDTH  , 960);    
+	cap->set(CV_CAP_PROP_FRAME_HEIGHT , 960);
+	
+	cap->set(CV_CAP_PROP_XI_OFFSET_X, 160);    
+	cap->set(CV_CAP_PROP_XI_OFFSET_Y, 0);    
+	cap->set(CV_CAP_PROP_XI_OFFSET_Y, 0);    
+//	cap->set(CV_CAP_PROP_EXPOSURE, 10000);    
+//	cap->set(CV_CAP_PROP_XI_OFFSET_Y, 0);    
+	
 	*cap >> frame;
 	frameSize = cv::Size(frame.size());
 
