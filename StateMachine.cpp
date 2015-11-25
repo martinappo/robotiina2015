@@ -5,8 +5,8 @@ bool DriveInstruction::aimTarget(const ObjectPosition &target, double errorMargi
 	//m_pCom->ToggleTribbler(0);
 	double heading = target.getHeading();
 	if (fabs(heading) > errorMargin){
-		std::cout << ", rotating: " << heading ;
-		m_pCom->Drive(0, 0,  -sign(heading) * std::min(20.0, fabs(heading)));
+		std::cout << ", rotating to: " << heading ;
+		m_pCom->Drive(0, 0, -sign(heading) * std::min(20.0, fabs(heading))*0.5);
 		return false;
 	}
 	else{

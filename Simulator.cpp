@@ -198,7 +198,7 @@ void Simulator::UpdateBallPos(double dt){
 	for (int i = 0; i < mNumberOfBalls; i++){
 		if (isMaster) {
 			if (balls[i].speed > 0.001) {
-				balls[i].fieldCoords.x += balls[i].speed*dt * (sin(balls[i].heading / 180 * CV_PI));
+				balls[i].fieldCoords.x -= balls[i].speed*dt * (sin(balls[i].heading / 180 * CV_PI));
 				balls[i].fieldCoords.y -= balls[i].speed*dt * (cos(balls[i].heading / 180 * CV_PI));
 				balls[i].speed *= 0.95;
 			}
@@ -377,18 +377,18 @@ void Simulator::Run(){
 
 bool Simulator::BallInTribbler(){
 	if (!tribblerRunning) return false;
+	bool was_in_tribbler = ball_in_tribbler;
 	double minDist = INT_MAX;
 	double dist = INT_MAX;
 	int minIndex = -1;
 	for (int i = 0; i < mNumberOfBalls; i++){
 		dist = cv::norm(self.fieldCoords - balls[i].fieldCoords);
 		//std::cout << dist << std::endl;
-		if (dist < minDist && fabs(balls[i].getHeading()) < 10){
+		if (dist < minDist && (fabs(balls[i].getHeading()) < 10 || was_in_tribbler || (fabs(balls[i].getHeading()) - 90)< 1)){
 			minDist = dist;
 			minIndex = i;
 		}
 	}
-	bool was_in_tribbler = ball_in_tribbler;
 	if (minDist < (was_in_tribbler ? 25 : 15))
 		ball_in_tribbler= true;
 	else ball_in_tribbler= false;
@@ -396,6 +396,8 @@ bool Simulator::BallInTribbler(){
 }
 
 void Simulator::Kick(int force){
+	if (force == 0) force = 2500;
+	force /= 6;
 	double minDist = INT_MAX;
 	double dist = INT_MAX;
 	int minDistIndex = mNumberOfBalls - 1;
@@ -407,11 +409,11 @@ void Simulator::Kick(int force){
 		}
 	}
 	if (isMaster) {
-		balls[minDistIndex].speed = force*2;
+		balls[minDistIndex].speed = force;
 		balls[minDistIndex].heading = self.getAngle();
 	}
 	else {
-		SendMessage("KCK " + std::to_string(minDistIndex) + " "+std::to_string(force*2)+" " + std::to_string(self.getAngle()) + " #");
+		SendMessage("KCK " + std::to_string(minDistIndex) + " "+std::to_string(force)+" " + std::to_string(self.getAngle()) + " #");
 	}
 	//balls[minDistIndex] = balls[mNumberOfBalls - 1];
 	//balls[mNumberOfBalls - 1].~BallPosition();

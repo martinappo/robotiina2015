@@ -64,7 +64,7 @@ DriveMode AimGate::step(double dt)
 	}
 	else errorMargin = 10;
 	if (aimTarget(target, errorMargin)){
-		return DRIVEMODE_IDLE;
+		return DRIVEMODE_KICK;
 	}
 	return DRIVEMODE_AIM_GATE;
 
