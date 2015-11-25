@@ -8,12 +8,18 @@ void DriveToBall::onEnter()
 
 	m_pCom->ToggleTribbler(30);
 }
-DriveMode DriveToBall::step(double dt)
+DriveMode DriveToBall::step(double dt){
+	//return stepNaive(dt);
+	//return stepAngled(dt);
+	return stepPenatalizeRotation(dt);
+}
+DriveMode DriveToBall::stepNaive(double dt)
 {
 	auto &target = getClosestBall();
 	if (target.getDistance() > 10000) return DRIVEMODE_IDLE;
 	if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
 	std::cout << std::endl << "aimtarget0, " ;
+
 	if (aimTarget(target,10)){
 		if (driveToTarget(target)){
 			if (aimTarget(target,2)){
@@ -23,6 +29,56 @@ DriveMode DriveToBall::step(double dt)
 	}
 	return DRIVEMODE_DRIVE_TO_BALL;
 } 
+DriveMode DriveToBall::stepAngled(double dt)
+{
+	auto &target = getClosestBall();
+
+	if (driveToTargetWithAngle(target, 20, 5))
+		return DRIVEMODE_CATCH_BALL;
+	else
+		return DRIVEMODE_DRIVE_TO_BALL;
+
+}
+DriveMode DriveToBall::stepPenatalizeRotation(double dt)
+{
+	const ObjectPosition &target = getClosestBall(true);
+	//if we are between closest ball and target gate and facing target gate then drive to home
+	//to avoid rotating on any next ball
+	if (fabs(m_pFieldState->GetTargetGate().getHeading()) < 20 
+		&& fabs(target.getHeading()) > 120) {
+		return DRIVEMODE_DRIVE_HOME;
+	}
+	if (target.getDistance() > 10000) return DRIVEMODE_IDLE;
+	if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
+	std::cout << std::endl << "aimtarget0, ";
+	if (aimTarget(target, 10)){
+		if (driveToTarget(target)){
+			if (aimTarget(target, 2)){
+				return DRIVEMODE_CATCH_BALL;
+			}
+		}
+	}
+	return DRIVEMODE_DRIVE_TO_BALL;
+
+}
+
+class DriveToHome : public DriveInstruction
+{
+public:
+	DriveToHome(const std::string &name = "DRIVE_HOME") : DriveInstruction(name){};
+	virtual DriveMode step(double dt){
+		auto target = m_pFieldState->GetHomeGate();
+		if (target.getDistance() < 50) {
+			return DRIVEMODE_DRIVE_TO_BALL;
+		}
+		else {
+			m_pCom->Drive(40, -target.getHeading());
+		}
+	return DRIVEMODE_DRIVE_HOME;
+	}
+
+};
+
 
 
 /*BEGIN CatchBall*/
@@ -88,6 +144,7 @@ void Kick::onEnter()
 
 std::pair<DriveMode, DriveInstruction*> SingleDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_IDLE, new SingleModeIdle()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_HOME, new DriveToHome()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_BALL, new DriveToBall()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_AIM_GATE, new AimGate()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_KICK, new Kick()),

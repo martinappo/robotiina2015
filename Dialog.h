@@ -19,6 +19,7 @@ public:
 	virtual void AddEventListener(IUIEventListener *pEventListener){
 		auto tc = dynamic_cast<ThreadedClass*>(pEventListener);
 		if (tc != NULL) {
+			assert(!tc->name.empty());
 			std::cout << "AddEventListener: " << tc->name << std::endl;
 		}
 		else{
@@ -37,6 +38,7 @@ public:
 			std::cout << "RemoveEventListener: " << "unknow class" << std::endl;
 		}
 		boost::mutex::scoped_lock lock(click_mutex); //allow one command at a time
+		//TODO: this is not working, fiqure out why or replace with for loop
 		std::remove_if(m_EventListeners.begin(), m_EventListeners.end(), [pEventListener](IUIEventListener *p){return p == pEventListener; });
 		std::cout << "count: " << m_EventListeners.size() << std::endl;
 	};

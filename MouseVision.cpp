@@ -3,7 +3,7 @@
 #include <thread>
 #include "ObjectFinder.h"
 
-MouseVision::MouseVision(ICamera * pCamera, IDisplay *pDisplay, FieldState *pFieldState)
+MouseVision::MouseVision(ICamera * pCamera, IDisplay *pDisplay, FieldState *pFieldState) :ThreadedClass("MouseVision")
 {
 	m_pCamera = pCamera;
 	m_pDisplay = pDisplay;

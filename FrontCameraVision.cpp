@@ -143,21 +143,21 @@ void FrontCameraVision::Run() {
 		cv::Point2f r1[4], r2[4];
 		cv::Point g1, g2;
 		//Blue gate pos
-		bool found = blueGateFinder.Locate(thresholdedImages[BLUE_GATE], frameHSV, frameBGR, g1, r1);
+		bool blueFound = blueGateFinder.Locate(thresholdedImages[BLUE_GATE], frameHSV, frameBGR, g1, r1);
 
 		//if (!found) {
 		//	m_pDisplay->ShowImage(frameBGR);
 		//	continue; // nothing to do :(
 		//}
 		//Yellow gate pos
-		found &= yellowGateFinder.Locate(thresholdedImages[YELLOW_GATE], frameHSV, frameBGR, g2, r2);
+		bool yellowFound = yellowGateFinder.Locate(thresholdedImages[YELLOW_GATE], frameHSV, frameBGR, g2, r2);
 		//if (!found) {
 		//	m_pDisplay->ShowImage(frameBGR);
 		//	continue; // nothing to do :(
 		//}
 		// ajust gate positions to ..
 		// find closest points to opposite gate centre
-		if (found) {
+		if (blueFound && yellowFound) {
 			auto min_i1 = 0, min_j1 = 0, min_i2 = 0, min_j2 = 0;
 			double min_dist1 = INT_MAX, min_dist2 = INT_MAX;
 			for (int i = 0; i < 4; i++){
@@ -184,21 +184,21 @@ void FrontCameraVision::Run() {
 
 			cv::Scalar color2(0, 0, 255);
 
-			auto c1 = (r1[min_i1] + r1[min_i2]) / 2;
+			cv::Point2d c1 = (r1[min_i1] + r1[min_i2]) / 2;
 			circle(frameBGR, c1, 12, color4, -1, 12, 0);
-			auto c2 = (r2[min_j1] + r2[min_j2]) / 2;
+			cv::Point2d c2 = (r2[min_j1] + r2[min_j2]) / 2;
 			circle(frameBGR, c2, 7, color2, -1, 8, 0);
 
-			m_pState->blueGate.updateRawCoordinates(c1, cv::Point2d(frameBGR.size() / 2));
-			m_pState->yellowGate.updateRawCoordinates(c2, cv::Point2d(frameBGR.size() / 2));
+			m_pState->blueGate.updateRawCoordinates(c1-cv::Point2d(frameBGR.size() / 2));
+			m_pState->yellowGate.updateRawCoordinates(c2- cv::Point2d(frameBGR.size() / 2));
 
 			m_pState->self.updateFieldCoords();
 		}
 		//Balls pos 
 //		cv::Mat rotMat = getRotationMatrix2D(cv::Point(0,0), -m_pState->self.getAngle(), 1);
 		cv::Mat balls(3, m_pState->balls.size(), CV_64FC1);
-		found = ballFinder.Locate(thresholdedImages[BALL], frameHSV, frameBGR, balls);
-		if (found) {
+		bool ballsFound = ballFinder.Locate(thresholdedImages[BALL], frameHSV, frameBGR, balls);
+		if (ballsFound) {
 			balls.row(0) -= frameBGR.size().width / 2;
 			balls.row(1) -= frameBGR.size().height / 2;
 //			cv::Mat rotatedBalls(balls.size(), balls.type());
@@ -208,15 +208,30 @@ void FrontCameraVision::Run() {
 
 			/* find balls that are close by */
 			for (int j = 0; j < balls.cols; j++){
-				m_pState->balls[j].updateRawCoordinates(cv::Point2d(balls.at<double>(0, j), balls.at<double>(1, j)), cv::Point(0, 0));
+				cv::Point2d rawCoords = cv::Point2d(balls.at<double>(0, j), balls.at<double>(1, j));
+				// find if ball projection to gate is larger than gate
+				// not quite working
+				if (blueFound && cv::norm(m_pState->blueGate.rawPixelCoords) < cv::norm(rawCoords)*cos(gDistanceCalculator.angleBetween(m_pState->blueGate.rawPixelCoords, rawCoords) / 180 * CV_PI)){
+					rawCoords = { INT_MAX, INT_MAX };
+				}
+				if (yellowFound && cv::norm(m_pState->yellowGate.rawPixelCoords) < cv::norm(rawCoords)*cos(gDistanceCalculator.angleBetween(m_pState->yellowGate.rawPixelCoords, rawCoords) / 180 * CV_PI)){
+					rawCoords = { INT_MAX, INT_MAX };
+				}
+				m_pState->balls[j].updateRawCoordinates(rawCoords, cv::Point(0, 0));
 				m_pState->balls[j].updateFieldCoords(m_pState->self.getFieldPos(), m_pState->self.getAngle());
 				m_pState->balls[j].isUpdated = true;
 			}
+			//TODO: use returned ball instead of balls.at<double>(0, ball_idx) 
 			int ball_idx = 0;
-			const BallPosition &ball = m_pState->balls.getClosest(&ball_idx);
-			cv::Rect bounding_rect = cv::Rect(cv::Point(balls.at<double>(0, ball_idx), balls.at<double>(1, ball_idx)) - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2), 
+			m_pState->balls.getClosest(false, &ball_idx);
+			cv::Rect bounding_rect = cv::Rect(cv::Point(balls.at<double>(0, ball_idx), balls.at<double>(1, ball_idx)) - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
 				cv::Point(balls.at<double>(0, ball_idx), balls.at<double>(1, ball_idx)) + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
 			rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), cv::Scalar(255, 0, 0), 2, 8, 0);
+
+			m_pState->balls.getClosest(true, &ball_idx);
+			bounding_rect = cv::Rect(cv::Point(balls.at<double>(0, ball_idx), balls.at<double>(1, ball_idx)) - cv::Point(30, 30) + cv::Point(frameBGR.size() / 2),
+				cv::Point(balls.at<double>(0, ball_idx), balls.at<double>(1, ball_idx)) + cv::Point(30, 30) + cv::Point(frameBGR.size() / 2));
+			rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), cv::Scalar(255, 255, 0), 2, 8, 0);
 		}
 		/*
 		ObjectPosition *targetGatePos = 0;
