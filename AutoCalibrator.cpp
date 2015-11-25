@@ -3,7 +3,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 
-AutoCalibrator::AutoCalibrator(ICamera * pCamera, IDisplay *pDisplay)
+AutoCalibrator::AutoCalibrator(ICamera * pCamera, IDisplay *pDisplay) :ThreadedClass("AutoCalibrator")
 {
     range = {{0,179},{0,255},{0,255}};
 	m_pCamera = pCamera;
@@ -82,7 +82,7 @@ bool AutoCalibrator::OnMouseEvent(int event, float x, float y, int flags, bool b
 			if (cv::norm(thresholdCorner1 - thresholdCorner2) > 100){
 				cv::Rect myROI(thresholdCorner1, thresholdCorner2);
 				image = image(myROI);
-				m_pDisplay->ShowImage(image);
+				m_pDisplay->ShowImage(image, true, false);
 				screenshot_mode = CALIBRATION;
 				drawRect = false;
 			}
@@ -191,7 +191,7 @@ void AutoCalibrator::Run() {
 			else{
 				cv::putText(display, "Select area for thresholding", cv::Point(200, 220), cv::FONT_HERSHEY_DUPLEX, 0.9, cv::Scalar(23, 40, 245));
 			}
-			m_pDisplay->ShowImage(display);
+			m_pDisplay->ShowImage(display, true, false);
 
 		}
 		else if (screenshot_mode == GRAB_FRAME){
@@ -205,7 +205,7 @@ void AutoCalibrator::Run() {
 		else if (screenshot_mode == CALIBRATION){
 			image.copyTo(display);
 			cv::putText(display, "Please wait, clustering", cv::Point(200, 220), cv::FONT_HERSHEY_DUPLEX, 0.9, cv::Scalar(23, 40, 245));
-			m_pDisplay->ShowImage(display);
+			m_pDisplay->ShowImage(display, true, false);
 
 			DetectThresholds(48);
 			screenshot_mode = THRESHOLDING;
@@ -219,7 +219,7 @@ void AutoCalibrator::Run() {
 		else if (screenshot_mode == GET_THRESHOLD) {
 			cv::putText(display, object_name, cv::Point((int)(image.cols * 0.3), (int)(image.rows*0.3)), cv::FONT_HERSHEY_DUPLEX , 1, cv::Scalar(23, 67, 245));
 			cv::putText(display, "(ctrl +) click to select pixels, right click back", cv::Point((int)(image.cols * 0.2), (int)(image.rows*0.5)), cv::FONT_HERSHEY_DUPLEX, 0.3, cv::Scalar(23, 67, 245));
-			m_pDisplay->ShowImage(display);
+			m_pDisplay->ShowImage(display, true, false);
 
 		}
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));

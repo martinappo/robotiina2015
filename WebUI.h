@@ -13,7 +13,7 @@ public:
 	virtual int createButton(const std::string& bar_name, char shortcut, std::function<void()> const &);
 	virtual int Draw();
 	virtual void clearButtons();
-	virtual void ShowImage(const cv::Mat &image, bool main = true);
+	virtual void ShowImage(const cv::Mat &image, bool main = true, bool flip = true);
 	virtual void AddEventListener(IUIEventListener *pEventListener);
 	virtual void RemoveEventListener(IUIEventListener *pEventListener);
 	virtual void putText(const std::string &text, cv::Point pos, double fontScale, cv::Scalar color);
