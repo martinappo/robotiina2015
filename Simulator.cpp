@@ -60,16 +60,23 @@ void Simulator::WriteString(const std::string &command){
 //			std::cout << "xxxxxxxxxxxxx" << std::endl;
 		}
 		else if (id == 4) {
-			char cmd = s[2];
-			if (cmd == 'k') {
-				Kick(atoi(s.substr(4).c_str()));
+			if (s[2] == 'k') {
+				Kick(atoi(s.substr(3).c_str()));
 			}
+			else if (s[2] == 'd' && s[3] == 'm') {
+				ToggleTribbler(atoi(s.substr(4).c_str()) > 0);
+			}
+			
 		}
 	}
 	
 }
-
-void Simulator::MessageReceived(const std::string & message){
+void Simulator::DataReceived(const std::string & message) {//serial
+	if (messageCallback != NULL) {
+		messageCallback->DataReceived(message);
+	}
+}
+void Simulator::MessageReceived(const std::string & message){ //udp
 	std::stringstream ss(message);
 	std::string command, r_id;
 	ss >> command;
@@ -164,8 +171,8 @@ void Simulator::UpdateGatePos(){
 	for (int s = -1; s < 2; s += 2){
 		cv::Point2d shift1(s * 10, -20);
 		cv::Point2d shift2(s * 10, 20);
-		double a1 = -gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - (blueGate.fieldCoords + shift1)) + self.getAngle();
-		double a2 = -gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - (yellowGate.fieldCoords + shift2)) + self.getAngle();
+		double a1 = gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - (blueGate.fieldCoords + shift1)) - self.getAngle();
+		double a2 = gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - (yellowGate.fieldCoords + shift2)) - self.getAngle();
 
 		double d1 = gDistanceCalculator.getDistanceInverted(self.fieldCoords, blueGate.fieldCoords + shift1);
 		double d2 = gDistanceCalculator.getDistanceInverted(self.fieldCoords, yellowGate.fieldCoords + shift2);
@@ -191,17 +198,22 @@ void Simulator::UpdateBallPos(double dt){
 	for (int i = 0; i < mNumberOfBalls; i++){
 		if (isMaster) {
 			if (balls[i].speed > 0.001) {
-				balls[i].fieldCoords.x += balls[i].speed*dt * (sin(balls[i].heading / 180 * CV_PI));
+				balls[i].fieldCoords.x -= balls[i].speed*dt * (sin(balls[i].heading / 180 * CV_PI));
 				balls[i].fieldCoords.y -= balls[i].speed*dt * (cos(balls[i].heading / 180 * CV_PI));
 				balls[i].speed *= 0.95;
 			}
 			message << (int)balls[i].fieldCoords.x << " " << (int)balls[i].fieldCoords.y << " ";
 			//SendMessage(message.str());
 		}
-		double a = -gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - balls[i].fieldCoords) + self.getAngle();
+		double a = gDistanceCalculator.angleBetween(cv::Point(0, 1), self.fieldCoords - balls[i].fieldCoords) - self.getAngle();
+		double a2 = gDistanceCalculator.angleBetween(cv::Point(0, 1), self.fieldCoords - balls[i].fieldCoords) + self.getAngle();
 		double d = gDistanceCalculator.getDistanceInverted(self.fieldCoords, balls[i].fieldCoords);
-		double x = d*sin(a / 180 * CV_PI);
-		double y = d*cos(a / 180 * CV_PI);
+		double x = -d*sin(a / 180 * CV_PI);
+		double y = -d*cos(a / 180 * CV_PI);
+		balls[i].polarMetricCoords.x = cv::norm(self.fieldCoords - balls[i].fieldCoords);
+		if (a > 360) a -= 360;
+		if (a < 0) a += 360;
+		balls[i].polarMetricCoords.y = a;
 		cv::Scalar color(48, 154, 236);
 		cv::circle(frame, cv::Point(x, y) + cv::Point(frame.size() / 2), 12, color, -1);
 	}
@@ -240,13 +252,13 @@ void Simulator::UpdateRobotPos(){
 	//std::cout << robotSpeed << std::endl;
 
 	
-	self.polarMetricCoords.y -= (robotSpeed.at<double>(2)*dt);
+	self.polarMetricCoords.y += (robotSpeed.at<double>(2)*dt);
 	if (self.polarMetricCoords.y > 360) self.polarMetricCoords.y -= 360;
 	if (self.polarMetricCoords.y < -360) self.polarMetricCoords.y += 360;
 	cv::Mat rotMat = getRotationMatrix2D(cv::Point(0, 0), self.getAngle(), 1);
 	cv::Mat rotatedSpeed = rotMat * robotSpeed;
 
-	self.fieldCoords.x += rotatedSpeed.at<double>(0)*dt;
+	self.fieldCoords.x -= rotatedSpeed.at<double>(0)*dt;
 	self.fieldCoords.y -= rotatedSpeed.at<double>(1)*dt;
 	
 
@@ -258,6 +270,8 @@ void Simulator::UpdateRobotPos(){
 
 	UpdateGatePos();
 	UpdateBallPos(dt);
+	UpdateBallIntTribbler();
+
 
 	{
 		std::lock_guard<std::mutex> lock(mutex);
@@ -266,7 +280,17 @@ void Simulator::UpdateRobotPos(){
 
 }
 
-
+void Simulator::UpdateBallIntTribbler(){
+	bool was_in_tribbler = ball_in_tribbler;
+	BallInTribbler();
+	bool is_in_tribbler = ball_in_tribbler;
+	if (!was_in_tribbler && is_in_tribbler) {
+		DataReceived("<5:bl:1>\n");
+	}
+	else if (was_in_tribbler && !is_in_tribbler) {
+		DataReceived("<5:bl:0>\n");
+	}
+}
 Simulator::~Simulator()
 {
 	WaitForStop();
@@ -285,6 +309,9 @@ cv::Mat & Simulator::Capture(bool bFullFrame){
 	}
 
 	std::lock_guard<std::mutex> lock(mutex);
+#ifdef VIRTUAL_FLIP
+	cv::flip(frame_copy, frame_copy, 1);
+#endif
 	frame_copy.copyTo(frame_copy2);
 	return frame_copy2;
 }
@@ -350,15 +377,18 @@ void Simulator::Run(){
 
 bool Simulator::BallInTribbler(){
 	if (!tribblerRunning) return false;
+	bool was_in_tribbler = ball_in_tribbler;
 	double minDist = INT_MAX;
 	double dist = INT_MAX;
+	int minIndex = -1;
 	for (int i = 0; i < mNumberOfBalls; i++){
 		dist = cv::norm(self.fieldCoords - balls[i].fieldCoords);
 		//std::cout << dist << std::endl;
-		if (dist < minDist)
+		if (dist < minDist && (fabs(balls[i].getHeading()) < 10 || was_in_tribbler || (fabs(balls[i].getHeading()) - 90)< 1)){
 			minDist = dist;
+			minIndex = i;
+		}
 	}
-	bool was_in_tribbler = ball_in_tribbler;
 	if (minDist < (was_in_tribbler ? 25 : 15))
 		ball_in_tribbler= true;
 	else ball_in_tribbler= false;
@@ -366,6 +396,8 @@ bool Simulator::BallInTribbler(){
 }
 
 void Simulator::Kick(int force){
+	if (force == 0) force = 2500;
+	force /= 6;
 	double minDist = INT_MAX;
 	double dist = INT_MAX;
 	int minDistIndex = mNumberOfBalls - 1;
@@ -377,11 +409,11 @@ void Simulator::Kick(int force){
 		}
 	}
 	if (isMaster) {
-		balls[minDistIndex].speed = force*2;
+		balls[minDistIndex].speed = force;
 		balls[minDistIndex].heading = self.getAngle();
 	}
 	else {
-		SendMessage("KCK " + std::to_string(minDistIndex) + " "+std::to_string(force*2)+" " + std::to_string(self.getAngle()) + " #");
+		SendMessage("KCK " + std::to_string(minDistIndex) + " "+std::to_string(force)+" " + std::to_string(self.getAngle()) + " #");
 	}
 	//balls[minDistIndex] = balls[mNumberOfBalls - 1];
 	//balls[mNumberOfBalls - 1].~BallPosition();

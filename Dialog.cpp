@@ -59,13 +59,23 @@ Dialog::Dialog(const std::string &title, const cv::Size &ptWindowSize, const cv:
 Dialog::~Dialog(){
 	WaitForStop();
 }
-void Dialog::ShowImage(const cv::Mat &image, bool main) {
+void Dialog::ShowImage(const cv::Mat &image, bool main, bool flipX) {
 	if (!m_bMainCamEnabled && main) return;
 	boost::mutex::scoped_lock lock(display_mutex); //allow one command at a time
 	if (main){
-		//cv::flip(image, image, 1);
+
+#ifdef VIRTUAL_FLIP
+		if(flipX)
+			cv::flip(image, cam1_area, 1);
+		else
+			image.copyTo(cam1_area);
+#else
+		image.copyTo(cam1_area);
+#endif
 	}
-	image.copyTo(main ? cam1_area : cam2_area);
+	else{
+		image.copyTo(cam2_area);
+	}
 	//	resize(image, cam_area, cv::Size(CAM_WIDTH, CAM_HEIGHT));//resize image
 	//resize(image, display, cv::Size(WINDOW_WIDTH, WINDOW_HEIGHT));//resize image
 }

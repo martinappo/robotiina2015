@@ -15,9 +15,9 @@ void BallPosition::predictCoordinates() {
 	//TODO: generate other coordinate types from predicted pixelcoords
 }
 
-void BallPosition::updateFieldCoords(cv::Point2d orgin) {
-	double fieldY = -(polarMetricCoords.x * cos(TAU*polarMetricCoords.y / 360));
-	double fieldX = (polarMetricCoords.x * sin(TAU*polarMetricCoords.y / 360));
+void BallPosition::updateFieldCoords(cv::Point2d orgin, double heading) {
+	double fieldY = -(polarMetricCoords.x * cos(TAU*(heading+polarMetricCoords.y) / 360));
+	double fieldX = (polarMetricCoords.x * sin(TAU*(heading+polarMetricCoords.y) / 360));
 	cv::Point2d filteredCoords = true ? cv::Point2d(fieldX, fieldY) : filter.doFiltering(cv::Point2d(fieldX, fieldY));
 	fieldCoords = orgin + filteredCoords;
 	time = boost::posix_time::microsec_clock::local_time();

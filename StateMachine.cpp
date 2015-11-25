@@ -15,15 +15,14 @@ bool DriveInstruction::catchTarget(const ObjectPosition &target){
 		m_pCom->Drive(0, 0, 0);
 		return true;
 	}
-	double heading =  target.getHeading();
-	m_pCom->Drive(70, 0, 0);
+	
+	m_pCom->ToggleTribbler(100);
+	m_pCom->Drive(20, 0, 0);
 	return false;
 }
 
 bool DriveInstruction::driveToTarget(const ObjectPosition &target, double maxDistance){
 
-	//if (USE_ANGLED_DRIVING)
-	//	return driveToTargetWithAngle(target, maxDistance);
 	double dist = target.getDistance();
 		
 	if (dist > maxDistance){

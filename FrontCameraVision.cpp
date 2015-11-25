@@ -195,22 +195,21 @@ void FrontCameraVision::Run() {
 			m_pState->self.updateFieldCoords();
 		}
 		//Balls pos 
-		cv::Mat rotMat = getRotationMatrix2D(cv::Point(0,0), +m_pState->self.getAngle(), 1);
+//		cv::Mat rotMat = getRotationMatrix2D(cv::Point(0,0), -m_pState->self.getAngle(), 1);
 		cv::Mat balls(3, m_pState->balls.size(), CV_64FC1);
 		found = ballFinder.Locate(thresholdedImages[BALL], frameHSV, frameBGR, balls);
 		if (found) {
 			balls.row(0) -= frameBGR.size().width / 2;
 			balls.row(1) -= frameBGR.size().height / 2;
-			cv::Mat rotatedBalls(balls.size(), balls.type());
+//			cv::Mat rotatedBalls(balls.size(), balls.type());
 
-			rotatedBalls = rotMat * balls;
+//			rotatedBalls = rotMat * balls;
 			m_pState->resetBallsUpdateState();
 
 			/* find balls that are close by */
-			for (int j = 0; j < rotatedBalls.cols; j++){
-				m_pState->balls[j].updateRawCoordinates(cv::Point2d(rotatedBalls.col(j)), cv::Point(0, 0));
-				m_pState->balls[j].updateFieldCoords(m_pState->self.getFieldPos());
-				m_pState->balls[j].polarMetricCoords.y += m_pState->self.getAngle(); // rotate balls back
+			for (int j = 0; j < balls.cols; j++){
+				m_pState->balls[j].updateRawCoordinates(cv::Point2d(balls.at<double>(0, j), balls.at<double>(1, j)), cv::Point(0, 0));
+				m_pState->balls[j].updateFieldCoords(m_pState->self.getFieldPos(), m_pState->self.getAngle());
 				m_pState->balls[j].isUpdated = true;
 			}
 			int ball_idx = 0;

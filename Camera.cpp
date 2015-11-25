@@ -3,7 +3,7 @@
 #include <thread>
 #define DOUBLE_BUFFERING
 
-Camera::Camera(const std::string &device) {
+Camera::Camera(const std::string &device): ThreadedClass("Camera") {
 	cap = new cv::VideoCapture(device.c_str());
 	if (!cap->isOpened())  // if not success, exit program
 	{
@@ -58,6 +58,9 @@ void Camera::Init() {
 
 
 	if (frameCount == 1) { // image
+#ifndef VIRTUAL_FLIP
+		cv::flip(frame, frame, 1);
+#endif
 		return;
 	}
 
@@ -96,6 +99,7 @@ cv::Mat &Camera::GetLastFrame(bool bFullFrame){
 
 cv::Mat &Camera::Capture(bool bFullFrame) {
 
+
 	if (frameCount == 1) { // image
 		frame.copyTo(frame1); // return clean copy
 		//return frame1_roi;
@@ -104,7 +108,9 @@ cv::Mat &Camera::Capture(bool bFullFrame) {
 #ifndef DOUBLE_BUFFERING
 		if (cap->isOpened()){
 			*cap >> *m_pFrame;
-			//cv::flip(*m_pFrame, *m_pFrame, 1);
+#ifndef VIRTUAL_FLIP
+			cv::flip(*m_pFrame, *m_pFrame, 1);
+#endif
 		}
 #else
 		if (bCaptureNextFrame) {
@@ -147,7 +153,9 @@ void Camera::Run(){
 
 		if (cap->isOpened()) {
 			*cap >> nextFrame;
-			 //cv::flip(nextFrame, nextFrame, 1);
+#ifndef VIRTUAL_FLIP
+			 cv::flip(nextFrame, nextFrame, 1);
+#endif
 
 		}
 		else {

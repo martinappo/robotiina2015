@@ -14,15 +14,31 @@ public:
 	int createButton(const std::string& bar_name, char shortcut, std::function<void()> const &);
 	int Draw();
 	void clearButtons();
-	virtual void ShowImage(const cv::Mat &image, bool main = true);
+	virtual void ShowImage(const cv::Mat &image, bool main = true, bool flip = true);
 	void ClearDisplay();
 	virtual void AddEventListener(IUIEventListener *pEventListener){
+		auto tc = dynamic_cast<ThreadedClass*>(pEventListener);
+		if (tc != NULL) {
+			std::cout << "AddEventListener: " << tc->name << std::endl;
+		}
+		else{
+			std::cout << "AddEventListener: " << "unknow class" << std::endl;
+		}
 		boost::mutex::scoped_lock lock(click_mutex); //allow one command at a time
 		m_EventListeners.push_back(pEventListener);
+		std::cout << "count: " << m_EventListeners.size() << std::endl;
 	};
 	virtual void RemoveEventListener(IUIEventListener *pEventListener){
+		auto tc = dynamic_cast<ThreadedClass*>(pEventListener);
+		if (tc != NULL) {
+			std::cout << "RemoveEventListener: " << tc->name << std::endl;
+		}
+		else{
+			std::cout << "RemoveEventListener: " << "unknow class" << std::endl;
+		}
 		boost::mutex::scoped_lock lock(click_mutex); //allow one command at a time
-		std::remove_if(m_EventListeners.begin(), m_EventListeners.end(), [pEventListener](IUIEventListener *p){return p = pEventListener; });
+		std::remove_if(m_EventListeners.begin(), m_EventListeners.end(), [pEventListener](IUIEventListener *p){return p == pEventListener; });
+		std::cout << "count: " << m_EventListeners.size() << std::endl;
 	};
 	std::vector<IUIEventListener*> m_EventListeners;
 	virtual void putText(const std::string &text, cv::Point pos, double fontScale, cv::Scalar color);

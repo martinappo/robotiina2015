@@ -1,6 +1,13 @@
 #include "SingleModePlay.h"
 #include "AutoPlayHelpers.h"
 
+/*BEGIN DriveToBall*/
+void DriveToBall::onEnter()
+{
+	DriveInstruction::onEnter();
+
+	m_pCom->ToggleTribbler(30);
+}
 DriveMode DriveToBall::step(double dt)
 {
 	auto &target = getClosestBall();
@@ -38,6 +45,7 @@ DriveMode CatchBall::step(double dt)
 {
 	FIND_TARGET_BALL
 
+	std::cout << std::endl << "catchTarget0, ";
 	if (STUCK_IN_STATE(3000)) return DRIVEMODE_DRIVE_TO_BALL;
 	if(catchTarget(target)) {
 		return DRIVEMODE_AIM_GATE;

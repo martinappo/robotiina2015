@@ -26,10 +26,10 @@ public:
 		std::chrono::milliseconds dura(ms);
 		std::this_thread::sleep_for(dura);
 	}
+	std::string name;
 protected:
 	boost::thread_group threads;
 	boost::atomic<bool> stop_thread;
-	std::string name;
 	virtual void Run() = 0;
 
 };

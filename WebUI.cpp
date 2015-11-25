@@ -22,7 +22,7 @@ int WebUI::Draw()
 void WebUI::clearButtons()
 {
 }
-void WebUI::ShowImage(const cv::Mat &image, bool main)
+void WebUI::ShowImage(const cv::Mat &image, bool main, bool flip)
 {
 }
 void WebUI::AddEventListener(IUIEventListener *pEventListener)
