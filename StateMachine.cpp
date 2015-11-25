@@ -2,11 +2,9 @@
 #include <algorithm>    // std::min
 
 bool DriveInstruction::aimTarget(const ObjectPosition &target, double errorMargin){
-	//m_pCom->ToggleTribbler(0);
 	double heading = target.getHeading();
 	if (fabs(heading) > errorMargin){
-		//std::cout << ", rotating to: " << heading ;
-		m_pCom->Drive(0, 0, -sign(heading) * std::min(20.0, fabs(heading))*0.5);
+		m_pCom->Drive(0, 0, -sign(heading) * std::min(20.0, fabs(heading))*0.8);
 		return false;
 	}
 	else{
@@ -20,17 +18,11 @@ bool DriveInstruction::catchTarget(const ObjectPosition &target){
 		return true;
 	}
 	double heading =  target.getHeading();
-	//std::cout << ", catchTarget: " << heading;
-	
-	m_pCom->ToggleTribbler(100);
-	m_pCom->Drive(20, 0, 0);
+	m_pCom->Drive(30, 0, 0);
 	return false;
 }
 
 bool DriveInstruction::driveToTarget(const ObjectPosition &target, double maxDistance){
-
-//	if (USE_ANGLED_DRIVING)
-//		return driveToTargetWithAngle(target, maxDistance);
 	double dist = target.getDistance();
 		
 	if (dist > maxDistance){
@@ -54,9 +46,9 @@ bool DriveInstruction::driveToTargetWithAngle(const ObjectPosition &target, doub
 	bool onPoint = false;
 	if (fabs(heading) > errorMargin){
 		if (dist > maxDistance){
-			speed = std::min(100.0, std::max(20.0, dist));
+			speed = std::min(200.0, std::max(30.0, dist));
 			direction = heading; //drive towards target
-			angularSpeed = sign(heading) * 4; //meanwhile rotate slowly to face the target
+			angularSpeed = sign(heading) * 20; //meanwhile rotate slowly to face the target
 		}
 		else{ //at location but facing wrong way
 			angularSpeed = heading * 0.5; //rotate
@@ -64,12 +56,12 @@ bool DriveInstruction::driveToTargetWithAngle(const ObjectPosition &target, doub
 	}
 	else{
 		if (dist > maxDistance){
-			speed = std::min(100.0, std::max(20.0, dist));
+			speed = std::min(200.0, std::max(30.0, dist));
 			direction = heading; //drive towards target
 		}
 		else onPoint = true;
 	}
-	m_pCom->Drive(speed, -direction, angularSpeed);
+	m_pCom->Drive(speed, direction, -angularSpeed); 
 	return onPoint;
 }
 

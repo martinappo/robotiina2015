@@ -1,6 +1,6 @@
 #define HEADING(angle) (angle > 180 ? angle - 360 : angle) 
 #define BALL_IN_TRIBBLER m_pCom->BallInTribbler()
-#define START_TRIBBLER m_pCom->ToggleTribbler(50);
+#define START_TRIBBLER m_pCom->ToggleTribbler(100);
 #define STOP_TRIBBLER m_pCom->ToggleTribbler(0);
 #define SIGHT_OBSTRUCTED false //TODO:Fix this
 

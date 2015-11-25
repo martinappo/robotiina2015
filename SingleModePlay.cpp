@@ -6,12 +6,12 @@ void DriveToBall::onEnter()
 {
 	DriveInstruction::onEnter();
 
-	m_pCom->ToggleTribbler(30);
+	m_pCom->ToggleTribbler(0);
 }
 DriveMode DriveToBall::step(double dt){
 	//return stepNaive(dt);
-	//return stepAngled(dt);
-	return stepPenatalizeRotation(dt);
+	return stepAngled(dt);
+	//return stepPenatalizeRotation(dt);
 }
 DriveMode DriveToBall::stepNaive(double dt)
 {
@@ -32,11 +32,14 @@ DriveMode DriveToBall::stepNaive(double dt)
 DriveMode DriveToBall::stepAngled(double dt)
 {
 	auto &target = getClosestBall();
-
-	if (driveToTargetWithAngle(target, 20, 5))
+	if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
+	if (driveToTargetWithAngle(target, 25, 5)){
 		return DRIVEMODE_CATCH_BALL;
-	else
+	}
+	else {
 		return DRIVEMODE_DRIVE_TO_BALL;
+	}
+		
 
 }
 DriveMode DriveToBall::stepPenatalizeRotation(double dt)
@@ -85,33 +88,29 @@ public:
 void CatchBall::onEnter()
 {
 	DriveInstruction::onEnter();
-
 	m_pCom->ToggleTribbler(100);
 	STOP_DRIVING
 }
-void CatchBall::onExit()
-{
-	//DO_NOT_STOP_TRIBBLER
-}
 DriveMode CatchBall::step(double dt)
 {
-	FIND_TARGET_BALL
-
-	//std::cout << std::endl << "catchTarget0, ";
+	FIND_TARGET_BALL //TODO: use it?
 	if (STUCK_IN_STATE(3000)) return DRIVEMODE_DRIVE_TO_BALL;
 	if(catchTarget(target)) {
 		return DRIVEMODE_AIM_GATE;
 	}
 	return DRIVEMODE_CATCH_BALL;
 }
-
+void CatchBall::onExit()
+{
+	//DO_NOT_STOP_TRIBBLER
+}
 /*END CatchBall*/
 
 
 /*BEGIN AimGate*/
+
 DriveMode AimGate::step(double dt)
 {
-
 	FIND_TARGET_GATE
 	if (!BALL_IN_TRIBBLER) return DRIVEMODE_DRIVE_TO_BALL;	
 	double errorMargin;
@@ -123,24 +122,24 @@ DriveMode AimGate::step(double dt)
 		return DRIVEMODE_KICK;
 	}
 	return DRIVEMODE_AIM_GATE;
-
 }
 
 
 /*BEGIN Kick*/
-DriveMode Kick::step(double dt)
-{
-	STOP_DRIVING
-	std::this_thread::sleep_for(std::chrono::milliseconds(50));
-	m_pCom->Kick();
-	std::this_thread::sleep_for(std::chrono::milliseconds(500)); //half second wait.
-	return DRIVEMODE_DRIVE_TO_BALL;
-}
 void Kick::onEnter()
 {
 	DriveInstruction::onEnter();
 	STOP_TRIBBLER
+	STOP_DRIVING
 }
+DriveMode Kick::step(double dt)
+{
+	std::this_thread::sleep_for(std::chrono::milliseconds(50));
+	m_pCom->Kick();
+	std::this_thread::sleep_for(std::chrono::milliseconds(50)); //less than half second wait.
+	return DRIVEMODE_DRIVE_TO_BALL;
+}
+
 
 std::pair<DriveMode, DriveInstruction*> SingleDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_IDLE, new SingleModeIdle()),
