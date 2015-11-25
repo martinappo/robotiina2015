@@ -7,7 +7,7 @@
 #include <chrono>
 #include <thread>
 
-#define DUMP_SERIAL
+//#define DUMP_SERIAL
 
 #ifdef DUMP_SERIAL
 #include <fstream>
@@ -55,8 +55,8 @@ public:
 		log << s;
 		log.flush();
 #endif
-		std::chrono::milliseconds dura(50);
-		std::this_thread::sleep_for(dura);
+//		std::chrono::milliseconds dura(50);
+//		std::this_thread::sleep_for(dura);
  	}
 
 	virtual void DataReceived(const std::string & message){};
