@@ -4,6 +4,33 @@
 #define TRIBBLER_QUEUE_SIZE 30
 #define TRIBBLER_STATE_THRESHOLD 16
 
+void CoilBoard::DataReceived(const std::string & message)
+{
+	for (int i = 0; i < message.length(); i++){
+		if (message[i] == '\n'){
+			HandleMessage(last_message);
+			last_message = "";
+		}
+		else 
+			last_message += message[i];
+	}
+}
+void CoilBoard::HandleMessage(const std::string & message)
+{
+	//<5:bl:0>
+	if ((message[1] - '0') == ID_MAIN_BOARD){
+		
+		if ((message[3] == 'b') && (message[4] == 'l')){
+			ballInTribbler = (message[6] == '1');
+		}
+		else if (message[3] == 'c') { // charge done
+			//TODO: allow kicking again, instead of waiting fo 1.5 sec below
+		}
+	}
+
+}
+
+
 void CoilBoard::Kick(int force){
 	boost::posix_time::ptime time2 = boost::posix_time::microsec_clock::local_time();
 	//std::cout << (afterKickTime - time2).total_milliseconds() << std::endl;
