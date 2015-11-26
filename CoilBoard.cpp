@@ -102,13 +102,12 @@ void CoilBoard::Run(){
 
 		if (m_pComPort) m_pComPort->SendCommand(ID_MAIN_BOARD, "fs", 1);
 		if (m_pComPort) m_pComPort->SendCommand(ID_MAIN_BOARD, "dm", 0);
-		/*
-		for(int i = 0; i< 20; i++) {
-			if (m_pComPort) m_pComPort->SendCommand(ID_MAIN_BOARD, "k", 800 + (i * 50));
-			Sleep(200);
+		
+		for(int i = 0; i< 50; i++) {
+			if (m_pComPort) m_pComPort->SendCommand(ID_MAIN_BOARD, "k", 200 + (i * 100));
+			Sleep(50);
 		}
-		Sleep(1000);
-		*/
+		Sleep(500);
 	}
 	catch (...){
 		std::cout << "Error writing or reading coliboard (try 2) " << std::endl;
