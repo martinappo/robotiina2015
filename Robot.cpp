@@ -616,10 +616,16 @@ void Robot::Run()
 			m_pDisplay->putShadowedText( std::string("Ball") + std::to_string(i) + ": "+ std::to_string(ball.polarMetricCoords.x) + " : " + std::to_string(ball.polarMetricCoords.y), cv::Point(-250, i * 15 + 10), 0.3, cv::Scalar(255, 255, 255));
 		}
 		*/
-		m_pDisplay->putShadowedText("robot x:" + std::to_string(field.self.fieldCoords.x) + " y: " + std::to_string(field.self.fieldCoords.y) + " r: " + std::to_string(field.self.getAngle()), cv::Point(-250, 200), 0.4, cv::Scalar(255, 255, 255));
-//		if (pSim != NULL)
-//			m_pDisplay->putShadowedText("simul x:" + std::to_string(pSim->self.fieldCoords.x) + " y: " + std::to_string(pSim->self.fieldCoords.y) + " r: " + std::to_string(pSim->self.getAngle()), cv::Point(-250, 220), 0.4, cv::Scalar(255, 255, 255));
-
+		std::stringstream ss;
+		ss.precision(3);
+		ss << "robot x:" << field.self.fieldCoords.x<< " y: "<<field.self.fieldCoords.y<< " r: " << field.self.getAngle();
+		m_pDisplay->putShadowedText(ss.str(), cv::Point(-250, 200), 0.4, cv::Scalar(255, 255, 255));
+		Simulator *pSim = dynamic_cast<Simulator*>(m_pCamera);
+		if (pSim != NULL){
+			ss.str("");
+			ss << "sim   x:" << pSim->self.fieldCoords.x << " y: " << pSim->self.fieldCoords.y << " r: " << pSim->self.getAngle();
+			m_pDisplay->putShadowedText(ss.str(), cv::Point(-250, 220), 0.4, cv::Scalar(255, 255, 255));
+		}
 
 
 		//m_pDisplay->putShadowedText( "border: " + std::to_string(borderDistance.distance), cv::Point(-140, 280), 0.5, cv::Scalar(255, 255, 255));

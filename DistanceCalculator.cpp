@@ -60,6 +60,8 @@ void DistanceCalculator::loadConf(){
 cv::Point2d DistanceCalculator::getPolarCoordinates(const cv::Point2d &pos, const cv::Point2d &orgin) const {
 	double distanceInCm = getDistance(orgin, pos);
 	double angle = angleBetween(pos - orgin, { 0, 1 });
+	//TODO: hack to fix simulator, as 
+	if (distanceInCm < 14 && fabs(fabs(angle)-270)<0.01)  angle = 0;
 	// flip angle alony y axis
 #ifndef VIRTUAL_FLIP
 	return{ distanceInCm, angle};
@@ -91,7 +93,7 @@ double DistanceCalculator::getDistance(const cv::Point2d &pos, const cv::Point2d
 	//return (8E-8)*pow(dist, 4) - (6E-5)*pow(dist, 3) + 0.0167*pow(dist, 2) - 1.5818 * dist + 72.791;
 
 	//y = 13,136e^0,008x
-	return 13.13*exp(0.008 * dist);
+	return std::max(0.0, 13.13*exp(0.008 * dist));
 
 	double minDif = INT_MAX;
 	int index = 0;
