@@ -162,6 +162,11 @@ void Simulator::MessageReceived(const std::string & message){ //udp
 void Simulator::UpdateGatePos(){
 
 	frame_blank.copyTo(frame);
+
+	drawRect(cv::Rect(cv::Point(-155, -230), cv::Point(155, 230)), 10, cv::Scalar(0, 0, 0));
+	drawRect(cv::Rect(cv::Point(-145, -220), cv::Point(145, 220)), 10, cv::Scalar(255, 255, 255));
+	drawLine(cv::Point(-145, 0), cv::Point(145, 0), 10, cv::Scalar(255, 255, 255));
+
 	blueGate.polarMetricCoords.x = cv::norm(self.fieldCoords - blueGate.fieldCoords);
 	blueGate.polarMetricCoords.y = 360 - gDistanceCalculator.angleBetween(cv::Point(0, 1), self.fieldCoords - (blueGate.fieldCoords)) + self.getAngle();
 	yellowGate.polarMetricCoords.x = cv::norm(self.fieldCoords - yellowGate.fieldCoords);;
@@ -424,4 +429,38 @@ void Simulator::giveCommand(FieldState::GameMode command){
 		SendMessage("REF " + std::to_string(command) + " #");
 	}
 	RefereeCom::giveCommand(command);
+}
+
+void Simulator::drawRect(cv::Rect rec, int thickness, const cv::Scalar &color){
+	drawLine(rec.tl(), rec.tl() + cv::Point(rec.width, 0), thickness, color);
+	drawLine(rec.tl() + cv::Point(rec.width, 0), rec.br(), thickness, color);
+	drawLine(rec.br() - cv::Point(rec.width, 0), rec.br(), thickness, color);
+	drawLine(rec.tl(), rec.tl() + cv::Point(0, rec.height), thickness, color);
+
+}
+
+void Simulator::drawLine(cv::Point start, cv::Point end, int thickness, CvScalar color)
+{
+	cv::Mat dummyField = cv::Mat(cv::Point(608, 608), CV_8UC3, cv::Scalar::all(245));
+	cv::LineIterator it(dummyField, start + cv::Point(dummyField.size() / 2), end + cv::Point(dummyField.size() / 2), 8);
+	cv::Point last = { INT_MAX, INT_MAX };
+	for (int i = 0; i < it.count; i++, ++it){
+		cv::Point xy = it.pos() - cv::Point(dummyField.size() / 2);
+		double a1 = gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - cv::Point2d(xy)) - self.getAngle();
+		double d1 = gDistanceCalculator.getDistanceInverted(self.fieldCoords, xy);
+
+
+		// draw gates
+		double x1 = d1*sin(a1 / 180 * CV_PI);
+		double y1 = d1*cos(a1 / 180 * CV_PI);
+		cv::Point cur = cv::Point((int)(x1), (int)(y1)) + cv::Point(frame.size() / 2);
+		if (last.x < 1000) {
+			//cv::circle(frame, cv::Point((int)(x1), (int)(y1)) + cv::Point(frame.size() / 2), 28, color, -1);
+			cv::line(frame, last, cur, color, thickness);
+		}
+		last = cur;
+	}
+	return;
+
+
 }

@@ -64,6 +64,9 @@ protected:
 	std::mutex mutex;
 	ObjectPosition robots[MAX_ROBOTS];
 
+	void drawRect(cv::Rect rec, int thickness, const cv::Scalar &color);
+	void drawLine(cv::Point start, cv::Point end, int thickness, CvScalar color);
+
 private:
 	int mNumberOfBalls;
 	int frames = 0;
