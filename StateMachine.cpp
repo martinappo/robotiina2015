@@ -4,7 +4,7 @@
 bool DriveInstruction::aimTarget(const ObjectPosition &target, double errorMargin){
 	double heading = target.getHeading();
 	if (fabs(heading) > errorMargin){
-		m_pCom->Drive(0, 0, -sign(heading) * std::min(20.0, fabs(heading))*0.8);
+		m_pCom->Drive(0, 0, -sign(heading) * std::min(40.0, std::max(fabs(heading), 10.0)));
 		return false;
 	}
 	else{
@@ -18,7 +18,8 @@ bool DriveInstruction::catchTarget(const ObjectPosition &target){
 		return true;
 	}
 	double heading =  target.getHeading();
-	m_pCom->Drive(30, 0, 0);
+	double dist = target.getDistance();
+	m_pCom->Drive(100, 0, 0);
 	return false;
 }
 

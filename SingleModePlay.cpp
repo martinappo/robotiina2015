@@ -6,7 +6,7 @@ void DriveToBall::onEnter()
 {
 	DriveInstruction::onEnter();
 
-	m_pCom->ToggleTribbler(0);
+	
 }
 DriveMode DriveToBall::step(double dt){
 	//return stepNaive(dt);
@@ -15,6 +15,7 @@ DriveMode DriveToBall::step(double dt){
 }
 DriveMode DriveToBall::stepNaive(double dt)
 {
+	if (STUCK_IN_STATE(500)) m_pCom->ToggleTribbler(0);
 	auto &target = getClosestBall();
 	if (target.getDistance() > 10000) return DRIVEMODE_IDLE;
 	if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
@@ -22,7 +23,7 @@ DriveMode DriveToBall::stepNaive(double dt)
 
 	if (aimTarget(target,10)){
 		if (driveToTarget(target)){
-			if (aimTarget(target,2)){
+			if (aimTarget(target,1.5)){
 				return DRIVEMODE_CATCH_BALL;
 			}
 		}
@@ -89,13 +90,15 @@ void CatchBall::onEnter()
 {
 	DriveInstruction::onEnter();
 	m_pCom->ToggleTribbler(100);
+	FIND_TARGET_BALL
+	initDist = target.getDistance();
 	STOP_DRIVING
 }
 DriveMode CatchBall::step(double dt)
 {
 	FIND_TARGET_BALL //TODO: use it?
-	if (STUCK_IN_STATE(3000)) return DRIVEMODE_DRIVE_TO_BALL;
-	if(catchTarget(target)) {
+	if (STUCK_IN_STATE(3000) || target.getDistance() > initDist  + 10) return DRIVEMODE_DRIVE_TO_BALL;
+	if(catchTarget(target)) { 
 		return DRIVEMODE_AIM_GATE;
 	}
 	return DRIVEMODE_CATCH_BALL;
@@ -115,9 +118,9 @@ DriveMode AimGate::step(double dt)
 	if (!BALL_IN_TRIBBLER) return DRIVEMODE_DRIVE_TO_BALL;	
 	double errorMargin;
 	if (target.getDistance() > 200){
-		errorMargin = 5;
+		errorMargin = 10;
 	}
-	else errorMargin = 10;
+	else errorMargin = 15;
 	if (aimTarget(target, errorMargin)){
 		return DRIVEMODE_KICK;
 	}

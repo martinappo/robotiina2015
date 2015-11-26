@@ -44,6 +44,8 @@ public:
 	virtual void onEnter();
 	virtual void onExit();
 	virtual DriveMode step(double dt);
+private:
+	double initDist;
 };
 
 class AimGate : public DriveInstruction
