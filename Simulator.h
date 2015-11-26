@@ -66,6 +66,7 @@ protected:
 
 	void drawRect(cv::Rect rec, int thickness, const cv::Scalar &color);
 	void drawLine(cv::Point start, cv::Point end, int thickness, CvScalar color);
+	void drawCircle(cv::Point start, int radius, int thickness, CvScalar color);
 
 private:
 	int mNumberOfBalls;

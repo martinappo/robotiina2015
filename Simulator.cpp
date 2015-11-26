@@ -166,6 +166,7 @@ void Simulator::UpdateGatePos(){
 	drawRect(cv::Rect(cv::Point(-155, -230), cv::Point(155, 230)), 10, cv::Scalar(0, 0, 0));
 	drawRect(cv::Rect(cv::Point(-145, -220), cv::Point(145, 220)), 10, cv::Scalar(255, 255, 255));
 	drawLine(cv::Point(-145, 0), cv::Point(145, 0), 10, cv::Scalar(255, 255, 255));
+	drawCircle(cv::Point(0, 0), 40, 10, cv::Scalar(255, 255, 255));
 
 	blueGate.polarMetricCoords.x = cv::norm(self.fieldCoords - blueGate.fieldCoords);
 	blueGate.polarMetricCoords.y = 360 - gDistanceCalculator.angleBetween(cv::Point(0, 1), self.fieldCoords - (blueGate.fieldCoords)) + self.getAngle();
@@ -280,6 +281,9 @@ void Simulator::UpdateRobotPos(){
 
 	{
 		std::lock_guard<std::mutex> lock(mutex);
+#ifdef VIRTUAL_FLIP
+		cv::flip(frame, frame, 1);
+#endif
 		frame.copyTo(frame_copy);
 	}
 
@@ -314,9 +318,6 @@ cv::Mat & Simulator::Capture(bool bFullFrame){
 	}
 
 	std::lock_guard<std::mutex> lock(mutex);
-#ifdef VIRTUAL_FLIP
-	cv::flip(frame_copy, frame_copy, 1);
-#endif
 	frame_copy.copyTo(frame_copy2);
 	return frame_copy2;
 }
@@ -449,18 +450,31 @@ void Simulator::drawLine(cv::Point start, cv::Point end, int thickness, CvScalar
 		double a1 = gDistanceCalculator.angleBetween(cv::Point(0, -1), self.fieldCoords - cv::Point2d(xy)) - self.getAngle();
 		double d1 = gDistanceCalculator.getDistanceInverted(self.fieldCoords, xy);
 
-
-		// draw gates
 		double x1 = d1*sin(a1 / 180 * CV_PI);
 		double y1 = d1*cos(a1 / 180 * CV_PI);
 		cv::Point cur = cv::Point((int)(x1), (int)(y1)) + cv::Point(frame.size() / 2);
 		if (last.x < 1000) {
-			//cv::circle(frame, cv::Point((int)(x1), (int)(y1)) + cv::Point(frame.size() / 2), 28, color, -1);
 			cv::line(frame, last, cur, color, thickness);
 		}
 		last = cur;
 	}
 	return;
+}
 
+void Simulator::drawCircle(cv::Point start, int radius, int thickness, CvScalar color){
 
+	double i, angle, x1, y1;
+	cv::Point last;
+	for (i = 0; i < 360; i += 10)
+	{
+		angle = i;
+		x1 = radius * cos(angle * PI / 180);
+		y1 = radius * sin(angle * PI / 180);
+		cv::Point cur = cv::Point(x1, y1);
+		if (i > 0) {
+			drawLine(last, cur, thickness, color);
+		}
+		last = cur;
+
+	}
 }
