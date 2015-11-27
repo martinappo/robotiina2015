@@ -9,7 +9,7 @@ void DriveToBall::onEnter()
 
 DriveMode DriveToBall::step(double dt){
 	//return stepNaive(dt);
-	if (STUCK_IN_STATE(500)) m_pCom->ToggleTribbler(0);
+	//if (STUCK_IN_STATE(500)) m_pCom->ToggleTribbler(0);
 	return stepAngled(dt);
 	//return stepPenatalizeRotation(dt);
 }
@@ -33,9 +33,10 @@ DriveMode DriveToBall::stepNaive(double dt)
 DriveMode DriveToBall::stepAngled(double dt)
 {
 	auto &target = getClosestBall();
+	
 	if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
 	if (driveToTargetWithAngle(target, 25, 5)){
-		return DRIVEMODE_CATCH_BALL;
+		return DRIVEMODE_IDLE;
 	}
 	else {
 		return DRIVEMODE_DRIVE_TO_BALL;

@@ -52,7 +52,7 @@ bool DriveInstruction::driveToTargetWithAngle(const ObjectPosition &target, doub
 			angularSpeed = sign(heading) * 20; //meanwhile rotate slowly to face the target
 		}
 		else{ //at location but facing wrong way
-			angularSpeed = std::max(heading * 0.5, 10.0); //rotate
+			angularSpeed = sign(heading) * std::max(fabs(heading) * 0.5, 10.0); //rotate
 		}
 	}
 	else{
