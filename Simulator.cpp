@@ -16,7 +16,7 @@ Simulator::Simulator(boost::asio::io_service &io, bool master, const std::string
 	, RefereeCom(NULL)
 	,isMaster(master)
 {
-	srand(::time(NULL));
+	srand((unsigned int) ::time(NULL));
 	/*
 	wheelSpeeds.push_back({ 0, 0 });
 	wheelSpeeds.push_back({ 0, 0 });

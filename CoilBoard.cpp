@@ -6,7 +6,7 @@
 
 void CoilBoard::DataReceived(const std::string & message)
 {
-	for (int i = 0; i < message.length(); i++){
+	for (unsigned int i = 0; i < message.length(); i++){
 		if (message[i] == '\n'){
 			HandleMessage(last_message);
 			last_message = "";
