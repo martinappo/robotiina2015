@@ -18,8 +18,11 @@
 
 struct ColorRange
 {
-	double low;
-	double high;
+    int low;
+    int high;
+	double flow;
+	double fhigh;
+
 };
 
 struct HSVColorRange

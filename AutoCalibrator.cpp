@@ -129,7 +129,7 @@ void AutoCalibrator::mouseClicked(int x, int y, int flags) {
 
 	int min_index =  (int)(hue.size() * 0.03);
 	int max_index =  (int)(hue.size() * 0.97);
-	/*
+	
 	if ((flags & cv::EVENT_FLAG_CTRLKEY)) {
 		range.hue.low = std::min(range.hue.low, hue[min_index]);
 		range.hue.high = std::max(range.hue.high, hue[max_index]);
@@ -155,7 +155,7 @@ void AutoCalibrator::mouseClicked(int x, int y, int flags) {
 
 	clustered.copyTo(selected, 255 - imgThresholded);
 	selected.copyTo(display);
-	*/
+	
 
 	//cv::imshow("auto thresholded", image); //show the thresholded image
     //cv::imshow("auto thresholded 2", imgThresholded); //show the thresholded image

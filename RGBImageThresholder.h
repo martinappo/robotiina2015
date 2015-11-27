@@ -49,10 +49,42 @@ public:
 #ifndef USE_INRANGE
 			for (int j = (frameHSV.cols*frameHSV.rows * 3 / diff)*i, k = (frameHSV.cols*frameHSV.rows / diff)*i; j < (frameHSV.cols*frameHSV.rows * 3 / diff)*(i + 1); j += 3, k++) {
 				//if (j % 2) continue;
-				int h = frameHSV.data[j];
-				int s = frameHSV.data[j + 1];
-				int v = frameHSV.data[j + 2];
+				float b = frameHSV.data[j];
+				float g = frameHSV.data[j + 1];
+				float r = frameHSV.data[j + 2];
 
+				b /= 255;
+				g /= 255;
+				r /= 255;
+
+				float h = b;
+				float s = g;
+				float v = r;
+#define THRESHOLD_RGB
+#ifdef THRESHOLD_RGB
+				float K = 0.f;
+				float tmp;
+				if (g < b)
+				{
+					//std::swap(g, b);
+					tmp = g; g = b; b = tmp;
+					K = -1.f;
+				}
+				float min_gb = b;
+				if (r < g)
+				{
+					//std::swap(r, g);
+					tmp = r; r = g; g = tmp;
+					K = -2.f / 6.f - K;
+					float min_gb =  g < b ? g : b;
+				}
+
+				float chroma = r - min_gb;
+				h = /*fabs*/(K + (g - b) / (6.f * chroma + 1e-20f));
+				if (h < 0) h = -h;
+				s = chroma / (r + 1e-20f);
+				v = r;
+#endif
 				bool ball	= THRESHOLD(rbl, h, s, v);
 				bool blue = THRESHOLD(rbg, h, s, v);
 				bool yellow = THRESHOLD(ryg, h, s, v);

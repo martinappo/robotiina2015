@@ -106,7 +106,7 @@ void FrontCameraVision::Run() {
 		if (gaussianBlurEnabled) {
 			cv::GaussianBlur(frameBGR, frameBGR, cv::Size(3, 3), 4);
 		}
-		//cvtColor(frameBGR, frameHSV, cv::COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
+		cvtColor(frameBGR, frameHSV, cv::COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
 		// simulator fps: 19
 		//imshow("a", frameHSV);
 		//cv::waitKey(1);
@@ -114,7 +114,7 @@ void FrontCameraVision::Run() {
 		/*	STEP 2. thresholding in parallel	          */
 		/**************************************************/
 
-		thresholder.Start(frameBGR, { BALL, BLUE_GATE, YELLOW_GATE, FIELD, INNER_BORDER, OUTER_BORDER });
+		thresholder.Start(frameHSV, { BALL, BLUE_GATE, YELLOW_GATE, FIELD, INNER_BORDER, OUTER_BORDER });
 		// simulator fps: 10
 
 		/**************************************************/
