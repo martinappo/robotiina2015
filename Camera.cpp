@@ -20,13 +20,15 @@ void Camera::Init() {
 //	cap->set(CV_CAP_PROP_EXPOSURE, 2);
 	//  [[960 x 960 from (175, 60)]] 
 //	cap->set(CV_CAP_PROP_XI_MANUAL_WB, 1);
-	
+#ifndef WIN32
+ // !
 	cap->set(CV_CAP_PROP_FRAME_WIDTH  , 960);    
 	cap->set(CV_CAP_PROP_FRAME_HEIGHT , 960);
 	
 	cap->set(CV_CAP_PROP_XI_OFFSET_X, 160);    
 	cap->set(CV_CAP_PROP_XI_OFFSET_Y, 0);    
-	cap->set(CV_CAP_PROP_XI_OFFSET_Y, 0);    
+	cap->set(CV_CAP_PROP_XI_OFFSET_Y, 0);  
+#endif
 //	cap->set(CV_CAP_PROP_EXPOSURE, 10000);    
 //	cap->set(CV_CAP_PROP_XI_OFFSET_Y, 0);    
 	
@@ -51,10 +53,10 @@ void Camera::Init() {
 //	frameSize = cv::Size((int)cap->get(CV_CAP_PROP_FRAME_WIDTH),    // Acquire input size
 //		(int)cap->get(CV_CAP_PROP_FRAME_HEIGHT));
 
-	maskedImage = cv::Mat(roi.height, roi.width, CV_8UC3, cv::Scalar(255, 0, 255));
-	mask = cv::Mat(roi.height, roi.width, CV_8U, cv::Scalar::all(0));
-	int radius = roi.height / 2;
-	cv::circle(mask, cv::Point(radius, radius), radius, cv::Scalar(255, 255, 255), -1, 8, 0);
+//	maskedImage = cv::Mat(roi.height, roi.width, CV_8UC3, cv::Scalar(255, 0, 255));
+//	mask = cv::Mat(roi.height, roi.width, CV_8U, cv::Scalar::all(0));
+//	int radius = roi.height / 2;
+//	cv::circle(mask, cv::Point(radius, radius), radius, cv::Scalar(255, 255, 255), -1, 8, 0);
 
 
 	if (frameCount == 1) { // image
@@ -131,11 +133,12 @@ cv::Mat &Camera::Capture(bool bFullFrame) {
 		else {
 			frames++;
 		}
+
 		bCaptureNextFrame = true;
 		return *m_pFrame;
-		m_pFrame->copyTo(maskedImage, mask);
+/*		m_pFrame->copyTo(maskedImage, mask);
 
-		return maskedImage;
+		return maskedImage;*/
 }
 const cv::Mat &Camera::CaptureHSV() {
     cvtColor(frame, buffer, cv::COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
