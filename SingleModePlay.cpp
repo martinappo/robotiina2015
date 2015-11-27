@@ -36,7 +36,7 @@ DriveMode DriveToBall::stepAngled(double dt)
 	
 	if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
 	if (driveToTargetWithAngle(target, 25, 5)){
-		return DRIVEMODE_IDLE;
+		return DRIVEMODE_CATCH_BALL;
 	}
 	else {
 		return DRIVEMODE_DRIVE_TO_BALL;
@@ -119,9 +119,9 @@ DriveMode AimGate::step(double dt)
 	if (!BALL_IN_TRIBBLER) return DRIVEMODE_DRIVE_TO_BALL;	
 	double errorMargin;
 	if (target.getDistance() > 200){
-		errorMargin = 10;
+		errorMargin = 2;
 	}
-	else errorMargin = 15;
+	else errorMargin = 4;
 	if (aimTarget(target, errorMargin)){
 		return DRIVEMODE_KICK;
 	}

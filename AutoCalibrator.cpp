@@ -207,7 +207,7 @@ void AutoCalibrator::Run() {
 			cv::putText(display, "Please wait, clustering", cv::Point(200, 220), cv::FONT_HERSHEY_DUPLEX, 0.9, cv::Scalar(23, 40, 245));
 			m_pDisplay->ShowImage(display, true, false);
 
-			DetectThresholds(48);
+			DetectThresholds(128);
 			screenshot_mode = THRESHOLDING;
 			//clustered.copyTo(display);
 			m_pDisplay->ShowImage(display);

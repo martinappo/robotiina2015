@@ -199,7 +199,7 @@ void WheelController::Run()
 		w_left->SetSpeed(speeds.x);
 		w_right->SetSpeed(speeds.y);
 		w_back->SetSpeed(speeds.z);
-		lastStep = now;
+		lastStep = now; 
 #else
 		//auto speeds = CalculateWheelSpeeds(targetSpeed.velocity, targetSpeed.heading, targetSpeed.rotation);
 		cv::Mat speeds = wheelAngles * targetSpeedXYW; 
