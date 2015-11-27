@@ -1,11 +1,11 @@
 #pragma once
 #include "types.h"
 //#define USE_INRANGE
-class TBBImageThresholder :
+class RGBImageThresholder :
 	public ImageThresholder, public cv::ParallelLoopBody
 {
 public:
-	TBBImageThresholder(ThresholdedImages &images, HSVColorRangeMap &objectMap) : ImageThresholder(images, objectMap){
+	RGBImageThresholder(ThresholdedImages &images, HSVColorRangeMap &objectMap) : ImageThresholder(images, objectMap){
 	}
 
 	void Start(cv::Mat &frameHSV, std::vector<OBJECT> objectList) {
@@ -44,7 +44,7 @@ public:
 		{
 
 #define THRESHOLD(range, h, s,v) \
-					(range.hue.low <= h) && (range.hue.high >= h) && (range.sat.low <= s) && (range.sat.high >= s) && (range.val.low <= v) && (range.val.high >= v)
+					(range.hue.flow <= h) && (range.hue.fhigh >= h) && (range.sat.flow <= s) && (range.sat.fhigh >= s) && (range.val.flow <= v) && (range.val.fhigh >= v)
 
 #ifndef USE_INRANGE
 			for (int j = (frameHSV.cols*frameHSV.rows * 3 / diff)*i, k = (frameHSV.cols*frameHSV.rows / diff)*i; j < (frameHSV.cols*frameHSV.rows * 3 / diff)*(i + 1); j += 3, k++) {
@@ -60,8 +60,8 @@ public:
 				float h = b;
 				float s = g;
 				float v = r;
-#define THRESHOLD_RGB
-#ifdef THRESHOLD_RGB
+
+
 				float K = 0.f;
 				float tmp;
 				if (g < b)
@@ -84,7 +84,7 @@ public:
 				if (h < 0) h = -h;
 				s = chroma / (r + 1e-20f);
 				v = r;
-#endif
+
 				bool ball	= THRESHOLD(rbl, h, s, v);
 				bool blue = THRESHOLD(rbg, h, s, v);
 				bool yellow = THRESHOLD(ryg, h, s, v);
@@ -95,9 +95,9 @@ public:
 				
 
 				
-				frameHSV.data[j] = h * 179;
-				frameHSV.data[j + 1] = s * 255;
-				frameHSV.data[j + 2] = v * 255;
+				frameHSV.data[j] = (int)(h * 179);
+				frameHSV.data[j + 1] = (int)(s * 255);
+				frameHSV.data[j + 2] = (int)(v * 255);
 				
 				
 				tbl.data[k] = ball ? 255 : 0;

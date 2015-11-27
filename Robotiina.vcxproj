@@ -94,6 +94,7 @@
     <ClInclude Include="AutoPlayHelpers.h" />
     <ClInclude Include="MultiModePlay.h" />
     <ClInclude Include="refereeCom.h" />
+    <ClInclude Include="Rgb2Hsv.h" />
     <ClInclude Include="SingleModePlay.h" />
     <ClInclude Include="StateMachine.h" />
     <ClInclude Include="BallFinder.h" />

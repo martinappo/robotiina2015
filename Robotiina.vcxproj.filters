@@ -264,6 +264,9 @@
     <ClInclude Include="refereeCom.h">
       <Filter>ComModule</Filter>
     </ClInclude>
+    <ClInclude Include="Rgb2Hsv.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

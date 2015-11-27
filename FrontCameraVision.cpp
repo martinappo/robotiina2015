@@ -3,6 +3,7 @@
 #include "ThreadedImageThresholder.h"
 #include "ParallelImageThresholder.h"
 #include "TBBImageThresholder.h"
+#include "RGBImageThresholder.h"
 #include "GateFinder.h"
 #include "BallFinder.h"
 #include "AutoCalibrator.h"
@@ -11,7 +12,7 @@
 #include "kdNode2D.h"
 #include "DistanceCalculator.h"
 #include "VideoRecorder.h"
-
+#include "Rgb2Hsv.h"
 
 extern DistanceCalculator gDistanceCalculator;
 
@@ -68,7 +69,7 @@ void FrontCameraVision::Run() {
 		std::cout << "Calibration data is missing!" << std::endl;
 
 	}
-	TBBImageThresholder thresholder(thresholdedImages, objectThresholds);
+	RGBImageThresholder thresholder(thresholdedImages, objectThresholds);
 	GateFinder blueGateFinder;
 	GateFinder yellowGateFinder;
 	BallFinder ballFinder;
@@ -91,10 +92,11 @@ void FrontCameraVision::Run() {
 	bool notEnoughtGreen = false;
 	int mouseControl = 0;
 	bool somethingOnWay = false;
-
+	cv::Mat frameBGR = m_pCamera->Capture();
+	cv::Mat frameHSV2 = cv::Mat(frameBGR.size(), CV_32FC3);
 	while (!stop_thread){
 
-		cv::Mat frameBGR = m_pCamera->Capture();
+		frameBGR = m_pCamera->Capture();
 		// simulator fps: 70
 		if (videoRecorder->isRecording){
 			videoRecorder->RecordFrame(frameBGR, "");
@@ -107,16 +109,21 @@ void FrontCameraVision::Run() {
 			cv::GaussianBlur(frameBGR, frameBGR, cv::Size(3, 3), 4);
 		}
 		cvtColor(frameBGR, frameHSV, cv::COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
+		//rgb2Hsv(frameBGR, frameHSV2);
 		// simulator fps: 19
-		//imshow("a", frameHSV);
+		//imshow("a", frameHSV2);
 		//cv::waitKey(1);
 		/**************************************************/
 		/*	STEP 2. thresholding in parallel	          */
 		/**************************************************/
 
-		thresholder.Start(frameHSV, { BALL, BLUE_GATE, YELLOW_GATE, FIELD, INNER_BORDER, OUTER_BORDER });
+		thresholder.Start(frameBGR, { BALL, BLUE_GATE, YELLOW_GATE, FIELD, INNER_BORDER, OUTER_BORDER });
 		// simulator fps: 10
+		cv::Mat motion;
+		cv::absdiff(frameHSV, frameBGR, motion);
 
+		imshow("t", motion);
+		cv::waitKey(1);
 		/**************************************************/
 		/*	STEP 3. check that path to gate is clean      */
 		/* this is done here, because finding contures	  */
