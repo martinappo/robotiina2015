@@ -35,6 +35,8 @@ protected:
 	virtual DriveMode stepNaive(double dt);
 	virtual DriveMode stepAngled(double dt);
 	virtual DriveMode stepPenatalizeRotation(double dt);
+private:
+	bool toggledDribbler = false;
 };
 
 class CatchBall : public DriveInstruction

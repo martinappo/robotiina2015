@@ -4,12 +4,16 @@
 /*BEGIN DriveToBall*/
 void DriveToBall::onEnter()
 {
+	toggledDribbler = false;
 	DriveInstruction::onEnter();	
 }
 
 DriveMode DriveToBall::step(double dt){
 	//return stepNaive(dt);
-	//if (STUCK_IN_STATE(500)) m_pCom->ToggleTribbler(0);
+	if (STUCK_IN_STATE(2000) && !toggledDribbler){ 
+		m_pCom->ToggleTribbler(0);
+		toggledDribbler = true;
+	}
 	return stepAngled(dt);
 	//return stepPenatalizeRotation(dt);
 }
@@ -23,7 +27,7 @@ DriveMode DriveToBall::stepNaive(double dt)
 
 	if (aimTarget(target,10)){
 		if (driveToTarget(target)){
-			if (aimTarget(target,1.5)){
+			if (aimTarget(target,1)){
 				return DRIVEMODE_CATCH_BALL;
 			}
 		}
@@ -119,9 +123,9 @@ DriveMode AimGate::step(double dt)
 	if (!BALL_IN_TRIBBLER) return DRIVEMODE_DRIVE_TO_BALL;	
 	double errorMargin;
 	if (target.getDistance() > 200){
-		errorMargin = 2;
+		errorMargin = 0.5;
 	}
-	else errorMargin = 4;
+	else errorMargin = 1;
 	if (aimTarget(target, errorMargin)){
 		return DRIVEMODE_KICK;
 	}

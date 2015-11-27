@@ -9,7 +9,8 @@ bool DriveInstruction::aimTarget(const ObjectPosition &target, double errorMargi
 	}
 	else{
 		m_pCom->Drive(0, 0, 0);
-		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		std::cout<<(fabs(heading) < errorMargin)<<std::endl;
 		return fabs(heading) < errorMargin;
 	}
 }
