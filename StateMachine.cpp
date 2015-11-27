@@ -1,5 +1,5 @@
 #include "StateMachine.h"
-#include <algorithm>    // std::min
+#include <algorithm>
 
 bool DriveInstruction::aimTarget(const ObjectPosition &target, double errorMargin){
 	double heading = target.getHeading();
@@ -28,7 +28,7 @@ bool DriveInstruction::driveToTarget(const ObjectPosition &target, double maxDis
 		
 	if (dist > maxDistance){
 		//std::cout << ", ball to far: " << dist << " target: " << maxDistance;
-		m_pCom->Drive(std::min(100.0, std::max(20.0, dist)), 0, 0);
+		m_pCom->Drive(std::max(20.0, dist), 0, 0);
 		return false;
 	}
 	else{
@@ -47,17 +47,17 @@ bool DriveInstruction::driveToTargetWithAngle(const ObjectPosition &target, doub
 	bool onPoint = false;
 	if (fabs(heading) > errorMargin){
 		if (dist > maxDistance){
-			speed = std::min(200.0, std::max(30.0, dist));
+			speed = std::max(30.0, dist); //max speed is limited to 190 in wheelController.cpp 
 			direction = heading; //drive towards target
 			angularSpeed = sign(heading) * 20; //meanwhile rotate slowly to face the target
 		}
 		else{ //at location but facing wrong way
-			angularSpeed = heading * 0.5; //rotate
+			angularSpeed = std::max(heading * 0.5, 10.0); //rotate
 		}
 	}
 	else{
 		if (dist > maxDistance){
-			speed = std::min(200.0, std::max(30.0, dist));
+			speed = std::max(30.0, dist);
 			direction = heading; //drive towards target
 		}
 		else onPoint = true;
@@ -69,19 +69,6 @@ bool DriveInstruction::driveToTargetWithAngle(const ObjectPosition &target, doub
 
 const BallPosition &DriveInstruction::getClosestBall(bool includeHeading){
 	return  m_pFieldState->balls.getClosest(includeHeading);
-	/*
-	int target_distance = INT_MAX;
-	int target_index = 0;
-	for (int i = 0; i < NUMBER_OF_BALLS; i++) {
-		if (abs(m_pFieldState->balls[i].fieldCoords.y) > 250) continue; // too far outside of the field
-		if (m_pFieldState->balls[i].getDistance() < target_distance) {
-			target_index = i;
-			target_distance = m_pFieldState->balls[i].getDistance();
-		}
-	}
-	return m_pFieldState->balls[target_index];
-	*/
-
 }
 
 

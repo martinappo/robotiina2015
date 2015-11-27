@@ -4,18 +4,18 @@
 /*BEGIN DriveToBall*/
 void DriveToBall::onEnter()
 {
-	DriveInstruction::onEnter();
-
-	
+	DriveInstruction::onEnter();	
 }
+
 DriveMode DriveToBall::step(double dt){
 	//return stepNaive(dt);
+	if (STUCK_IN_STATE(500)) m_pCom->ToggleTribbler(0);
 	return stepAngled(dt);
 	//return stepPenatalizeRotation(dt);
 }
 DriveMode DriveToBall::stepNaive(double dt)
 {
-	if (STUCK_IN_STATE(500)) m_pCom->ToggleTribbler(0);
+	
 	auto &target = getClosestBall();
 	if (target.getDistance() > 10000) return DRIVEMODE_IDLE;
 	if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
