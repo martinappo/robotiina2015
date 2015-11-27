@@ -65,7 +65,7 @@ void Dialog::ShowImage(const cv::Mat &image, bool main, bool flipX) {
 	if (main){
 
 #ifdef VIRTUAL_FLIP
-		if(flipX)
+		if(false)
 			cv::flip(image, cam1_area, 1);
 		else
 			image.copyTo(cam1_area);

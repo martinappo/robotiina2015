@@ -83,10 +83,10 @@ void FrontCameraVision::Run() {
 
 	cv::Mat white(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(255, 255, 255));
 	cv::Mat black(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(40, 40, 40));
-	cv::Mat green(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(21, 188, 80));
-	cv::Mat yellow(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(61, 255, 244));
-	cv::Mat blue(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(236, 137, 48));
-	cv::Mat orange(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(48, 154, 236));
+	cv::Mat green(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(21, 100, 80));
+	cv::Mat yellow(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(61, 200, 200));
+	cv::Mat blue(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(200, 137, 48));
+	cv::Mat orange(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(48, 100, 200));
 
 	bool notEnoughtGreen = false;
 	int mouseControl = 0;
@@ -95,22 +95,27 @@ void FrontCameraVision::Run() {
 	while (!stop_thread){
 
 		cv::Mat frameBGR = m_pCamera->Capture();
+		// simulator fps: 70
 		if (videoRecorder->isRecording){
 			videoRecorder->RecordFrame(frameBGR, "");
 		}
+
 		/**************************************************/
 		/*	STEP 1. Convert picture to HSV colorspace	  */
 		/**************************************************/
 		if (gaussianBlurEnabled) {
 			cv::GaussianBlur(frameBGR, frameBGR, cv::Size(3, 3), 4);
 		}
-		cvtColor(frameBGR, frameHSV, cv::COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
-
+		//cvtColor(frameBGR, frameHSV, cv::COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
+		// simulator fps: 19
+		//imshow("a", frameHSV);
+		//cv::waitKey(1);
 		/**************************************************/
 		/*	STEP 2. thresholding in parallel	          */
 		/**************************************************/
 
-		thresholder.Start(frameHSV, { BALL, BLUE_GATE, YELLOW_GATE/*, FIELD, INNER_BORDER, OUTER_BORDER*/ });
+		thresholder.Start(frameBGR, { BALL, BLUE_GATE, YELLOW_GATE, FIELD, INNER_BORDER, OUTER_BORDER });
+		// simulator fps: 10
 
 		/**************************************************/
 		/*	STEP 3. check that path to gate is clean      */
@@ -194,6 +199,9 @@ void FrontCameraVision::Run() {
 
 			m_pState->self.updateFieldCoords();
 		}
+		// simulator fps: 8.3
+
+
 		//Balls pos 
 //		cv::Mat rotMat = getRotationMatrix2D(cv::Point(0,0), -m_pState->self.getAngle(), 1);
 		cv::Mat balls(3, m_pState->balls.size(), CV_64FC1);
@@ -240,6 +248,9 @@ void FrontCameraVision::Run() {
 		// else leave to NULL
 		*/
 
+		// simulator fps: 8.3
+
+
 		if (gateObstructionDetectionEnabled) {
 			// step 3.2
 			int count = countNonZero(thresholdedImages[SIGHT_MASK]);
@@ -261,7 +272,7 @@ void FrontCameraVision::Run() {
 
 		// copy thresholded images before they are destroyed
 		if (nightVisionEnabled) {
-			green.copyTo(frameBGR, thresholdedImages[FIELD]);
+			//green.copyTo(frameBGR, thresholdedImages[FIELD]);
 			white.copyTo(frameBGR, thresholdedImages[INNER_BORDER]);
 			black.copyTo(frameBGR, thresholdedImages[OUTER_BORDER]);
 			orange.copyTo(frameBGR, thresholdedImages[BALL]);

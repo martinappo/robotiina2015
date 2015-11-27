@@ -32,12 +32,12 @@ void CalibrationConfReader::LoadConf(const std::string &name){
 	{
 		read_ini(std::string("conf/") + name + ".ini", pt);
 
-		range.hue.low = pt.get<int>("hue.low");
-		range.hue.high = pt.get<int>("hue.high");
-		range.sat.low = pt.get<int>("sat.low");
-		range.sat.high = pt.get<int>("sat.high");
-		range.val.low = pt.get<int>("val.low");
-		range.val.high = pt.get<int>("val.high");
+		range.hue.low = (double)pt.get<int>("hue.low") / 179.0;
+		range.hue.high = (double)pt.get<int>("hue.high") / 179.0;;
+		range.sat.low = (double)pt.get<int>("sat.low") / 255.0;;
+		range.sat.high = (double)pt.get<int>("sat.high") / 255.0;;
+		range.val.low = (double)pt.get<int>("val.low") / 255.0;;
+		range.val.high = (double)pt.get<int>("val.high") / 255.0;;
 	}
 	catch (...){};
 

@@ -245,12 +245,8 @@ void Simulator::UpdateBallPos(double dt){
 
 }
 
-void Simulator::UpdateRobotPos(){
-	time = boost::posix_time::microsec_clock::local_time();
+void Simulator::UpdateRobotPos(double dt){
 
-	double dt = (double)(time - lastStep).total_milliseconds() / 1000.0;
-
-	lastStep = time;
 	if (dt > 1000) return;
 	cv::Mat robotSpeed = cv::Mat_<double>(3, 1);
 	cv::solve(wheelAngles, wheelSpeeds, robotSpeed, cv::DECOMP_SVD);
@@ -305,17 +301,19 @@ Simulator::~Simulator()
 }
 
 cv::Mat & Simulator::Capture(bool bFullFrame){
-	if (frames > 10) {
-		boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
-		boost::posix_time::time_duration::tick_type dt2 = (time - lastCapture2).total_milliseconds();
-		fps = 1000.0 * frames / dt2;
-		lastCapture2 = time;
+	double t2 = (double)cv::getTickCount();
+	if (frames > 20) {
+		double dt = (t2 - time) / cv::getTickFrequency();
+		fps = frames / dt;
+		time = t2;
 		frames = 0;
 	}
 	else {
 		frames++;
 	}
-	UpdateRobotPos();
+	double dt = (t2 - time2) / cv::getTickFrequency();
+	UpdateRobotPos(dt);
+	time2 = t2;
 	return frame;
 
 	std::lock_guard<std::mutex> lock(mutex);

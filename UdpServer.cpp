@@ -57,6 +57,7 @@ void UdpServer::handle_send(boost::shared_ptr<std::string> /*message*/,
 }
 
 void UdpServer::SendMessage(const std::string &message){
+	return;
 	//std::cout << "SendMessage" << message << std::endl;
 
 	boost::shared_ptr<std::string> x(

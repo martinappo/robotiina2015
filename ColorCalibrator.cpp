@@ -13,7 +13,7 @@ HSVColorRange ColorCalibrator::GetObjectThresholds (int index, const std::string
 {
 	LoadConf(name);
 
-
+	/*
     cvNamedWindow("ColorCalibrator", CV_WINDOW_AUTOSIZE); //create a window called "Control"
     cvCreateTrackbar("LowH", "ColorCalibrator", &range.hue.low, 179); //Hue (0 - 179)
     cvCreateTrackbar("HighH", "ColorCalibrator", &range.hue.high, 179);
@@ -28,14 +28,14 @@ HSVColorRange ColorCalibrator::GetObjectThresholds (int index, const std::string
 
     cv::Mat imgThresholded, imgHSV;
     cvtColor(image, imgHSV, cv::COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
-
+	*/
 
 
     while (true)
     {
-        cv::inRange(imgHSV, cv::Scalar(range.hue.low, range.sat.low, range.val.low), cv::Scalar(range.hue.high, range.sat.high, range.val.high), imgThresholded); //Threshold the image
+        //cv::inRange(imgHSV, cv::Scalar(range.hue.low, range.sat.low, range.val.low), cv::Scalar(range.hue.high, range.sat.high, range.val.high), imgThresholded); //Threshold the image
 
-        cv::imshow(name.c_str(), imgThresholded); //show the thresholded image
+     //   cv::imshow(name.c_str(), imgThresholded); //show the thresholded image
 
         if (cv::waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
         {

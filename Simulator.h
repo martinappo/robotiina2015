@@ -59,7 +59,7 @@ protected:
 	Speed targetSpeed, actualSpeed;
 	void UpdateGatePos();
 	void UpdateBallPos(double dt);
-	void UpdateRobotPos();
+	void UpdateRobotPos(double dt);
 	void UpdateBallIntTribbler();
 	std::mutex mutex;
 	ObjectPosition robots[MAX_ROBOTS];
@@ -73,9 +73,8 @@ private:
 	int frames = 0;
 	double fps;
 	bool tribblerRunning = false;
-	boost::posix_time::ptime lastCapture2;
-	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
-	boost::posix_time::ptime lastStep = time;
+	double time = 0;
+	double time2 = 0;
 	bool isMaster = false;
 	bool isMasterPresent = false;
 	int id = -1;

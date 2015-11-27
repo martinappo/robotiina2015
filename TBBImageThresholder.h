@@ -1,6 +1,6 @@
 #pragma once
 #include "types.h"
-#define USE_INRANGE
+//#define USE_INRANGE
 class TBBImageThresholder :
 	public ImageThresholder, public cv::ParallelLoopBody
 {
@@ -24,34 +24,90 @@ public:
 
 	virtual void operator()(const cv::Range& range) const
 	{
-		auto &rb = objectMap[BALL];
+		auto &rbl = objectMap[BALL];
 		auto &rbg = objectMap[BLUE_GATE];
 		auto &ryg = objectMap[YELLOW_GATE];
-		auto &tb = thresholdedImages[BALL];
+
+		auto &rfd = objectMap[FIELD];
+		auto &rib = objectMap[INNER_BORDER];
+		auto &rob = objectMap[OUTER_BORDER];
+
+		auto &tbl = thresholdedImages[BALL];
 		auto &tbg = thresholdedImages[BLUE_GATE];
 		auto &tyg = thresholdedImages[YELLOW_GATE];
+
+		auto &tfd = thresholdedImages[FIELD];
+		auto &tib = thresholdedImages[INNER_BORDER];
+		auto &tob = thresholdedImages[OUTER_BORDER];
 
 		for (int i = range.start; i < range.end; i++)
 		{
 
+#define THRESHOLD(range, h, s,v) \
+					(range.hue.low <= h) && (range.hue.high >= h) && (range.sat.low <= s) && (range.sat.high >= s) && (range.val.low <= v) && (range.val.high >= v)
+
 #ifndef USE_INRANGE
 			for (int j = (frameHSV.cols*frameHSV.rows * 3 / diff)*i, k = (frameHSV.cols*frameHSV.rows / diff)*i; j < (frameHSV.cols*frameHSV.rows * 3 / diff)*(i + 1); j += 3, k++) {
 				//if (j % 2) continue;
-				int h = frameHSV.data[j];
-				int s = frameHSV.data[j + 1];
-				int v = frameHSV.data[j + 2];
+				float b = frameHSV.data[j];
+				float g = frameHSV.data[j + 1];
+				float r = frameHSV.data[j + 2];
 
+				b /= 255;
+				g /= 255;
+				r /= 255;
 
-				bool ball = (rb.hue.low <= h) && (rb.hue.high >= h) && (rb.sat.low <= s) && (rb.sat.high >= s) && (rb.val.low <= v) && (rb.val.high >= v);
-				bool blue = (rbg.hue.low <= h) && (rbg.hue.high >= h) && (rbg.sat.low <= s) && (rbg.sat.high >= s) && (rbg.val.low <= v) && (rbg.val.high >= v);
-				bool yellow = (ryg.hue.low <= h) && (ryg.hue.high >= h) && (ryg.sat.low <= s) && (ryg.sat.high >= s) && (ryg.val.low <= v) && (ryg.val.high >= v);
+				float h = b;
+				float s = g;
+				float v = r;
+#define THRESHOLD_RGB
+#ifdef THRESHOLD_RGB
+				float K = 0.f;
+				float tmp;
+				if (g < b)
+				{
+					//std::swap(g, b);
+					tmp = g; g = b; b = tmp;
+					K = -1.f;
+				}
+				float min_gb = b;
+				if (r < g)
+				{
+					//std::swap(r, g);
+					tmp = r; r = g; g = tmp;
+					K = -2.f / 6.f - K;
+					float min_gb =  g < b ? g : b;
+				}
 
-				//frameHSV.data[j] = ball ? 255 : 0;
-				//frameHSV.data[j + 1] = blue ? 255 : 0;
-				//frameHSV.data[j + 2] = yellow ? 255 : 0;
-				tb.data[k] = ball ? 255 : 0;
+				float chroma = r - min_gb;
+				h = /*fabs*/(K + (g - b) / (6.f * chroma + 1e-20f));
+				if (h < 0) h = -h;
+				s = chroma / (r + 1e-20f);
+				v = r;
+#endif
+				bool ball	= THRESHOLD(rbl, h, s, v);
+				bool blue = THRESHOLD(rbg, h, s, v);
+				bool yellow = THRESHOLD(ryg, h, s, v);
+
+				bool field = THRESHOLD(rfd, h, s, v);
+				bool inner_b = THRESHOLD(rib, h, s, v);
+				bool outer_b = THRESHOLD(rob, h, s, v);
+				
+
+				
+				frameHSV.data[j] = h * 179;
+				frameHSV.data[j + 1] = s * 255;
+				frameHSV.data[j + 2] = v * 255;
+				
+				
+				tbl.data[k] = ball ? 255 : 0;
 				tbg.data[k] = blue ? 255 : 0;
 				tyg.data[k] = yellow ? 255 : 0;
+
+				tfd.data[k] = field ? 255 : 0;
+				tib.data[k] = inner_b ? 255 : 0;
+				tob.data[k] = outer_b ? 255 : 0;
+				
 
 
 			}
@@ -73,6 +129,6 @@ public:
 protected:
 	cv::Mat frameHSV;
 	std::vector<OBJECT> objectList;
-	int diff = 12;
+	int diff = 8;
 };
 
