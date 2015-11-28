@@ -34,6 +34,7 @@
 #include "SoccerField.h"
 #include "MouseVision.h"
 
+
 #define STATE_BUTTON(name, shortcut, new_state) \
 m_pDisplay->createButton(std::string("") + name, shortcut, [&](){ this->SetState(new_state); });
 #define BUTTON(name, shortcut, function_body) \
@@ -69,7 +70,6 @@ std::pair<STATE, std::string> states[] = {
 	std::pair<STATE, std::string>(STATE_RUN, "Autopilot"),
 	std::pair<STATE, std::string>(STATE_TEST, "Test"),
 	std::pair<STATE, std::string>(STATE_MANUAL_CONTROL, "Manual Control"),
-	std::pair<STATE, std::string>(STATE_TEST_COILGUN, "Test CoilGun"),
 	std::pair<STATE, std::string>(STATE_SELECT_GATE, "Select Gate"),
 	std::pair<STATE, std::string>(STATE_DANCE, "Dance"),
 	std::pair<STATE, std::string>(STATE_MOUSE_VISION, "Mouse Vision"),
@@ -399,7 +399,7 @@ void Robot::Run()
 				});
 				std::stringstream sset;
 				sset << " [ robot: " << refCom->FIELD_MARKER << refCom->ROBOT_MARKER << ", team: " << refCom->TEAM_MARKER << "]";
-
+				/*
 				STATE_BUTTON("(S)ettings" + sset.str(), 's', STATE_SETTINGS)
 					m_pDisplay->createButton("Reinit wheels", '-', [this] {
 					//initPorts();
@@ -412,7 +412,7 @@ void Robot::Run()
 					//initCoilboard();
 					this->last_state = STATE_END_OF_GAME; // force dialog redraw
 				});
-				
+				*/
 				m_pDisplay->createButton("Swap displays", '-', [this] {
 					m_pDisplay->SwapDisplays();
 				});
@@ -427,7 +427,6 @@ void Robot::Run()
 
 				STATE_BUTTON("(M)anual Control", 'm', STATE_MANUAL_CONTROL)
 				STATE_BUTTON("M(o)use vision", 'o', STATE_MOUSE_VISION)
-				STATE_BUTTON("Test CoilGun", '-', STATE_TEST_COILGUN)
 				STATE_BUTTON("(D)istance calibration", 'd', STATE_DISTANCE_CALIBRATE)
 				STATE_BUTTON("Test Autopilot", '-', STATE_TEST)
 				STATE_BUTTON("E(x)it", 27, STATE_END_OF_GAME)

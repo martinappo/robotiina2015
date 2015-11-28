@@ -8,6 +8,7 @@
 extern DistanceCalculator gDistanceCalculator;
 extern cv::Mat wheelAngles;
 
+const double SIMULATOR_SPEED = 0.3;
 
 Simulator::Simulator(boost::asio::io_service &io, bool master, const std::string game_mode) :
 	mNumberOfBalls(game_mode == "master" || game_mode =="slave" ? 1 :11 )
@@ -23,7 +24,7 @@ Simulator::Simulator(boost::asio::io_service &io, bool master, const std::string
 	wheelSpeeds.push_back({ 0, 0 });
 	wheelSpeeds.push_back({ 0, 0 });
 	*/
-	self.fieldCoords = cv::Point(100, 100); //cv::Point(rand() % 300 - 150, rand() % 460 - 230);
+	self.fieldCoords = cv::Point(rand() % 300 - 150, rand() % 460 - 230);
 	self.polarMetricCoords = cv::Point(0, 45);
 	if (isMaster) {
 		id = 0;
@@ -35,8 +36,8 @@ Simulator::Simulator(boost::asio::io_service &io, bool master, const std::string
 		}
 		else{
 			for (int i = 0; i < mNumberOfBalls; i++) {
-				balls[i].fieldCoords.x = (int)(((i % 3) - 1) * 100);// +rand() % 50;
-				balls[i].fieldCoords.y = (int)((i / 3 - 1.5) * 110);// +rand() % 50;
+				balls[i].fieldCoords.x = (int)(((i % 3) - 1) * 100) +rand() % 50;
+				balls[i].fieldCoords.y = (int)((i / 3 - 1.5) * 110) +rand() % 50;
 				balls[i].id = i;
 			}
 		}
@@ -257,14 +258,14 @@ void Simulator::UpdateRobotPos(){
 	//std::cout << robotSpeed << std::endl;
 
 	
-	self.polarMetricCoords.y -= (robotSpeed.at<double>(2)*dt);
+	self.polarMetricCoords.y -= SIMULATOR_SPEED*(robotSpeed.at<double>(2)*dt);
 	if (self.polarMetricCoords.y > 360) self.polarMetricCoords.y -= 360;
 	if (self.polarMetricCoords.y < -360) self.polarMetricCoords.y += 360;
 	cv::Mat rotMat = getRotationMatrix2D(cv::Point(0, 0), self.getAngle(), 1);
 	cv::Mat rotatedSpeed = rotMat * robotSpeed;
 
-	self.fieldCoords.x += rotatedSpeed.at<double>(0)*dt;
-	self.fieldCoords.y -= rotatedSpeed.at<double>(1)*dt;
+	self.fieldCoords.x += SIMULATOR_SPEED*rotatedSpeed.at<double>(0)*dt;
+	self.fieldCoords.y -= SIMULATOR_SPEED*rotatedSpeed.at<double>(1)*dt;
 	
 
 	if (!isMaster && id > 0) {

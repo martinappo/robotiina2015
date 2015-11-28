@@ -20,7 +20,7 @@ class SingleModeIdle : public Idle {
 	}
 
 	virtual DriveMode step(double dt) {
-		if (m_pFieldState->GAME_MODE_START_SINGLE_PLAY) return DRIVEMODE_DRIVE_TO_BALL;
+		if (m_pFieldState->gameMode == FieldState::GAME_MODE_START_SINGLE_PLAY) return DRIVEMODE_DRIVE_TO_BALL;
 		return DRIVEMODE_IDLE;
 	}
 };
@@ -35,8 +35,12 @@ protected:
 	virtual DriveMode stepNaive(double dt);
 	virtual DriveMode stepAngled(double dt);
 	virtual DriveMode stepPenatalizeRotation(double dt);
+	virtual DriveMode stepAimGate(double dt);
+
 private:
 	bool toggledDribbler = false;
+	ObjectPosition initialBall;
+	ObjectPosition initialGate;
 };
 
 class CatchBall : public DriveInstruction

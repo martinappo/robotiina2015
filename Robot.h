@@ -7,7 +7,24 @@
 #include <boost/thread/mutex.hpp>
 
 namespace po = boost::program_options;
-
+enum STATE
+{
+	STATE_NONE = 0,
+	STATE_AUTOCALIBRATE,
+	STATE_CALIBRATE,
+	STATE_LAUNCH,
+	STATE_SELECT_GATE,
+	STATE_RUN,
+	STATE_SETTINGS,
+	STATE_REMOTE_CONTROL,
+	STATE_MANUAL_CONTROL,
+	STATE_DANCE,
+	STATE_TEST,
+	STATE_MOUSE_VISION,
+	STATE_DISTANCE_CALIBRATE,
+	STATE_GIVE_COMMAND,
+	STATE_END_OF_GAME /* leave this last*/
+};
 class Robot {
 private:
 	po::variables_map config;

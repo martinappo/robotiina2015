@@ -106,11 +106,14 @@ void StateMachine::Run()
 	while (!stop_thread) {
 		boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
 		boost::posix_time::time_duration::tick_type dt = (time - lastStep).total_milliseconds();
-		newMode = curDriveMode->second->step1(double(dt));
+		newMode = testMode ? curDriveMode->second->step(double(dt)) : curDriveMode->second->step1(double(dt));
 		
 	auto old = curDriveMode;
 
-	if (testMode) newMode = testDriveMode;
+	if (testMode && newMode != testDriveMode) {
+		newMode = DRIVEMODE_IDLE;
+		testDriveMode = DRIVEMODE_IDLE;
+	}
 
 	if (newMode != curDriveMode->first){
 		boost::mutex::scoped_lock lock(mutex);
