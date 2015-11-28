@@ -39,9 +39,10 @@ public:
 		}
 		boost::mutex::scoped_lock lock(click_mutex); //allow one command at a time
 		for (auto it = m_EventListeners.begin(); it != m_EventListeners.end(); it++){
-			*it = pEventListener;
-			m_EventListeners.erase(it);
-			break;
+			if (*it == pEventListener){
+				m_EventListeners.erase(it);
+				break;
+			}
 		}
 		std::cout << "count: " << m_EventListeners.size() << std::endl;
 	};
