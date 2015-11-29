@@ -8,7 +8,8 @@
 extern DistanceCalculator gDistanceCalculator;
 extern cv::Mat wheelAngles;
 
-const double SIMULATOR_SPEED = 0.3;
+const double SIMULATOR_SPEED = 0.1;
+const bool INIT_RANDOM = false;
 
 Simulator::Simulator(boost::asio::io_service &io, bool master, const std::string game_mode) :
 mNumberOfBalls(game_mode == "master" || game_mode == "slave" ? 1 : 11)
@@ -24,8 +25,8 @@ mNumberOfBalls(game_mode == "master" || game_mode == "slave" ? 1 : 11)
 	wheelSpeeds.push_back({ 0, 0 });
 	wheelSpeeds.push_back({ 0, 0 });
 	*/
-	self.fieldCoords = cv::Point(rand() % 300 - 150, rand() % 460 - 230);
-	self.polarMetricCoords = cv::Point(0, 45);
+	self.fieldCoords = !INIT_RANDOM ? cv::Point(-140, 140) : cv::Point(rand() % 300 - 150, rand() % 460 - 230);
+	self.polarMetricCoords = cv::Point(0, !INIT_RANDOM ? 45 : rand() % 359);
 	if (isMaster) {
 		id = 0;
 		// distribute balls uniformly at random
@@ -36,8 +37,8 @@ mNumberOfBalls(game_mode == "master" || game_mode == "slave" ? 1 : 11)
 		}
 		else{
 			for (int i = 0; i < mNumberOfBalls; i++) {
-				balls[i].fieldCoords.x = (int)(((i % 3) - 1) * 100) +rand() % 50;
-				balls[i].fieldCoords.y = (int)((i / 3 - 1.5) * 110) +rand() % 50;
+				balls[i].fieldCoords.x = (int)(((i % 3) - 1) * 100) + !INIT_RANDOM  ? 0 : rand() % 50;
+				balls[i].fieldCoords.y = (int)((i / 3 - 1.5) * 110) + !INIT_RANDOM ? 0 : rand() % 50;
 				balls[i].id = i;
 			}
 		}

@@ -187,4 +187,6 @@ public:
 };
 
 
-#define sign(x) ((x > 0) - (x < 0))
+//#define sign(x) ((x > 0) - (x < 0))
+// slower, but avoids zero value
+#define sign(x) ((x > 0)  ? 1 : -1) 

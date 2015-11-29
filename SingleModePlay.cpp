@@ -1,6 +1,14 @@
 #include "SingleModePlay.h"
 #include "AutoPlayHelpers.h"
 
+enum {
+	DRIVEMODE_DRIVE_TO_BALL_NAIVE = 5000,
+	DRIVEMODE_DIRVE_TO_BALL_AVOID_TURN,
+	DRIVEMODE_DRIVE_TO_BALL_ANGLED,
+	DRIVEMODE_DRIVE_TO_BALL_AIM_GATE,
+	DRIVEMODE_ROTATE_AROUND_BALL
+};
+
 /*BEGIN DriveToBall*/
 void DriveToBall::onEnter()
 {
@@ -222,6 +230,52 @@ DriveMode Kick::step(double dt)
 	return DRIVEMODE_DRIVE_TO_BALL;
 }
 
+class RotateAroundBall : public DriveInstruction
+{
+protected:
+	double initialBallHeading = 0;
+public:
+	RotateAroundBall(const std::string &name = "ROTATE_AROUND_BALL") : DriveInstruction(name){};
+	void onEnter(){
+		initialBallHeading = getClosestBall().getHeading();
+	}
+
+	virtual DriveMode step(double dt){
+		const ObjectPosition &ball = getClosestBall();
+		const ObjectPosition &gate = m_pFieldState->GetTargetGate();
+		double gateHeading = gate.getHeading();
+		double ballHeading = ball.getAngle();
+		double ballDistance = ball.getDistance();
+
+		double rotation = 0;
+		double heading = 0;
+		double speed = 0;
+
+		double errorMargin = 5;
+		double maxDistance = 30;
+
+		if (fabs(gateHeading) > errorMargin){
+			rotation = -sign(gateHeading) * std::min(40.0, std::max(fabs(gateHeading), 5.0));
+		}
+		if (ballDistance > maxDistance) {
+			heading = ballHeading +sign(ballHeading) * asin(maxDistance / ballDistance) * 180 / CV_PI;
+
+			speed = std::max(60.0, ballDistance);
+		}
+		else {
+			// drive around the ball
+			double top = (fabs(initialBallHeading) > 90) ? 1 : -1;
+			double left = sign(initialBallHeading);
+			heading = ballHeading + top*left*90;
+			speed = 40;
+		}
+		m_pCom->Drive(speed, heading, rotation);
+		return DRIVEMODE_ROTATE_AROUND_BALL;
+	}
+
+};
+
+
 
 std::pair<DriveMode, DriveInstruction*> SingleDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_IDLE, new SingleModeIdle()),
@@ -234,6 +288,7 @@ std::pair<DriveMode, DriveInstruction*> SingleDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_AIM_GATE, new AimGate()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_KICK, new Kick()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_CATCH_BALL, new CatchBall()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_ROTATE_AROUND_BALL, new RotateAroundBall()),
 };
 
 SingleModePlay::SingleModePlay(ICommunicationModule *pComModule, FieldState *pState)
