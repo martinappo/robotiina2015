@@ -37,8 +37,8 @@ mNumberOfBalls(game_mode == "master" || game_mode == "slave" ? 1 : 11)
 		}
 		else{
 			for (int i = 0; i < mNumberOfBalls; i++) {
-				balls[i].fieldCoords.x = (int)(((i % 3) - 1) * 100) + !INIT_RANDOM  ? 0 : rand() % 50;
-				balls[i].fieldCoords.y = (int)((i / 3 - 1.5) * 110) + !INIT_RANDOM ? 0 : rand() % 50;
+				balls[i].fieldCoords.x = (int)(((i % 3) - 1) * 100) + (!INIT_RANDOM  ? 0 : (rand() % 50));
+				balls[i].fieldCoords.y = (int)((i / 3 - 1.5) * 110) + (!INIT_RANDOM ? 0 : (rand() % 50));
 				balls[i].id = i;
 			}
 		}

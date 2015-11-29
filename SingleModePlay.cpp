@@ -258,16 +258,18 @@ public:
 			rotation = -sign(gateHeading) * std::min(40.0, std::max(fabs(gateHeading), 5.0));
 		}
 		if (ballDistance > maxDistance) {
-			heading = ballHeading +sign(ballHeading) * asin(maxDistance / ballDistance) * 180 / CV_PI;
+			maxDistance = 30;
+			heading = ballHeading; +sign(ballHeading) * asin(maxDistance / ballDistance) * 180 / CV_PI;
 
 			speed = std::max(60.0, ballDistance);
 		}
 		else {
 			// drive around the ball
-			double top = (fabs(initialBallHeading) > 90) ? 1 : -1;
+			double top = (fabs(initialBallHeading) > 90) ? -1 : 1;
 			double left = sign(initialBallHeading);
 			heading = ballHeading + top*left*90;
 			speed = 40;
+			maxDistance = 60;
 		}
 		m_pCom->Drive(speed, heading, rotation);
 		return DRIVEMODE_ROTATE_AROUND_BALL;
