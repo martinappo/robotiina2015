@@ -10,7 +10,7 @@
 const int MAX_ROBOTS = 10;
 class Simulator : public ICamera, public ISerial, public ThreadedClass, public FieldState, public UdpServer, public RefereeCom
 {
-  using UdpServer::SendMessage;
+	using UdpServer::SendMessage;
 public:
 	Simulator(boost::asio::io_service &io, bool master, const std::string game_mode);
 	virtual ~Simulator();
@@ -25,7 +25,7 @@ public:
 	virtual const Speed & GetTargetSpeed();
 	virtual void Init();
 	std::string GetDebugInfo();
-	bool IsReal(){ return false;  }
+	bool IsReal(){ return false; }
 	void Run();
 	virtual void SetTargetGate(OBJECT gate) {}
 	virtual GatePosition &GetTargetGate() { return blueGate; };
@@ -59,7 +59,7 @@ protected:
 	Speed targetSpeed, actualSpeed;
 	void UpdateGatePos();
 	void UpdateBallPos(double dt);
-	void UpdateRobotPos();
+	void UpdateRobotPos(double dt);
 	void UpdateBallIntTribbler();
 	std::mutex mutex;
 	ObjectPosition robots[MAX_ROBOTS];
@@ -73,9 +73,8 @@ private:
 	int frames = 0;
 	double fps;
 	bool tribblerRunning = false;
-	boost::posix_time::ptime lastCapture2;
-	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
-	boost::posix_time::ptime lastStep = time;
+	double time = 0;
+	double time2 = 0;
 	bool isMaster = false;
 	bool isMasterPresent = false;
 	int id = -1;
@@ -84,4 +83,3 @@ private:
 	bool ball_in_tribbler = false;
 	cv::Mat wheelSpeeds = (cv::Mat_<double>(4, 1) << 0.0, 0.0, 0.0, 0.0);
 };
-

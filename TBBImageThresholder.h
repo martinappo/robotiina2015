@@ -1,6 +1,6 @@
 #pragma once
 #include "types.h"
-#define USE_INRANGE
+//#define USE_INRANGE
 class TBBImageThresholder :
 	public ImageThresholder, public cv::ParallelLoopBody
 {
@@ -24,15 +24,27 @@ public:
 
 	virtual void operator()(const cv::Range& range) const
 	{
-		auto &rb = objectMap[BALL];
+		auto &rbl = objectMap[BALL];
 		auto &rbg = objectMap[BLUE_GATE];
 		auto &ryg = objectMap[YELLOW_GATE];
-		auto &tb = thresholdedImages[BALL];
+
+		auto &rfd = objectMap[FIELD];
+		auto &rib = objectMap[INNER_BORDER];
+		auto &rob = objectMap[OUTER_BORDER];
+
+		auto &tbl = thresholdedImages[BALL];
 		auto &tbg = thresholdedImages[BLUE_GATE];
 		auto &tyg = thresholdedImages[YELLOW_GATE];
 
+		auto &tfd = thresholdedImages[FIELD];
+		auto &tib = thresholdedImages[INNER_BORDER];
+		auto &tob = thresholdedImages[OUTER_BORDER];
+
 		for (int i = range.start; i < range.end; i++)
 		{
+
+#define THRESHOLD(range, h, s,v) \
+					(range.hue.low <= h) && (range.hue.high >= h) && (range.sat.low <= s) && (range.sat.high >= s) && (range.val.low <= v) && (range.val.high >= v)
 
 #ifndef USE_INRANGE
 			for (int j = (frameHSV.cols*frameHSV.rows * 3 / diff)*i, k = (frameHSV.cols*frameHSV.rows / diff)*i; j < (frameHSV.cols*frameHSV.rows * 3 / diff)*(i + 1); j += 3, k++) {
@@ -41,17 +53,29 @@ public:
 				int s = frameHSV.data[j + 1];
 				int v = frameHSV.data[j + 2];
 
+				bool ball = THRESHOLD(rbl, h, s, v);
+				bool blue = THRESHOLD(rbg, h, s, v);
+				bool yellow = THRESHOLD(ryg, h, s, v);
 
-				bool ball = (rb.hue.low <= h) && (rb.hue.high >= h) && (rb.sat.low <= s) && (rb.sat.high >= s) && (rb.val.low <= v) && (rb.val.high >= v);
-				bool blue = (rbg.hue.low <= h) && (rbg.hue.high >= h) && (rbg.sat.low <= s) && (rbg.sat.high >= s) && (rbg.val.low <= v) && (rbg.val.high >= v);
-				bool yellow = (ryg.hue.low <= h) && (ryg.hue.high >= h) && (ryg.sat.low <= s) && (ryg.sat.high >= s) && (ryg.val.low <= v) && (ryg.val.high >= v);
+				bool field = THRESHOLD(rfd, h, s, v);
+				bool inner_b = THRESHOLD(rib, h, s, v);
+				bool outer_b = THRESHOLD(rob, h, s, v);
 
-				//frameHSV.data[j] = ball ? 255 : 0;
-				//frameHSV.data[j + 1] = blue ? 255 : 0;
-				//frameHSV.data[j + 2] = yellow ? 255 : 0;
-				tb.data[k] = ball ? 255 : 0;
+
+
+				frameHSV.data[j] = h * 179;
+				frameHSV.data[j + 1] = s * 255;
+				frameHSV.data[j + 2] = v * 255;
+
+
+				tbl.data[k] = ball ? 255 : 0;
 				tbg.data[k] = blue ? 255 : 0;
 				tyg.data[k] = yellow ? 255 : 0;
+
+				tfd.data[k] = field ? 255 : 0;
+				tib.data[k] = inner_b ? 255 : 0;
+				tob.data[k] = outer_b ? 255 : 0;
+
 
 
 			}
@@ -59,7 +83,7 @@ public:
 
 #else // use inRange
 			cv::Mat in(frameHSV, cv::Rect(0, (frameHSV.rows / diff)*i,
-			frameHSV.cols, frameHSV.rows / diff));
+				frameHSV.cols, frameHSV.rows / diff));
 
 			for (auto &object : objectList) {
 				auto r = objectMap[object];
@@ -73,6 +97,5 @@ public:
 protected:
 	cv::Mat frameHSV;
 	std::vector<OBJECT> objectList;
-	int diff = 12;
+	int diff = 8;
 };
-

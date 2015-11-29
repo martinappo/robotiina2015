@@ -10,11 +10,11 @@ extern cv::Mat wheelAngles;
 
 
 Simulator::Simulator(boost::asio::io_service &io, bool master, const std::string game_mode) :
-	mNumberOfBalls(game_mode == "master" || game_mode =="slave" ? 1 :11 )
-	, FieldState(game_mode == "master" || game_mode == "slave" ? 1 : 11)
-	, ThreadedClass("Simulator"), UdpServer(io, 31000, master)
-	, RefereeCom(NULL)
-	,isMaster(master)
+mNumberOfBalls(game_mode == "master" || game_mode == "slave" ? 1 : 11)
+, FieldState(game_mode == "master" || game_mode == "slave" ? 1 : 11)
+, ThreadedClass("Simulator"), UdpServer(io, 31000, master)
+, RefereeCom(NULL)
+, isMaster(master)
 {
 	srand(::time(NULL));
 	/*
@@ -54,10 +54,10 @@ void Simulator::WriteString(const std::string &command){
 		if (s.empty()) continue;
 		int id = s[0] - '1'; //string 1...5 -> int 0...4
 		if (id < 4 && s.substr(2, 2) == "sd") {
-			wheelSpeeds.at<double>(id,0) = atoi(s.substr(4).c_str());
-//			std::cout << "zzzzzzzzzzzzz" << std::endl;
-//			std::cout << wheelSpeeds << std::endl;
-//			std::cout << "xxxxxxxxxxxxx" << std::endl;
+			wheelSpeeds.at<double>(id, 0) = atoi(s.substr(4).c_str());
+			//			std::cout << "zzzzzzzzzzzzz" << std::endl;
+			//			std::cout << wheelSpeeds << std::endl;
+			//			std::cout << "xxxxxxxxxxxxx" << std::endl;
 		}
 		else if (id == 4) {
 			if (s[2] == 'k') {
@@ -66,10 +66,10 @@ void Simulator::WriteString(const std::string &command){
 			else if (s[2] == 'd' && s[3] == 'm') {
 				ToggleTribbler(atoi(s.substr(4).c_str()) > 0);
 			}
-			
+
 		}
 	}
-	
+
 }
 void Simulator::DataReceived(const std::string & message) {//serial
 	if (messageCallback != NULL) {
@@ -162,12 +162,12 @@ void Simulator::MessageReceived(const std::string & message){ //udp
 void Simulator::UpdateGatePos(){
 
 	frame_blank.copyTo(frame);
-	
+
 	drawRect(cv::Rect(cv::Point(-155, -230), cv::Point(155, 230)), 10, cv::Scalar(0, 0, 0));
 	drawRect(cv::Rect(cv::Point(-145, -220), cv::Point(145, 220)), 10, cv::Scalar(255, 255, 255));
 	drawLine(cv::Point(-145, 0), cv::Point(145, 0), 10, cv::Scalar(255, 255, 255));
 	drawCircle(cv::Point(0, 0), 40, 10, cv::Scalar(255, 255, 255));
-	
+
 	blueGate.polarMetricCoords.x = cv::norm(self.fieldCoords - blueGate.fieldCoords);
 	blueGate.polarMetricCoords.y = 360 - gDistanceCalculator.angleBetween(cv::Point(0, 1), self.fieldCoords - (blueGate.fieldCoords)) + self.getAngle();
 	yellowGate.polarMetricCoords.x = cv::norm(self.fieldCoords - yellowGate.fieldCoords);;
@@ -245,18 +245,14 @@ void Simulator::UpdateBallPos(double dt){
 
 }
 
-void Simulator::UpdateRobotPos(){
-	time = boost::posix_time::microsec_clock::local_time();
+void Simulator::UpdateRobotPos(double dt){
 
-	double dt = (double)(time - lastStep).total_milliseconds() / 1000.0;
-
-	lastStep = time;
 	if (dt > 1000) return;
 	cv::Mat robotSpeed = cv::Mat_<double>(3, 1);
 	cv::solve(wheelAngles, wheelSpeeds, robotSpeed, cv::DECOMP_SVD);
 	//std::cout << robotSpeed << std::endl;
 
-	
+
 	self.polarMetricCoords.y -= (robotSpeed.at<double>(2)*dt);
 	if (self.polarMetricCoords.y > 360) self.polarMetricCoords.y -= 360;
 	if (self.polarMetricCoords.y < -360) self.polarMetricCoords.y += 360;
@@ -265,13 +261,13 @@ void Simulator::UpdateRobotPos(){
 
 	self.fieldCoords.x += rotatedSpeed.at<double>(0)*dt;
 	self.fieldCoords.y -= rotatedSpeed.at<double>(1)*dt;
-	
+
 
 	if (!isMaster && id > 0) {
 		std::stringstream message;
 		message << "POS " << id << " " << self.fieldCoords.x << " " << self.fieldCoords.y << " " << self.getAngle() << " #";
 		SendMessage(message.str());
-	} 
+	}
 
 	UpdateGatePos();
 	UpdateBallPos(dt);
@@ -305,17 +301,19 @@ Simulator::~Simulator()
 }
 
 cv::Mat & Simulator::Capture(bool bFullFrame){
-	if (frames > 10) {
-		boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
-		boost::posix_time::time_duration::tick_type dt2 = (time - lastCapture2).total_milliseconds();
-		fps = 1000.0 * frames / dt2;
-		lastCapture2 = time;
+	double t2 = (double)cv::getTickCount();
+	if (frames > 20) {
+		double dt = (t2 - time) / cv::getTickFrequency();
+		fps = frames / dt;
+		time = t2;
 		frames = 0;
 	}
 	else {
 		frames++;
 	}
-	UpdateRobotPos();
+	double dt = (t2 - time2) / cv::getTickFrequency();
+	UpdateRobotPos(dt);
+	time2 = t2;
 	return frame;
 
 	std::lock_guard<std::mutex> lock(mutex);
@@ -400,8 +398,8 @@ bool Simulator::BallInTribbler(){
 		}
 	}
 	if (minDist < (was_in_tribbler ? 25 : 15))
-		ball_in_tribbler= true;
-	else ball_in_tribbler= false;
+		ball_in_tribbler = true;
+	else ball_in_tribbler = false;
 	return ball_in_tribbler;
 }
 
@@ -423,7 +421,7 @@ void Simulator::Kick(int force){
 		balls[minDistIndex].heading = self.getAngle();
 	}
 	else {
-		SendMessage("KCK " + std::to_string(minDistIndex) + " "+std::to_string(force)+" " + std::to_string(self.getAngle()) + " #");
+		SendMessage("KCK " + std::to_string(minDistIndex) + " " + std::to_string(force) + " " + std::to_string(self.getAngle()) + " #");
 	}
 	//balls[minDistIndex] = balls[mNumberOfBalls - 1];
 	//balls[mNumberOfBalls - 1].~BallPosition();
@@ -459,7 +457,7 @@ void Simulator::drawLine(cv::Point start, cv::Point end, int thickness, CvScalar
 		double y1 = d1*cos(a1 / 180 * CV_PI);
 		cv::Point cur = cv::Point((int)(x1), (int)(y1)) + cv::Point(frame.size() / 2);
 		if (last.x < 1000) {
-			cv::line(frame, last, cur, color, std::min(30.0, 4* 1/d1*960));
+			cv::line(frame, last, cur, color, std::min(30.0, 4 * 1 / d1 * 960));
 		}
 		last = cur;
 	}
