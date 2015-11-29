@@ -16,8 +16,8 @@ DriveMode DriveToBall::step(double dt){
 		m_pCom->ToggleTribbler(0);
 		toggledDribbler = true;
 	}
-	//return stepAimGate(dt);
-	return stepAngled(dt);
+	return stepAimGate(dt);
+	//return stepAngled(dt);
 	//return stepPenatalizeRotation(dt);
 }
 DriveMode DriveToBall::stepNaive(double dt)
@@ -83,7 +83,7 @@ DriveMode DriveToBall::stepAimGate(double dt){
 
 	double rotation = 0;
 	double errorMargin = 5;
-	double maxDistance = 25;
+	double maxDistance = 30;
 	//if (fabs(gateHeading - ballHeading) > 90) { // we are between gate and ball
 	//	return stepAngled(dt); 
 	//}
@@ -94,15 +94,24 @@ DriveMode DriveToBall::stepAimGate(double dt){
 	double speed = 0;
 	if (ballDistance > maxDistance) {
 		heading = ballHeading;// +sign(gateHeading) / ballDistance;
-		speed = std::max(30.0, ballDistance);
+		if(fabs(heading) > 30)
+			heading = sign(heading)*(fabs(heading) + 15);
+		speed = std::max(60.0, ballDistance);
 	}
 	else {
 		if (fabs(ballHeading) <= errorMargin && fabs(gateHeading) <= errorMargin){
 			return DRIVEMODE_CATCH_BALL;
 		}
+		if(fabs(ballHeading) > errorMargin ){
+			heading = ballHeading + sign(ballHeading) * 55;
+		}
+		rotation = 0;
+		if(fabs(gateHeading) > errorMargin){
+			rotation = -sign(gateHeading) * std::min(40.0, std::max(fabs(gateHeading), 5.0));
+		}
 		// drive around the ball
-		heading = ballHeading + sign(ballHeading) * 90;
-		speed = 30;
+		//heading = ballHeading + sign(ballHeading) * 90;
+		speed = std::max(fabs(ballHeading), 35.0);
 	}
 	m_pCom->Drive(speed, heading, rotation);
 	return DRIVEMODE_DRIVE_TO_BALL;
@@ -132,7 +141,7 @@ public:
 void CatchBall::onEnter()
 {
 	DriveInstruction::onEnter();
-	m_pCom->ToggleTribbler(100);
+	m_pCom->ToggleTribbler(250);
 	FIND_TARGET_BALL
 	initDist = target.getDistance();
 	STOP_DRIVING

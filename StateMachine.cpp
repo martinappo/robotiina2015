@@ -21,7 +21,7 @@ bool DriveInstruction::catchTarget(const ObjectPosition &target){
 	}
 	double heading =  target.getHeading();
 	double dist = target.getDistance();
-	m_pCom->Drive(50, 0, 0);
+	m_pCom->Drive(50, 0, -sign(heading)* 5);
 	return false;
 }
 
