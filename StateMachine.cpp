@@ -4,12 +4,14 @@
 bool DriveInstruction::aimTarget(const ObjectPosition &target, double errorMargin){
 	double heading = target.getHeading();
 	if (fabs(heading) > errorMargin){
-		m_pCom->Drive(0, 0, -sign(heading) * std::min(40.0, std::max(fabs(heading), 10.0)));
+		m_pCom->Drive(0, 0, -sign(heading) * std::min(40.0, std::max(fabs(heading), 5.0)));
 		return false;
 	}
 	else{
 		m_pCom->Drive(0, 0, 0);
-		return true;
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		std::cout<<(fabs(heading) < errorMargin)<<std::endl;
+		return fabs(heading) < errorMargin;
 	}
 }
 bool DriveInstruction::catchTarget(const ObjectPosition &target){
@@ -19,7 +21,7 @@ bool DriveInstruction::catchTarget(const ObjectPosition &target){
 	}
 	double heading =  target.getHeading();
 	double dist = target.getDistance();
-	m_pCom->Drive(100, 0, 0);
+	m_pCom->Drive(50, 0, -sign(heading)* 5);
 	return false;
 }
 
@@ -104,11 +106,14 @@ void StateMachine::Run()
 	while (!stop_thread) {
 		boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
 		boost::posix_time::time_duration::tick_type dt = (time - lastStep).total_milliseconds();
-		newMode = curDriveMode->second->step1(double(dt));
+		newMode = testMode ? curDriveMode->second->step(double(dt)) : curDriveMode->second->step1(double(dt));
 		
 	auto old = curDriveMode;
 
-	if (testMode) newMode = testDriveMode;
+	if (testMode && newMode != testDriveMode) {
+		newMode = DRIVEMODE_IDLE;
+		testDriveMode = DRIVEMODE_IDLE;
+	}
 
 	if (newMode != curDriveMode->first){
 		boost::mutex::scoped_lock lock(mutex);

@@ -8,7 +8,7 @@ FieldState::~FieldState(){
 }
 
 void FieldState::resetBallsUpdateState() {
-	for (size_t i = 0; i < balls.size(); i++) {
+	for (size_t i = 0, isize = balls.size(); i < isize; i++) {
 		balls[i].setIsUpdated(false);
 	}
 }

@@ -64,7 +64,7 @@ void SoccerField::Run(){
 			+ self.fieldCoords + c
 			, cv::Scalar(133, 33, 55), 3);
 		
-		for (int i = 0; i < balls.size(); i++) {
+		for (size_t i = 0, ilen = balls.size(); i < ilen; i++) {
 			BallPosition &_ball = balls[i];
 			cv::circle(field, _ball.fieldCoords + c, 7, cv::Scalar(48, 154, 236), -1);
 			/*{

@@ -23,6 +23,7 @@ public:
 		actionStart = boost::posix_time::microsec_clock::local_time();
 	};
 	virtual DriveMode step1(double dt){
+		//not executed in test mode
 		if (m_pFieldState->gameMode == FieldState::GAME_MODE_STOPED){
 			return DRIVEMODE_IDLE;
 		}
