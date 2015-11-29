@@ -3,6 +3,10 @@
 enum SingleModeDriveStates {
 	//DRIVEMODE_IDLE = 0,
 	DRIVEMODE_DRIVE_TO_BALL = DRIVEMODE_IDLE + 1,
+	DRIVEMODE_DRIVE_TO_BALL_NAIVE,
+	DRIVEMODE_DIRVE_TO_BALL_AVOID_TURN,
+	DRIVEMODE_DRIVE_TO_BALL_ANGLED,
+	DRIVEMODE_DRIVE_TO_BALL_AIM_GATE,
 	DRIVEMODE_LOCATE_HOME,
 	DRIVEMODE_DRIVE_HOME,
 	DRIVEMODE_CATCH_BALL,
@@ -31,11 +35,13 @@ public:
 	virtual void onEnter();
 	DriveToBall(const std::string &name = "DRIVE_TO_BALL") : DriveInstruction(name){};
 	virtual DriveMode step(double dt);
+	/*
 protected:
 	virtual DriveMode stepNaive(double dt);
 	virtual DriveMode stepAngled(double dt);
 	virtual DriveMode stepPenatalizeRotation(double dt);
 	virtual DriveMode stepAimGate(double dt);
+	*/
 
 private:
 	bool toggledDribbler = false;
