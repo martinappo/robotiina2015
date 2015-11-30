@@ -19,7 +19,7 @@ void DriveToBall::onEnter()
 }
 
 DriveMode DriveToBall::step(double dt){
-	return DRIVEMODE_DRIVE_TO_BALL_AIM_GATE;
+	return DRIVEMODE_ROTATE_AROUND_BALL;
 	/*
 	//return stepNaive(dt);
 	if (STUCK_IN_STATE(2000) && !toggledDribbler){ 
@@ -245,7 +245,9 @@ public:
 		const ObjectPosition &ball = getClosestBall();
 		const ObjectPosition &gate = m_pFieldState->GetTargetGate();
 		double gateHeading = gate.getHeading();
-		double ballHeading = ball.getAngle();
+		double gateAngle = gate.getAngle();
+		double ballAngle = ball.getAngle();
+		double ballHeading = ball.getHeading();
 		double ballDistance = ball.getDistance();
 
 		double rotation = 0;
@@ -254,21 +256,28 @@ public:
 
 		double errorMargin = 5;
 		double maxDistance = 30;
+		if (fabs(gateHeading) <= errorMargin && fabs(ballHeading) <= errorMargin){
+			return DRIVEMODE_CATCH_BALL;
+		}
 
 		if (fabs(gateHeading) > errorMargin){
 			rotation = -sign(gateHeading) * std::min(40.0, std::max(fabs(gateHeading), 5.0));
 		}
 		if (ballDistance > maxDistance) {
 			maxDistance = 30;
-			heading = ballHeading +sign(ballHeading) * asin(maxDistance / ballDistance) * 180 / CV_PI;
+			double top = 1;// (fabs(initialBallHeading) > 90) ? -1 : 1;
+
+			heading = ballAngle + sign(ballHeading) * top*asin(maxDistance / ballDistance) * 180 / CV_PI;
 
 			speed = std::max(60.0, ballDistance);
 		}
-		else {
+		else if (fabs(gateHeading - ballHeading) > errorMargin*2){
+			//return DRIVEMODE_CATCH_BALL;
+
 			// drive around the ball
-			double top = (fabs(initialBallHeading) > 90) ? -1 : 1;
+			double top = 1;// (fabs(initialBallHeading) > 90) ? -1 : 1;
 			double left = sign(initialBallHeading);
-			heading = ballHeading + top*left*90;
+			heading = ballAngle + top*left*90;
 			speed = 40;
 			maxDistance = 60;
 		}
