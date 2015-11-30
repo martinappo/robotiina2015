@@ -281,6 +281,10 @@ public:
 			speed = 40;
 			maxDistance = 60;
 		}
+		if (((speed) < 0.01) && (fabs(heading) < 0.01) && (fabs(rotation) < 0.01)){
+			// nowhere to go, error margins are out-of-sync
+			return DRIVEMODE_CATCH_BALL;
+		}
 		m_pCom->Drive(speed, heading, rotation);
 		return DRIVEMODE_ROTATE_AROUND_BALL;
 	}

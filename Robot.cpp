@@ -477,10 +477,21 @@ void Robot::Run()
 			START_DIALOG
 				m_pDisplay->createButton(OBJECT_LABELS[BLUE_GATE], '-', [&field, this]{
 				field.SetTargetGate(BLUE_GATE);
+				Simulator *pSim = dynamic_cast<Simulator*>(this->m_pCamera);
+				if (pSim!=NULL){
+					pSim->self.fieldCoords = cv::Point2d(155, 230);
+					pSim->self.polarMetricCoords.y = -30;
+				}
 				this->SetState(STATE_NONE);
 			});
 			m_pDisplay->createButton(OBJECT_LABELS[YELLOW_GATE], '-', [&field, this]{
 				field.SetTargetGate(YELLOW_GATE);
+				Simulator *pSim = dynamic_cast<Simulator*>(this->m_pCamera);
+				if (pSim != NULL){
+					pSim->self.fieldCoords = cv::Point2d(-155, -230);
+					pSim->self.polarMetricCoords.y = 150;
+
+				}
 				this->SetState(STATE_NONE);
 			});
 			END_DIALOG

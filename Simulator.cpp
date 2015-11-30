@@ -8,7 +8,7 @@
 extern DistanceCalculator gDistanceCalculator;
 extern cv::Mat wheelAngles;
 
-const double SIMULATOR_SPEED = 0.1;
+const double SIMULATOR_SPEED = 0.5;
 const bool INIT_RANDOM = false;
 
 Simulator::Simulator(boost::asio::io_service &io, bool master, const std::string game_mode) :
@@ -25,8 +25,8 @@ mNumberOfBalls(game_mode == "master" || game_mode == "slave" ? 1 : 11)
 	wheelSpeeds.push_back({ 0, 0 });
 	wheelSpeeds.push_back({ 0, 0 });
 	*/
-	self.fieldCoords = !INIT_RANDOM ? cv::Point(-140, 140) : cv::Point(rand() % 300 - 150, rand() % 460 - 230);
-	self.polarMetricCoords = cv::Point(0, !INIT_RANDOM ? 45 : rand() % 359);
+	self.fieldCoords = !INIT_RANDOM ? cv::Point(155, 230) : cv::Point(rand() % 300 - 150, rand() % 460 - 230);
+	self.polarMetricCoords = cv::Point(0, !INIT_RANDOM ? -30 : rand() % 359);
 	if (isMaster) {
 		id = 0;
 		// distribute balls uniformly at random
