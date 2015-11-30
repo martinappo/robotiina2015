@@ -260,7 +260,7 @@ public:
 		}
 		if (ballDistance > maxDistance) {
 			maxDistance = 30;
-			heading = ballHeading; +sign(ballHeading) * asin(maxDistance / ballDistance) * 180 / CV_PI;
+			heading = ballHeading +sign(ballHeading) * asin(maxDistance / ballDistance) * 180 / CV_PI;
 
 			speed = std::max(60.0, ballDistance);
 		}

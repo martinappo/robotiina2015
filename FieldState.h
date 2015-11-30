@@ -34,7 +34,7 @@ public:
 		return balls.size();
 	}
 public:
-	BallPosition closest = BallPosition();
+	BallPosition closest = BallPosition(true);
 private:
 	std::vector<BallPosition> balls;
 	double ballLost = -1;

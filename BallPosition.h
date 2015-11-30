@@ -8,8 +8,13 @@
 class BallPosition : public ObjectPosition
 {
 public:
-	BallPosition(bool useKalman=false):useKalman(useKalman){};
-	BallPosition(const BallPosition & ballPos){};
+	BallPosition() :useKalman(false){};
+	BallPosition(bool useKalman) :useKalman(useKalman){};
+	BallPosition(const BallPosition & ballPos){
+		rawPixelCoords = ballPos.rawPixelCoords;
+		polarMetricCoords = ballPos.polarMetricCoords;
+		fieldCoords = ballPos.fieldCoords;
+	};
 	virtual ~BallPosition();
 	int id;
 	bool isValid;
