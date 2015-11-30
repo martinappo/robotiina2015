@@ -21,6 +21,7 @@ const BallPosition& BallArray::calcClosest(int * index){
 	closest.rawPixelCoords = balls[target_index].rawPixelCoords;
 	closest.polarMetricCoords = balls[target_index].polarMetricCoords;
 	closest.fieldCoords = balls[target_index].fieldCoords;
+	return closest;
 #else
 	std::cout << balls[target_index].polarMetricCoords << ", " << closest.fieldCoords << ", " << balls[target_index].fieldCoords  << std::endl;
 	if (cv::norm(closest.fieldCoords - balls[target_index].fieldCoords) > 20) { // another ball found
