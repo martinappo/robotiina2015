@@ -69,8 +69,8 @@ bool DriveInstruction::driveToTargetWithAngle(const ObjectPosition &target, doub
 }
 
 
-const BallPosition &DriveInstruction::getClosestBall(bool includeHeading){
-	return  m_pFieldState->balls.getClosest(includeHeading);
+const BallPosition &DriveInstruction::getClosestBall(bool includeHeading, bool reset){
+	return  m_pFieldState->balls.getClosest();
 }
 
 

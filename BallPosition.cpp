@@ -1,5 +1,6 @@
 #include "BallPosition.h"
-
+#include "DistanceCalculator.h"
+extern DistanceCalculator gDistanceCalculator;
 
 BallPosition::~BallPosition()
 {
@@ -8,11 +9,26 @@ BallPosition::~BallPosition()
 void BallPosition::setIsUpdated(bool updated) {
 	isUpdated = updated;
 }
+void BallPosition::filterCoords(const BallPosition &ball, ObjectPosition robot, bool reset) {
 
-void BallPosition::predictCoordinates() {
-	//updateCoordinates(0, 0, cv::Point(0,0), 0);
-	//pixelCoordsForField = filter->getPrediction();
-	//TODO: generate other coordinate types from predicted pixelcoords
+	if (reset) {
+		filter.reset(ball.fieldCoords);
+		fieldCoords = ball.fieldCoords;
+		polarMetricCoords = ball.polarMetricCoords;
+		rawPixelCoords = ball.rawPixelCoords;
+	}
+	else {
+		fieldCoords = filter.doFiltering(ball.fieldCoords);
+	}
+	//polarMetricCoords = ball.polarMetricCoords;
+	polarMetricCoords.x = cv::norm(robot.fieldCoords - fieldCoords);
+	polarMetricCoords.y = gDistanceCalculator.angleBetween(cv::Point(0, -1), robot.fieldCoords - fieldCoords) + robot.getAngle();
+	rawPixelCoords = ball.rawPixelCoords;
+
+}
+
+void BallPosition::predictCoords() {
+
 }
 
 void BallPosition::updateFieldCoords(cv::Point2d orgin, double heading) {

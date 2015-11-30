@@ -17,7 +17,7 @@ RobotPosition::~RobotPosition()
 {
 }
 
-void RobotPosition::updateFieldCoordsNew(cv::Point2d orgin) {
+void RobotPosition::updateFieldCoordsNew(cv::Point2d orgin, double dt) {
 
 
 	double d1 = blueGate.getDistance();
@@ -70,52 +70,25 @@ void RobotPosition::updateFieldCoordsNew(cv::Point2d orgin) {
 //	if (da2 < 0) da2 += 360;
 	//polarMetricCoords.y = (da1 + da2) / 2;
 	polarMetricCoords.y = d1 > d2 ? da1 : da2;
+	double lastRotationSpeed = rotationSpeed;
+	double LEARNING_RATE = 0.6; // not really learning
+	rotationSpeed = (1 - LEARNING_RATE) * rotationSpeed + LEARNING_RATE*((lastRotation - polarMetricCoords.y) / dt);
+	lastRotation = polarMetricCoords.y;
 
-}
-void RobotPosition::updateFieldCoords(cv::Point2d orgin) {
-
-	updateFieldCoordsNew();
-	return;
-
-	auto possiblePoints = intersectionOfTwoCircles(yellowGate.fieldCoords, yellowGate.getDistance(), blueGate.fieldCoords, blueGate.getDistance());
-
-	if (isRobotAboveCenterLine(yellowGate.getAngle(), blueGate.getAngle())){
-		if (possiblePoints.first.y > 155){
-			this->rawFieldCoords = possiblePoints.first;
-		}else
-			this->rawFieldCoords = possiblePoints.second;
-	}
-	else {
-		if (possiblePoints.first.y < 155){
-			this->rawFieldCoords = possiblePoints.first;
-		}else
-			this->rawFieldCoords = possiblePoints.second;
-	}
-	fieldCoords = filter.doFiltering(rawFieldCoords);
-	/*double possiblePointDistance1 = cv::norm(possiblePoints.first - lastFieldCoords);
-	double possiblePointDistance2 = cv::norm(possiblePoints.second - lastFieldCoords);
-	if (possiblePointDistance1 < possiblePointDistance2) {
-		this->fieldCoords = possiblePoints.first;
-	}
-	else {
-		this->fieldCoords = possiblePoints.second;
-	}*/
-
-	// no that we know robot position, we can calculate it's angle to blue or yellow gate on the field
-	double angleToBlueGate = DistanceCalculator::angleBetween(fieldCoords - blueGate.fieldCoords, { 0, 1 });
-	double angleToYellowGate = DistanceCalculator::angleBetween(fieldCoords - yellowGate.fieldCoords, { 0, 1 });
-	// now add real gate angle to this angle
-	auto a1 = (angleToBlueGate - blueGate.getAngle());
-	auto a2 = (angleToYellowGate - yellowGate.getAngle());
-	// for taking average, they must have same sign
-	if (a1 < 0) a1 += 360;
-	if (a2 < 0) a2 += 360;
-	//polarMetricCoords.y = (a1 + a2) / 2;
-	polarMetricCoords.y = blueGate.getDistance() > yellowGate.getDistance() ? a1 : a2;
 
 
 }
+void RobotPosition::updateFieldCoords(cv::Point2d orgin, double dt) {
 
+	updateFieldCoordsNew(orgin, dt);
+}
+
+void RobotPosition::predict(double dt){
+	fieldCoords = filter.getPrediction();
+	// preserve rotation
+	polarMetricCoords.y = rotationSpeed * dt;
+
+}
 void RobotPosition::updatePolarCoords() {
 	return;
 }

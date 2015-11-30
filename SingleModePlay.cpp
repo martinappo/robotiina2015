@@ -14,7 +14,7 @@ void DriveToBall::onEnter()
 {
 	toggledDribbler = false;
 	DriveInstruction::onEnter();	
-	initialBall = getClosestBall();
+	initialBall = getClosestBall(false, true);
 	initialGate = m_pFieldState->GetTargetGate();
 }
 

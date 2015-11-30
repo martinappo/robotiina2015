@@ -37,7 +37,7 @@ public:
 	bool catchTarget(const ObjectPosition &target);
 	bool driveToTarget(const ObjectPosition &target, double maxDistance = 50);
 	bool driveToTargetWithAngle(const ObjectPosition &target, double maxDistance = 50, double errorMargin = 10);
-	const BallPosition &getClosestBall(bool includeHeading = false);
+	const BallPosition &getClosestBall(bool includeHeading = false, bool reset=true);
 };
 class Idle : public DriveInstruction
 {

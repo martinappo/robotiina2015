@@ -6,9 +6,10 @@
 #include "RobotPosition.h"
 #include "TargetPosition.h"
 
+class FieldState;
 class BallArray {
 public:
-	BallArray(unsigned ballCount){
+	BallArray(unsigned ballCount, FieldState* field):field(field){
 		balls.resize(ballCount);
 		// distribute balls uniformly
 		for (unsigned i = 0; i < ballCount; i++) {
@@ -24,30 +25,21 @@ public:
 	std::vector<BallPosition>::iterator end() {
 		return balls.end();
 	}
-	const BallPosition& getClosest(bool includeHeading = false, int *index = NULL){
-		double alpha = 3;
-		double target_distance = INT_MAX;
-		int target_index = 0;
-		for (unsigned i = 0; i < balls.size(); i++) {
-			//if (abs(balls[i].fieldCoords.y) > 250) continue; // too far outside of the field
-			double curDist = balls[i].getDistance();
-			if(includeHeading)
-				curDist += alpha * curDist * sin(fabs(balls[i].getHeading()) / 180 * CV_PI);
-			//std::cout << "getClosest: " << (includeHeading ? 1 : 0) << " " << balls[i].getDistance() << ", " << balls[i].getHeading() << " -> " << curDist << std::endl;
-			if (curDist < target_distance) {
-				target_index = i;
-				target_distance = curDist;
-			}
-		}
-		if (index != NULL) *index = target_index;
-		return balls[target_index];
+	const BallPosition& getClosest(){
+		return closest;
 	}
+	const BallPosition& calcClosest(int * index);
+
 	size_t size() {
 		return balls.size();
 	}
-
+public:
+	BallPosition closest = BallPosition(true);
 private:
 	std::vector<BallPosition> balls;
+	double ballLost = -1;
+	FieldState *field;
+	std::atomic_bool reset;
 };
 class FieldState {
 public:
@@ -98,6 +90,7 @@ public:
 	RobotPosition self; //Robot distance on field
 	ObjectPosition partner;
 	ObjectPosition opponents[2];
+	ObjectPosition partnerHomeGate;
 	std::atomic_bool gateObstructed;
 	virtual void SetTargetGate(OBJECT gate) = 0;
 	virtual GatePosition &GetTargetGate() = 0;

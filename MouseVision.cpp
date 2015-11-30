@@ -34,7 +34,7 @@ void MouseVision::Run(){
 		frameBGR.copyTo(display);
 		m_pState->blueGate.updateRawCoordinates(cv::Point2d(x, y), cv::Point2d(frameBGR.size()/2));
 		//m_pState->yellowGate.updateCoordinates(cv::Point(frameBGR.cols - x, frameBGR.rows - y));
-		m_pState->self.updateFieldCoords();
+		m_pState->self.updateFieldCoords(cv::Point2d(0,0), 0);
 		//ballFinder.populateBalls(thresholdedImages, frameHSV, frameBGR, BALL, m_pState);
 		m_pDisplay->ShowImage(display);
 		std::this_thread::sleep_for(std::chrono::milliseconds(50));

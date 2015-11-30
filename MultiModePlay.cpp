@@ -81,7 +81,7 @@ public:
 	Defensive() : DriveInstruction("2V2_DEFENSIVE"){};
 	virtual DriveMode step(double dt){
 		auto & target = m_pFieldState->partner;
-		if (abs(m_pFieldState->GetHomeGate().getDistance() - target.getDistance()) > 100){//is ally in defense area?
+		if (m_pFieldState->partnerHomeGate.getDistance() > 100){//is ally in defense area?
 			if (m_pFieldState->GetHomeGate().getDistance() > 80)
 				return DRIVEMODE_2V2_DRIVE_HOME;
 			else{

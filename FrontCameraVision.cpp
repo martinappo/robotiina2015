@@ -93,6 +93,8 @@ void FrontCameraVision::Run() {
 	bool somethingOnWay = false;
 
 	while (!stop_thread){
+		double t2 = (double)cv::getTickCount();
+		double dt = (t2 - time) / cv::getTickFrequency();
 
 		cv::Mat frameBGR = m_pCamera->Capture();
 		if (videoRecorder->isRecording){
@@ -192,7 +194,15 @@ void FrontCameraVision::Run() {
 			m_pState->blueGate.updateRawCoordinates(c1-cv::Point2d(frameBGR.size() / 2));
 			m_pState->yellowGate.updateRawCoordinates(c2- cv::Point2d(frameBGR.size() / 2));
 
-			m_pState->self.updateFieldCoords();
+			m_pState->self.updateFieldCoords(cv::Point2d(0,0), dt);
+		}
+		else {
+			m_pState->self.predict(dt);
+			// calculate gates from predicted pos.
+			m_pState->blueGate.polarMetricCoords.x = cv::norm(m_pState->self.fieldCoords - m_pState->blueGate.fieldCoords);
+			m_pState->blueGate.polarMetricCoords.y = 360 - gDistanceCalculator.angleBetween(cv::Point(0, 1), m_pState->self.fieldCoords - (m_pState->blueGate.fieldCoords)) + m_pState->self.getAngle();
+			m_pState->yellowGate.polarMetricCoords.x = cv::norm(m_pState->self.fieldCoords - m_pState->yellowGate.fieldCoords);;
+			m_pState->yellowGate.polarMetricCoords.y = 360 - gDistanceCalculator.angleBetween(cv::Point(0, 1), m_pState->self.fieldCoords - (m_pState->yellowGate.fieldCoords)) + m_pState->self.getAngle();
 		}
 		//Balls pos 
 //		cv::Mat rotMat = getRotationMatrix2D(cv::Point(0,0), -m_pState->self.getAngle(), 1);
@@ -223,15 +233,18 @@ void FrontCameraVision::Run() {
 			}
 			//TODO: use returned ball instead of balls.at<double>(0, ball_idx) 
 			int ball_idx = 0;
-			m_pState->balls.getClosest(false, &ball_idx);
-			cv::Rect bounding_rect = cv::Rect(cv::Point(balls.at<double>(0, ball_idx), balls.at<double>(1, ball_idx)) - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
-				cv::Point(balls.at<double>(0, ball_idx), balls.at<double>(1, ball_idx)) + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
-			rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), cv::Scalar(255, 0, 0), 2, 8, 0);
-
+			m_pState->balls.calcClosest(&ball_idx);
+			if (ball_idx >= 0) {
+				cv::Rect bounding_rect = cv::Rect(cv::Point(balls.at<double>(0, ball_idx), balls.at<double>(1, ball_idx)) - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
+					cv::Point(balls.at<double>(0, ball_idx), balls.at<double>(1, ball_idx)) + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
+				rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), cv::Scalar(255, 0, 0), 2, 8, 0);
+			}
+			/*
 			m_pState->balls.getClosest(true, &ball_idx);
 			bounding_rect = cv::Rect(cv::Point(balls.at<double>(0, ball_idx), balls.at<double>(1, ball_idx)) - cv::Point(30, 30) + cv::Point(frameBGR.size() / 2),
 				cv::Point(balls.at<double>(0, ball_idx), balls.at<double>(1, ball_idx)) + cv::Point(30, 30) + cv::Point(frameBGR.size() / 2));
 			rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), cv::Scalar(255, 255, 0), 2, 8, 0);
+			*/
 		}
 		/*
 		ObjectPosition *targetGatePos = 0;

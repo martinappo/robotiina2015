@@ -22,6 +22,7 @@ protected:
 	bool borderDetectionEnabled = false;
 	bool nightVisionEnabled = false;
 	VideoRecorder *videoRecorder  = NULL;
+	double time = 0;
 
 public:
 	FrontCameraVision(ICamera * pCamera, IDisplay *pDisplay, FieldState *pFieldState);

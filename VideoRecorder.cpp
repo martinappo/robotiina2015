@@ -80,6 +80,7 @@ void VideoRecorder::RecordFrame(const cv::Mat &frame, const std::string subtitle
 	std::replace(frameName.begin(), frameName.end(), ':', '.');
 	cv::imwrite(frameName, frame);
 #endif
-	*subtitles << "{" << frameCounter << "}{" << (frameCounter) << "}" << " frame " << frameCounter << ": " << boost::posix_time::to_simple_string(boost::posix_time::microsec_clock::local_time()) << "|" << subtitle << "\r\n";
+	if (subtitles != NULL)
+		*subtitles << "{" << frameCounter << "}{" << (frameCounter) << "}" << " frame " << frameCounter << ": " << boost::posix_time::to_simple_string(boost::posix_time::microsec_clock::local_time()) << "|" << subtitle << "\r\n";
 	frameCounter++;
 }

@@ -9,10 +9,11 @@ public:
 	RobotPosition(GatePosition &yellowGate, GatePosition &blueGate, cv::Point initialCoords = cv::Point(0,0));
 	virtual ~RobotPosition();
 	virtual void updatePolarCoords();
-	void updateFieldCoordsNew(cv::Point2d orgin = cv::Point(0, 0));
-	void updateFieldCoords(cv::Point2d orgin = cv::Point(0, 0));
+	void updateFieldCoordsNew(cv::Point2d orgin, double dt);
+	void updateFieldCoords(cv::Point2d orgin, double dt);
 	double getAngle();
 	cv::Point2d rawFieldCoords; // (x, y) Coordinates to display objects on field by, relative to field
+	void predict(double dt);
 private:
 	GatePosition & yellowGate, & blueGate; // use references that point somewhere
 	void initPolarCoordinates();
@@ -21,4 +22,6 @@ private:
 	double getRobotDirection();
 	KalmanFilter filter;
 	double tmp;
+	double lastRotation = 0;
+	double rotationSpeed = 0;
 };

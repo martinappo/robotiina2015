@@ -53,7 +53,10 @@ void SoccerField::Run(){
 
 		{
 			std::stringstream message;
-			message << "POS " << " " << self.fieldCoords.x << " " << self.fieldCoords.y << " " << self.getAngle() << " #";
+			message.precision(3);
+			message << "POS " << " " << self.fieldCoords.x << " " << self.fieldCoords.y << " " << self.getAngle() 
+				<< " " << GetHomeGate().getDistance() << " " << GetHomeGate().getAngle()
+				<< " #";
 			SendMessage(message.str());
 		}
 
@@ -64,6 +67,7 @@ void SoccerField::Run(){
 			+ self.fieldCoords + c
 			, cv::Scalar(133, 33, 55), 3);
 		
+		cv::circle(field, balls.closest.fieldCoords + c, 12, cv::Scalar(48, 154, 236), 2);
 		for (size_t i = 0, ilen = balls.size(); i < ilen; i++) {
 			BallPosition &_ball = balls[i];
 			cv::circle(field, _ball.fieldCoords + c, 7, cv::Scalar(48, 154, 236), -1);
@@ -72,6 +76,7 @@ void SoccerField::Run(){
 				//SendMessage(message.str());
 			}*/
 		}
+
 		
 		if (!std::isnan(blueGate.getDistance())) {
 				cv::circle(field, blueGate.fieldCoords + c, 14, cv::Scalar(236, 137, 48), 7);
@@ -116,11 +121,13 @@ void SoccerField::MessageReceived(const std::string & message){
 		gameMode = GAME_MODE_TAKE_BALL;
 	}
 	else  if (command == "POS") {
-		std::string x, y, a;
-		ss >> x >> y >> a;
-		partner.fieldCoords.x = atoi(x.c_str());
-		partner.fieldCoords.y = atoi(y.c_str());
+		std::string x, y, a, gd, ga;
+		ss >> x >> y >> a >> gd >> ga;
+		partner.fieldCoords.x = atof(x.c_str());
+		partner.fieldCoords.y = atof(y.c_str());
 		partner.polarMetricCoords.y = gDistanceCalculator.angleBetween(partner.fieldCoords, { 0, -1 });
 		partner.polarMetricCoords.x = cv::norm(self.fieldCoords - partner.fieldCoords);
+		partnerHomeGate.polarMetricCoords.x = atof(gd.c_str());
+		partnerHomeGate.polarMetricCoords.y = atof(ga.c_str());
 	}
 }

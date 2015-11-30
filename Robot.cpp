@@ -399,7 +399,7 @@ void Robot::Run()
 				});
 				std::stringstream sset;
 				sset << " [ robot: " << refCom->FIELD_MARKER << refCom->ROBOT_MARKER << ", team: " << refCom->TEAM_MARKER << "]";
-				/*
+				
 				STATE_BUTTON("(S)ettings" + sset.str(), 's', STATE_SETTINGS)
 					m_pDisplay->createButton("Reinit wheels", '-', [this] {
 					//initPorts();
@@ -407,6 +407,7 @@ void Robot::Run()
 					//TODO: fix this
 					this->last_state = STATE_END_OF_GAME; // force dialog redraw
 				});
+				/*
 				m_pDisplay->createButton("Reinit coilboard", '-', [this] {
 					//initPorts();
 					//initCoilboard();
@@ -602,12 +603,12 @@ void Robot::Run()
 		m_pDisplay->putShadowedText( std::string("Trib:") + (comModule.BallInTribbler() ? "yes" : "no"), cv::Point(-140, 100), 0.5, cv::Scalar(255, 255, 255));
 		m_pDisplay->putShadowedText( std::string("Sight:") + (field.gateObstructed ? "obst" : "free"), cv::Point(-140, 120), 0.5, cv::Scalar(255, 255, 255));
 		//m_pDisplay->putShadowedText( std::string("OnWay:") + (somethingOnWay ? "yes" : "no"), cv::Point(-140, 140), 0.5, cv::Scalar(255, 255, 255));
-		
+		/*
 		const BallPosition &ball = field.balls.getClosest();
 		m_pDisplay->putShadowedText(std::string("Ball") + ": " + std::to_string(ball.polarMetricCoords.x) + " : " + std::to_string(ball.getHeading()), cv::Point(-250, 140), 0.4, cv::Scalar(255, 255, 255));
 		const BallPosition &ballp = field.balls.getClosest(true);
 		m_pDisplay->putShadowedText(std::string("Ball'")+ ": " + std::to_string(ballp.polarMetricCoords.x) + " : " + std::to_string(ballp.getHeading()), cv::Point(-250, 160), 0.4, cv::Scalar(255, 255, 255));
-
+		*/
 		/*
 		for (int i = 0; i < field.balls.size(); i++) {
 
