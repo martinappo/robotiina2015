@@ -38,19 +38,20 @@ public:
 
 	DriveMode step(double dt)
 	{
-
+		
 		auto &target = getClosestBall();
 		if (target.getDistance() > 10000) return DRIVEMODE_IDLE;
 		if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
 		//std::cout << std::endl << "aimtarget0, " ;
 
-		if (aimTarget(target, 10)){
-			if (driveToTarget(target)){
-				if (aimTarget(target, 1)){
+		if (aimTarget(target, speed, 10)){
+			if (driveToTarget(target, speed)){
+				if (aimTarget(target, speed, 1)){
 					return DRIVEMODE_CATCH_BALL;
 				}
 			}
 		}
+		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 		return DRIVEMODE_DRIVE_TO_BALL_NAIVE;
 	}
 };
@@ -62,13 +63,16 @@ public:
 
 	DriveMode step(double dt)
 	{
+		
+
 		auto &target = getClosestBall();
 
 		if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
-		if (driveToTargetWithAngle(target, 25, 5)){
+		if (driveToTargetWithAngle(target, speed, 25, 5)){
 			return DRIVEMODE_CATCH_BALL;
 		}
 		else {
+			m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 			return DRIVEMODE_DRIVE_TO_BALL_ANGLED;
 		}
 
@@ -83,6 +87,7 @@ public:
 
 	DriveMode step(double dt)
 	{
+		
 		const ObjectPosition &target = getClosestBall(true);
 		//if we are between closest ball and target gate and facing target gate then drive to home
 		//to avoid rotating on any next ball
@@ -93,13 +98,14 @@ public:
 		if (target.getDistance() > 10000) return DRIVEMODE_IDLE;
 		if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
 		//std::cout << std::endl << "aimtarget0, ";
-		if (aimTarget(target, 10)){
-			if (driveToTarget(target)){
-				if (aimTarget(target, 2)){
+		if (aimTarget(target, speed, 10)){
+			if (driveToTarget(target, speed)){
+				if (aimTarget(target, speed, 2)){
 					return DRIVEMODE_CATCH_BALL;
 				}
 			}
 		}
+		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 		return DRIVEMODE_DIRVE_TO_BALL_AVOID_TURN;
 
 	}
@@ -186,9 +192,12 @@ DriveMode CatchBall::step(double dt)
 {
 	FIND_TARGET_BALL //TODO: use it?
 	if (STUCK_IN_STATE(3000) || target.getDistance() > initDist  + 10) return DRIVEMODE_DRIVE_TO_BALL;
-	if(catchTarget(target)) { 
+	
+	if(catchTarget(target, speed)) { 
 		return DRIVEMODE_AIM_GATE;
 	}
+	m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
+
 	return DRIVEMODE_CATCH_BALL;
 }
 void CatchBall::onExit()
@@ -209,9 +218,12 @@ DriveMode AimGate::step(double dt)
 		errorMargin = 0.5;
 	}
 	else errorMargin = 1;
-	if (aimTarget(target, errorMargin)){
+	
+	if (aimTarget(target, speed, errorMargin)){
 		return DRIVEMODE_KICK;
 	}
+	m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
+
 	return DRIVEMODE_AIM_GATE;
 }
 

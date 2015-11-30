@@ -80,6 +80,7 @@ class Defensive : public DriveInstruction
 public:
 	Defensive() : DriveInstruction("2V2_DEFENSIVE"){};
 	virtual DriveMode step(double dt){
+		Speed speed;
 		auto & target = m_pFieldState->partner;
 		if (m_pFieldState->partnerHomeGate.getDistance() > 100){//is ally in defense area?
 			if (m_pFieldState->GetHomeGate().getDistance() > 80)
@@ -87,7 +88,7 @@ public:
 			else{
 				BallPosition ball = DriveInstruction::getClosestBall();
 				if (ball.polarMetricCoords.x != INT_MAX)
-					DriveInstruction::aimTarget(ball);
+					DriveInstruction::aimTarget(ball, speed);
 				//block gate & look for ball
 			}
 		}
@@ -96,6 +97,7 @@ public:
 			positon self between opponent and gate?
 			*/
 		}
+		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 		return DRIVEMODE_2V2_DEFENSIVE;
 	}
 };
@@ -122,15 +124,18 @@ class AimPartner : public DriveInstruction
 public:
 	AimPartner() : DriveInstruction("2V2_AIM_PARTNER"){};
 	virtual DriveMode step(double dt){
+		Speed speed;
 		auto & target = m_pFieldState->partner;
 		std::cout << target.polarMetricCoords.y << std::endl;
-		if (aimTarget(target, 2)){
+		if (aimTarget(target, speed, 2)){
 			m_pCom->Kick(400);
 			std::cout << "kicked" << std::endl;
 			m_pFieldState->SendMessage("PAS #");
 			std::cout << DRIVEMODE_2V2_DEFENSIVE << std::endl;
 			return DRIVEMODE_2V2_DEFENSIVE;
-		}else return DRIVEMODE_2V2_AIM_PARTNER;
+		}
+		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
+		return DRIVEMODE_2V2_AIM_PARTNER;
 	}
 };
 
@@ -140,23 +145,27 @@ class AimGate2v2 : public DriveInstruction
 public:
 	AimGate2v2() : DriveInstruction("2V2_AIM_GATE"){};
 	virtual DriveMode step(double dt){
+		Speed speed;
 		ObjectPosition &lastGateLocation = m_pFieldState->GetTargetGate();
 		bool sightObstructed = m_pFieldState->gateObstructed;
 		if (!m_pCom->BallInTribbler()) return DRIVEMODE_2V2_OFFENSIVE;
-		if (aimTarget(lastGateLocation, 2)){
+		if (aimTarget(lastGateLocation, speed, 2)){
 			if (sightObstructed) { //then move sideways away from gate
 				//std::cout << sightObstructed << std::endl;
-				m_pCom->Drive(45, 90, 0);
-				std::chrono::milliseconds dura(400); // do we need to sleep?
-				std::this_thread::sleep_for(dura);
+				speed.velocity = 45;
+				speed.heading += 90;
+//				std::chrono::milliseconds dura(400); // do we need to sleep?
+//				std::this_thread::sleep_for(dura);
 			}
 			else {
 				return DRIVEMODE_2V2_KICK;
 			}
 		}
 		else {
-			m_pCom->Drive(0, 0, lastGateLocation.getHeading());
+			speed.rotation = lastGateLocation.getHeading();
 		}
+		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
+
 		return DRIVEMODE_2V2_AIM_GATE;
 	}
 };
@@ -201,14 +210,17 @@ class DriveHome2v2 : public DriveInstruction
 public:
 	DriveHome2v2() : DriveInstruction("2V2_DRIVE_HOME"){};
 	virtual DriveMode step(double dt){
+		Speed speed;
 		ObjectPosition &lastGateLocation = m_pFieldState->GetHomeGate();
-		if (DriveInstruction::aimTarget(lastGateLocation)){
-			if (DriveInstruction::driveToTarget(lastGateLocation)){
-				if (DriveInstruction::aimTarget(lastGateLocation)){
+		if (DriveInstruction::aimTarget(lastGateLocation, speed)){
+			if (DriveInstruction::driveToTarget(lastGateLocation, speed)){
+				if (DriveInstruction::aimTarget(lastGateLocation, speed)){
 					return DRIVEMODE_2V2_DEFENSIVE;
 				}
 			}
 		}
+		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
+
 		return DRIVEMODE_2V2_DRIVE_HOME;
 	}
 };

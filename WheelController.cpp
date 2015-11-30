@@ -75,21 +75,25 @@ void WheelController::DriveRotate(double velocity, double direction, double rota
 	targetSpeed.velocity = velocity; // sin(direction* PI / 180.0)* velocity + rotate;
 	targetSpeed.heading = direction; //cos(direction* PI / 180.0)* velocity + rotate,
 	targetSpeed.rotation = rotate;
-	
-	targetSpeedXYW.at<double>(0) = sin(direction* CV_PI / 180.0)* velocity;
-	targetSpeedXYW.at<double>(1) = cos(direction* CV_PI / 180.0)* velocity;
-	targetSpeedXYW.at<double>(2) = rotate;
-
-	directControl = false;
-	updateSpeed = true;
-	lastUpdate = boost::posix_time::microsec_clock::local_time();
-
+	return Drive(cv::Point2d(sin(direction* CV_PI / 180.0)* velocity,
+							 cos(direction* CV_PI / 180.0)* velocity),
+							 rotate);
 	
 }
 void WheelController::Drive(const cv::Point2d &speed, double angularSpeed){
 	targetSpeedXYW.at<double>(0) = speed.x;
 	targetSpeedXYW.at<double>(1) = speed.y;
 	targetSpeedXYW.at<double>(2) = angularSpeed;
+
+	cv::Mat speeds = wheelAngles * targetSpeedXYW;
+	//std::cout << targetSpeedXYW << std::endl;
+	std::ostringstream oss;
+	for (auto i = 0; i < speeds.rows; i++) {
+		oss << (i + id_start) << ":sd" << (int)speeds.at<double>(i) << "\n";
+	}
+	//std::cout << oss.str() << std::endl;
+	m_pComPort->WriteString(oss.str());
+
 
 }
 
@@ -170,7 +174,8 @@ std::string WheelController::GetDebugInfo(){
 void WheelController::Run()
 {
 	if (m_pComPort == NULL) return;
-	while (!stop_thread) {
+	while (!stop_thread) { 
+		return;
 #ifdef LIMIT_ACCELERATION
 		CalculateRobotSpeed();
 		boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();

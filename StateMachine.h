@@ -11,6 +11,7 @@ protected:
 	boost::posix_time::ptime actionStart;
 	FieldState *m_pFieldState;
 	ICommunicationModule *m_pCom;
+	Speed speed;
 public:
 	const std::string name;
 	DriveInstruction(const std::string &name) : name(name){
@@ -27,16 +28,17 @@ public:
 		if (m_pFieldState->gameMode == FieldState::GAME_MODE_STOPED){
 			return DRIVEMODE_IDLE;
 		}
+		speed = { 0, 0, 0 };
 		return step(dt);
 	};
 	virtual DriveMode step(double dt) = 0;
 	virtual void onExit(){};
 
 	const static bool USE_ANGLED_DRIVING = false;
-	bool aimTarget(const ObjectPosition &target, double errorMargin = (USE_ANGLED_DRIVING) ? 90 : 10);
-	bool catchTarget(const ObjectPosition &target);
-	bool driveToTarget(const ObjectPosition &target, double maxDistance = 50);
-	bool driveToTargetWithAngle(const ObjectPosition &target, double maxDistance = 50, double errorMargin = 10);
+	bool aimTarget(const ObjectPosition &target, Speed &speed, double errorMargin = (USE_ANGLED_DRIVING) ? 90 : 10);
+	bool catchTarget(const ObjectPosition &target, Speed &speed);
+	bool driveToTarget(const ObjectPosition &target, Speed &speed, double maxDistance = 50);
+	bool driveToTargetWithAngle(const ObjectPosition &target, Speed &speed, double maxDistance = 50, double errorMargin = 10);
 	const BallPosition &getClosestBall(bool includeHeading = false, bool reset=true);
 };
 class Idle : public DriveInstruction

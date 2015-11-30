@@ -1,55 +1,55 @@
 #include "StateMachine.h"
 #include <algorithm>
 
-bool DriveInstruction::aimTarget(const ObjectPosition &target, double errorMargin){
+bool DriveInstruction::aimTarget(const ObjectPosition &target, Speed &speed, double errorMargin){
 	double heading = target.getHeading();
 	if (fabs(heading) > errorMargin){
-		m_pCom->Drive(0, 0, -sign(heading) * std::min(40.0, std::max(fabs(heading), 5.0)));
+		speed.rotation = - sign(heading) * std::min(40.0, std::max(fabs(heading), 5.0));
 		return false;
 	}
 	else{
-		m_pCom->Drive(0, 0, 0);
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		std::cout<<(fabs(heading) < errorMargin)<<std::endl;
 		return fabs(heading) < errorMargin;
 	}
 }
-bool DriveInstruction::catchTarget(const ObjectPosition &target){
+bool DriveInstruction::catchTarget(const ObjectPosition &target, Speed &speed){
 	if (m_pCom->BallInTribbler()) {
-		m_pCom->Drive(0, 0, 0);
 		return true;
 	}
 	double heading =  target.getHeading();
 	double dist = target.getDistance();
-	m_pCom->Drive(50, 0, -sign(heading)* 5);
+	//m_pCom->Drive(50, 0, -sign(heading)* 5);
+	speed.velocity = 50;
+	speed.heading = -sign(heading) * 5;
 	return false;
 }
 
-bool DriveInstruction::driveToTarget(const ObjectPosition &target, double maxDistance){
+bool DriveInstruction::driveToTarget(const ObjectPosition &target, Speed &speed, double maxDistance){
 	double dist = target.getDistance();
 		
 	if (dist > maxDistance){
 		//std::cout << ", ball to far: " << dist << " target: " << maxDistance;
-		m_pCom->Drive(std::max(20.0, dist), 0, 0);
+		//m_pCom->Drive(std::max(20.0, dist), 0, 0);
+		speed.velocity = std::max(20.0, dist);
 		return false;
 	}
 	else{
 		//std::cout << ", ball near: " << dist << " target: " << maxDistance;
-		m_pCom->Drive(20, 0, 0);
+		//m_pCom->Drive(20, 0, 0);
+		speed.velocity = 20;
 		return true;
 	}
 }
 
-bool DriveInstruction::driveToTargetWithAngle(const ObjectPosition &target, double maxDistance, double errorMargin){
+bool DriveInstruction::driveToTargetWithAngle(const ObjectPosition &target, Speed &speed, double maxDistance, double errorMargin){
 	double heading = target.getHeading();
 	double dist = target.getDistance();
-	double speed = 0;
+	double velocity = 0;
 	double direction = 0;
 	double angularSpeed = 0;
 	bool onPoint = false;
 	if (fabs(heading) > errorMargin){
 		if (dist > maxDistance){
-			speed = std::max(30.0, dist); //max speed is limited to 190 in wheelController.cpp 
+			velocity = std::max(30.0, dist); //max speed is limited to 190 in wheelController.cpp 
 			direction = heading; //drive towards target
 			angularSpeed = sign(heading) * 20; //meanwhile rotate slowly to face the target
 		}
@@ -59,12 +59,15 @@ bool DriveInstruction::driveToTargetWithAngle(const ObjectPosition &target, doub
 	}
 	else{
 		if (dist > maxDistance){
-			speed = std::max(30.0, dist);
+			velocity = std::max(30.0, dist);
 			direction = heading; //drive towards target
 		}
 		else onPoint = true;
 	}
-	m_pCom->Drive(speed, direction, -angularSpeed); 
+	//m_pCom->Drive(speed, direction, -angularSpeed); 
+	speed.velocity = velocity;
+	speed.heading = direction;
+	speed.rotation = -angularSpeed;
 	return onPoint;
 }
 
