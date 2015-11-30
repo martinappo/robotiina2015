@@ -12,8 +12,8 @@ const double SIMULATOR_SPEED = 0.5;
 const bool INIT_RANDOM = false;
 
 Simulator::Simulator(boost::asio::io_service &io, bool master, const std::string game_mode) :
-mNumberOfBalls(game_mode == "master" || game_mode == "slave" ? 1 : 1)
-, FieldState(game_mode == "master" || game_mode == "slave" ? 1 : 1)
+mNumberOfBalls(game_mode == "master" || game_mode == "slave" ? 1 : 11)
+, FieldState(game_mode == "master" || game_mode == "slave" ? 1 : 11)
 , ThreadedClass("Simulator"), UdpServer(io, 31000, master)
 , RefereeCom(NULL)
 , isMaster(master)
