@@ -287,11 +287,11 @@ void FrontCameraVision::Run() {
 		*/
 
 		//PARTNER POSITION ====================================================================================================
-		bool ourRobotBlueBottom = false; //TODO: changeable in settings
+		bool ourRobotBlueBottom = (m_pState->robotColor == FieldState::ROBOT_COLOR_YELLOW_UP);
 
 		std::vector<std::pair<cv::Point2i, double>> positionsToDistances; //One of the colors position and according distances
-		for (int blueIndex = 0; blueIndex < notBlueGates.size(); blueIndex++) {
-			for (int yellowIndex = 0; yellowIndex < notYellowGates.size(); yellowIndex++) {
+		for (size_t blueIndex = 0; blueIndex < notBlueGates.size(); blueIndex++) {
+			for (size_t yellowIndex = 0; yellowIndex < notYellowGates.size(); yellowIndex++) {
 				cv::Point2i bluePos = notBlueGates[blueIndex];
 				cv::Point2i yellowPos = notYellowGates[yellowIndex];
 				double distBetweenYellowBlue = cv::norm(bluePos - yellowPos);

@@ -80,7 +80,12 @@ public:
 		GAME_MODE_IN_PROGRESS,
 		GAME_MODE_TAKE_BALL, // other robot passed pall
 	};
+	enum RobotColor {
+		ROBOT_COLOR_YELLOW_UP = 0,
+		ROBOT_COLOR_BLUE_UP
+	};
 	std::atomic_int gameMode;
+	RobotColor robotColor = ROBOT_COLOR_BLUE_UP;
 	FieldState(const int number_of_balls);
 	virtual ~FieldState();
 	//BallPosition balls[number_of_balls]; //All others are distance from self and heading to it

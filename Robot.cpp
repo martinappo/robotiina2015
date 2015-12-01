@@ -398,16 +398,17 @@ void Robot::Run()
 					this->last_state = STATE_END_OF_GAME; // force dialog redraw
 				});
 				std::stringstream sset;
-				sset << " [ robot: " << refCom->FIELD_MARKER << refCom->ROBOT_MARKER << ", team: " << refCom->TEAM_MARKER << "]";
+				sset << " [ robot: " << refCom->FIELD_MARKER << refCom->ROBOT_MARKER << ", team: " << refCom->TEAM_MARKER << 
+					", color: " << ((field.robotColor == FieldState::ROBOT_COLOR_YELLOW_UP) ? "Yellow Up" : "Blue Up")  << "]";
 				
 				STATE_BUTTON("(S)ettings" + sset.str(), 's', STATE_SETTINGS)
-					m_pDisplay->createButton("Reinit wheels", '-', [this] {
+				/*
+				m_pDisplay->createButton("Reinit wheels", '-', [this] {
 					//initPorts();
 					//initWheels();
 					//TODO: fix this
 					this->last_state = STATE_END_OF_GAME; // force dialog redraw
 				});
-				/*
 				m_pDisplay->createButton("Reinit coilboard", '-', [this] {
 					//initPorts();
 					//initCoilboard();
@@ -512,6 +513,10 @@ void Robot::Run()
 						this->last_state = STATE_END_OF_GAME; // force dialog redraw
 					});
 				}
+				m_pDisplay->createButton(std::string("Our Color: ") + ((field.robotColor == FieldState::ROBOT_COLOR_YELLOW_UP) ? "Yellow Up" : "Blue Up"), '-', [this, &field]{
+					field.robotColor = (FieldState::RobotColor)(!field.robotColor);
+					this->last_state = STATE_END_OF_GAME; // force dialog redraw
+				});
 				STATE_BUTTON("BACK", 8, STATE_NONE)
 			END_DIALOG
 		}
