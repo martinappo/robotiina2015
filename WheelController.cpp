@@ -216,7 +216,6 @@ void WheelController::Run()
 #else
 		//auto speeds = CalculateWheelSpeeds(targetSpeed.velocity, targetSpeed.heading, targetSpeed.rotation);
 		cv::Mat speeds = wheelAngles * targetSpeedXYW; 
-		//std::cout << targetSpeedXYW << std::endl;
 		std::ostringstream oss;
 		for (auto i = 0; i < speeds.rows; i++) {
 			oss << (i + id_start) << ":sd" << (int)speeds.at<double>(i) << "\n";

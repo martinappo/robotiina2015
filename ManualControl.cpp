@@ -4,6 +4,9 @@
 
 ManualControl::ManualControl(ICommunicationModule *pComModule) :ConfigurableModule("ManualControl"), ThreadedClass("ManualControl")
 {
+	speed = { 0, 0 };
+	rotation = 0;
+
 	m_pComModule = pComModule;
 
 	AddSetting("Turn Left", []{return "r"; }, [this] {this->rotation -= 10; });
@@ -26,14 +29,17 @@ ManualControl::ManualControl(ICommunicationModule *pComModule) :ConfigurableModu
 
 
 void ManualControl::Run(){
+	speed = { 0, 0 };
+	rotation = 0;
 	while (!stop_thread){
+		last_tick = boost::posix_time::microsec_clock::local_time();
 		m_pComModule->Drive(speed, rotation);
 		boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
-		double dt = (double)((time - last_tick).total_milliseconds())/400;
+		double dt = (double)((time - last_tick).total_milliseconds())/1000;
 
-		rotation -= sign(rotation);
-		speed.x -= sign(speed.x)*dt;
-		speed.y -= sign(speed.y)*dt;
+		rotation -= sign0(rotation);
+		speed.x -= sign0(speed.x)*dt;
+		speed.y -= sign0(speed.y)*dt;
 		last_tick = time;
 		Sleep(100);
 	}

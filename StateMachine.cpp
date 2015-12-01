@@ -4,7 +4,7 @@
 bool DriveInstruction::aimTarget(const ObjectPosition &target, Speed &speed, double errorMargin){
 	double heading = target.getHeading();
 	if (fabs(heading) > errorMargin){
-		speed.rotation = - sign(heading) * std::min(40.0, std::max(fabs(heading), 5.0));
+		speed.rotation = - sign0(heading) * std::min(40.0, std::max(fabs(heading), 5.0));
 		return false;
 	}
 	else{
@@ -19,7 +19,7 @@ bool DriveInstruction::catchTarget(const ObjectPosition &target, Speed &speed){
 	double dist = target.getDistance();
 	//m_pCom->Drive(50, 0, -sign(heading)* 5);
 	speed.velocity = 50;
-	speed.heading = -sign(heading) * 5;
+	speed.heading = -sign0(heading) * 5;
 	return false;
 }
 
@@ -51,10 +51,10 @@ bool DriveInstruction::driveToTargetWithAngle(const ObjectPosition &target, Spee
 		if (dist > maxDistance){
 			velocity = std::max(30.0, dist); //max speed is limited to 190 in wheelController.cpp 
 			direction = heading; //drive towards target
-			angularSpeed = sign(heading) * 20; //meanwhile rotate slowly to face the target
+			angularSpeed = sign0(heading) * 20; //meanwhile rotate slowly to face the target
 		}
 		else{ //at location but facing wrong way
-			angularSpeed = sign(heading) * std::max(fabs(heading) * 0.5, 10.0); //rotate
+			angularSpeed = sign0(heading) * std::max(fabs(heading) * 0.5, 10.0); //rotate
 		}
 	}
 	else{

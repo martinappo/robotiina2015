@@ -186,7 +186,7 @@ public:
 	virtual ~ImageThresholder(){};
 };
 
-
-//#define sign(x) ((x > 0) - (x < 0))
-// slower, but avoids zero value
+// -1 0 1
+#define sign0(x) ((x > 0) - (x < 0))
+// -1 1
 #define sign(x) ((x > 0)  ? 1 : -1) 

@@ -133,14 +133,14 @@ public:
 		//	return stepAngled(dt); 
 		//}
 		if (fabs(gateHeading) > errorMargin){
-			rotation = -sign(gateHeading) * std::min(40.0, std::max(fabs(gateHeading), 5.0));
+			rotation = -sign0(gateHeading) * std::min(40.0, std::max(fabs(gateHeading), 5.0));
 		}
 		double heading = 0;
 		double speed = 0;
 		if (ballDistance > maxDistance) {
 			heading = ballHeading;// +sign(gateHeading) / ballDistance;
 			if (fabs(heading) > 30)
-				heading = sign(heading)*(fabs(heading) + 15);
+				heading = sign0(heading)*(fabs(heading) + 15);
 			speed = std::max(60.0, ballDistance);
 		}
 		else {
@@ -148,11 +148,11 @@ public:
 				return DRIVEMODE_CATCH_BALL;
 			}
 			if (fabs(ballHeading) > errorMargin){
-				heading = ballHeading + sign(ballHeading) * 55;
+				heading = ballHeading + sign0(ballHeading) * 55;
 			}
 			rotation = 0;
 			if (fabs(gateHeading) > errorMargin){
-				rotation = -sign(gateHeading) * std::min(40.0, std::max(fabs(gateHeading), 5.0));
+				rotation = -sign0(gateHeading) * std::min(40.0, std::max(fabs(gateHeading), 5.0));
 			}
 			// drive around the ball
 			//heading = ballHeading + sign(ballHeading) * 90;

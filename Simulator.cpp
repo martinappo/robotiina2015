@@ -130,12 +130,13 @@ void Simulator::MessageReceived(const std::string & message){ //udp
 			do {
 				std::string x, y, a;
 				ss >> r_id >> x >> y;
-				int _id = atoi(r_id.c_str());
-				if (_id != id) {
-					robots[_id].fieldCoords.x = atoi(x.c_str());
-					robots[_id].fieldCoords.y = atoi(y.c_str());
+				if (r_id != "99"){
+					int _id = atoi(r_id.c_str());
+					if (_id != id) {
+						robots[_id].fieldCoords.x = atoi(x.c_str());
+						robots[_id].fieldCoords.y = atoi(y.c_str());
+					}
 				}
-
 
 			} while (r_id != "99");
 		}

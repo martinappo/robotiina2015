@@ -18,6 +18,31 @@ enum MultiModeDriveStates {
 	DRIVEMODE_2V2_OPPONENT_KICKOFF
 
 };
+class DriveToBallv2 : public DriveToBall
+{
+public:
+	DriveToBallv2(const std::string &name = "DRIVE_TO_BALL_V2") : DriveToBall(name){};
+
+	DriveMode step(double dt)
+	{
+
+		auto &target = getClosestBall();
+		if (target.getDistance() > 10000) return DRIVEMODE_IDLE;
+		if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
+		//std::cout << std::endl << "aimtarget0, " ;
+
+		if (aimTarget(target, speed, 10)){
+			if (driveToTarget(target, speed)){
+				if (aimTarget(target, speed, 1)){
+					return DRIVEMODE_CATCH_BALL;
+				}
+			}
+		}
+		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
+		return DRIVEMODE_DRIVE_TO_BALL;
+	}
+};
+
 
 class MasterModeIdle : public Idle {
 
@@ -102,14 +127,14 @@ public:
 	}
 };
 
-class KickOff : public DriveToBall
+class KickOff : public DriveToBallv2
 {
 private:
 	bool active = false;
 public:
-	KickOff() : DriveToBall("2V2_KICKOFF"){};
+	KickOff() : DriveToBallv2("2V2_KICKOFF"){};
 	virtual DriveMode step(double dt){
-		DriveMode next = DriveToBall::step(dt);
+		DriveMode next = DriveToBallv2::step(dt);
 		switch (next)
 		{
 		case DRIVEMODE_AIM_GATE:
@@ -254,7 +279,7 @@ private:
 
 std::pair<DriveMode, DriveInstruction*> MasterDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_IDLE, new MasterModeIdle()),
-//	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_BALL, new DriveToBall()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_BALL, new DriveToBallv2()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DEFENSIVE, new Defensive()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_OFFENSIVE, new Offensive()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_AIM_PARTNER, new AimPartner()),
@@ -270,7 +295,7 @@ std::pair<DriveMode, DriveInstruction*> SlaveDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_IDLE, new SlaveModeIdle()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DEFENSIVE, new Defensive()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_OFFENSIVE, new Offensive()),
-	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_BALL, new DriveToBall()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_BALL, new DriveToBallv2()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DRIVE_HOME, new DriveHome2v2()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_AIM_GATE, new AimGate2v2()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_KICK, new Kick()),

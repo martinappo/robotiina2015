@@ -47,6 +47,9 @@ private:
 	boost::posix_time::ptime idleStart;
 public:
 	Idle() : DriveInstruction("IDLE"){};
+	void onEnter(){
+		m_pCom->Drive(0,0,0);
+	}
 	virtual DriveMode step(double dt){ return DRIVEMODE_IDLE; }
 };
 
