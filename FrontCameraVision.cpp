@@ -146,13 +146,26 @@ void FrontCameraVision::Run() {
 		cv::Point g1, g2;
 		//Blue gate pos
 		bool blueFound = blueGateFinder.Locate(thresholdedImages[BLUE_GATE], frameHSV, frameBGR, g1, r1);
-
+		if (blueFound) {
+			cv::Point vertices[4];
+			for (int i = 0; i < 4; ++i){
+				vertices[i] = r1[i];
+			}
+			cv::fillConvexPoly(thresholdedImages[BALL], vertices, 4, cv::Scalar::all(0));
+		}
 		//if (!found) {
 		//	m_pDisplay->ShowImage(frameBGR);
 		//	continue; // nothing to do :(
 		//}
 		//Yellow gate pos
 		bool yellowFound = yellowGateFinder.Locate(thresholdedImages[YELLOW_GATE], frameHSV, frameBGR, g2, r2);
+		if (yellowFound) {
+			cv::Point vertices[4];
+			for (int i = 0; i < 4; ++i){
+				vertices[i] = r2[i];
+			}
+			cv::fillConvexPoly(thresholdedImages[BALL], vertices, 4, cv::Scalar::all(0));
+		}
 		//if (!found) {
 		//	m_pDisplay->ShowImage(frameBGR);
 		//	continue; // nothing to do :(
