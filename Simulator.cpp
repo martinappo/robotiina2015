@@ -236,7 +236,12 @@ void Simulator::UpdateBallPos(double dt){
 		double x = -d*sin(a / 180 * CV_PI);
 		double y = d*cos(a / 180 * CV_PI);
 		cv::Scalar color(i * 52, i * 15 + 100, i * 30);
-		cv::circle(frame, cv::Point(x, y) + cv::Point(frame.size() / 2), 24, color, -1);
+		//cv::circle(frame, cv::Point(x, y) + cv::Point(frame.size() / 2), 24, color, -1);
+		//cv::circle(frame, cv::Point(x, y) + cv::Point(frame.size() / 2), 24, color, -1);
+		cv::Scalar color1(236, 137, 48);
+		cv::Scalar color2(61, 255, 244);
+		cv::rectangle(frame, cv::Point(x - 10, y - 10) + cv::Point(frame.size() / 2), cv::Point(x + 10, y) + cv::Point(frame.size() / 2), color1, -1);
+		cv::rectangle(frame, cv::Point(x - 10, y ) + cv::Point(frame.size() / 2), cv::Point(x + 10, y + 10) + cv::Point(frame.size() / 2), color2, -1);
 		if (isMaster) {
 			message << i << " " << (int)robots[i].fieldCoords.x << " " << (int)robots[i].fieldCoords.y << " ";
 		}

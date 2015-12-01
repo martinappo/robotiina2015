@@ -135,8 +135,15 @@ public:
 	KickOff() : DriveToBallv2("2V2_KICKOFF"){};
 	virtual DriveMode step(double dt){
 		DriveMode next = DriveToBallv2::step(dt);
+		auto & target = getClosestBall();
 		switch (next)
 		{
+		case DRIVEMODE_CATCH_BALL:		
+			m_pCom->ToggleTribbler(250);
+			if (catchTarget(target, speed) || true)
+				return DRIVEMODE_2V2_AIM_PARTNER;
+			m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
+			return DRIVEMODE_2V2_KICKOFF;
 		case DRIVEMODE_AIM_GATE:
 			return DRIVEMODE_2V2_AIM_PARTNER;
 		default:
