@@ -21,7 +21,8 @@ void DriveToBall::onEnter()
 DriveMode DriveToBall::step(double dt){
 	//return DRIVEMODE_DRIVE_TO_BALL_ANGLED;
 	//return DRIVEMODE_DRIVE_TO_BALL_NAIVE;
-	return DRIVEMODE_ROTATE_AROUND_BALL;
+	//return DRIVEMODE_ROTATE_AROUND_BALL;
+	return DRIVEMODE_DRIVE_TO_BALL_AIM_GATE;
 	/*
 	//return stepNaive(dt);
 	if (STUCK_IN_STATE(2000) && !toggledDribbler){ 
