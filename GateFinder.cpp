@@ -13,8 +13,8 @@ GateFinder::~GateFinder()
 
 extern void drawLine(cv::Mat & img, cv::Mat & img2, cv::Vec4f line, int thickness, CvScalar color, bool nightVision = false);
 
-bool GateFinder::Locate(cv::Mat &imgThresholded, cv::Mat &frameHSV, cv::Mat &frameBGR, cv::Point &center, cv::Point2f *bounds) {
-	int smallestGateArea = 100;
+bool GateFinder::Locate(cv::Mat &imgThresholded, cv::Mat &frameHSV, cv::Mat &frameBGR, cv::Point &center, cv::Point2f *bounds, std::vector<cv::Point2i> &notGates) {
+	int smallestGateArea = 1;
 	double growGateHeight = 1.2;
 	center = cv::Point(-1, -1);
 	//cv::Mat imgThresholded = HSVRanges[target]; // reference counted, I think
@@ -37,12 +37,14 @@ bool GateFinder::Locate(cv::Mat &imgThresholded, cv::Mat &frameHSV, cv::Mat &fra
 	double largest_area = 0;
 	double area = 0;
 	size_t largest_contour_index = 0;
-	for (size_t i = 0; i < contours.size(); i++) // iterate through each contour.
+
+	for (size_t i = 0; i < contours.size(); i++)
 	{
-		area = cv::contourArea(contours[i], false);  //  Find the area of contour		
+		area = cv::contourArea(contours[i], false);
 		if (area > largest_area){
+			notGates.push_back(getCenterFromContour(contours[i]));
 			largest_area = area;
-			largest_contour_index = i;                //Store the index of largest contour
+			largest_contour_index = i;  //Store the index of largest contour
 		}
 	}
 
@@ -51,75 +53,26 @@ bool GateFinder::Locate(cv::Mat &imgThresholded, cv::Mat &frameHSV, cv::Mat &fra
 		return false;
 	}
 
-	//find center
-	if (contours.size() > largest_contour_index){
-		cv::Moments M = cv::moments(contours[largest_contour_index]);
-		center = cv::Point2i((int)(M.m10 / M.m00), (int)(M.m01 / M.m00));
+	//find center of actual gate (i.e largest contour)
+	if (contours.size() > largest_contour_index) {
+		center = getCenterFromContour(contours[largest_contour_index]);
 	}
 	else {
 		assert(false);
 	}
 
-/*
-	//cv::Rect bounding_rect;
-	//Cutting out gate from ball frame
-	bounding_rect = cv::boundingRect(contours[largest_contour_index]);
-	bounding_rect.height = bounding_rect.height * growGateHeight;
-	rectangle(HSVRanges[BALL], bounding_rect.tl(), bounding_rect.br(), color, -1, 8, 0);
-	//for clear visual:
-	rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), color, -1, 8, 0);
-	if (HSVRanges.find(SIGHT_MASK) != HSVRanges.end()) {
-		rectangle(HSVRanges[SIGHT_MASK], bounding_rect.tl(), bounding_rect.br(), color, -1, 8, 0);
-	}
-*/
-	cv::Scalar color4(255, 0, 0);
-
 	cv::RotatedRect bounding_rect2 = cv::minAreaRect(contours[largest_contour_index]);
-	/*cv::Point2f bounds[4];*/ bounding_rect2.points(bounds);
-	//objectPos.updateRawCoordinates(center, bounding_rect2, imgThresholded.size() / 2);
-	/*
-	int min_dist = INT_MAX;
-	int min_index = 0;
-	int min_dist2 = INT_MAX;
-	int min_index2 = 0;
-	for (int i = 0; i < 4; i++){
-		int dist = cv::norm(rect_points[i] - cv::Point2f(imgThresholded.cols / 2, imgThresholded.rows / 2));
-		if (dist < min_dist){
-			min_dist2 = min_dist;
-			min_index2 = min_index;
-			min_dist = dist;
-			min_index = i;
-		}
-		else if (dist < min_dist2){
-			min_dist2 = dist;
-			min_index2 = i;
-		}
-	}
-	center = (rect_points[min_index]+ rect_points[min_index2])/2;	
-	circle(frameBGR,  center, 7, color, -1, 8, 0);
-	*/
+	bounding_rect2.points(bounds);
 	
-	//int shift = bounding_rect2.size.height * 0.09 +0.2;
-	//std::cout << "shift: " << shift << " height: " << bounding_rect2.size.height << std::endl;
+	//Drawing gate //TODO: turn off, when in competition
 	for (int j = 0; j < 4; j++) {
 		line(frameBGR, bounds[j], bounds[(j + 1) % 4], color, 1, 8);
-		/*
-		std::vector<cv::Point2i> points;
-		points.push_back(rect_points[j]);
-		points.push_back(rect_points[(j + 1) % 4]);
-		cv::Vec4f newLine;
-		cv::fitLine(points, newLine, CV_DIST_L2, 0, 0.1, 0.1);
-		//std::cout << rect_points[j] << ", " << rect_points[(j + 1) % 4] << ": " << atan2(newLine[1], newLine[0])*180/PI << std::endl;
-		if (abs(atan2(newLine[1], newLine[0]) * 180 / PI) < 45) {
-			newLine[3] += shift; // shift line down
-			drawLine(frameBGR, HSVRanges[BALL], newLine, 1, cv::Scalar(0, 255 * (1 + 0.3), 0));
-			drawLine(frameBGR, HSVRanges[SIGHT_MASK], newLine, 1, cv::Scalar(0, 255 * (1 + 0.3), 0));
-		}
-		*/
-
 	}
-	
 
-	// find out lowest line
 	return true;
+}
+
+cv::Point2i GateFinder::getCenterFromContour(std::vector<cv::Point> contour) {
+	cv::Moments M = cv::moments(contour);
+	return cv::Point2i((int)(M.m10 / M.m00), (int)(M.m01 / M.m00));
 }

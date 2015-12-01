@@ -649,8 +649,7 @@ void Robot::Run()
 //		if (pSim != NULL)
 //			m_pDisplay->putShadowedText("Yell gate d: " + std::to_string((int)pSim->yellowGate.getDistance()) + " a: " + std::to_string(pSim->yellowGate.getAngle()), cv::Point(-250, 330), 0.4, cv::Scalar(255, 255, 255));
 
-		
-
+		m_pDisplay->putShadowedText("Partner d: " + std::to_string((int)field.partner.getDistance()) + " a: " + std::to_string(field.partner.getAngle()), cv::Point(-250, 360), 0.4, cv::Scalar(255, 255, 255));
 		
 		//TODO: fix putShadowedText newline thing
 		std::vector<std::string> subtitles2;

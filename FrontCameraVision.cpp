@@ -73,13 +73,7 @@ void FrontCameraVision::Run() {
 	GateFinder yellowGateFinder;
 	BallFinder ballFinder;
 
-	auto frameSize = m_pCamera->GetFrameSize();
-
-	/*
-	m_pState->blueGate.setFrameSize(frameSize);
-	m_pState->yellowGate.setFrameSize(frameSize);
-	*/
-	
+	auto frameSize = m_pCamera->GetFrameSize();	
 
 	cv::Mat white(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(255, 255, 255));
 	cv::Mat black(frameSize.height, frameSize.width, CV_8UC3, cv::Scalar(40, 40, 40));
@@ -142,42 +136,37 @@ void FrontCameraVision::Run() {
 		/**************************************************/
 		/* STEP 4. extract closest ball and gate positions*/
 		/**************************************************/
-		cv::Point2f r1[4], r2[4];
-		cv::Point g1, g2;
+		cv::Point2f blueGate[4], yellowGate[4];
+		std::vector<cv::Point2i> notBlueGates, notYellowGates;
+		cv::Point blueGateCenter, yellowGateCenter;
 		//Blue gate pos
-		bool blueFound = blueGateFinder.Locate(thresholdedImages[BLUE_GATE], frameHSV, frameBGR, g1, r1);
+		bool blueFound = blueGateFinder.Locate(thresholdedImages[BLUE_GATE], frameHSV, frameBGR, blueGateCenter, blueGate, notBlueGates);
 		if (blueFound) {
 			cv::Point vertices[4];
 			for (int i = 0; i < 4; ++i){
-				vertices[i] = r1[i];
+				vertices[i] = blueGate[i];
 			}
 			cv::fillConvexPoly(thresholdedImages[BALL], vertices, 4, cv::Scalar::all(0));
 		}
-		//if (!found) {
-		//	m_pDisplay->ShowImage(frameBGR);
-		//	continue; // nothing to do :(
-		//}
+
 		//Yellow gate pos
-		bool yellowFound = yellowGateFinder.Locate(thresholdedImages[YELLOW_GATE], frameHSV, frameBGR, g2, r2);
+		bool yellowFound = yellowGateFinder.Locate(thresholdedImages[YELLOW_GATE], frameHSV, frameBGR, yellowGateCenter, yellowGate, notYellowGates);
 		if (yellowFound) {
 			cv::Point vertices[4];
 			for (int i = 0; i < 4; ++i){
-				vertices[i] = r2[i];
+				vertices[i] = yellowGate[i];
 			}
 			cv::fillConvexPoly(thresholdedImages[BALL], vertices, 4, cv::Scalar::all(0));
 		}
-		//if (!found) {
-		//	m_pDisplay->ShowImage(frameBGR);
-		//	continue; // nothing to do :(
-		//}
+
 		// ajust gate positions to ..
 		// find closest points to opposite gate centre
 		if (blueFound && yellowFound) {
 			auto min_i1 = 0, min_j1 = 0, min_i2 = 0, min_j2 = 0;
 			double min_dist1 = INT_MAX, min_dist2 = INT_MAX;
 			for (int i = 0; i < 4; i++){
-				double dist1 = cv::norm(r1[i] - (cv::Point2f)g2);
-				double dist2 = cv::norm(r2[i] - (cv::Point2f)g1);
+				double dist1 = cv::norm(blueGate[i] - (cv::Point2f)yellowGateCenter);
+				double dist2 = cv::norm(yellowGate[i] - (cv::Point2f)blueGateCenter);
 				if (dist1 < min_dist1) {
 					min_dist1 = dist1;
 					min_i1 = i;
@@ -190,18 +179,19 @@ void FrontCameraVision::Run() {
 			auto next = (min_i1 + 1) % 4;
 			auto prev = (min_i1 + 3) % 4;
 			// find longest side
-			min_i2 = (cv::norm(r1[min_i1] - r1[next]) > cv::norm(r1[min_i1] - r1[prev])) ? next : prev;
+			min_i2 = (cv::norm(blueGate[min_i1] - blueGate[next]) > cv::norm(blueGate[min_i1] - blueGate[prev])) ? next : prev;
 			next = (min_j1 + 1) % 4;
 			prev = (min_j1 + 3) % 4;
 			// find longest side
-			min_j2 = (cv::norm(r2[min_j1] - r2[next]) > cv::norm(r2[min_j1] - r2[prev])) ? next : prev;
+			min_j2 = (cv::norm(yellowGate[min_j1] - yellowGate[next]) > cv::norm(yellowGate[min_j1] - yellowGate[prev])) ? next : prev;
 			cv::Scalar color4(0, 0, 0);
 
 			cv::Scalar color2(0, 0, 255);
 
-			cv::Point2d c1 = (r1[min_i1] + r1[min_i2]) / 2;
-			circle(frameBGR, c1, 12, color4, -1, 12, 0);
-			cv::Point2d c2 = (r2[min_j1] + r2[min_j2]) / 2;
+			cv::Point2d c1 = (blueGate[min_i1] + blueGate[min_i2]) / 2;
+			
+			(frameBGR, c1, 12, color4, -1, 12, 0);
+			cv::Point2d c2 = (yellowGate[min_j1] + yellowGate[min_j2]) / 2;
 			circle(frameBGR, c2, 7, color2, -1, 8, 0);
 
 			m_pState->blueGate.updateRawCoordinates(c1-cv::Point2d(frameBGR.size() / 2));
@@ -266,6 +256,41 @@ void FrontCameraVision::Run() {
 		// else leave to NULL
 		*/
 
+		//PARTNER POSITION ====================================================================================================
+		bool ourRobotBlueBottom = false; //TODO: changeable in settings
+
+		std::vector<std::pair<cv::Point2i, double>> positionsToDistances; //One of the colors position and according distances
+		for (int blueIndex = 0; blueIndex < notBlueGates.size(); blueIndex++) {
+			for (int yellowIndex = 0; yellowIndex < notYellowGates.size(); yellowIndex++) {
+				cv::Point2i bluePos = notBlueGates[blueIndex];
+				cv::Point2i yellowPos = notYellowGates[yellowIndex];
+				double distBetweenYellowBlue = cv::norm(bluePos - yellowPos);
+				cv::Point2i frameCenter = cv::Point2i(frameSize.width / 2, frameSize.height / 2); //our robot is in center
+				double distBetweenBlueAndRobot = cv::norm(bluePos - frameCenter);
+				double distBetweenYellowAndRobot = cv::norm(yellowPos - frameCenter);
+
+				if (distBetweenYellowBlue < 200 &&   //If distance between two colors is great, then it cannot be robot
+					 //If our robot has bottom blue, then blue distance from robot has to less than yellow
+					((ourRobotBlueBottom && distBetweenBlueAndRobot < distBetweenYellowAndRobot) 
+					//If our robot has not bottom blue, then blue distance from robot has to be greater than yellow
+					|| (!ourRobotBlueBottom && distBetweenBlueAndRobot > distBetweenYellowAndRobot))) {
+					std::pair<cv::Point2i, double> positionToDistance = std::make_pair(bluePos, distBetweenYellowBlue);
+					positionsToDistances.push_back(positionToDistance);
+				}
+			}
+		}
+		auto sortFunc = [](std::pair<cv::Point2i, double> posToDis1, std::pair<cv::Point2i, double> posToDis2) { return (posToDis1.second < posToDis2.second); };
+		std::sort(positionsToDistances.begin(), positionsToDistances.end(), sortFunc);
+		if (positionsToDistances.size() > 0) {
+			m_pState->partner.updateRawCoordinates(positionsToDistances[0].first, cv::Point(0, 0));
+		}
+		else {
+			m_pState->partner.updateRawCoordinates(cv::Point(-1, -1), cv::Point(0, 0));
+		}
+		circle(frameBGR, m_pState->partner.rawPixelCoords, 10, cv::Scalar(0, 0, 255), 2, 8, 0);
+
+
+		//Gate obstruction
 		if (gateObstructionDetectionEnabled) {
 			// step 3.2
 			int count = countNonZero(thresholdedImages[SIGHT_MASK]);
