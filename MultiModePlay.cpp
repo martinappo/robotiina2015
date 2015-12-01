@@ -163,11 +163,15 @@ public:
 	AimPartner() : DriveInstruction("2V2_AIM_PARTNER"){};
 	virtual DriveMode step(double dt){
 
-		auto & target = m_pFieldState->partner;
+		//auto & target = m_pFieldState->partner;
+		auto & target = m_pFieldState->GetHomeGate();
 		std::cout << target.polarMetricCoords.y << std::endl;
 		if (aimTarget(target, speed, 2)){
+			std::cout << "pre kick " << m_pFieldState->self.getHeading() << std::endl;
+			m_pCom->Drive(0, 0, -sign(m_pFieldState->self.getHeading())*90);
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
 			m_pCom->Kick(400);
-			std::cout << "kicked" << std::endl;
+			std::cout << "kicked " << m_pFieldState->self.getHeading() << std::endl;
 			m_pFieldState->SendMessage("PAS #");
 			std::cout << DRIVEMODE_2V2_DEFENSIVE << std::endl;
 			return DRIVEMODE_2V2_DEFENSIVE;
