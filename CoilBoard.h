@@ -15,7 +15,8 @@ private:
 	boost::posix_time::time_duration waitDuration;
 	boost::posix_time::ptime afterKickTime = time;
 	//boost::posix_time::time_duration afterKickDuration;
-	std::atomic_bool kick;
+	std::atomic_bool kickAllowed;
+	std::atomic_int kickForce ;
 	std::atomic_int ballInTribblerCount;
 	std::mutex lock;
 	ISerial *m_pComPort;
@@ -25,13 +26,13 @@ public:
 	CoilBoard(ISerial *port) : m_pComPort(port), ThreadedClass("CoilBoard") {
 		ballInTribbler = false;
 		ballInTribblerCount = 0;
-		kick = false;
+		kickAllowed = true;
 		if (m_pComPort) {
 			m_pComPort->SetMessageHandler(this);
 		}
 		Start();
 	};
-	void Kick(int force = 800);
+	void Kick(int force = 2500);
 	void ToggleTribbler(int speed);
 	bool BallInTribbler() { return ballInTribbler; }
 	void Run();

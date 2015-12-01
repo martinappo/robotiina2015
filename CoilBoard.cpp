@@ -24,7 +24,7 @@ void CoilBoard::HandleMessage(const std::string & message)
 			ballInTribbler = (message[6] == '1');
 		}
 		else if (message[3] == 'c') { // charge done
-			//TODO: allow kicking again, instead of waiting fo 1.5 sec below
+			kickAllowed = true; 
 		}
 	}
 
@@ -34,10 +34,15 @@ void CoilBoard::HandleMessage(const std::string & message)
 void CoilBoard::Kick(int force){
 	boost::posix_time::ptime time2 = boost::posix_time::microsec_clock::local_time();
 	//std::cout << (afterKickTime - time2).total_milliseconds() << std::endl;
+	if (!kickAllowed) {
+		std::cout << "coil not ready, not kicking" << std::endl;
+		//return;
+	}
 	if ((time2 - afterKickTime).total_milliseconds() < 1500) return;
 	//WriteString("k800\n");
-	kick = true; // set flag, so that we do not corrupt writing in Run method
+	kickForce = force; // set flag, so that we do not corrupt writing in Run method
 	//forcedNotInTribbler = true;
+
 	afterKickTime = time2; //reset timer
 	return;
 }
@@ -68,12 +73,12 @@ void CoilBoard::Run(){
 				if(m_pComPort) m_pComPort->WriteString("5:p\n");
 				waitTime = time;
 			}
-			if (kick) {
+			if (kickForce !=0) {
 				std::cout << "kick ----->" << std::endl;
-				if (m_pComPort) m_pComPort->WriteString("5:k\n");
+				if (m_pComPort) m_pComPort->SendCommand(ID_MAIN_BOARD, "k", kickForce);
+				kickForce = 0;
 				Sleep(100);
 				if (m_pComPort) m_pComPort->WriteString("5:c\n");
-				kick = false;
 			}
 			/*
 			//Forcing ballintribler false after kick
