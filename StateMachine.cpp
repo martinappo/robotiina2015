@@ -19,7 +19,7 @@ bool DriveInstruction::catchTarget(const ObjectPosition &target, Speed &speed){
 	double dist = target.getDistance();
 	//m_pCom->Drive(50, 0, -sign(heading)* 5);
 	speed.velocity = 50;
-	speed.heading = -sign0(heading) * 5;
+	speed.heading = 0;
 	return false;
 }
 

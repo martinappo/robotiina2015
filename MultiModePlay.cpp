@@ -94,8 +94,14 @@ public:
 			//ATTACK! -> GOAL!!
 			return DRIVEMODE_2V2_AIM_GATE;
 		}
-		else
-			return DRIVEMODE_2V2_AIM_GATE;
+		else{
+			auto &target = getClosestBall();
+			if (driveToTargetWithAngle(target, speed, 30, 5)){
+				if (catchTarget(target, speed) || true)
+					return DRIVEMODE_2V2_AIM_GATE;
+			}
+		}
+		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 		return DRIVEMODE_2V2_OFFENSIVE;
 	}
 };
