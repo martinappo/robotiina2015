@@ -209,18 +209,45 @@ void FrontCameraVision::Run() {
 		}
 		//Balls pos 
 //		cv::Mat rotMat = getRotationMatrix2D(cv::Point(0,0), -m_pState->self.getAngle(), 1);
-		cv::Mat balls(3, m_pState->balls.size(), CV_64FC1);
+		//cv::Mat balls(3, m_pState->balls.size(), CV_64FC1);
+		std::vector<cv::Point2d> balls;
 		bool ballsFound = ballFinder.Locate(thresholdedImages[BALL], frameHSV, frameBGR, balls);
 		if (ballsFound) {
-			balls.row(0) -= frameBGR.size().width / 2;
-			balls.row(1) -= frameBGR.size().height / 2;
+			//balls.row(0) -= frameBGR.size().width / 2;
+			//balls.row(1) -= frameBGR.size().height / 2;
+			std::sort(balls.begin(), balls.end(), [](cv::Point2d a, cv::Point2d b)
+			{
+				return cv::norm(a) < cv::norm(b);
+			});
+			// validate balls
+			cv::Point2i closest;
+			for (auto ball : balls) {
+				closest = ball;
+				if (BallFinder::validateBall(thresholdedImages, ball, frameHSV, frameBGR)){
+					break;
+				} else {
+					cv::Rect bounding_rect = cv::Rect(closest - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
+						closest + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
+					rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), cv::Scalar(255, 0, 255), 2, 8, 0);
+
+				}
+			}
+			cv::Rect bounding_rect = cv::Rect(closest - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
+				closest + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
+			rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), cv::Scalar(255, 0, 0), 2, 8, 0);
+
 //			cv::Mat rotatedBalls(balls.size(), balls.type());
 
 //			rotatedBalls = rotMat * balls;
 			m_pState->resetBallsUpdateState();
+			m_pState->balls.closest.updateRawCoordinates(closest, cv::Point(0,0));
+			m_pState->balls.closest.updateFieldCoords(m_pState->self.getFieldPos(), m_pState->self.getAngle());
+			m_pState->balls.closest.isUpdated = true;
+
 
 			/* find balls that are close by */
-			for (int j = 0; j < balls.cols; j++){
+			/*
+			for (int j = 0; j < balls.size(); j++){
 				cv::Point2d rawCoords = cv::Point2d(balls.at<double>(0, j), balls.at<double>(1, j));
 				// find if ball projection to gate is larger than gate
 				// not quite working
@@ -234,7 +261,9 @@ void FrontCameraVision::Run() {
 				m_pState->balls[j].updateFieldCoords(m_pState->self.getFieldPos(), m_pState->self.getAngle());
 				m_pState->balls[j].isUpdated = true;
 			}
+			*/
 			//TODO: use returned ball instead of balls.at<double>(0, ball_idx) 
+			/*
 			int ball_idx = 0;
 			m_pState->balls.calcClosest(&ball_idx);
 			if (ball_idx >= 0) {
@@ -242,6 +271,7 @@ void FrontCameraVision::Run() {
 					cv::Point(balls.at<double>(0, ball_idx), balls.at<double>(1, ball_idx)) + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
 				rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), cv::Scalar(255, 0, 0), 2, 8, 0);
 			}
+			*/
 			/*
 			m_pState->balls.getClosest(true, &ball_idx);
 			bounding_rect = cv::Rect(cv::Point(balls.at<double>(0, ball_idx), balls.at<double>(1, ball_idx)) - cv::Point(30, 30) + cv::Point(frameBGR.size() / 2),

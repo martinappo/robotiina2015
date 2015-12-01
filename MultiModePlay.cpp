@@ -31,9 +31,12 @@ public:
 		if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
 		//std::cout << std::endl << "aimtarget0, " ;
 
-		if (aimTarget(target, speed, 10)){
-			if (driveToTarget(target, speed)){
+		speed.velocity = 0;
+		speed.heading = 0;
+		if (aimTarget(target, speed, 5)){
+			if (driveToTarget(target, speed, 10)){
 				if (aimTarget(target, speed, 1)){
+					m_pCom->Drive(0,0,0);
 					return DRIVEMODE_CATCH_BALL;
 				}
 			}
@@ -94,8 +97,14 @@ public:
 			//ATTACK! -> GOAL!!
 			return DRIVEMODE_2V2_AIM_GATE;
 		}
-		else
-			return DRIVEMODE_2V2_AIM_GATE;
+		else{
+			auto &target = getClosestBall();
+			if (driveToTargetWithAngle(target, speed, 30, 5)){
+				if (catchTarget(target, speed) )
+					return DRIVEMODE_2V2_AIM_GATE;
+			}
+		}
+		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 		return DRIVEMODE_2V2_OFFENSIVE;
 	}
 };
@@ -135,8 +144,15 @@ public:
 	KickOff() : DriveToBallv2("2V2_KICKOFF"){};
 	virtual DriveMode step(double dt){
 		DriveMode next = DriveToBallv2::step(dt);
+		auto & target = getClosestBall();
 		switch (next)
 		{
+		case DRIVEMODE_CATCH_BALL:		
+			m_pCom->ToggleTribbler(250);
+			if (catchTarget(target, speed) )
+				return DRIVEMODE_2V2_AIM_PARTNER;
+			m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
+			return DRIVEMODE_2V2_KICKOFF;
 		case DRIVEMODE_AIM_GATE:
 			return DRIVEMODE_2V2_AIM_PARTNER;
 		default:
@@ -150,11 +166,15 @@ public:
 	AimPartner() : DriveInstruction("2V2_AIM_PARTNER"){};
 	virtual DriveMode step(double dt){
 
-		auto & target = m_pFieldState->partner;
+		//auto & target = m_pFieldState->partner;
+		auto & target = m_pFieldState->GetHomeGate();
 		std::cout << target.polarMetricCoords.y << std::endl;
 		if (aimTarget(target, speed, 2)){
-			m_pCom->Kick(400);
-			std::cout << "kicked" << std::endl;
+			std::cout << "pre kick " << m_pFieldState->self.getHeading() << std::endl;
+			m_pCom->Drive(0, 0, sign(m_pFieldState->self.getHeading())*20);
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+			m_pCom->Kick(400);//reduce kick strength - parameter not used currently
+			std::cout << "kicked " << m_pFieldState->self.getHeading() << std::endl;
 			m_pFieldState->SendMessage("PAS #");
 			std::cout << DRIVEMODE_2V2_DEFENSIVE << std::endl;
 			return DRIVEMODE_2V2_DEFENSIVE;
