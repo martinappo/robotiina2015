@@ -19,7 +19,6 @@ void Camera::Init() {
 	//	cap->set(CV_CAP_PROP_GAIN, 0.5);
 //	cap->set(CV_CAP_PROP_EXPOSURE, 2);
 	//  [[960 x 960 from (175, 60)]] 
-//	cap->set(CV_CAP_PROP_XI_MANUAL_WB, 1);
 #ifndef WIN32
  // !
 	cap->set(CV_CAP_PROP_FRAME_WIDTH  , 960);    
@@ -28,6 +27,7 @@ void Camera::Init() {
 	cap->set(CV_CAP_PROP_XI_OFFSET_X, 160);    
 	cap->set(CV_CAP_PROP_XI_OFFSET_Y, 0);    
 	cap->set(CV_CAP_PROP_XI_OFFSET_Y, 0);  
+	cap->set(CV_CAP_PROP_XI_AUTO_WB, 0);
 #endif
 //	cap->set(CV_CAP_PROP_EXPOSURE, 10000);    
 //	cap->set(CV_CAP_PROP_XI_OFFSET_Y, 0);    
