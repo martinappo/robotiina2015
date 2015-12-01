@@ -196,8 +196,10 @@ DriveMode CatchBall::step(double dt)
 	FIND_TARGET_BALL //TODO: use it?
 	if (STUCK_IN_STATE(3000) || target.getDistance() > initDist  + 10) return DRIVEMODE_DRIVE_TO_BALL;
 	
-	if(catchTarget(target, speed)) { 
-		return DRIVEMODE_AIM_GATE;
+	if(aimTarget(target, speed,2)) { 
+		if(catchTarget(target, speed)) { 
+			return DRIVEMODE_AIM_GATE;
+		}
 	}
 	m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 
@@ -286,7 +288,7 @@ public:
 
 			speed = std::max(60.0, ballDistance);
 		}
-		else if (fabs(gateHeading - ballHeading) > errorMargin*2){
+		else if (fabs(gateHeading - ballHeading) > errorMargin/2){
 			//return DRIVEMODE_CATCH_BALL;
 
 			// drive around the ball
