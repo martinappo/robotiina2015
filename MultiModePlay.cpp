@@ -80,7 +80,7 @@ class Defensive : public DriveInstruction
 public:
 	Defensive() : DriveInstruction("2V2_DEFENSIVE"){};
 	virtual DriveMode step(double dt){
-		Speed speed;
+
 		auto & target = m_pFieldState->partner;
 		if (m_pFieldState->partnerHomeGate.getDistance() > 100){//is ally in defense area?
 			if (m_pFieldState->GetHomeGate().getDistance() > 80)
@@ -124,7 +124,7 @@ class AimPartner : public DriveInstruction
 public:
 	AimPartner() : DriveInstruction("2V2_AIM_PARTNER"){};
 	virtual DriveMode step(double dt){
-		Speed speed;
+
 		auto & target = m_pFieldState->partner;
 		std::cout << target.polarMetricCoords.y << std::endl;
 		if (aimTarget(target, speed, 2)){
@@ -145,7 +145,7 @@ class AimGate2v2 : public DriveInstruction
 public:
 	AimGate2v2() : DriveInstruction("2V2_AIM_GATE"){};
 	virtual DriveMode step(double dt){
-		Speed speed;
+
 		ObjectPosition &lastGateLocation = m_pFieldState->GetTargetGate();
 		bool sightObstructed = m_pFieldState->gateObstructed;
 		if (!m_pCom->BallInTribbler()) return DRIVEMODE_2V2_OFFENSIVE;
@@ -210,7 +210,7 @@ class DriveHome2v2 : public DriveInstruction
 public:
 	DriveHome2v2() : DriveInstruction("2V2_DRIVE_HOME"){};
 	virtual DriveMode step(double dt){
-		Speed speed;
+
 		ObjectPosition &lastGateLocation = m_pFieldState->GetHomeGate();
 		if (DriveInstruction::aimTarget(lastGateLocation, speed)){
 			if (DriveInstruction::driveToTarget(lastGateLocation, speed)){
