@@ -20,8 +20,10 @@ class SingleModeIdle : public Idle {
 	}
 
 	virtual DriveMode step(double dt) {
-		if (m_pFieldState->gameMode == FieldState::GAME_MODE_START_SINGLE_PLAY) return DRIVEMODE_DRIVE_TO_BALL;
-		return DRIVEMODE_IDLE;
+		while (!m_pFieldState->isPlaying) {
+			return DRIVEMODE_IDLE;
+		}
+		return DRIVEMODE_DRIVE_TO_BALL;
 	}
 };
 

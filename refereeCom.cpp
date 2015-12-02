@@ -10,7 +10,15 @@ RefereeCom::RefereeCom(FieldState *pFieldState, const std::string &name) : Confi
 }
 
 void RefereeCom::giveCommand(FieldState::GameMode command) {
-	m_pFieldState->gameMode = command;
+	if (command == FieldState::GAME_MODE_START_SINGLE_PLAY) {
+		m_pFieldState->isPlaying = true;
+	}
+	else {
+		if (command == FieldState::GAME_MODE_STOPED) {
+			m_pFieldState->isPlaying = false;
+		}
+		m_pFieldState->gameMode = command;
+	}
 }
 
 void RefereeCom::nextField() {
@@ -53,8 +61,10 @@ void RefereeCom::handleMessage(const std::string & message){
 	if (command.length() == 12 && command.at(0) == 'a' && command.at(1) == FIELD_MARKER && (command.at(2) == ALL_MARKER || command.at(2) == ROBOT_MARKER)) {
 		if (command.at(2) == ROBOT_MARKER) sendAck("a" + std::string(1, FIELD_MARKER) + std::string(1, ROBOT_MARKER) + "ACK------");
 		command = command.substr(3);
-		if (command == "START----") m_pFieldState->gameMode = FieldState::GAME_MODE_START_SINGLE_PLAY;
-		else if (command == "STOP-----") m_pFieldState->gameMode = FieldState::GAME_MODE_STOPED;
+		if (command == "START----") m_pFieldState->isPlaying = true;
+		else if (command == "STOP-----") {
+			m_pFieldState->isPlaying = false; m_pFieldState->gameMode = FieldState::GAME_MODE_STOPED;
+		}
 		else if (command == "PLACEDBAL") m_pFieldState->gameMode = FieldState::GAME_MODE_PLACED_BALL;
 		else if (command == "ENDHALF--") m_pFieldState->gameMode = FieldState::GAME_MODE_END_HALF;
 		else if (command.at(0) == TEAM_MARKER) {

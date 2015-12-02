@@ -111,31 +111,31 @@ void StateMachine::Run()
 		boost::posix_time::time_duration::tick_type dt = (time - lastStep).total_milliseconds();
 		newMode = testMode ? curDriveMode->second->step(double(dt)) : curDriveMode->second->step1(double(dt), newMode);
 		
-	auto old = curDriveMode;
+		auto old = curDriveMode;
 
-	if (testMode){
-		if (testDriveMode != DRIVEMODE_IDLE && newMode == DRIVEMODE_IDLE){
-			newMode = testDriveMode;
+		if (testMode){
+			if (testDriveMode != DRIVEMODE_IDLE && newMode == DRIVEMODE_IDLE){
+				newMode = testDriveMode;
+			}
+			else if (newMode != testDriveMode) {
+				newMode = DRIVEMODE_IDLE;
+				testDriveMode = DRIVEMODE_IDLE;
+			}
 		}
-		else if (newMode != testDriveMode) {
-			newMode = DRIVEMODE_IDLE;
-			testDriveMode = DRIVEMODE_IDLE;
-		}
-	}
 
-	if (newMode != curDriveMode->first){
-		boost::mutex::scoped_lock lock(mutex);
-		curDriveMode->second->onExit();
-		//m_pCom->Stop();
-		curDriveMode = driveModes.find(newMode);
-		if (curDriveMode == driveModes.end()) {
-			//std::cout << "Invalid drive mode from :" << old->second->name << ", reverting to idle" << std::endl;
-			curDriveMode = driveModes.find(DRIVEMODE_IDLE);
+		if (newMode != curDriveMode->first){
+			boost::mutex::scoped_lock lock(mutex);
+			curDriveMode->second->onExit();
+			//m_pCom->Stop();
+			curDriveMode = driveModes.find(newMode);
+			if (curDriveMode == driveModes.end()) {
+				//std::cout << "Invalid drive mode from :" << old->second->name << ", reverting to idle" << std::endl;
+				curDriveMode = driveModes.find(DRIVEMODE_IDLE);
+			}
+			//std::cout << "state change :" << old->second->name << " ->" << curDriveMode->second->name << std::endl; //TODO debug: miks siia ei j6ua?
+			curDriveMode->second->onEnter();
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
-		//std::cout << "state change :" << old->second->name << " ->" << curDriveMode->second->name << std::endl; //TODO debug: miks siia ei j6ua?
-		curDriveMode->second->onEnter();
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-	}
 	}
 	//std::cout << "StateMachine stoping" << std::endl;
 

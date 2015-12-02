@@ -93,6 +93,9 @@ class MasterModeIdle : public Idle {
 class SlaveModeIdle : public Idle {
 
 	virtual DriveMode step(double dt) {
+		while (!m_pFieldState->isPlaying) {
+			return DRIVEMODE_IDLE;
+		}
 		switch (m_pFieldState->gameMode) {
 		case FieldState::GAME_MODE_START_OPPONENT_KICK_OFF:
 			return DRIVEMODE_2V2_DEFENSIVE;
@@ -106,7 +109,6 @@ class SlaveModeIdle : public Idle {
 		case FieldState::GAME_MODE_START_OUR_THROWIN:
 			return DRIVEMODE_2V2_DEFENSIVE;
 		}
-		return DRIVEMODE_IDLE;
 	}
 };
 class Offensive : public DriveInstruction

@@ -86,6 +86,7 @@ public:
 		ROBOT_COLOR_BLUE_UP
 	};
 	std::atomic_int gameMode;
+	std::atomic<bool> isPlaying = false;
 	RobotColor robotColor = ROBOT_COLOR_BLUE_UP;
 	std::atomic_bool collisionWithBorder;
 	std::atomic_bool collisionWithUnknown;
