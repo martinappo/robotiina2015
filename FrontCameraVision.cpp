@@ -219,13 +219,10 @@ void FrontCameraVision::Run() {
 		cv::Mat roiOuterBorder(thresholdedImages[OUTER_BORDER], privateZone);
 		m_pState->collisionWithBorder = cv::countNonZero(roiOuterBorder) > 0.1 * 40000;
 		cv::bitwise_or(thresholdedImages[INNER_BORDER], thresholdedImages[FIELD], thresholdedImages[FIELD]);
-
+		//std::cout << "coll b: " << cv::countNonZero(roiOuterBorder) << std::endl;
 		cv::Mat roiField(thresholdedImages[FIELD], privateZone);
 		m_pState->collisionWithUnknown = cv::countNonZero(roiField) < 0.9 * 40000; // 40000=private zone area
-		if (wasCollisionWithBorder != m_pState->collisionWithBorder)
-			std::cout << "Collision with border " << (wasCollisionWithBorder ? "no " :"yes ") << std::endl;
-		if (wasCollisionWithUnknown != m_pState->collisionWithUnknown)
-			std::cout << "Collision with unknown " << (wasCollisionWithUnknown ? "no " : "yes ") << std::endl;
+		//std::cout << "coll u: " << cv::countNonZero(roiField) << std::endl;
 		//imshow("field", roiField);
 		//cv::waitKey(1);
 

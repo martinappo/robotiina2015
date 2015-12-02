@@ -622,6 +622,10 @@ void Robot::Run()
 		
 		const BallPosition &ball = field.balls.getClosest();
 		m_pDisplay->putShadowedText(std::string("Ball") + ": " + std::to_string(ball.polarMetricCoords.x) + " : " + std::to_string(ball.getHeading()), cv::Point(-250, 140), 0.4, cv::Scalar(255, 255, 255));
+		
+		m_pDisplay->putShadowedText(std::string("Collison border") + ": " + (field.collisionWithBorder ? "yes" : "no"), cv::Point(-250, 160), 0.4, cv::Scalar(255, 255, 255));
+		m_pDisplay->putShadowedText(std::string("Collison unknown") + ": " + (field.collisionWithUnknown ? "yes" : "no"), cv::Point(-250, 180), 0.4, cv::Scalar(255, 255, 255));
+
 		/*
 		const BallPosition &ballp = field.balls.getClosest(true);
 		m_pDisplay->putShadowedText(std::string("Ball'")+ ": " + std::to_string(ballp.polarMetricCoords.x) + " : " + std::to_string(ballp.getHeading()), cv::Point(-250, 160), 0.4, cv::Scalar(255, 255, 255));
