@@ -93,6 +93,9 @@ class MasterModeIdle : public Idle {
 class SlaveModeIdle : public Idle {
 
 	virtual DriveMode step(double dt) {
+		while (!m_pFieldState->isPlaying) {
+			return DRIVEMODE_IDLE;
+		}
 		switch (m_pFieldState->gameMode) {
 		case FieldState::GAME_MODE_START_OPPONENT_KICK_OFF:
 			return DRIVEMODE_2V2_DEFENSIVE;
@@ -106,7 +109,6 @@ class SlaveModeIdle : public Idle {
 		case FieldState::GAME_MODE_START_OUR_THROWIN:
 			return DRIVEMODE_2V2_DEFENSIVE;
 		}
-		return DRIVEMODE_IDLE;
 	}
 };
 class Offensive : public DriveInstruction
@@ -169,9 +171,46 @@ public:
 			}
 		}
 		else{
-			/*active defense
-			positon self between opponent and gate?
-			*/
+
+			auto & opponent = m_pFieldState->opponents[0];//get the one with ball?
+			//auto & opponent = m_pFieldState->GetTargetGate(); for testing
+			auto & homeGate = m_pFieldState->GetHomeGate();
+			double gateHeading = homeGate.getHeading() - 180 * sign(homeGate.getHeading());
+			double gateAngle = homeGate.getHeading() - 180 * sign(homeGate.getHeading());;
+			double opponentAngle = opponent.getAngle();
+			double opponentHeading = opponent.getHeading();
+			double opponentDistance = opponent.getDistance();
+
+			double rotation = 0;
+			double heading = 0;
+			double velocity = 0;
+
+			double errorMargin = 5;
+			double maxDistance = 30;
+			
+
+			if (fabs(gateHeading) > errorMargin){
+				rotation = -sign(gateHeading) * std::min(40.0, std::max(fabs(gateHeading), 5.0));
+			}
+			if (opponentDistance > maxDistance) {
+				maxDistance = 30;
+				double top = 1;
+
+				heading = opponentAngle + sign(opponentHeading) * top*asin(maxDistance / opponentDistance) * 180 / CV_PI;
+
+				velocity = std::max(60.0, opponentDistance);
+			}
+			else if (fabs(gateHeading - opponentHeading) > errorMargin / 2){
+				double top = 1;
+				double left = sign(opponentHeading);
+				heading = opponentAngle + top*left * 90;
+				velocity = 40;
+				maxDistance = 60;
+			}
+			speed.velocity = velocity;
+			speed.heading = heading;
+			speed.rotation = rotation;
+			
 		}
 		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 		return DRIVEMODE_2V2_DEFENSIVE;
@@ -203,7 +242,7 @@ public:
 			std::cout << "pre kick " << m_pFieldState->self.getHeading() << std::endl;
 			m_pCom->Drive(0, 0, sign(m_pFieldState->self.getHeading())*20);
 			std::this_thread::sleep_for(std::chrono::milliseconds(500));
-			m_pCom->Kick(1200);//reduce kick strength - parameter not used currently
+			m_pCom->Kick(1200);
 			std::cout << "kicked " << m_pFieldState->self.getHeading() << std::endl;
 			m_pFieldState->SendMessage("PAS #");
 			std::cout << DRIVEMODE_2V2_DEFENSIVE << std::endl;
@@ -238,8 +277,10 @@ public:
 		}
 		else {
 			speed.rotation = lastGateLocation.getHeading();
+			if(fabs(speed.rotation) > 50)
+				speed.rotation = sign(speed.rotation)*50;				
 		}
-		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
+		m_pCom->Drive(speed.velocity, speed.heading, -speed.rotation);
 
 		return DRIVEMODE_2V2_AIM_GATE;
 	}
@@ -264,12 +305,8 @@ public:
 	virtual DriveMode step(double dt){
 
 		ObjectPosition &lastGateLocation = m_pFieldState->GetHomeGate();
-		if (DriveInstruction::aimTarget(lastGateLocation, speed)){
-			if (DriveInstruction::driveToTarget(lastGateLocation, speed)){
-				if (DriveInstruction::aimTarget(lastGateLocation, speed)){
-					return DRIVEMODE_2V2_DEFENSIVE;
-				}
-			}
+		if (DriveInstruction::driveToTargetWithAngle(lastGateLocation, speed)){
+			return DRIVEMODE_2V2_DEFENSIVE;
 		}
 		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 
@@ -358,7 +395,7 @@ DriveMode Kick2v2::step(double dt){
 	m_pCom->ToggleTribbler(0);
 	m_pCom->Drive(0, 0, 0);
 	std::this_thread::sleep_for(std::chrono::milliseconds(50));
-	m_pCom->Kick(800);
+	m_pCom->Kick(2500);
 	std::this_thread::sleep_for(std::chrono::milliseconds(500)); //half second wait.
 	return DRIVEMODE_2V2_DEFENSIVE;
 }

@@ -44,8 +44,8 @@ private:
 class FieldState {
 public:
 	enum GameMode {
-		GAME_MODE_STOPED = 0,
-		GAME_MODE_START_SINGLE_PLAY,
+//		GAME_MODE_STOPED = 0,
+		GAME_MODE_START_SINGLE_PLAY=0,
 
 		GAME_MODE_PLACED_BALL,
 		GAME_MODE_END_HALF,
@@ -86,6 +86,7 @@ public:
 		ROBOT_COLOR_BLUE_UP
 	};
 	std::atomic_int gameMode;
+	std::atomic_bool isPlaying;
 	RobotColor robotColor = ROBOT_COLOR_BLUE_UP;
 	std::atomic_bool collisionWithBorder;
 	std::atomic_bool collisionWithUnknown;

@@ -64,10 +64,11 @@ const BallPosition& BallArray::calcClosest(int * index){
 }
 
 FieldState::FieldState(int number_of_balls) :yellowGate(YELLOW_GATE), blueGate(BLUE_GATE), self(yellowGate, blueGate, cv::Point(0, 0)), balls(number_of_balls, this){
-	gameMode = GAME_MODE_STOPED;
+	gameMode = GAME_MODE_START_SINGLE_PLAY;
 	collisionWithBorder = false;
 	collisionWithUnknown = false;
 	collisionRange = {0,0};
+	isPlaying = false;
 };
 FieldState::~FieldState(){
 

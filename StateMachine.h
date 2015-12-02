@@ -4,8 +4,8 @@
 #include "FieldState.h"
 typedef int DriveMode;
 const DriveMode DRIVEMODE_CRASH = 0;
-const DriveMode DRIVEMODE_BORDER_TO_CLOSE = 0;
-const DriveMode DRIVEMODE_IDLE = 0;
+const DriveMode DRIVEMODE_BORDER_TO_CLOSE = 1;
+const DriveMode DRIVEMODE_IDLE = 2;
 
 class DriveInstruction
 {
@@ -28,28 +28,41 @@ public:
 	};
 	virtual DriveMode step1(double dt, DriveMode driveMode){
 		//not executed in test mode
-		if (m_pFieldState->gameMode == FieldState::GAME_MODE_STOPED){
+		if (!m_pFieldState->isPlaying){
 			return DRIVEMODE_IDLE;
 		}
+/*
 		// handle crash
 		if (m_pFieldState->collisionWithBorder && driveMode != DRIVEMODE_BORDER_TO_CLOSE){
 			prevDriveMode = driveMode;
+			std::cout << "To close to border" << std::endl;
 			return DRIVEMODE_BORDER_TO_CLOSE;
 		}
+*/
+		/*
 		if (m_pFieldState->collisionWithUnknown && driveMode != DRIVEMODE_CRASH){
+			std::cout << "Crash" << std::endl;
 			return DRIVEMODE_CRASH;
 		}
+		*/
 		// recover from crash
+/*
 		if (!m_pFieldState->collisionWithBorder && driveMode == DRIVEMODE_BORDER_TO_CLOSE){
 			DriveMode tmp = prevDriveMode;
 			prevDriveMode = DRIVEMODE_IDLE;
+			//std::cout <<"aaa" <<std::endl;
 			return tmp;
 		}
+*/
+		/*
 		if (!m_pFieldState->collisionWithUnknown && driveMode == DRIVEMODE_CRASH){
 			DriveMode tmp = prevDriveMode;
 			prevDriveMode = DRIVEMODE_IDLE;
+			//std::cout << "bbb" << std::endl;
 			return tmp;
 		}
+		*/
+		prevDriveMode = driveMode;
 		speed = { 0, 0, 0 };
 		return step(dt);
 	};
@@ -82,7 +95,9 @@ private:
 public:
 	Crash() : DriveInstruction("CRASH"){};
 	void onEnter(){
+//		m_pCom->Kick(2700);
 		m_pCom->Drive(0, 0, 0);
+		//Sleep(1000);
 	}
 	virtual DriveMode step(double dt){ 
 		return DRIVEMODE_CRASH;
@@ -99,7 +114,7 @@ public:
 		m_pCom->Drive(0, 0, 0);
 	}
 	virtual DriveMode step(double dt){ 
-		return DRIVEMODE_IDLE; 
+		return DRIVEMODE_BORDER_TO_CLOSE; 
 	}
 };
 

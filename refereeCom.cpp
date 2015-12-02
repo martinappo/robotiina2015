@@ -48,13 +48,15 @@ void RefereeCom::nextRobot() {
 void RefereeCom::handleMessage(const std::string & message){
 	//TODO: update m_pFieldState->gameMode from here directly, add missing start commands there
 	if (m_pFieldState == NULL) return;
-
+	std::cout << "referee command: " << message << std::endl;
 	std::string command = message.substr(0, 12);
 	if (command.length() == 12 && command.at(0) == 'a' && command.at(1) == FIELD_MARKER && (command.at(2) == ALL_MARKER || command.at(2) == ROBOT_MARKER)) {
 		if (command.at(2) == ROBOT_MARKER) sendAck("a" + std::string(1, FIELD_MARKER) + std::string(1, ROBOT_MARKER) + "ACK------");
 		command = command.substr(3);
-		if (command == "START----") m_pFieldState->gameMode = FieldState::GAME_MODE_START_SINGLE_PLAY;
-		else if (command == "STOP-----") m_pFieldState->gameMode = FieldState::GAME_MODE_STOPED;
+		if (command == "START----") m_pFieldState->isPlaying = true;
+		else if (command == "STOP-----") {
+			m_pFieldState->isPlaying = false;
+		}
 		else if (command == "PLACEDBAL") m_pFieldState->gameMode = FieldState::GAME_MODE_PLACED_BALL;
 		else if (command == "ENDHALF--") m_pFieldState->gameMode = FieldState::GAME_MODE_END_HALF;
 		else if (command.at(0) == TEAM_MARKER) {

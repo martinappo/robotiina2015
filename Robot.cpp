@@ -80,8 +80,8 @@ std::pair<STATE, std::string> states[] = {
 };
 
 std::pair<std::string, FieldState::GameMode> refCommands[] = {
-	std::pair<std::string, FieldState::GameMode>("Start game", FieldState::GAME_MODE_START_SINGLE_PLAY),
-	std::pair<std::string, FieldState::GameMode>("Stop game", FieldState::GAME_MODE_STOPED),
+//	std::pair<std::string, FieldState::GameMode>("Start game", FieldState::GAME_MODE_START_SINGLE_PLAY),
+//	std::pair<std::string, FieldState::GameMode>("Stop game", FieldState::GAME_MODE_STOPED),
 	std::pair<std::string, FieldState::GameMode>("Placed ball", FieldState::GAME_MODE_PLACED_BALL),
 	std::pair<std::string, FieldState::GameMode>("End half", FieldState::GAME_MODE_END_HALF),
 
@@ -382,7 +382,11 @@ void Robot::Run()
 				STATE_BUTTON("(C)Change Gate [" + ((int)field.GetTargetGate().getDistance() == (int)(field.blueGate.getDistance()) ? "blue" : "yellow") + "]", 'c', STATE_SELECT_GATE)
 				STATE_BUTTON("(G)ive Referee Command", 'g', STATE_GIVE_COMMAND)
 				STATE_BUTTON("Auto(P)ilot [" + (autoPilot->running ? "On" : "Off") + "]", 'p', STATE_LAUNCH)
+				m_pDisplay->createButton(std::string("Referee : ") + (field.isPlaying ? "STOP" : "START"), 'v', [this, &field]{
+					field.isPlaying = !field.isPlaying;
 
+					this->last_state = STATE_END_OF_GAME; // force dialog redraw
+				});
 				/*
 			createButton(std::string("(M)ouse control [") + (mouseControl == 0 ? "Off" : (mouseControl == 1 ? "Ball" : "Gate")) + "]", [this, &mouseControl]{
 				mouseControl = (mouseControl + 1) % 3;
@@ -428,7 +432,7 @@ void Robot::Run()
 
 
 				STATE_BUTTON("(M)anual Control", 'm', STATE_MANUAL_CONTROL)
-				STATE_BUTTON("M(o)use vision", 'o', STATE_MOUSE_VISION)
+				//STATE_BUTTON("M(o)use vision", 'o', STATE_MOUSE_VISION)
 				STATE_BUTTON("(D)istance calibration", 'd', STATE_DISTANCE_CALIBRATE)
 				STATE_BUTTON("Test Autopilot", '-', STATE_TEST)
 				STATE_BUTTON("E(x)it", 27, STATE_END_OF_GAME)
@@ -611,7 +615,8 @@ void Robot::Run()
 
 		m_pDisplay->putShadowedText( "fps: " + std::to_string(m_pCamera->GetFPS()), cv::Point(-140, 20), 0.5, cv::Scalar(255, 255, 255));
 		//assert(STATE_END_OF_GAME != state);
-		m_pDisplay->putShadowedText( "state: " + STATE_LABELS[state], cv::Point(-140, 40), 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putShadowedText("state: " + STATE_LABELS[state], cv::Point(-140, 40), 0.5, cv::Scalar(255, 255, 255));
+		m_pDisplay->putShadowedText(std::string("running: ") +(field.isPlaying ? "yes":"no"), cv::Point(-140, 460), 0.5, cv::Scalar(255, 255, 255));
 		//m_pDisplay->putShadowedText( std::string("Ball:") + (ballPos.getDistance() > 0 ? "yes" : "no"), cv::Point(-140, 60), 0.5, cv::Scalar(255, 255, 255));
 		//m_pDisplay->putShadowedText( std::string("Gate:") + (targetGatePos.getDistance() >0 ? "yes" : "no"), cv::Point(-140, 80), 0.5, cv::Scalar(255, 255, 255));
 
