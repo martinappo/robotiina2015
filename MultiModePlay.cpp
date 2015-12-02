@@ -114,15 +114,39 @@ class Offensive : public DriveInstruction
 public:
 	Offensive() : DriveInstruction("2V2_OFFENSIVE"){};
 	virtual DriveMode step(double dt){
-		if (m_pCom->BallInTribbler()){
-			//ATTACK! -> GOAL!!
-			return DRIVEMODE_2V2_AIM_GATE;
+		if (m_pCom->BallInTribbler() || true){
+			//Reverese to GOAL			
+			const ObjectPosition &gate = m_pFieldState->GetTargetGate();
+			double reverseHeading = gate.getHeading() - 180 * sign(gate.getHeading());
+			double targetHeading = gate.getHeading();
+			double targetDistance = gate.getHeading();
+
+			double rotation = 0;
+			double errorMargin = 5;
+			double maxDistance = 30;
+			if (fabs(reverseHeading) > errorMargin){
+				rotation = -sign0(reverseHeading) * std::min(40.0, std::max(fabs(reverseHeading), 5.0));
+			}
+			double heading = 0;
+			double speed = 0;
+			if (targetDistance > maxDistance) {
+				heading = targetHeading;
+				if (fabs(heading) > 30)
+					heading = sign0(heading)*(fabs(heading) + 15);
+				speed = std::max(60.0, targetDistance);
+			}
+			else {
+				m_pCom->Drive(0,0,0);
+				return DRIVEMODE_2V2_AIM_GATE;
+			}
+			m_pCom->Drive(speed, heading, rotation);
+			return DRIVEMODE_2V2_OFFENSIVE;
 		}
 		else{
 			auto &target = getClosestBall();
 			if (driveToTargetWithAngle(target, speed, 30, 5)){
-				if (catchTarget(target, speed) )
-					return DRIVEMODE_2V2_AIM_GATE;
+				if (catchTarget(target, speed))
+					return  DRIVEMODE_2V2_OFFENSIVE;
 			}
 		}
 		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
@@ -182,7 +206,7 @@ public:
 			std::cout << "pre kick " << m_pFieldState->self.getHeading() << std::endl;
 			m_pCom->Drive(0, 0, sign(m_pFieldState->self.getHeading())*20);
 			std::this_thread::sleep_for(std::chrono::milliseconds(500));
-			m_pCom->Kick(400);//reduce kick strength - parameter not used currently
+			m_pCom->Kick(400);
 			std::cout << "kicked " << m_pFieldState->self.getHeading() << std::endl;
 			m_pFieldState->SendMessage("PAS #");
 			std::cout << DRIVEMODE_2V2_DEFENSIVE << std::endl;
