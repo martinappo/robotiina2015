@@ -48,7 +48,7 @@ void RefereeCom::nextRobot() {
 void RefereeCom::handleMessage(const std::string & message){
 	//TODO: update m_pFieldState->gameMode from here directly, add missing start commands there
 	if (m_pFieldState == NULL) return;
-
+	std::cout << "referee command: " << message << std::endl;
 	std::string command = message.substr(0, 12);
 	if (command.length() == 12 && command.at(0) == 'a' && command.at(1) == FIELD_MARKER && (command.at(2) == ALL_MARKER || command.at(2) == ROBOT_MARKER)) {
 		if (command.at(2) == ROBOT_MARKER) sendAck("a" + std::string(1, FIELD_MARKER) + std::string(1, ROBOT_MARKER) + "ACK------");

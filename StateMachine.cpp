@@ -4,7 +4,7 @@
 bool DriveInstruction::aimTarget(const ObjectPosition &target, Speed &speed, double errorMargin){
 	double heading = target.getHeading();
 	if (fabs(heading) > errorMargin){
-		speed.rotation = - sign0(heading) * std::min(40.0, std::max(fabs(heading), 5.0));
+		speed.rotation = - sign0(heading) * std::min(40.0, fabs(heading));
 		return false;
 	}
 	else{

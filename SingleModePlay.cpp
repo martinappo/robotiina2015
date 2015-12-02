@@ -128,7 +128,7 @@ public:
 
 		double rotation = 0;
 		double errorMargin = 5;
-		double maxDistance = 30;
+		double maxDistance = 35;
 		//if (fabs(gateHeading - ballHeading) > 90) { // we are between gate and ball
 		//	return stepAngled(dt); 
 		//}
@@ -145,10 +145,12 @@ public:
 		}
 		else {
 			if (fabs(ballHeading) <= errorMargin && fabs(gateHeading) <= errorMargin){
+				m_pCom->Drive(0, 0, 0);
 				return DRIVEMODE_CATCH_BALL;
 			}
 			if (fabs(ballHeading) > errorMargin){
-				heading = ballHeading + sign0(ballHeading) * 55;
+				heading = ballHeading + sign0(ballHeading) * 45;
+				speed = 35;
 			}
 			rotation = 0;
 			if (fabs(gateHeading) > errorMargin){
@@ -156,7 +158,7 @@ public:
 			}
 			// drive around the ball
 			//heading = ballHeading + sign(ballHeading) * 90;
-			speed = std::max(fabs(ballHeading), 35.0);
+			//std::max(fabs(ballHeading), 35.0);
 		}
 		m_pCom->Drive(speed, heading, rotation);
 		return DRIVEMODE_DRIVE_TO_BALL_AIM_GATE;
@@ -197,10 +199,12 @@ DriveMode CatchBall::step(double dt)
 	if (STUCK_IN_STATE(3000) || target.getDistance() > initDist  + 10) return DRIVEMODE_DRIVE_TO_BALL;
 	
 	if(aimTarget(target, speed,2)) { 
+		//m_pCom->Drive(0, 0, 0);
 		if(catchTarget(target, speed)) { 
 			return DRIVEMODE_AIM_GATE;
 		}
 	}
+	std::cout <<speed.velocity<<" " << speed.heading<<" " <<speed.rotation <<std::endl;
 	m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 
 	return DRIVEMODE_CATCH_BALL;

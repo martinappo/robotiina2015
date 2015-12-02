@@ -31,29 +31,34 @@ public:
 		if (m_pFieldState->gameMode == FieldState::GAME_MODE_STOPED){
 			return DRIVEMODE_IDLE;
 		}
+/*
 		// handle crash
 		if (m_pFieldState->collisionWithBorder && driveMode != DRIVEMODE_BORDER_TO_CLOSE){
 			prevDriveMode = driveMode;
 			std::cout << "To close to border" << std::endl;
 			return DRIVEMODE_BORDER_TO_CLOSE;
 		}
+*/
 		if (m_pFieldState->collisionWithUnknown && driveMode != DRIVEMODE_CRASH){
 			std::cout << "Crash" << std::endl;
 			return DRIVEMODE_CRASH;
 		}
 		// recover from crash
+/*
 		if (!m_pFieldState->collisionWithBorder && driveMode == DRIVEMODE_BORDER_TO_CLOSE){
 			DriveMode tmp = prevDriveMode;
 			prevDriveMode = DRIVEMODE_IDLE;
 			//std::cout <<"aaa" <<std::endl;
 			return tmp;
 		}
+*/
 		if (!m_pFieldState->collisionWithUnknown && driveMode == DRIVEMODE_CRASH){
 			DriveMode tmp = prevDriveMode;
 			prevDriveMode = DRIVEMODE_IDLE;
 			//std::cout << "bbb" << std::endl;
 			return tmp;
 		}
+
 		prevDriveMode = driveMode;
 		speed = { 0, 0, 0 };
 		return step(dt);
