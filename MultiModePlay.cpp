@@ -63,7 +63,7 @@ public:
 					return DRIVEMODE_2V2_AIM_PARTNER;
 				}
 				else {
-					return DRIVEMODE_AIM_GATE;
+					return DRIVEMODE_2V2_OFFENSIVE;
 				}
 			}
 		}
@@ -114,18 +114,18 @@ class Offensive : public DriveInstruction
 public:
 	Offensive() : DriveInstruction("2V2_OFFENSIVE"){};
 	virtual DriveMode step(double dt){
-		if (m_pCom->BallInTribbler() || true){
+		if (m_pCom->BallInTribbler()){
 			//Reverese to GOAL			
 			const ObjectPosition &gate = m_pFieldState->GetTargetGate();
 			double reverseHeading = gate.getHeading() - 180 * sign(gate.getHeading());
 			double targetHeading = gate.getHeading();
-			double targetDistance = gate.getHeading();
+			double targetDistance = gate.getDistance();
 
 			double rotation = 0;
 			double errorMargin = 5;
-			double maxDistance = 30;
+			double maxDistance = 80;
 			if (fabs(reverseHeading) > errorMargin){
-				rotation = -sign0(reverseHeading) * std::min(40.0, std::max(fabs(reverseHeading), 5.0));
+				rotation = -sign0(reverseHeading) * std::min(30.0, std::max(fabs(reverseHeading), 5.0));
 			}
 			double heading = 0;
 			double speed = 0;
@@ -133,21 +133,18 @@ public:
 				heading = targetHeading;
 				if (fabs(heading) > 30)
 					heading = sign0(heading)*(fabs(heading) + 15);
-				speed = std::max(60.0, targetDistance);
+				speed = 60;//std::max(60.0, targetDistance);
 			}
 			else {
 				m_pCom->Drive(0,0,0);
+				std::cout<<"to aim gate " << targetDistance << " " << maxDistance<<std::endl;
 				return DRIVEMODE_2V2_AIM_GATE;
 			}
 			m_pCom->Drive(speed, heading, rotation);
 			return DRIVEMODE_2V2_OFFENSIVE;
 		}
 		else{
-			auto &target = getClosestBall();
-			if (driveToTargetWithAngle(target, speed, 30, 5)){
-				if (catchTarget(target, speed))
-					return  DRIVEMODE_2V2_OFFENSIVE;
-			}
+			return DRIVEMODE_2V2_CATCH_BALL;
 		}
 		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 		return DRIVEMODE_2V2_OFFENSIVE;
