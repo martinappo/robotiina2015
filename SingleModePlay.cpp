@@ -259,6 +259,7 @@ public:
 	}
 
 	virtual DriveMode step(double dt){
+		if (m_pCom->BallInTribbler())return DRIVEMODE_AIM_GATE;
 		const ObjectPosition &ball = getClosestBall();
 		const ObjectPosition &gate = m_pFieldState->GetTargetGate();
 		double gateHeading = gate.getHeading();
