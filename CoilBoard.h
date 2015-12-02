@@ -24,6 +24,7 @@ private:
 
 public:
 	CoilBoard(ISerial *port) : m_pComPort(port), ThreadedClass("CoilBoard") {
+		kickForce = 0;
 		ballInTribbler = false;
 		ballInTribblerCount = 0;
 		kickAllowed = true;
