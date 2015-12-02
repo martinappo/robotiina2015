@@ -89,6 +89,7 @@ public:
 	RobotColor robotColor = ROBOT_COLOR_BLUE_UP;
 	std::atomic_bool collisionWithBorder;
 	std::atomic_bool collisionWithUnknown;
+	cv::Point2d collisionRange; // which directions are blocked
 	FieldState(const int number_of_balls);
 	virtual ~FieldState();
 	//BallPosition balls[number_of_balls]; //All others are distance from self and heading to it
