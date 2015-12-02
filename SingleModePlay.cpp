@@ -128,7 +128,7 @@ public:
 
 		double rotation = 0;
 		double errorMargin = 5;
-		double maxDistance = 35;
+		double maxDistance = 40;
 		//if (fabs(gateHeading - ballHeading) > 90) { // we are between gate and ball
 		//	return stepAngled(dt); 
 		//}
@@ -197,14 +197,14 @@ DriveMode CatchBall::step(double dt)
 {
 	FIND_TARGET_BALL //TODO: use it?
 	if (STUCK_IN_STATE(3000) || target.getDistance() > initDist  + 10) return DRIVEMODE_DRIVE_TO_BALL;
-	
+	speed.velocity, speed.heading, speed.rotation = 0;
 	if(aimTarget(target, speed,2)) { 
 		//m_pCom->Drive(0, 0, 0);
 		if(catchTarget(target, speed)) { 
 			return DRIVEMODE_AIM_GATE;
 		}
 	}
-	std::cout <<speed.velocity<<" " << speed.heading<<" " <<speed.rotation <<std::endl;
+	//std::cout <<speed.velocity<<" " << speed.heading<<" " <<speed.rotation <<std::endl;
 	m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 
 	return DRIVEMODE_CATCH_BALL;
@@ -224,13 +224,14 @@ DriveMode AimGate::step(double dt)
 	if (!BALL_IN_TRIBBLER) return DRIVEMODE_DRIVE_TO_BALL;	
 	double errorMargin;
 	if (target.getDistance() > 200){
-		errorMargin = 0.5;
+		errorMargin = 1;
 	}
-	else errorMargin = 1;
+	else errorMargin = 2;
 	
 	if (aimTarget(target, speed, errorMargin)){
 		return DRIVEMODE_KICK;
 	}
+	//std::cout <<speed.velocity<<" " << speed.heading<<" " <<speed.rotation <<std::endl;
 	m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 
 	return DRIVEMODE_AIM_GATE;
@@ -247,7 +248,7 @@ void Kick::onEnter()
 DriveMode Kick::step(double dt)
 {
 	std::this_thread::sleep_for(std::chrono::milliseconds(50));
-	m_pCom->Kick(3500);
+	m_pCom->Kick(5000);
 	std::this_thread::sleep_for(std::chrono::milliseconds(50)); //less than half second wait.
 	return DRIVEMODE_DRIVE_TO_BALL;
 }
