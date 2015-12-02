@@ -3,6 +3,8 @@
 #include "ThreadedClass.h"
 #include "FieldState.h"
 typedef int DriveMode;
+const DriveMode DRIVEMODE_CRASH = 0;
+const DriveMode DRIVEMODE_BORDER_TO_CLOSE = 0;
 const DriveMode DRIVEMODE_IDLE = 0;
 
 class DriveInstruction
@@ -12,6 +14,7 @@ protected:
 	FieldState *m_pFieldState;
 	ICommunicationModule *m_pCom;
 	Speed speed;
+	static DriveMode prevDriveMode;
 public:
 	const std::string name;
 	DriveInstruction(const std::string &name) : name(name){
@@ -23,10 +26,29 @@ public:
 	virtual void onEnter(){
 		actionStart = boost::posix_time::microsec_clock::local_time();
 	};
-	virtual DriveMode step1(double dt){
+	virtual DriveMode step1(double dt, DriveMode driveMode){
 		//not executed in test mode
 		if (m_pFieldState->gameMode == FieldState::GAME_MODE_STOPED){
 			return DRIVEMODE_IDLE;
+		}
+		// handle crash
+		if (m_pFieldState->collisionWithBorder && driveMode != DRIVEMODE_BORDER_TO_CLOSE){
+			prevDriveMode = driveMode;
+			return DRIVEMODE_BORDER_TO_CLOSE;
+		}
+		if (m_pFieldState->collisionWithUnknown && driveMode != DRIVEMODE_CRASH){
+			return DRIVEMODE_CRASH;
+		}
+		// recover from crash
+		if (!m_pFieldState->collisionWithBorder && driveMode == DRIVEMODE_BORDER_TO_CLOSE){
+			DriveMode tmp = prevDriveMode;
+			prevDriveMode = DRIVEMODE_IDLE;
+			return tmp;
+		}
+		if (!m_pFieldState->collisionWithUnknown && driveMode == DRIVEMODE_CRASH){
+			DriveMode tmp = prevDriveMode;
+			prevDriveMode = DRIVEMODE_IDLE;
+			return tmp;
 		}
 		speed = { 0, 0, 0 };
 		return step(dt);
@@ -53,13 +75,41 @@ public:
 	virtual DriveMode step(double dt){ return DRIVEMODE_IDLE; }
 };
 
+class Crash : public DriveInstruction
+{
+private:
+	boost::posix_time::ptime idleStart;
+public:
+	Crash() : DriveInstruction("CRASH"){};
+	void onEnter(){
+		m_pCom->Drive(0, 0, 0);
+	}
+	virtual DriveMode step(double dt){ 
+		return DRIVEMODE_CRASH;
+	}
+};
+
+class BorderToClose : public DriveInstruction
+{
+private:
+	boost::posix_time::ptime idleStart;
+public:
+	BorderToClose() : DriveInstruction("BORDER_TO_CLOSE"){};
+	void onEnter(){
+		m_pCom->Drive(0, 0, 0);
+	}
+	virtual DriveMode step(double dt){ 
+		return DRIVEMODE_IDLE; 
+	}
+};
+
 class StateMachine : public IControlModule, public ThreadedClass
 {
 public:
 	typedef std::map<DriveMode, DriveInstruction*> TDriveModes;
 	const TDriveModes driveModes;
 	std::atomic_bool testMode;
-
+	DriveMode preCrashState = DRIVEMODE_IDLE;
 private:
 	TDriveModes::const_iterator curDriveMode;
 	ICommunicationModule *m_pComModule;
@@ -84,3 +134,4 @@ public:
 	virtual ~StateMachine();
 	std::string GetDebugInfo();
 };
+
