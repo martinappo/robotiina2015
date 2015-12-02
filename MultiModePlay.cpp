@@ -33,8 +33,8 @@ public:
 		speed.velocity = 0;
 		speed.heading = 0;
 		if (aimTarget(target, speed, 5)){
-			if (driveToTarget(target, speed, 15)){
-				if (aimTarget(target, speed, 1)){
+			if (driveToTarget(target, speed, 35)){
+				if (aimTarget(target, speed, 2)){
 					m_pCom->Drive(0,0,0);
 					return DRIVEMODE_CATCH_BALL;
 				}
@@ -63,7 +63,7 @@ public:
 					return DRIVEMODE_2V2_AIM_PARTNER;
 				}
 				else {
-					return DRIVEMODE_AIM_GATE;
+					return DRIVEMODE_2V2_OFFENSIVE;
 				}
 			}
 		}
@@ -115,15 +115,36 @@ public:
 	Offensive() : DriveInstruction("2V2_OFFENSIVE"){};
 	virtual DriveMode step(double dt){
 		if (m_pCom->BallInTribbler()){
-			//ATTACK! -> GOAL!!
-			return DRIVEMODE_2V2_AIM_GATE;
+			//Reverese to GOAL			
+			const ObjectPosition &gate = m_pFieldState->GetTargetGate();
+			double reverseHeading = gate.getHeading() - 180 * sign(gate.getHeading());
+			double targetHeading = gate.getHeading();
+			double targetDistance = gate.getDistance();
+
+			double rotation = 0;
+			double errorMargin = 5;
+			double maxDistance = 80;
+			if (fabs(reverseHeading) > errorMargin){
+				rotation = -sign0(reverseHeading) * std::min(30.0, std::max(fabs(reverseHeading), 5.0));
+			}
+			double heading = 0;
+			double speed = 0;
+			if (targetDistance > maxDistance) {
+				heading = targetHeading;
+				if (fabs(heading) > 30)
+					heading = sign0(heading)*(fabs(heading) + 15);
+				speed = 60;//std::max(60.0, targetDistance);
+			}
+			else {
+				m_pCom->Drive(0,0,0);
+				std::cout<<"to aim gate " << targetDistance << " " << maxDistance<<std::endl;
+				return DRIVEMODE_2V2_AIM_GATE;
+			}
+			m_pCom->Drive(speed, heading, rotation);
+			return DRIVEMODE_2V2_OFFENSIVE;
 		}
 		else{
-			auto &target = getClosestBall();
-			if (driveToTargetWithAngle(target, speed, 30, 5)){
-				if (catchTarget(target, speed) )
-					return DRIVEMODE_2V2_AIM_GATE;
-			}
+			return DRIVEMODE_2V2_CATCH_BALL;
 		}
 		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 		return DRIVEMODE_2V2_OFFENSIVE;
@@ -182,7 +203,7 @@ public:
 			std::cout << "pre kick " << m_pFieldState->self.getHeading() << std::endl;
 			m_pCom->Drive(0, 0, sign(m_pFieldState->self.getHeading())*20);
 			std::this_thread::sleep_for(std::chrono::milliseconds(500));
-			m_pCom->Kick(400);//reduce kick strength - parameter not used currently
+			m_pCom->Kick(1200);//reduce kick strength - parameter not used currently
 			std::cout << "kicked " << m_pFieldState->self.getHeading() << std::endl;
 			m_pFieldState->SendMessage("PAS #");
 			std::cout << DRIVEMODE_2V2_DEFENSIVE << std::endl;
