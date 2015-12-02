@@ -86,6 +86,8 @@ public:
 	};
 	std::atomic_int gameMode;
 	RobotColor robotColor = ROBOT_COLOR_BLUE_UP;
+	std::atomic_bool collisionWithBorder;
+	std::atomic_bool collisionWithUnknown;
 	FieldState(const int number_of_balls);
 	virtual ~FieldState();
 	//BallPosition balls[number_of_balls]; //All others are distance from self and heading to it

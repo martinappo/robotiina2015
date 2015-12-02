@@ -41,6 +41,7 @@ mNumberOfBalls(game_mode == "master" || game_mode == "slave" ? 1 : 11)
 				balls[i].fieldCoords.y = (int)((i / 3 - 1.5) * 110) + (!INIT_RANDOM ? 0 : (rand() % 200) - 100);
 				balls[i].id = i;
 			}
+			robots[9].fieldCoords = cv::Point(rand() % 300 - 150, rand() % 460 - 230);
 		}
 	}
 	else {
@@ -195,8 +196,10 @@ void Simulator::UpdateGatePos(){
 
 		cv::Scalar color(236, 137, 48);
 		cv::Scalar color2(61, 255, 244);
-		cv::circle(frame, cv::Point((int)(x1), (int)(y1)) + cv::Point(frame.size() / 2), 28, color, -1);
-		cv::circle(frame, cv::Point((int)(x2), (int)(y2)) + cv::Point(frame.size() / 2), 28, color2, -1);
+		double s1 = 8000 / cv::norm(self.fieldCoords - blueGate.fieldCoords);
+		double s2 = 8000 / cv::norm(self.fieldCoords - yellowGate.fieldCoords);
+		cv::circle(frame, cv::Point((int)(x1), (int)(y1)) + cv::Point(frame.size() / 2), s1, color, -1);
+		cv::circle(frame, cv::Point((int)(x2), (int)(y2)) + cv::Point(frame.size() / 2), s2, color2, -1);
 	}
 
 }
@@ -236,12 +239,12 @@ void Simulator::UpdateBallPos(double dt){
 		double x = -d*sin(a / 180 * CV_PI);
 		double y = d*cos(a / 180 * CV_PI);
 		cv::Scalar color(i * 52, i * 15 + 100, i * 30);
-		//cv::circle(frame, cv::Point(x, y) + cv::Point(frame.size() / 2), 24, color, -1);
-		//cv::circle(frame, cv::Point(x, y) + cv::Point(frame.size() / 2), 24, color, -1);
+		double s = std::min(20., 4000 / cv::norm(self.fieldCoords - robots[i].fieldCoords));
+		cv::circle(frame, cv::Point(x, y) + cv::Point(frame.size() / 2), s*2, color, -1);
 		cv::Scalar color1(236, 137, 48);
 		cv::Scalar color2(61, 255, 244);
-		cv::rectangle(frame, cv::Point(x - 10, y - 10) + cv::Point(frame.size() / 2), cv::Point(x + 10, y) + cv::Point(frame.size() / 2), color1, -1);
-		cv::rectangle(frame, cv::Point(x - 10, y ) + cv::Point(frame.size() / 2), cv::Point(x + 10, y + 10) + cv::Point(frame.size() / 2), color2, -1);
+		cv::rectangle(frame, cv::Point(x - s, y - s) + cv::Point(frame.size() / 2), cv::Point(x + s, y) + cv::Point(frame.size() / 2), color1, -1);
+		cv::rectangle(frame, cv::Point(x - s, y ) + cv::Point(frame.size() / 2), cv::Point(x + s, y + s) + cv::Point(frame.size() / 2), color2, -1);
 		if (isMaster) {
 			message << i << " " << (int)robots[i].fieldCoords.x << " " << (int)robots[i].fieldCoords.y << " ";
 		}
@@ -278,6 +281,8 @@ void Simulator::UpdateRobotPos(double dt){
 
 	UpdateGatePos();
 	UpdateBallPos(dt);
+	cv::circle(frame, cv::Point(frame.size() / 2), 70, cv::Scalar::all(160), -1);
+
 	UpdateBallIntTribbler();
 
 	return;

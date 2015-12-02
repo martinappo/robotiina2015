@@ -207,6 +207,28 @@ void FrontCameraVision::Run() {
 			m_pState->yellowGate.polarMetricCoords.x = cv::norm(m_pState->self.fieldCoords - m_pState->yellowGate.fieldCoords);;
 			m_pState->yellowGate.polarMetricCoords.y = 360 - gDistanceCalculator.angleBetween(cv::Point(0, 1), m_pState->self.fieldCoords - (m_pState->yellowGate.fieldCoords)) + m_pState->self.getAngle();
 		}
+
+		//COLLISION DETECTION ====================================================================================================
+		bool wasCollisionWithBorder = m_pState->collisionWithBorder;
+		bool wasCollisionWithUnknown = m_pState->collisionWithUnknown;
+		// mask ourself
+		cv::circle(thresholdedImages[FIELD], cv::Point(frameBGR.size() / 2), 70, 255, -1);
+		cv::Rect privateZone(-100, -100, 200, 200);
+		privateZone += cv::Point(frameBGR.size() / 2);
+		cv::rectangle(frameBGR, privateZone, cv::Scalar(0,255,255),2, 8);
+		cv::Mat roiOuterBorder(thresholdedImages[OUTER_BORDER], privateZone);
+		m_pState->collisionWithBorder = cv::countNonZero(roiOuterBorder) > 0.1 * 40000;
+		cv::bitwise_or(thresholdedImages[INNER_BORDER], thresholdedImages[FIELD], thresholdedImages[FIELD]);
+
+		cv::Mat roiField(thresholdedImages[FIELD], privateZone);
+		m_pState->collisionWithUnknown = cv::countNonZero(roiField) < 0.9 * 40000; // 40000=private zone area
+		if (wasCollisionWithBorder != m_pState->collisionWithBorder)
+			std::cout << "Collision with border " << (wasCollisionWithBorder ? "no " :"yes ") << std::endl;
+		if (wasCollisionWithUnknown != m_pState->collisionWithUnknown)
+			std::cout << "Collision with unknown " << (wasCollisionWithUnknown ? "no " : "yes ") << std::endl;
+		//imshow("field", roiField);
+		//cv::waitKey(1);
+
 		//Balls pos 
 //		cv::Mat rotMat = getRotationMatrix2D(cv::Point(0,0), -m_pState->self.getAngle(), 1);
 		//cv::Mat balls(3, m_pState->balls.size(), CV_64FC1);
