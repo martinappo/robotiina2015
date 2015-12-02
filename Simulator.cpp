@@ -34,6 +34,8 @@ mNumberOfBalls(game_mode == "master" || game_mode == "slave" ? 1 : 11)
 			balls[0].fieldCoords = { 0, 0 };
 			balls[0].id = 0;
 			if (game_mode == "master") self.fieldCoords = { 0, -60 };
+			robots[1].fieldCoords = cv::Point(rand() % 300 - 150, rand() % 460 - 230);
+
 		}
 		else{
 			for (int i = 0; i < mNumberOfBalls; i++) {
@@ -281,7 +283,7 @@ void Simulator::UpdateRobotPos(double dt){
 
 	UpdateGatePos();
 	UpdateBallPos(dt);
-	cv::circle(frame, cv::Point(frame.size() / 2), 70, cv::Scalar::all(160), -1);
+	//cv::circle(frame, cv::Point(frame.size() / 2), 55, cv::Scalar::all(160), -1);
 
 	UpdateBallIntTribbler();
 

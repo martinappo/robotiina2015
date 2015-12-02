@@ -48,11 +48,11 @@ private:
 class CatchBall : public DriveInstruction
 {
 public:
-	CatchBall() : DriveInstruction("CATCH_BALL"){};
+	CatchBall(const std::string &name = "CATCH_BALL") : DriveInstruction(name){};
 	virtual void onEnter();
 	virtual void onExit();
 	virtual DriveMode step(double dt);
-private:
+protected:
 	double initDist;
 };
 

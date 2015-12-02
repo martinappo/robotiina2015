@@ -77,6 +77,7 @@ public:
 		GAME_MODE_START_OUR_YELLOW_CARD,
 		GAME_MODE_START_OPPONENT_YELLOW_CARD,
 		/* our states */
+		CAME_MODE_CATCH_KICK_OFF,
 		GAME_MODE_IN_PROGRESS,
 		GAME_MODE_TAKE_BALL, // other robot passed pall
 	};

@@ -3,7 +3,7 @@
 #define START_TRIBBLER m_pCom->ToggleTribbler(100);
 #define STOP_TRIBBLER m_pCom->ToggleTribbler(0);
 #define SIGHT_OBSTRUCTED false //TODO:Fix this
-
+/*
 
 void DriveToTagetFromNear(int speed, ICommunicationModule*pCom, const ObjectPosition &target) {
 	pCom->Drive(speed, 0, HEADING(target.getAngle()));
@@ -20,7 +20,7 @@ void DriveToTagetFromFar(ICommunicationModule*pCom, const ObjectPosition &target
 	double angleConst = abs(angle) < 13 ? 0 : std::max(std::min(50.0 / target.getDistance(), 1.0), 0.5);
 	std::cout << angleConst << std::endl;
 	pCom->Drive(speed, angle, angleConst * angle); // TODO: mingi väikese kaarega sõita
-}
+}*/
 #define FIND_TARGET_BALL const BallPosition & target = getClosestBall();
 #define FIND_TARGET_GATE const GatePosition & target = m_pFieldState->GetTargetGate();
 #define TARGET_BALL_NOT_FOUND target.getDistance() > 500
