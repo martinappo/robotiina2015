@@ -33,8 +33,8 @@ public:
 		speed.velocity = 0;
 		speed.heading = 0;
 		if (aimTarget(target, speed, 5)){
-			if (driveToTarget(target, speed, 15)){
-				if (aimTarget(target, speed, 1)){
+			if (driveToTarget(target, speed, 35)){
+				if (aimTarget(target, speed, 2)){
 					m_pCom->Drive(0,0,0);
 					return DRIVEMODE_CATCH_BALL;
 				}
@@ -182,7 +182,7 @@ public:
 			std::cout << "pre kick " << m_pFieldState->self.getHeading() << std::endl;
 			m_pCom->Drive(0, 0, sign(m_pFieldState->self.getHeading())*20);
 			std::this_thread::sleep_for(std::chrono::milliseconds(500));
-			m_pCom->Kick(400);//reduce kick strength - parameter not used currently
+			m_pCom->Kick(1200);//reduce kick strength - parameter not used currently
 			std::cout << "kicked " << m_pFieldState->self.getHeading() << std::endl;
 			m_pFieldState->SendMessage("PAS #");
 			std::cout << DRIVEMODE_2V2_DEFENSIVE << std::endl;
