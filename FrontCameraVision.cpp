@@ -213,16 +213,18 @@ void FrontCameraVision::Run() {
 		bool wasCollisionWithUnknown = m_pState->collisionWithUnknown;
 		// mask ourself
 		cv::circle(thresholdedImages[FIELD], cv::Point(frameBGR.size() / 2), 70, 255, -1);
+
+                cv::circle(frameBGR, cv::Point(frameBGR.size() / 2), 70, 255, -1);
 		cv::Rect privateZone(-100, -100, 200, 200);
 		privateZone += cv::Point(frameBGR.size() / 2);
 		cv::rectangle(frameBGR, privateZone, cv::Scalar(0,255,255),2, 8);
 		cv::Mat roiOuterBorder(thresholdedImages[OUTER_BORDER], privateZone);
-		m_pState->collisionWithBorder = cv::countNonZero(roiOuterBorder) > 0.1 * 40000;
+		m_pState->collisionWithBorder = cv::countNonZero(roiOuterBorder) > 1600;
 		cv::bitwise_or(thresholdedImages[INNER_BORDER], thresholdedImages[FIELD], thresholdedImages[FIELD]);
 		//std::cout << "coll b: " << cv::countNonZero(roiOuterBorder) << std::endl;
 		cv::Mat roiField(thresholdedImages[FIELD], privateZone);
-		m_pState->collisionWithUnknown = cv::countNonZero(roiField) < 0.9 * 40000; // 40000=private zone area
-		//std::cout << "coll u: " << cv::countNonZero(roiField) << std::endl;
+		m_pState->collisionWithUnknown = cv::countNonZero(roiField) < 36000; // 40000=private zone area
+		std::cout << "coll u: " << cv::countNonZero(roiField) << std::endl;
 		//imshow("field", roiField);
 		//cv::waitKey(1);
 
