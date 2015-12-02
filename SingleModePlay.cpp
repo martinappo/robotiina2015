@@ -243,7 +243,7 @@ void Kick::onEnter()
 DriveMode Kick::step(double dt)
 {
 	std::this_thread::sleep_for(std::chrono::milliseconds(50));
-	m_pCom->Kick();
+	m_pCom->Kick(3500);
 	std::this_thread::sleep_for(std::chrono::milliseconds(50)); //less than half second wait.
 	return DRIVEMODE_DRIVE_TO_BALL;
 }

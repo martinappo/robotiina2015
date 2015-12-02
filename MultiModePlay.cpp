@@ -337,7 +337,7 @@ DriveMode Kick2v2::step(double dt){
 	m_pCom->ToggleTribbler(0);
 	m_pCom->Drive(0, 0, 0);
 	std::this_thread::sleep_for(std::chrono::milliseconds(50));
-	m_pCom->Kick();
+	m_pCom->Kick(800);
 	std::this_thread::sleep_for(std::chrono::milliseconds(500)); //half second wait.
 	return DRIVEMODE_2V2_DEFENSIVE;
 }

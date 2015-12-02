@@ -32,7 +32,7 @@ public:
 		}
 		Start();
 	};
-	void Kick(int force = 2500);
+	void Kick(int force);
 	void ToggleTribbler(int speed);
 	bool BallInTribbler() { return ballInTribbler; }
 	void Run();

@@ -32,6 +32,7 @@ void CoilBoard::HandleMessage(const std::string & message)
 
 
 void CoilBoard::Kick(int force){
+	std::cout << "kickforce " << force << std::endl;
 	boost::posix_time::ptime time2 = boost::posix_time::microsec_clock::local_time();
 	//std::cout << (afterKickTime - time2).total_milliseconds() << std::endl;
 	if (!kickAllowed) {
@@ -74,7 +75,7 @@ void CoilBoard::Run(){
 				waitTime = time;
 			}
 			if (kickForce !=0) {
-				std::cout << "kick ----->" << std::endl;
+				std::cout << "kick ----->" << kickForce << std::endl;
 				if (m_pComPort) m_pComPort->SendCommand(ID_MAIN_BOARD, "k", kickForce);
 				kickForce = 0;
 				Sleep(100);

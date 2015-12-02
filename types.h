@@ -147,7 +147,7 @@ public:
 	// needed for spinAroundDribbler https://github.com/kallaspriit/soccervision/blob/80840c921ad0935ed2e0718ed405613af3e51aa1/src/Robot.cpp#L385
 	virtual void Drive(const cv::Point2d &speed, double angularSpeed = 0) = 0; /* x,y speed components */
 	virtual bool BallInTribbler() = 0;
-	virtual void Kick(int force = 800) = 0;
+	virtual void Kick(int force) = 0;
 	virtual void ToggleTribbler(int speed) = 0;
 	virtual std::string GetDebugInfo() = 0;
 
