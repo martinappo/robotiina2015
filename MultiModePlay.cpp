@@ -238,8 +238,10 @@ public:
 		}
 		else {
 			speed.rotation = lastGateLocation.getHeading();
+			if(fabs(speed.rotation) > 50)
+				speed.rotation = sign(speed.rotation)*50;				
 		}
-		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
+		m_pCom->Drive(speed.velocity, speed.heading, -speed.rotation);
 
 		return DRIVEMODE_2V2_AIM_GATE;
 	}
