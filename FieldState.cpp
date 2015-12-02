@@ -67,6 +67,7 @@ FieldState::FieldState(int number_of_balls) :yellowGate(YELLOW_GATE), blueGate(B
 	gameMode = GAME_MODE_STOPED;
 	collisionWithBorder = false;
 	collisionWithUnknown = false;
+	isPlaying = false;
 };
 FieldState::~FieldState(){
 
