@@ -322,6 +322,8 @@ std::pair<DriveMode, DriveInstruction*> SingleDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_KICK, new Kick()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_CATCH_BALL, new CatchBall()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_ROTATE_AROUND_BALL, new RotateAroundBall()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_CRASH, new Crash()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_BORDER_TO_CLOSE, new BorderToClose()),
 };
 
 SingleModePlay::SingleModePlay(ICommunicationModule *pComModule, FieldState *pState)
