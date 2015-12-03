@@ -126,3 +126,14 @@ double DistanceCalculator::getDistance(const cv::Point2d &pos, const cv::Point2d
 	}
 	return INT_MAX;
 }
+
+bool DistanceCalculator::angleInRange(cv::Point2d point, cv::Point2d range){
+	double a1 = angleBetween(point, cv::Point(0, -1));
+	if (range.x < range.y) {
+		return range.x < a1 && range.y > a1;
+	}
+	else {
+		return range.x > a1 && range.y < a1;
+
+	}
+}

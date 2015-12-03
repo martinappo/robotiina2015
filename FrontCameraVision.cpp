@@ -222,6 +222,9 @@ void FrontCameraVision::Run() {
 			// mask ourself
 			//cv::circle(frameBGR, cv::Point(frameBGR.size() / 2), 70, 255, -1);
 			cv::bitwise_or(thresholdedImages[INNER_BORDER], thresholdedImages[FIELD], thresholdedImages[FIELD]);
+//			cv::bitwise_or(thresholdedImages[FIELD], thresholdedImages[BALL], thresholdedImages[FIELD]);
+//			cv::bitwise_or(thresholdedImages[FIELD], thresholdedImages[BLUE_GATE], thresholdedImages[FIELD]);
+//			cv::bitwise_or(thresholdedImages[FIELD], thresholdedImages[YELLOW_GATE], thresholdedImages[FIELD]);
 			//imshow("a", thresholdedImages[FIELD]);
 			//cv::waitKey(1);
 			m_pState->collisionRange = { -1, -1 };
@@ -290,9 +293,16 @@ void FrontCameraVision::Run() {
 			});
 			// validate balls
 			cv::Point2i closest;
+			bool ballOk;
 			for (auto ball : balls) {
 				closest = ball;
-				if (BallFinder::validateBall(thresholdedImages, ball, frameHSV, frameBGR)){
+				ballOk = BallFinder::validateBall(thresholdedImages, ball, frameHSV, frameBGR);
+				if (ballOk && m_pState->collisionWithBorder){
+					if (gDistanceCalculator.angleInRange(ball, m_pState->collisionRange)) {
+						ballOk = false;
+					};
+				}
+				if (ballOk){
 					break;
 				} else {
 					cv::Rect bounding_rect = cv::Rect(closest - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
@@ -358,6 +368,8 @@ void FrontCameraVision::Run() {
 		//PARTNER POSITION ====================================================================================================
 		if (detectOtherRobots) {
 			bool ourRobotBlueBottom = (m_pState->robotColor == FieldState::ROBOT_COLOR_YELLOW_UP);
+			//std::vector<cv::Point2d> robots;
+			//bool ballsFound = ballFinder.Locate(thresholdedImages[FIELD], frameHSV, frameBGR, robots);
 
 			std::vector<std::pair<cv::Point2i, double>> positionsToDistances; //One of the colors position and according distances
 			for (size_t blueIndex = 0; blueIndex < notBlueGates.size(); blueIndex++) {

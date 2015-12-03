@@ -17,6 +17,7 @@ public:
 		if (alphaDeg < 0) alphaDeg += 360;
 		return alphaDeg;
 	}
+	static bool angleInRange(cv::Point2d point, cv::Point2d range);
 
 private:
 	boost::property_tree::ptree pt;
