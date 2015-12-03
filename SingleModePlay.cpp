@@ -20,7 +20,7 @@ void DriveToBall::onEnter()
 
 DriveMode DriveToBall::step(double dt){
 	//return DRIVEMODE_DRIVE_TO_BALL_ANGLED;
-	return DRIVEMODE_DRIVE_TO_BALL_NAIVE;
+	//return DRIVEMODE_DRIVE_TO_BALL_NAIVE;
 	//return DRIVEMODE_ROTATE_AROUND_BALL;
 	return DRIVEMODE_DRIVE_TO_BALL_AIM_GATE;
 }
@@ -210,11 +210,15 @@ DriveMode CatchBall::step(double dt)
 		if(catchTarget(target, speed)) { 
 			return DRIVEMODE_AIM_GATE;
 		}
+		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
+		return DRIVEMODE_CATCH_BALL;
 	}
+	double heading = sign(target.getHeading())*10;
+	if(heading == 0)
+		m_pCom->Drive(-10,0, 0);//move slightly in order not to get stuck
+	m_pCom->Drive(0,0, heading);
 	//std::cout <<speed.velocity<<" " << speed.heading<<" " <<speed.rotation <<std::endl;
-	m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
-
-	return DRIVEMODE_CATCH_BALL;
+	return DRIVEMODE_DRIVE_TO_BALL;
 }
 void CatchBall::onExit()
 {
