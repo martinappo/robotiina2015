@@ -191,6 +191,25 @@ void CatchBall::onEnter()
 	initDist = target.getDistance();
 	STOP_DRIVING
 }
+#ifdef ANDRESE_CATCH_BALL
+DriveMode CatchBall::step(double dt)
+{
+	FIND_TARGET_BALL //TODO: use it?
+		if (/*STUCK_IN_STATE(3000) ||*/ target.getDistance() > (initDist + 10)) return DRIVEMODE_DRIVE_TO_BALL;
+	speed.velocity, speed.heading, speed.rotation = 0;
+	if (fabs(target.getHeading()) <= 2.) {
+		if (catchTarget(target, speed)) return DRIVEMODE_AIM_GATE;
+	}
+	else {
+		double heading = -sign(target.getHeading())*10.;
+		//move slightly in order not to get stuck
+		speed.velocity = -10;
+		speed.rotation = heading;
+	}
+	m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
+	return DRIVEMODE_CATCH_BALL;
+}
+#else
 DriveMode CatchBall::step(double dt)
 {
 	FIND_TARGET_BALL //TODO: use it?
@@ -207,6 +226,7 @@ DriveMode CatchBall::step(double dt)
 	else m_pCom->Drive(0,0, heading);
 	return DRIVEMODE_DRIVE_TO_BALL;
 }
+#endif
 void CatchBall::onExit(){}//DO_NOT_STOP_TRIBBLER
 /*END CatchBall*/
 
