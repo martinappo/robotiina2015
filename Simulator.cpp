@@ -33,7 +33,7 @@ mNumberOfBalls(game_mode == "master" || game_mode == "slave" ? 1 : 11)
 		if (mNumberOfBalls == 1)  {
 			balls[0].fieldCoords = { 0, 0 };
 			balls[0].id = 0;
-			if (game_mode == "master") self.fieldCoords = { 0, -60 };
+			if (game_mode == "master") self.fieldCoords = { 0, 60 };
 			robots[1].fieldCoords = cv::Point(rand() % 300 - 150, rand() % 460 - 230);
 
 		}
@@ -214,7 +214,7 @@ void Simulator::UpdateBallPos(double dt){
 			if (balls[i].speed > 0.001) {
 				balls[i].fieldCoords.x += balls[i].speed*dt * (sin(balls[i].heading / 180 * CV_PI));
 				balls[i].fieldCoords.y -= balls[i].speed*dt * (cos(balls[i].heading / 180 * CV_PI));
-				balls[i].speed *= 0.95;
+				balls[i].speed *= 0.8;
 			}
 			message << (int)balls[i].fieldCoords.x << " " << (int)balls[i].fieldCoords.y << " ";
 			//SendMessage(message.str());
@@ -264,8 +264,7 @@ void Simulator::UpdateRobotPos(double dt){
 	if (dt > 1000) return;
 	cv::Mat robotSpeed = cv::Mat_<double>(3, 1);
 	cv::solve(wheelAngles, wheelSpeeds, robotSpeed, cv::DECOMP_SVD);
-	std::cout << robotSpeed << std::endl;
-	double dr = SIMULATOR_SPEED*(robotSpeed.at<double>(2)*dt);
+	double dr = SIMULATOR_SPEED*2*(robotSpeed.at<double>(2)*dt);
 	self.polarMetricCoords.y -= dr;
 	if (self.polarMetricCoords.y > 360) self.polarMetricCoords.y -= 360;
 	if (self.polarMetricCoords.y < -360) self.polarMetricCoords.y += 360;
@@ -323,8 +322,7 @@ void Simulator::UpdateBallIntTribbler(cv::Mat robotSpeed, double dt){
 		ball_in_tribbler = false;
 		return;
 	}
-	std::cout << minDist << std::endl;
-	if (minDist < (was_in_tribbler ? 30 : 16)) {
+	if (minDist < (was_in_tribbler ? 30 : 24)) {
 		ball_in_tribbler = fabs(balls[minIndex].getHeading()) < 10;
 
 		double dr = SIMULATOR_SPEED*(robotSpeed.at<double>(2)*dt);
@@ -467,6 +465,7 @@ void Simulator::Kick(int force){
 	}
 	if (isMaster) {
 		balls[minDistIndex].speed = force;
+		balls[minDistIndex].heading = self.getAngle();
 
 	}
 	else {

@@ -9,6 +9,7 @@ enum MultiModeDriveStates {
 	//2v2 modes
 	DRIVEMODE_2V2_OFFENSIVE = 100,
 	DRIVEMODE_2V2_DEFENSIVE,
+	DRIVEMODE_2V2_WAIT_KICKOFF,
 	DRIVEMODE_2V2_CATCH_KICKOFF,
 	DRIVEMODE_2V2_AIM_PARTNER,
 	DRIVEMODE_2V2_AIM_GATE,
@@ -53,19 +54,20 @@ public:
 		auto &target = getClosestBall();
 		if (STUCK_IN_STATE(3000) || target.getDistance() > initDist + 10) return DRIVEMODE_DRIVE_TO_BALL;
 
-		if (fabs(target.getHeading()) <= 2) {
+		if (fabs(target.getHeading()) <= 2.) {
 			if (catchTarget(target, speed)) {
 				if (master && m_pFieldState->gameMode == FieldState::GAME_MODE_START_OUR_KICK_OFF)return DRIVEMODE_2V2_AIM_PARTNER;
 				else return DRIVEMODE_2V2_OFFENSIVE;
 			}
-			m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
-			return DRIVEMODE_CATCH_BALL;
 		}
-		double heading = sign(target.getHeading()) * 10;
-		//move slightly in order not to get stuck
-		if (heading == 0) m_pCom->Drive(-10, 0, 0);
-		else m_pCom->Drive(0, 0, heading);
-		return DRIVEMODE_DRIVE_TO_BALL;
+		else {
+			double heading = -sign(target.getHeading())*10.;
+			//move slightly in order not to get stuck
+			speed.velocity = -10;
+			speed.rotation = heading;
+		}
+		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
+		return DRIVEMODE_CATCH_BALL;
 	}
 };
 
@@ -210,14 +212,19 @@ public:
 
 class AimPartner : public DriveInstruction
 {
+protected:
+	double initialHeading = 0;
 public:
 	AimPartner() : DriveInstruction("2V2_AIM_PARTNER"){};
+	void onEnter(){ 
+		initialHeading = m_pFieldState->GetHomeGate().polarMetricCoords.y;
+	}
 	virtual DriveMode step(double dt){
 
 		//auto & target = m_pFieldState->partner;
-		auto & target = m_pFieldState->GetHomeGate();
+		auto target = m_pFieldState->GetHomeGate();
 		std::cout << target.polarMetricCoords.y << std::endl;
-		if (aimTarget(target, speed, 2)){
+		if (aimTarget(target, speed, 45)){
 			m_pCom->Drive(0, 0, sign(m_pFieldState->self.getHeading())*20);
 			std::this_thread::sleep_for(std::chrono::milliseconds(500));
 			m_pCom->Kick(1200);
