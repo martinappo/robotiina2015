@@ -13,7 +13,7 @@ bool DriveInstruction::catchTarget(const ObjectPosition &target, Speed &speed){
 	if (m_pCom->BallInTribbler()) return true;
 	double heading =  target.getHeading();
 	double dist = target.getDistance();
-	speed.velocity = 50;
+	speed.velocity = 60;
 	speed.heading = 0;
 	return false;
 }
