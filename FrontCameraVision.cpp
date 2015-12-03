@@ -221,13 +221,13 @@ void FrontCameraVision::Run() {
 		int collisionAngles = 0;
 		int collisionAngle = 0;
 		for (size_t c/*orner*/ = 0; c < 4; c++) {
-			cv::Rect privateZone(0,0,100,100);
+			cv::Rect privateZone(25,25,100,100);
 			
 			//if (c == 0) privateZone = cv::Rect (0, 0, 100, 100); //c==0
 			//else if (c == 1) privateZone = cv::Rect (0, -100, 100, 100); //c==1
 			//else if (c == 2) privateZone = cv::Rect(-100, -100, 100, 100); //c==2
 			//else if (c == 3) privateZone = cv::Rect(-100, 0, 100, 100); //c==3
-			privateZone += cv::Point((c == 0 || c==1) ? 0 : -1, (c == 0 || c==3) ? 0 : -1) * 100;
+			privateZone += cv::Point((c == 0 || c==1) ? 0 : -1, (c == 0 || c==3) ? 0 : -1) * 150;
 			privateZone += cv::Point(frameBGR.size() / 2);
 			cv::Mat roiOuterBorder(thresholdedImages[OUTER_BORDER], privateZone);
 			cv::Mat roiField(thresholdedImages[FIELD], privateZone);
