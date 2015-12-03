@@ -20,28 +20,58 @@ void DriveToBall::onEnter()
 
 DriveMode DriveToBall::step(double dt){
 	//return DRIVEMODE_DRIVE_TO_BALL_ANGLED;
-	//return DRIVEMODE_DRIVE_TO_BALL_NAIVE;
+	return DRIVEMODE_DRIVE_TO_BALL_NAIVE;
 	//return DRIVEMODE_ROTATE_AROUND_BALL;
 	return DRIVEMODE_DRIVE_TO_BALL_AIM_GATE;
 }
 class DriveToBallNaive : public DriveToBall
 {
 public:
+	int colisionTicker = 0;
+	Speed lastSpeed;
 	DriveToBallNaive(const std::string &name = "DRIVE_TO_BALL_NAIVE") : DriveToBall(name){};
+	boost::posix_time::ptime collisionTime = boost::posix_time::microsec_clock::local_time();
+	boost::posix_time::ptime collisionTime2 = boost::posix_time::microsec_clock::local_time();
 
 	DriveMode step(double dt)
-	{		
-		auto &target = getClosestBall();
-		if (target.getDistance() > 10000) return DRIVEMODE_IDLE;
-		if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
-		if (aimTarget(target, speed, 10)){
-			if (driveToTarget(target, speed)){
-				if (aimTarget(target, speed, 1)){
-					return DRIVEMODE_CATCH_BALL;
+	{	
+		boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
+		boost::posix_time::time_duration::tick_type collisionDt = (time - collisionTime).total_milliseconds();
+		boost::posix_time::time_duration::tick_type collisionDt2 = (time - collisionTime2).total_milliseconds();
+
+		if (collisionDt < 1000) {
+			speed = lastSpeed;
+		} else {
+			auto &target = getClosestBall();
+			if (target.getDistance() > 10000) return DRIVEMODE_IDLE;
+			if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
+			if (aimTarget(target, speed, 10)){
+				if (driveToTarget(target, speed, 35)){
+					if (aimTarget(target, speed, 1)){
+						return DRIVEMODE_CATCH_BALL;
+					}
 				}
+			}
+			if (m_pFieldState->collisionWithUnknown && fabs(speed.velocity) > 1.) {
+				//speed.velocity = 0;
+				if (m_pFieldState->collisionRange.x < m_pFieldState->collisionRange.y) {
+					if (speed.heading > m_pFieldState->collisionRange.x) {
+						speed.heading -= 90;
+						speed.velocity = 100;
+					}
+					else if (speed.heading < m_pFieldState->collisionRange.y){
+						speed.heading += 90;
+						speed.velocity = 100;
+
+					}
+				}
+				speed.rotation = 0;
+				 collisionTime = boost::posix_time::microsec_clock::local_time();
+				lastSpeed = speed;
 			}
 		}
 		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
+		
 		return DRIVEMODE_DRIVE_TO_BALL_NAIVE;
 	}
 };
@@ -86,16 +116,6 @@ public:
 			if (driveToTarget(target, speed)){
 				if (aimTarget(target, speed, 2)){
 					return DRIVEMODE_CATCH_BALL;
-				}
-			}
-		}
-		if (m_pFieldState->collisionWithUnknown) {
-			if (m_pFieldState->collisionRange.x < m_pFieldState->collisionRange.y) {
-				if (speed.heading > m_pFieldState->collisionRange.x) {
-					speed.heading -= 90;
-				}
-				else if (speed.heading < m_pFieldState->collisionRange.y){
-					speed.heading += 90;
 				}
 			}
 		}
