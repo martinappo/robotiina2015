@@ -245,8 +245,8 @@ void Simulator::UpdateBallPos(double dt){
 		cv::circle(frame, cv::Point(x, y) + cv::Point(frame.size() / 2), s*2, color, -1);
 		cv::Scalar color1(236, 137, 48);
 		cv::Scalar color2(61, 255, 244);
-		cv::rectangle(frame, cv::Point(x - s, y - s) + cv::Point(frame.size() / 2), cv::Point(x + s, y) + cv::Point(frame.size() / 2), color1, -1);
-		cv::rectangle(frame, cv::Point(x - s, y ) + cv::Point(frame.size() / 2), cv::Point(x + s, y + s) + cv::Point(frame.size() / 2), color2, -1);
+		cv::rectangle(frame, cv::Point2d(x - s, y - s) + cv::Point2d(frame.size() / 2), cv::Point2d(x + s, y) + cv::Point2d(frame.size() / 2), color1, -1);
+		cv::rectangle(frame, cv::Point2d(x - s, y ) + cv::Point2d(frame.size() / 2), cv::Point2d(x + s, y + s) + cv::Point2d(frame.size() / 2), color2, -1);
 		if (isMaster) {
 			message << i << " " << (int)robots[i].fieldCoords.x << " " << (int)robots[i].fieldCoords.y << " ";
 		}
@@ -487,7 +487,7 @@ void Simulator::drawCircle(cv::Point start, int radius, int thickness, CvScalar 
 		angle = i;
 		x1 = radius * cos(angle * PI / 180);
 		y1 = radius * sin(angle * PI / 180);
-		cv::Point cur = cv::Point(x1, y1);
+		cv::Point cur = cv::Point(int(x1), int(y1));
 		if (i > 0) {
 			drawLine(last, cur, thickness, color);
 		}

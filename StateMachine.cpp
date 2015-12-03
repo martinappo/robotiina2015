@@ -17,7 +17,6 @@ bool DriveInstruction::catchTarget(const ObjectPosition &target, Speed &speed){
 	}
 	double heading =  target.getHeading();
 	double dist = target.getDistance();
-	//m_pCom->Drive(50, 0, -sign(heading)* 5);
 	speed.velocity = 50;
 	speed.heading = 0;
 	return false;
@@ -27,14 +26,10 @@ bool DriveInstruction::driveToTarget(const ObjectPosition &target, Speed &speed,
 	double dist = target.getDistance();
 		
 	if (dist > maxDistance){
-		//std::cout << ", ball to far: " << dist << " target: " << maxDistance;
-		//m_pCom->Drive(std::max(20.0, dist), 0, 0);
 		speed.velocity = std::max(20.0, dist);
 		return false;
 	}
 	else{
-		//std::cout << ", ball near: " << dist << " target: " << maxDistance;
-		//m_pCom->Drive(20, 0, 0);
 		speed.velocity = 20;
 		return true;
 	}
@@ -64,7 +59,6 @@ bool DriveInstruction::driveToTargetWithAngle(const ObjectPosition &target, Spee
 		}
 		else onPoint = true;
 	}
-	//m_pCom->Drive(speed, direction, -angularSpeed); 
 	speed.velocity = velocity;
 	speed.heading = direction;
 	speed.rotation = -angularSpeed;
@@ -85,14 +79,11 @@ StateMachine::StateMachine(ICommunicationModule *pComModule, FieldState *pState,
 	for (auto driveMode : driveModes){
 		driveMode.second->Init(pComModule, pState);
 	}
-
 	curDriveMode = this->driveModes.find(DRIVEMODE_IDLE);
 }
 
-void StateMachine::setTestMode(DriveMode mode)
-{
-	testDriveMode = mode;
-}
+void StateMachine::setTestMode(DriveMode mode){	testDriveMode = mode;}
+
 void StateMachine::enableTestMode(bool enable)
 {
 	setTestMode(DRIVEMODE_IDLE);
@@ -126,7 +117,6 @@ void StateMachine::Run()
 		if (newMode != curDriveMode->first){
 			boost::mutex::scoped_lock lock(mutex);
 			curDriveMode->second->onExit();
-			//m_pCom->Stop();
 			curDriveMode = driveModes.find(newMode);
 			if (curDriveMode == driveModes.end()) {
 				//std::cout << "Invalid drive mode from :" << old->second->name << ", reverting to idle" << std::endl;
@@ -137,15 +127,12 @@ void StateMachine::Run()
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
 	}
-	//std::cout << "StateMachine stoping" << std::endl;
-
 }
 
 std::string StateMachine::GetDebugInfo(){
 	std::ostringstream oss;
 	boost::mutex::scoped_lock lock(mutex);
 	oss << "[StateMachine] State: " << curDriveMode->second->name;
-
 	return oss.str();
 }
 
@@ -153,9 +140,7 @@ std::string StateMachine::GetDebugInfo(){
 StateMachine::~StateMachine()
 {
 	WaitForStop();
-	for (auto &mode : driveModes){
-		delete mode.second;
-	}
+	for (auto &mode : driveModes){ delete mode.second;}
 }
 
 DriveMode DriveInstruction::prevDriveMode = DRIVEMODE_IDLE;

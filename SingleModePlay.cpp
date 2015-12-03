@@ -23,16 +23,6 @@ DriveMode DriveToBall::step(double dt){
 	//return DRIVEMODE_DRIVE_TO_BALL_NAIVE;
 	//return DRIVEMODE_ROTATE_AROUND_BALL;
 	return DRIVEMODE_DRIVE_TO_BALL_AIM_GATE;
-	/*
-	//return stepNaive(dt);
-	if (STUCK_IN_STATE(2000) && !toggledDribbler){ 
-		m_pCom->ToggleTribbler(0);
-		toggledDribbler = true;
-	}
-	return stepAimGate(dt);
-	//return stepAngled(dt);
-	//return stepPenatalizeRotation(dt);
-	*/
 }
 class DriveToBallNaive : public DriveToBall
 {
@@ -40,13 +30,10 @@ public:
 	DriveToBallNaive(const std::string &name = "DRIVE_TO_BALL_NAIVE") : DriveToBall(name){};
 
 	DriveMode step(double dt)
-	{
-		
+	{		
 		auto &target = getClosestBall();
 		if (target.getDistance() > 10000) return DRIVEMODE_IDLE;
 		if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
-		//std::cout << std::endl << "aimtarget0, " ;
-
 		if (aimTarget(target, speed, 10)){
 			if (driveToTarget(target, speed)){
 				if (aimTarget(target, speed, 1)){
@@ -66,20 +53,14 @@ public:
 
 	DriveMode step(double dt)
 	{
-		
-
 		auto &target = getClosestBall();
 
 		if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
-		if (driveToTargetWithAngle(target, speed, 25, 5)){
-			return DRIVEMODE_CATCH_BALL;
-		}
+		if (driveToTargetWithAngle(target, speed, 25, 5)){return DRIVEMODE_CATCH_BALL;}
 		else {
 			m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 			return DRIVEMODE_DRIVE_TO_BALL_ANGLED;
 		}
-
-
 	}
 };
 
@@ -129,9 +110,6 @@ public:
 		double rotation = 0;
 		double errorMargin = 5;
 		double maxDistance = 40;
-		//if (fabs(gateHeading - ballHeading) > 90) { // we are between gate and ball
-		//	return stepAngled(dt); 
-		//}
 		if (fabs(gateHeading) > errorMargin){
 			rotation = -sign0(gateHeading) * std::min(40.0, std::max(fabs(gateHeading), 5.0));
 		}
@@ -199,7 +177,6 @@ DriveMode CatchBall::step(double dt)
 	if (STUCK_IN_STATE(3000) || target.getDistance() > initDist  + 10) return DRIVEMODE_DRIVE_TO_BALL;
 	speed.velocity, speed.heading, speed.rotation = 0;
 	if(aimTarget(target, speed,2)) { 
-		//m_pCom->Drive(0, 0, 0);
 		if(catchTarget(target, speed)) { 
 			return DRIVEMODE_AIM_GATE;
 		}

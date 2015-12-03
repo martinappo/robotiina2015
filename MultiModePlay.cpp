@@ -32,13 +32,9 @@ public:
 		if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
 		speed.velocity = 0;
 		speed.heading = 0;
-		if (aimTarget(target, speed, 5)){
-			if (driveToTarget(target, speed, 35)){
-				if (aimTarget(target, speed, 2)){
-					m_pCom->Drive(0,0,0);
-					return DRIVEMODE_CATCH_BALL;
-				}
-			}
+		if (driveToTargetWithAngle(target, speed)){
+			m_pCom->Drive(0,0,0);
+			return DRIVEMODE_CATCH_BALL;
 		}
 		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 		return DRIVEMODE_DRIVE_TO_BALL;
@@ -133,8 +129,7 @@ public:
 			double speed = 0;
 			if (targetDistance > maxDistance) {
 				heading = targetHeading;
-				if (fabs(heading) > 30)
-					heading = sign0(heading)*(fabs(heading) + 15);
+				if (fabs(heading) > 30) heading = sign0(heading)*(fabs(heading) + 15);
 				speed = 60;//std::max(60.0, targetDistance);
 			}
 			else {
@@ -161,8 +156,7 @@ public:
 
 		auto & target = m_pFieldState->partner;
 		if (m_pFieldState->partnerHomeGate.getDistance() > 100){//is ally in defense area?
-			if (m_pFieldState->GetHomeGate().getDistance() > 80)
-				return DRIVEMODE_2V2_DRIVE_HOME;
+			if (m_pFieldState->GetHomeGate().getDistance() > 80) return DRIVEMODE_2V2_DRIVE_HOME;
 			else{
 				BallPosition ball = DriveInstruction::getClosestBall();
 				if (ball.polarMetricCoords.x != INT_MAX)
@@ -189,15 +183,11 @@ public:
 			double maxDistance = 30;
 			
 
-			if (fabs(gateHeading) > errorMargin){
-				rotation = -sign(gateHeading) * std::min(40.0, std::max(fabs(gateHeading), 5.0));
-			}
+			if (fabs(gateHeading) > errorMargin) rotation = -sign(gateHeading) * std::min(40.0, std::max(fabs(gateHeading), 5.0));
 			if (opponentDistance > maxDistance) {
 				maxDistance = 30;
 				double top = 1;
-
 				heading = opponentAngle + sign(opponentHeading) * top*asin(maxDistance / opponentDistance) * 180 / CV_PI;
-
 				velocity = std::max(60.0, opponentDistance);
 			}
 			else if (fabs(gateHeading - opponentHeading) > errorMargin / 2){
@@ -239,13 +229,10 @@ public:
 		auto & target = m_pFieldState->GetHomeGate();
 		std::cout << target.polarMetricCoords.y << std::endl;
 		if (aimTarget(target, speed, 2)){
-			std::cout << "pre kick " << m_pFieldState->self.getHeading() << std::endl;
 			m_pCom->Drive(0, 0, sign(m_pFieldState->self.getHeading())*20);
 			std::this_thread::sleep_for(std::chrono::milliseconds(500));
 			m_pCom->Kick(1200);
-			std::cout << "kicked " << m_pFieldState->self.getHeading() << std::endl;
 			m_pFieldState->SendMessage("PAS #");
-			std::cout << DRIVEMODE_2V2_DEFENSIVE << std::endl;
 			return DRIVEMODE_2V2_DEFENSIVE;
 		}
 		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
@@ -265,20 +252,14 @@ public:
 		if (!m_pCom->BallInTribbler()) return DRIVEMODE_2V2_OFFENSIVE;
 		if (aimTarget(lastGateLocation, speed, 2)){
 			if (sightObstructed) { //then move sideways away from gate
-				//std::cout << sightObstructed << std::endl;
 				speed.velocity = 45;
 				speed.heading += 90;
-//				std::chrono::milliseconds dura(400); // do we need to sleep?
-//				std::this_thread::sleep_for(dura);
 			}
-			else {
-				return DRIVEMODE_2V2_KICK;
-			}
+			else return DRIVEMODE_2V2_KICK;
 		}
 		else {
 			speed.rotation = lastGateLocation.getHeading();
-			if(fabs(speed.rotation) > 50)
-				speed.rotation = sign(speed.rotation)*50;				
+			if(fabs(speed.rotation) > 50) speed.rotation = sign(speed.rotation)*50;				
 		}
 		m_pCom->Drive(speed.velocity, speed.heading, -speed.rotation);
 
@@ -305,11 +286,8 @@ public:
 	virtual DriveMode step(double dt){
 
 		ObjectPosition &lastGateLocation = m_pFieldState->GetHomeGate();
-		if (DriveInstruction::driveToTargetWithAngle(lastGateLocation, speed)){
-			return DRIVEMODE_2V2_DEFENSIVE;
-		}
+		if (DriveInstruction::driveToTargetWithAngle(lastGateLocation, speed))return DRIVEMODE_2V2_DEFENSIVE;
 		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
-
 		return DRIVEMODE_2V2_DRIVE_HOME;
 	}
 };
@@ -325,12 +303,9 @@ public:
 
 	DriveMode step(double dt){
 
-		if (ball.getDistance() > 500)
-			return DRIVEMODE_2V2_DEFENSIVE;
+		if (ball.getDistance() > 500) return DRIVEMODE_2V2_DEFENSIVE;
 		const BallPosition& newBall = getClosestBall();
-		if (abs(ball.getDistance() - newBall.getDistance()) > 10 || abs(ball.getAngle() - newBall.getAngle()) > 5){ //ball has moved
-			return DRIVEMODE_2V2_OFFENSIVE;
-		}
+		if (abs(ball.getDistance() - newBall.getDistance()) > 10 || abs(ball.getAngle() - newBall.getAngle()) > 5){ return DRIVEMODE_2V2_OFFENSIVE;	}
 		else{
 			std::this_thread::sleep_for(std::chrono::milliseconds(500)); //half second wait.
 			return DRIVEMODE_2V2_OPPONENT_KICKOFF;
@@ -373,17 +348,10 @@ std::pair<DriveMode, DriveInstruction*> SlaveDriveModes[] = {
 MultiModePlay::MultiModePlay(ICommunicationModule *pComModule, FieldState *pState, bool bMaster) :StateMachine(pComModule, pState,
 	bMaster ? TDriveModes(MasterDriveModes, MasterDriveModes + sizeof(MasterDriveModes) / sizeof(MasterDriveModes[0]))
 	: TDriveModes(SlaveDriveModes, SlaveDriveModes + sizeof(SlaveDriveModes) / sizeof(SlaveDriveModes[0])))
-	, isMaster(bMaster)
-{
-}
+	, isMaster(bMaster){}
 
 
-MultiModePlay::~MultiModePlay()
-{
-}
-
-
-
+MultiModePlay::~MultiModePlay(){}
 
 /*BEGIN Kick2v2*/
 void Kick2v2::onEnter(){
@@ -399,63 +367,3 @@ DriveMode Kick2v2::step(double dt){
 	std::this_thread::sleep_for(std::chrono::milliseconds(500)); //half second wait.
 	return DRIVEMODE_2V2_DEFENSIVE;
 }
-
-/*BEGIN DriveToBall2v2*/
-/*
-void DriveToBall2v2::onEnter(){
-	DriveInstruction::onEnter();
-	m_pCom->Drive(0, 0, 0);
-	std::chrono::milliseconds dura(200);
-	std::this_thread::sleep_for(dura);
-	m_pCom->ToggleTribbler(0);
-
-	target = DriveInstruction::getClosestBall();
-}
-
-DriveMode DriveToBall2v2::step(double dt){
-	target = DriveInstruction::getClosestBall();
-	if (target.polarMetricCoords.x == INT_MAX){ // no valid balls
-		return DRIVEMODE_2V2_DEFENSIVE;
-	}
-	if (target.getDistance() > 10000) return DRIVEMODE_2V2_DEFENSIVE;
-	if (m_pCom->BallInTribbler()) return DRIVEMODE_2V2_AIM_GATE;
-
-	if (DriveInstruction::aimTarget(target)){
-		if (DriveInstruction::driveToTarget(target)){
-			if (DriveInstruction::aimTarget(target, 13)){
-				m_pCom->ToggleTribbler(true);
-				return DRIVEMODE_2V2_CATCH_BALL;
-			}
-		}
-	}
-	return DRIVEMODE_2V2_DRIVE_TO_BALL;
-}
-*/
-/*BEGIN CatchBall2v2*/
-/*
-void CatchBall2v2::onEnter(){
-	DriveInstruction::onEnter();
-	m_pCom->ToggleTribbler(true);
-	catchStart = boost::posix_time::microsec_clock::local_time();
-	m_pCom->Drive(0, 0, 0);
-}
-
-DriveMode CatchBall2v2::step(double dt){
-	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
-	boost::posix_time::time_duration::tick_type catchDuration = (time - catchStart).total_milliseconds();
-	ObjectPosition &lastBallLocation = m_pFieldState->balls[0];
-	if (m_pCom->BallInTribbler()) {
-		return DRIVEMODE_2V2_AIM_GATE;
-	}
-	else if (catchDuration > 2000) { //trying to catch ball for 2 seconds
-		return DRIVEMODE_2V2_DRIVE_TO_BALL;
-	}
-	else {
-		double rotate = abs(lastBallLocation.getAngle()) * 0.4 + 5;
-		m_pCom->Drive(50, 0, lastBallLocation.getAngle() < 0 ? rotate : -rotate);
-	}
-	return DRIVEMODE_2V2_CATCH_BALL;
-}
-*/
-/*BEGIN DriveHome2v2*/
-
