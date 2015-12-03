@@ -242,7 +242,7 @@ void FrontCameraVision::Run() {
 				privateZone += cv::Point(frameBGR.size() / 2);
 				cv::Mat roiOuterBorder(thresholdedImages[OUTER_BORDER], privateZone);
 				cv::Mat roiField(thresholdedImages[FIELD], privateZone);
-				bool cb = borderCollisonEnabled ? cv::countNonZero(roiOuterBorder) > 160 : false;
+				bool cb = borderCollisonEnabled ? cv::countNonZero(roiOuterBorder) > 300 : false;
 				bool cu = fieldCollisonEnabled ? cv::countNonZero(roiField) < 9000 : false;
 				//if(c==1) {
 				//	std::cout << "coll b: " << cv::countNonZero(roiField) << std::endl;
