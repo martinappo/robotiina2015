@@ -24,6 +24,7 @@ protected:
 	bool fieldCollisonEnabled = false;
 	bool nightVisionEnabled = false;
 	bool detectOtherRobots = false;
+	bool detectObjectsNearBall = false;
 
 	VideoRecorder *videoRecorder  = NULL;
 	double time = 0;

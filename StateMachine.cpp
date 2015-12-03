@@ -109,7 +109,7 @@ void StateMachine::Run()
 			curDriveMode = driveModes.find(newMode);
 			if (curDriveMode == driveModes.end()) curDriveMode = driveModes.find(DRIVEMODE_IDLE);
 			curDriveMode->second->onEnter();
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			std::this_thread::sleep_for(std::chrono::milliseconds(10)); // We should remove this
 		}
 	}
 }
