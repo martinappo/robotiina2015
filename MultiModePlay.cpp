@@ -53,18 +53,19 @@ public:
 		auto &target = getClosestBall();
 		if (STUCK_IN_STATE(3000) || target.getDistance() > initDist + 10) return DRIVEMODE_DRIVE_TO_BALL;
 
-		if (aimTarget(target, speed, 2)) {
+		if (fabs(target.getHeading()) <= 2) {
 			if (catchTarget(target, speed)) {
-				if (master && m_pFieldState->gameMode == FieldState::GAME_MODE_START_OUR_KICK_OFF){
-					return DRIVEMODE_2V2_AIM_PARTNER;
-				}
-				else {
-					return DRIVEMODE_2V2_OFFENSIVE;
-				}
+				if (master && m_pFieldState->gameMode == FieldState::GAME_MODE_START_OUR_KICK_OFF)return DRIVEMODE_2V2_AIM_PARTNER;
+				else return DRIVEMODE_2V2_OFFENSIVE;
 			}
+			m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
+			return DRIVEMODE_CATCH_BALL;
 		}
-		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
-		return DRIVEMODE_CATCH_BALL;
+		double heading = sign(target.getHeading()) * 10;
+		//move slightly in order not to get stuck
+		if (heading == 0) m_pCom->Drive(-10, 0, 0);
+		else m_pCom->Drive(0, 0, heading);
+		return DRIVEMODE_DRIVE_TO_BALL;
 	}
 };
 
@@ -89,9 +90,7 @@ class MasterModeIdle : public Idle {
 class SlaveModeIdle : public Idle {
 
 	virtual DriveMode step(double dt) {
-		while (!m_pFieldState->isPlaying) {
-			return DRIVEMODE_IDLE;
-		}
+		while (!m_pFieldState->isPlaying) return DRIVEMODE_IDLE;
 		switch (m_pFieldState->gameMode) {
 		case FieldState::GAME_MODE_START_OPPONENT_KICK_OFF:
 			return DRIVEMODE_2V2_DEFENSIVE;
@@ -122,9 +121,7 @@ public:
 			double rotation = 0;
 			double errorMargin = 5;
 			double maxDistance = 80;
-			if (fabs(reverseHeading) > errorMargin){
-				rotation = -sign0(reverseHeading) * std::min(30.0, std::max(fabs(reverseHeading), 5.0));
-			}
+			if (fabs(reverseHeading) > errorMargin) rotation = -sign0(reverseHeading) * std::min(30.0, std::max(fabs(reverseHeading), 5.0));
 			double heading = 0;
 			double speed = 0;
 			if (targetDistance > maxDistance) {
@@ -140,9 +137,7 @@ public:
 			m_pCom->Drive(speed, heading, rotation);
 			return DRIVEMODE_2V2_OFFENSIVE;
 		}
-		else{
-			return DRIVEMODE_2V2_CATCH_BALL;
-		}
+		else return DRIVEMODE_2V2_CATCH_BALL;
 		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 		return DRIVEMODE_2V2_OFFENSIVE;
 	}
@@ -153,7 +148,6 @@ class Defensive : public DriveInstruction
 public:
 	Defensive() : DriveInstruction("2V2_DEFENSIVE"){};
 	virtual DriveMode step(double dt){
-
 		auto & target = m_pFieldState->partner;
 		if (m_pFieldState->partnerHomeGate.getDistance() > 100){//is ally in defense area?
 			if (m_pFieldState->GetHomeGate().getDistance() > 80) return DRIVEMODE_2V2_DRIVE_HOME;
@@ -165,7 +159,6 @@ public:
 			}
 		}
 		else{
-
 			auto & opponent = m_pFieldState->opponents[0];//get the one with ball?
 			//auto & opponent = m_pFieldState->GetTargetGate(); for testing
 			auto & homeGate = m_pFieldState->GetHomeGate();
@@ -174,15 +167,11 @@ public:
 			double opponentAngle = opponent.getAngle();
 			double opponentHeading = opponent.getHeading();
 			double opponentDistance = opponent.getDistance();
-
 			double rotation = 0;
 			double heading = 0;
 			double velocity = 0;
-
 			double errorMargin = 5;
 			double maxDistance = 30;
-			
-
 			if (fabs(gateHeading) > errorMargin) rotation = -sign(gateHeading) * std::min(40.0, std::max(fabs(gateHeading), 5.0));
 			if (opponentDistance > maxDistance) {
 				maxDistance = 30;
@@ -262,7 +251,6 @@ public:
 			if(fabs(speed.rotation) > 50) speed.rotation = sign(speed.rotation)*50;				
 		}
 		m_pCom->Drive(speed.velocity, speed.heading, -speed.rotation);
-
 		return DRIVEMODE_2V2_AIM_GATE;
 	}
 };
@@ -284,7 +272,6 @@ class DriveHome2v2 : public DriveInstruction
 public:
 	DriveHome2v2() : DriveInstruction("2V2_DRIVE_HOME"){};
 	virtual DriveMode step(double dt){
-
 		ObjectPosition &lastGateLocation = m_pFieldState->GetHomeGate();
 		if (DriveInstruction::driveToTargetWithAngle(lastGateLocation, speed))return DRIVEMODE_2V2_DEFENSIVE;
 		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
@@ -302,7 +289,6 @@ public:
 	}
 
 	DriveMode step(double dt){
-
 		if (ball.getDistance() > 500) return DRIVEMODE_2V2_DEFENSIVE;
 		const BallPosition& newBall = getClosestBall();
 		if (abs(ball.getDistance() - newBall.getDistance()) > 10 || abs(ball.getAngle() - newBall.getAngle()) > 5){ return DRIVEMODE_2V2_OFFENSIVE;	}

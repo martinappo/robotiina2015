@@ -7,14 +7,10 @@ bool DriveInstruction::aimTarget(const ObjectPosition &target, Speed &speed, dou
 		speed.rotation = - sign0(heading) * std::min(40.0, std::max(fabs(heading),5.0));
 		return false;
 	}
-	else{
-		return fabs(heading) < errorMargin;
-	}
+	else return fabs(heading) < errorMargin;
 }
 bool DriveInstruction::catchTarget(const ObjectPosition &target, Speed &speed){
-	if (m_pCom->BallInTribbler()) {
-		return true;
-	}
+	if (m_pCom->BallInTribbler()) return true;
 	double heading =  target.getHeading();
 	double dist = target.getDistance();
 	speed.velocity = 50;
@@ -23,8 +19,7 @@ bool DriveInstruction::catchTarget(const ObjectPosition &target, Speed &speed){
 }
 
 bool DriveInstruction::driveToTarget(const ObjectPosition &target, Speed &speed, double maxDistance){
-	double dist = target.getDistance();
-		
+	double dist = target.getDistance();		
 	if (dist > maxDistance){
 		speed.velocity = std::max(20.0, dist);
 		return false;
@@ -76,9 +71,7 @@ StateMachine::StateMachine(ICommunicationModule *pComModule, FieldState *pState,
 {
 	m_pComModule = pComModule;
 	m_pFieldState = pState;
-	for (auto driveMode : driveModes){
-		driveMode.second->Init(pComModule, pState);
-	}
+	for (auto driveMode : driveModes) driveMode.second->Init(pComModule, pState);
 	curDriveMode = this->driveModes.find(DRIVEMODE_IDLE);
 }
 
@@ -100,14 +93,10 @@ void StateMachine::Run()
 	while (!stop_thread) {
 		boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
 		boost::posix_time::time_duration::tick_type dt = (time - lastStep).total_milliseconds();
-		newMode = testMode ? curDriveMode->second->step(double(dt)) : curDriveMode->second->step1(double(dt), newMode);
-		
+		newMode = testMode ? curDriveMode->second->step(double(dt)) : curDriveMode->second->step1(double(dt), newMode);		
 		auto old = curDriveMode;
-
 		if (testMode){
-			if (testDriveMode != DRIVEMODE_IDLE && newMode == DRIVEMODE_IDLE){
-				newMode = testDriveMode;
-			}
+			if (testDriveMode != DRIVEMODE_IDLE && newMode == DRIVEMODE_IDLE) newMode = testDriveMode;
 			else if (newMode != testDriveMode) {
 				newMode = DRIVEMODE_IDLE;
 				testDriveMode = DRIVEMODE_IDLE;
@@ -118,11 +107,7 @@ void StateMachine::Run()
 			boost::mutex::scoped_lock lock(mutex);
 			curDriveMode->second->onExit();
 			curDriveMode = driveModes.find(newMode);
-			if (curDriveMode == driveModes.end()) {
-				//std::cout << "Invalid drive mode from :" << old->second->name << ", reverting to idle" << std::endl;
-				curDriveMode = driveModes.find(DRIVEMODE_IDLE);
-			}
-			//std::cout << "state change :" << old->second->name << " ->" << curDriveMode->second->name << std::endl; //TODO debug: miks siia ei j6ua?
+			if (curDriveMode == driveModes.end()) curDriveMode = driveModes.find(DRIVEMODE_IDLE);
 			curDriveMode->second->onEnter();
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
