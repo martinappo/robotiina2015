@@ -89,6 +89,16 @@ public:
 				}
 			}
 		}
+		if (m_pFieldState->collisionWithUnknown) {
+			if (m_pFieldState->collisionRange.x < m_pFieldState->collisionRange.y) {
+				if (speed.heading > m_pFieldState->collisionRange.x) {
+					speed.heading -= 90;
+				}
+				else if (speed.heading < m_pFieldState->collisionRange.y){
+					speed.heading += 90;
+				}
+			}
+		}
 		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 		return DRIVEMODE_DIRVE_TO_BALL_AVOID_TURN;
 

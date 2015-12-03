@@ -19,8 +19,12 @@ protected:
 	bool sonarsEnabled = false;
 	bool greenAreaDetectionEnabled = false;
 	bool gateObstructionDetectionEnabled = false;
-	bool borderDetectionEnabled = false;
+	bool borderDetectionEnabled = true;
+	bool borderCollisonEnabled = false;
+	bool fieldCollisonEnabled = false;
 	bool nightVisionEnabled = false;
+	bool detectOtherRobots = false;
+
 	VideoRecorder *videoRecorder  = NULL;
 	double time = 0;
 

@@ -26,7 +26,10 @@ FrontCameraVision::FrontCameraVision(ICamera *pCamera, IDisplay *pDisplay, Field
 	ADD_BOOL_SETTING(greenAreaDetectionEnabled);
 	ADD_BOOL_SETTING(gateObstructionDetectionEnabled);
 	ADD_BOOL_SETTING(borderDetectionEnabled);
+	ADD_BOOL_SETTING(borderCollisonEnabled);
+	ADD_BOOL_SETTING(fieldCollisonEnabled);
 	ADD_BOOL_SETTING(nightVisionEnabled);
+	ADD_BOOL_SETTING(detectOtherRobots);
 	videoRecorder = new VideoRecorder("videos/", 30, m_pCamera->GetFrameSize(true));
 	LoadSettings();
 	Start();
@@ -209,53 +212,58 @@ void FrontCameraVision::Run() {
 		}
 
 		//COLLISION DETECTION ====================================================================================================
-		bool wasCollisionWithBorder = m_pState->collisionWithBorder;
-		bool wasCollisionWithUnknown = m_pState->collisionWithUnknown;
-		// mask ourself
-		cv::circle(thresholdedImages[FIELD], cv::Point(frameBGR.size() / 2), 70, 255, -1);
-		//cv::circle(frameBGR, cv::Point(frameBGR.size() / 2), 70, 255, -1);
-		cv::bitwise_or(thresholdedImages[INNER_BORDER], thresholdedImages[FIELD], thresholdedImages[FIELD]);
-		m_pState->collisionRange = {-1, -1 };
-		bool collisionWithBorder = false;
-		bool collisonWithUnknown = false;
-		int collisionAngles = 0;
-		int collisionAngle = 0;
-		for (size_t c/*orner*/ = 0; c < 4; c++) {
-			cv::Rect privateZone(25,25,100,100);
-			
-			//if (c == 0) privateZone = cv::Rect (0, 0, 100, 100); //c==0
-			//else if (c == 1) privateZone = cv::Rect (0, -100, 100, 100); //c==1
-			//else if (c == 2) privateZone = cv::Rect(-100, -100, 100, 100); //c==2
-			//else if (c == 3) privateZone = cv::Rect(-100, 0, 100, 100); //c==3
-			privateZone += cv::Point((c == 0 || c==1) ? 0 : -1, (c == 0 || c==3) ? 0 : -1) * 150;
-			privateZone += cv::Point(frameBGR.size() / 2);
-			cv::Mat roiOuterBorder(thresholdedImages[OUTER_BORDER], privateZone);
-			cv::Mat roiField(thresholdedImages[FIELD], privateZone);
-			bool cb = cv::countNonZero(roiOuterBorder) > 160;
-			bool cu = cv::countNonZero(roiField) < 3600;
-			if (cb) {
-				if (!collisionWithBorder) {// no previous collison
-					m_pState->collisionRange.x = c * 90. - 180;
-					m_pState->collisionRange.y = c * 90. - 90;
-				} else if (m_pState->collisionRange.y + 90. < c*90.-90.){
-					m_pState->collisionRange.x = c * 90. - 180;
+		if (borderCollisonEnabled || fieldCollisonEnabled) {
+			bool wasCollisionWithBorder = m_pState->collisionWithBorder;
+			bool wasCollisionWithUnknown = m_pState->collisionWithUnknown;
+			// mask ourself
+			cv::circle(thresholdedImages[FIELD], cv::Point(frameBGR.size() / 2), 70, 255, -1);
+			//cv::circle(frameBGR, cv::Point(frameBGR.size() / 2), 70, 255, -1);
+			cv::bitwise_or(thresholdedImages[INNER_BORDER], thresholdedImages[FIELD], thresholdedImages[FIELD]);
+			m_pState->collisionRange = { -1, -1 };
+			bool collisionWithBorder = false;
+			bool collisonWithUnknown = false;
+
+			for (size_t c/*orner*/ = 0; c < 4; c++) {
+				cv::Rect privateZone(25, 25, 100, 100);
+
+				//if (c == 0) privateZone = cv::Rect (0, 0, 100, 100); //c==0
+				//else if (c == 1) privateZone = cv::Rect (0, -100, 100, 100); //c==1
+				//else if (c == 2) privateZone = cv::Rect(-100, -100, 100, 100); //c==2
+				//else if (c == 3) privateZone = cv::Rect(-100, 0, 100, 100); //c==3
+				privateZone += cv::Point((c == 0 || c == 1) ? 0 : -1, (c == 0 || c == 3) ? 0 : -1) * 150;
+				privateZone += cv::Point(frameBGR.size() / 2);
+				cv::Mat roiOuterBorder(thresholdedImages[OUTER_BORDER], privateZone);
+				cv::Mat roiField(thresholdedImages[FIELD], privateZone);
+				bool cb = borderCollisonEnabled ? cv::countNonZero(roiOuterBorder) > 160 : false;
+				bool cu = fieldCollisonEnabled ? cv::countNonZero(roiField) < 3600 : false;
+				if (cb || cu) {
+					if (!collisionWithBorder) {// no previous collison
+						m_pState->collisionRange.x = c * 90. - 180;
+						m_pState->collisionRange.y = c * 90. - 90;
+					}
+					else if (m_pState->collisionRange.y + 90. < c*90. - 90.){
+						m_pState->collisionRange.x = c * 90. - 180;
+					}
+					else {
+						m_pState->collisionRange.y = c * 90. - 90;
+					}
+					collisionWithBorder |= cb;
+					collisonWithUnknown |= cu;
+					cv::rectangle(frameBGR, privateZone, cv::Scalar(cb * 64 + cu * 128, 0, 255), 2, 8);
+
 				}
 				else {
-					m_pState->collisionRange.y = c * 90. - 90;
+					cv::rectangle(frameBGR, privateZone, cv::Scalar(155, 255, 155), 2, 8);
 				}
-				collisionWithBorder |= cb;
-				collisonWithUnknown |= cu;
-				cv::rectangle(frameBGR, privateZone, cv::Scalar(cb * 64 + cu*128, 0, 255), 2, 8);
-
+				//std::cout << "coll b: " << cv::countNonZero(roiOuterBorder) << std::endl;
 			}
-			else {
-				cv::rectangle(frameBGR, privateZone, cv::Scalar(155, 255, 155), 2, 8);
-			}
-			//std::cout << "coll b: " << cv::countNonZero(roiOuterBorder) << std::endl;
+			m_pState->collisionWithBorder = collisionWithBorder;
+			m_pState->collisionWithUnknown = collisonWithUnknown;
 		}
-		m_pState->collisionWithBorder = collisionWithBorder;
-		m_pState->collisionWithUnknown = collisonWithUnknown;
-
+		else {
+			m_pState->collisionWithBorder = false;
+			m_pState->collisionWithUnknown = false;
+		}
 		//std::cout << "coll u: " << cv::countNonZero(roiField) << std::endl;
 		//imshow("field", roiField);
 		//cv::waitKey(1);
@@ -340,38 +348,42 @@ void FrontCameraVision::Run() {
 		*/
 
 		//PARTNER POSITION ====================================================================================================
-		bool ourRobotBlueBottom = (m_pState->robotColor == FieldState::ROBOT_COLOR_YELLOW_UP);
+		if (detectOtherRobots) {
+			bool ourRobotBlueBottom = (m_pState->robotColor == FieldState::ROBOT_COLOR_YELLOW_UP);
 
-		std::vector<std::pair<cv::Point2i, double>> positionsToDistances; //One of the colors position and according distances
-		for (size_t blueIndex = 0; blueIndex < notBlueGates.size(); blueIndex++) {
-			for (size_t yellowIndex = 0; yellowIndex < notYellowGates.size(); yellowIndex++) {
-				cv::Point2i bluePos = notBlueGates[blueIndex];
-				cv::Point2i yellowPos = notYellowGates[yellowIndex];
-				double distBetweenYellowBlue = cv::norm(bluePos - yellowPos);
-				cv::Point2i frameCenter = cv::Point2i(frameSize.width / 2, frameSize.height / 2); //our robot is in center
-				double distBetweenBlueAndRobot = cv::norm(bluePos - frameCenter);
-				double distBetweenYellowAndRobot = cv::norm(yellowPos - frameCenter);
+			std::vector<std::pair<cv::Point2i, double>> positionsToDistances; //One of the colors position and according distances
+			for (size_t blueIndex = 0; blueIndex < notBlueGates.size(); blueIndex++) {
+				for (size_t yellowIndex = 0; yellowIndex < notYellowGates.size(); yellowIndex++) {
+					cv::Point2i bluePos = notBlueGates[blueIndex];
+					cv::Point2i yellowPos = notYellowGates[yellowIndex];
+					double distBetweenYellowBlue = cv::norm(bluePos - yellowPos);
+					cv::Point2i frameCenter = cv::Point2i(frameSize.width / 2, frameSize.height / 2); //our robot is in center
+					double distBetweenBlueAndRobot = cv::norm(bluePos - frameCenter);
+					double distBetweenYellowAndRobot = cv::norm(yellowPos - frameCenter);
 
-				if (distBetweenYellowBlue < 200 &&   //If distance between two colors is great, then it cannot be robot
-					 //If our robot has bottom blue, then blue distance from robot has to less than yellow
-					((ourRobotBlueBottom && distBetweenBlueAndRobot < distBetweenYellowAndRobot) 
-					//If our robot has not bottom blue, then blue distance from robot has to be greater than yellow
-					|| (!ourRobotBlueBottom && distBetweenBlueAndRobot > distBetweenYellowAndRobot))) {
-					std::pair<cv::Point2i, double> positionToDistance = std::make_pair(bluePos, distBetweenYellowBlue);
-					positionsToDistances.push_back(positionToDistance);
+					if (distBetweenYellowBlue < 200 &&   //If distance between two colors is great, then it cannot be robot
+						//If our robot has bottom blue, then blue distance from robot has to less than yellow
+						((ourRobotBlueBottom && distBetweenBlueAndRobot < distBetweenYellowAndRobot)
+						//If our robot has not bottom blue, then blue distance from robot has to be greater than yellow
+						|| (!ourRobotBlueBottom && distBetweenBlueAndRobot > distBetweenYellowAndRobot))) {
+						std::pair<cv::Point2i, double> positionToDistance = std::make_pair(bluePos, distBetweenYellowBlue);
+						positionsToDistances.push_back(positionToDistance);
+					}
 				}
 			}
-		}
-		auto sortFunc = [](std::pair<cv::Point2i, double> posToDis1, std::pair<cv::Point2i, double> posToDis2) { return (posToDis1.second < posToDis2.second); };
-		std::sort(positionsToDistances.begin(), positionsToDistances.end(), sortFunc);
-		if (positionsToDistances.size() > 0) {
-			m_pState->partner.updateRawCoordinates(positionsToDistances[0].first, cv::Point(0, 0));
+			auto sortFunc = [](std::pair<cv::Point2i, double> posToDis1, std::pair<cv::Point2i, double> posToDis2) { return (posToDis1.second < posToDis2.second); };
+			std::sort(positionsToDistances.begin(), positionsToDistances.end(), sortFunc);
+			if (positionsToDistances.size() > 0) {
+				m_pState->partner.updateRawCoordinates(positionsToDistances[0].first, cv::Point(0, 0));
+			}
+			else {
+				m_pState->partner.updateRawCoordinates(cv::Point(-1, -1), cv::Point(0, 0));
+			}
+			circle(frameBGR, m_pState->partner.rawPixelCoords, 10, cv::Scalar(0, 0, 255), 2, 8, 0);
 		}
 		else {
 			m_pState->partner.updateRawCoordinates(cv::Point(-1, -1), cv::Point(0, 0));
 		}
-		circle(frameBGR, m_pState->partner.rawPixelCoords, 10, cv::Scalar(0, 0, 255), 2, 8, 0);
-
 
 		//Gate obstruction
 		if (gateObstructionDetectionEnabled) {
