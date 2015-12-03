@@ -16,13 +16,15 @@ void DriveToBall::onEnter()
 	DriveInstruction::onEnter();	
 	initialBall = getClosestBall(false, true);
 	initialGate = m_pFieldState->GetTargetGate();
+	if (ACTIVE_DRIVE_TO_BALL_MODE == DRIVEMODE_IDLE)
+		ACTIVE_DRIVE_TO_BALL_MODE = DRIVEMODE_DRIVE_TO_BALL_AIM_GATE;
 }
 
 DriveMode DriveToBall::step(double dt){
 	//return DRIVEMODE_DRIVE_TO_BALL_ANGLED;
 	//return DRIVEMODE_DRIVE_TO_BALL_NAIVE;
 	//return DRIVEMODE_ROTATE_AROUND_BALL;
-	return DRIVEMODE_DRIVE_TO_BALL_AIM_GATE;
+	return ACTIVE_DRIVE_TO_BALL_MODE;
 }
 class DriveToBallNaive : public DriveToBall
 {
@@ -120,7 +122,16 @@ public:
 
 	DriveMode step(double dt){
 		if (m_pCom->BallInTribbler())return DRIVEMODE_AIM_GATE;
-		if (m_pFieldState->obstacleNearBall) return DRIVEMODE_DRIVE_TO_BALL_ANGLED;
+		if (m_pFieldState->obstacleNearBall) {
+			ACTIVE_DRIVE_TO_BALL_MODE = DRIVEMODE_DRIVE_TO_BALL_ANGLED;
+			return DRIVEMODE_DRIVE_TO_BALL_ANGLED;
+		}
+		/*
+		if (m_pFieldState->collisionWithBorder) {
+			ACTIVE_DRIVE_TO_BALL_MODE = DRIVEMODE_DRIVE_TO_BALL_NAIVE;
+			return DRIVEMODE_DRIVE_TO_BALL_NAIVE;
+		}
+		*/
 		const ObjectPosition &ball = getClosestBall();
 		const ObjectPosition &gate = m_pFieldState->GetTargetGate();
 		double gateHeading = gate.getHeading();
@@ -221,6 +232,7 @@ void Kick::onEnter()
 	DriveInstruction::onEnter();
 	STOP_TRIBBLER
 	STOP_DRIVING
+	ACTIVE_DRIVE_TO_BALL_MODE = DRIVEMODE_DRIVE_TO_BALL_AIM_GATE;
 }
 DriveMode Kick::step(double dt)
 {

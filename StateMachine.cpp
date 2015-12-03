@@ -129,3 +129,4 @@ StateMachine::~StateMachine()
 }
 
 DriveMode DriveInstruction::prevDriveMode = DRIVEMODE_IDLE;
+DriveMode DriveInstruction::ACTIVE_DRIVE_TO_BALL_MODE = DRIVEMODE_IDLE;
