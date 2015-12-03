@@ -1,5 +1,6 @@
 #include "SingleModePlay.h"
 #include "AutoPlayHelpers.h"
+#define ANDRESE_CATCH_BALL
 
 enum {
 	DRIVEMODE_DRIVE_TO_BALL_NAIVE = 5000,
@@ -21,13 +22,14 @@ void DriveToBall::onEnter()
 }
 
 DriveMode DriveToBall::step(double dt){
+	if(initialBall.getDistance() == 0) return DRIVEMODE_DRIVE_HOME;
 	//return DRIVEMODE_DRIVE_TO_BALL_ANGLED;
 	//return DRIVEMODE_DRIVE_TO_BALL_NAIVE;
 	//return DRIVEMODE_ROTATE_AROUND_BALL;
 	return ACTIVE_DRIVE_TO_BALL_MODE;
 }
 class DriveToBallNaive : public DriveToBall
-{
+{ 
 public:
 	int colisionTicker = 0;
 	Speed lastSpeed;

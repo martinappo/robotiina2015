@@ -331,7 +331,7 @@ void FrontCameraVision::Run() {
 				cv::Rect bigAreaAroundBall = cv::Rect(closest - cv::Point(50, 50) + cv::Point(frameBGR.size() / 2),
 					closest + cv::Point(50, 50) + cv::Point(frameBGR.size() / 2));
 				cv::Mat roiField(thresholdedImages[FIELD], bigAreaAroundBall);
-				std::cout << cv::countNonZero(roiField) << std::endl;
+				//std::cout << cv::countNonZero(roiField) << std::endl;
 				bool cb = cv::countNonZero(roiField) > 300/*tune this*/;
 				rectangle(frameBGR, bigAreaAroundBall.tl(), bigAreaAroundBall.br(), cv::Scalar(255, 50, cb? 255:50), 2, 8, 0);
 				m_pState->obstacleNearBall = cb;

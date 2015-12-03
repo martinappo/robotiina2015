@@ -14,12 +14,12 @@ BallFinder::~BallFinder()
 
 bool BallFinder::Locate(cv::Mat &imgThresholded, cv::Mat &frameHSV, cv::Mat &frameBGR, std::vector<cv::Point2d> &objectCoords) {
 
+	
 	cv::Point2d notValidPosition = cv::Point2d(-1.0, -1.0);
 	
 	int smallestBallArea = 4;
 	cv::Point2d center(-1, -1);
 
-	//cv::Mat imgThresholded = HSVRanges[target]; // reference counted, I think
 	if (imgThresholded.rows == 0){
 		std::cout << "Image thresholding has failed" << std::endl;
 		return false;
@@ -38,52 +38,26 @@ bool BallFinder::Locate(cv::Mat &imgThresholded, cv::Mat &frameHSV, cv::Mat &fra
 	if (contours.size() == 0){ //if no contours found
 		return false;
 	}
-	//pFieldState->resetBallsUpdateState();
 	int ballsUpdatedCount = 0;
 	cv::Point2d frameCenter = cv::Point2d(frameHSV.size()) / 2;
+	
 	for (unsigned int i = 0; i < contours.size(); i++)
 	{
-		//if (ballsUpdatedCount >= objectCoords.cols) break;
 		int ballArea = (int)(cv::contourArea(contours[i], false));
 		if (ballArea >= smallestBallArea) {
 			cv::Moments M = cv::moments(contours[i]);
-			//int posY = (int)(M.m01 / M.m00);
-			//int posX = (int)(M.m10 / M.m00);
 			cv::Rect bounding_rect = cv::boundingRect(contours[i]);
 			rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), redColor, 1, 8, 0);
+			try{
 			objectCoords.push_back(cv::Point2d((M.m10 / M.m00), (M.m01 / M.m00)) - frameCenter);
-			/*
-			objectCoords.at<double>(0, ballsUpdatedCount) = posX;
-			objectCoords.at<double>(1, ballsUpdatedCount) = posY;
-			objectCoords.at<double>(2, ballsUpdatedCount) = 1;
-			*/
-			//std::cout << "c: " << objectCoords.col(ballsUpdatedCount) << std::endl;
-			/*
-			//TODO: index balls and match the right BallPosition object and contour from frame
-			BallPosition &currentBall = pFieldState->balls[ballsUpdatedCount]; // ref into array
-			//currentBall.updateRawCoordinates(posX, posY, pFieldState->self.fieldCoords, pFieldState->self.getAngle());
-			currentBall.setIsUpdated(true);
-			*/
+			}
+			catch(cv::Exception ex){
+				return false;
+			   std::cout<< ex.msg;
+			}
 			ballsUpdatedCount++;
 		}
 	}
-	/*
-	for (int i = ballsUpdatedCount; i < objectCoords.cols; i++){
-		objectCoords.at<double>(0, i) = 0;
-		objectCoords.at<double>(1, i) = 0;
-		objectCoords.at<double>(2, i) = 0;
-	}
-	*/
-	/*
-	if (ballsUpdatedCount < NUMBER_OF_BALLS) {
-		for (int i = 0; i < NUMBER_OF_BALLS; i++) {
-			BallPosition &currentBall = pFieldState->balls[i];
-			if (!currentBall.isUpdated) {
-				//currentBall.predictCoordinates();
-			}
-		}
-	}
-	*/
 	return true;
 }
 
