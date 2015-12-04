@@ -354,11 +354,16 @@ public:
 
 	virtual DriveMode step(double dt){
 		auto &target = getClosestBall();
-		aimTarget(target, speed,2);
-		if (wentLeft) speed.heading = 90;
-		else speed.heading = 90;
-		wentLeft = !(wentLeft);
-		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
+		auto homeGate = m_pFieldState->GetHomeGate();
+		double gateAngle = homeGate.getHeading() - 180 * sign(homeGate.getHeading());
+		aimTarget(target, speed,2);		
+		if (gateAngle < 0) {
+			speed.heading = 90;
+		}
+		else {
+			speed.heading = -90;
+		}
+		m_pCom->Drive(10, speed.heading, speed.rotation);
 		return DRIVEMODE_2V2_GOAL_KEEPER;
 	}
 };
