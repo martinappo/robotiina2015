@@ -20,6 +20,10 @@ public:
 	virtual bool BallInTribbler() {
 		return m_pCoilGun->BallInTribbler();
 	}
+
+	virtual long BallInTribblerTime() {
+		return m_pCoilGun->BallInTribblerTime();
+	}
 	virtual void Kick(int kick) {
 		m_pCoilGun->Kick(kick);
 	}

@@ -21,7 +21,10 @@ void CoilBoard::HandleMessage(const std::string & message)
 	if ((message[1] - '0') == ID_MAIN_BOARD){
 		
 		if ((message[3] == 'b') && (message[4] == 'l')){
-			ballInTribbler = (message[6] == '1');
+			bool inTribbler = (message[6] == '1');
+			if (!ballInTribbler && inTribbler)
+				ballCatchTime = boost::posix_time::microsec_clock::local_time();
+			ballInTribbler = inTribbler;
 		}
 		else if (message[3] == 'c') { // charge done
 			kickAllowed = true; 
