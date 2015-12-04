@@ -20,7 +20,9 @@ enum MultiModeDriveStates {
 	DRIVEMODE_2V2_DRIVE_HOME,
 	DRIVEMODE_2V2_OPPONENT_KICKOFF,
 	DRIVEMODE_2V2_GOAL_KEEPER,
-	DRIVEMODE_2V2_DRIVE_TO_BALL_NAIVE
+	DRIVEMODE_2V2_DRIVE_TO_BALL_NAIVE,
+	DRIVEMODE_2V2_CATCH_BALL_NAIVE,
+
 
 };
 
@@ -30,25 +32,50 @@ public:
 	int colisionTicker = 0;
 	Speed lastSpeed;
 	DriveToBallNaivev2(const std::string &name = "DRIVE_TO_BALL_NAIVE") : DriveToBall(name){};
-	boost::posix_time::ptime collisionTime = boost::posix_time::microsec_clock::local_time();
-	boost::posix_time::ptime collisionTime2 = boost::posix_time::microsec_clock::local_time();
 
 	DriveMode step(double dt)
 	{
-
+		speed = {0,0, 0};
 		auto &target = getClosestBall();
-		//if (target.getDistance() > 10000) return DRIVEMODE_IDLE;
-		if (m_pCom->BallInTribbler(true)) return DRIVEMODE_CATCH_BALL;
-		if (aimTarget(target, speed, 10))
-			if (driveToTarget(target, speed, 35))
-				if (aimTarget(target, speed, 1))
-					speed.velocity = 150;
+		if (target.getDistance() < 50) {
+			m_pCom->ToggleTribbler(true);
+		} else if (target.getDistance() > 170) {
+			m_pCom->ToggleTribbler(false);
+		}
 		
+		if (m_pCom->BallInTribbler(true)) return DRIVEMODE_CATCH_BALL;
+		if (aimTarget(target, speed, 10)){
+			if (driveToTarget(target, speed, 35)) {
+				if (aimTarget(target, speed, 1)) {
+					return DRIVEMODE_2V2_CATCH_BALL_NAIVE;
+				}
+			}
+		}
+		std::cout << "1 " << target.getHeading() << " " << speed.velocity << " " << speed.heading << " " << speed.rotation << std::endl;
 		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 		return DRIVEMODE_2V2_DRIVE_TO_BALL_NAIVE;
 	}
 };
 
+class CatchBallNaivev2 : public DriveToBall
+{
+public:
+	int colisionTicker = 0;
+	Speed lastSpeed;
+	CatchBallNaivev2(const std::string &name = "CATCH_BALL_NAIVE") : DriveToBall(name){};
+	void onEnter(){ 
+		m_pCom->ToggleTribbler(true);
+	}
+	DriveMode step(double dt)
+	{
+		if (STUCK_IN_STATE(3000)) return DRIVEMODE_2V2_DRIVE_TO_BALL_NAIVE;
+
+		lastSpeed.velocity += 100*dt; 
+
+		m_pCom->Drive(lastSpeed.velocity, lastSpeed.heading, lastSpeed.rotation);
+		return DRIVEMODE_2V2_CATCH_BALL_NAIVE;
+	}
+};
 
 class DriveToBallv2 : public DriveToBall
 {
