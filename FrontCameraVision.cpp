@@ -299,7 +299,7 @@ void FrontCameraVision::Run() {
 			bool ballOk;
 
 			cv::Point2i possibleClosest;
-			cv::Point2i theClosest = balls.size()>0 ? balls[0] : cv::Point2d(0, 0);
+			cv::Point2i theClosest = balls.size()>0 ? balls[0] : cv::Point2i(0, 0);
 
 			for (auto ball : balls) {
 				possibleClosest = ball;
