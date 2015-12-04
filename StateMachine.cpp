@@ -95,23 +95,19 @@ void StateMachine::Run()
 		boost::posix_time::time_duration::tick_type dt = (time - lastStep).total_milliseconds();
 		newMode = testMode ? curDriveMode->second->step(double(dt)) : curDriveMode->second->step1(double(dt), newMode);
 		auto old = curDriveMode;
-
+		if (testMode){
+			if (testDriveMode != DRIVEMODE_IDLE && newMode == DRIVEMODE_IDLE) newMode = testDriveMode;
+			else if (newMode != testDriveMode) {
+				newMode = DRIVEMODE_IDLE;
+				testDriveMode = DRIVEMODE_IDLE;
+			}
+		}
 
 		if (newMode != curDriveMode->first){
 			boost::mutex::scoped_lock lock(mutex);
 			std::cout << "state: " << curDriveMode->second->name;
 
 			curDriveMode->second->onExit();
-			if (testMode){
-				if (testDriveMode != DRIVEMODE_IDLE && newMode == DRIVEMODE_IDLE) newMode = testDriveMode;
-				else if (newMode != testDriveMode) {
-					auto newDriveMode = driveModes.find(newMode);
-					std::cout << "-> actual state: " << newDriveMode->second->name << std::endl;
-
-					newMode = DRIVEMODE_IDLE;
-					testDriveMode = DRIVEMODE_IDLE;
-				}
-			}
 			curDriveMode = driveModes.find(newMode);
 			if (curDriveMode == driveModes.end()){
 				curDriveMode = driveModes.find(DRIVEMODE_IDLE);
