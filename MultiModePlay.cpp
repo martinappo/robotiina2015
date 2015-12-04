@@ -360,6 +360,9 @@ public:
 
 	virtual DriveMode step(double dt){
 		auto &target = getClosestBall();
+		if (target.getDistance() < 25) {
+			return DRIVEMODE_DRIVE_HOME;
+		}
 		auto homeGate = m_pFieldState->GetHomeGate();
 		double homeGateDist = homeGate.getDistance();
 		double gateAngle = homeGate.getHeading() - 180 * sign(homeGate.getHeading());
