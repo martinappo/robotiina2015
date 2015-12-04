@@ -97,14 +97,13 @@ void StateMachine::Run()
 		auto old = curDriveMode;
 		
 
-		if (newMode != curDriveMode->first){
+		if (newMode != curDriveMode->first || (testMode && testDriveMode != DRIVEMODE_IDLE && newMode == DRIVEMODE_IDLE)){
 			boost::mutex::scoped_lock lock(mutex);
 				std::cout << "state: " << curDriveMode->second->name;
 
 			curDriveMode->second->onExit();
 			if (testMode){
-				if (testDriveMode != DRIVEMODE_IDLE && newMode == DRIVEMODE_IDLE) newMode = testDriveMode;
-				else if (newMode != testDriveMode) {
+				if (newMode != testDriveMode) {
 					auto newDriveMode = driveModes.find(newMode);
 					std::cout << "-> actual state: " << newDriveMode->second->name << std::endl;
 
