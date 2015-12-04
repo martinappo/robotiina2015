@@ -25,6 +25,7 @@ protected:
 	bool nightVisionEnabled = false;
 	bool detectOtherRobots = false;
 	bool detectObjectsNearBall = false;
+	bool hideUseless = false;
 
 	VideoRecorder *videoRecorder  = NULL;
 	double time = 0;

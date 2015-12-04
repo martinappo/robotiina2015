@@ -32,6 +32,7 @@ FrontCameraVision::FrontCameraVision(ICamera *pCamera, IDisplay *pDisplay, Field
 	ADD_BOOL_SETTING(nightVisionEnabled);
 	ADD_BOOL_SETTING(detectOtherRobots);
 	ADD_BOOL_SETTING(detectObjectsNearBall);
+	ADD_BOOL_SETTING(hideUseless);
 	videoRecorder = new VideoRecorder("videos/", 30, m_pCamera->GetFrameSize(true));
 	LoadSettings();
 	Start();
@@ -199,10 +200,10 @@ void FrontCameraVision::Run() {
 
 			cv::Point2d c2 = (yellowGate[min_j1] + yellowGate[min_j2]) / 2;
 
-#ifndef IGNORE_USELESS
-			circle(frameBGR, c2, 7, color2, -1, 8, 0);
-			circle(frameBGR, c1, 12, color4, -1, 12, 0);
-#endif
+			if (!hideUseless) {
+				circle(frameBGR, c2, 7, color2, -1, 8, 0);
+				circle(frameBGR, c1, 12, color4, -1, 12, 0);
+			}
 			m_pState->blueGate.updateRawCoordinates(c1-cv::Point2d(frameBGR.size() / 2));
 			m_pState->yellowGate.updateRawCoordinates(c2- cv::Point2d(frameBGR.size() / 2));
 
@@ -262,7 +263,7 @@ void FrontCameraVision::Run() {
 						m_pState->collisionRange.x = c * 90. - 180;
 						m_pState->collisionRange.y = c * 90. - 90;
 					}
-					else if (m_pState->collisionRange.y + 90. < c*90. - 90.){
+					else if (m_pState->collisionRange.y + 90. < c*90. - 90.) {
 						m_pState->collisionRange.x = c * 90. - 180;
 					}
 					else {
@@ -270,15 +271,15 @@ void FrontCameraVision::Run() {
 					}
 					collisionWithBorder |= cb;
 					collisonWithUnknown |= cu;
-#ifndef IGNORE_USELESS
-					cv::rectangle(frameBGR, privateZone, cv::Scalar(cb * 64 + cu * 128, 0, 255), 2, 8);
-#endif
+					if (!hideUseless) {
+						cv::rectangle(frameBGR, privateZone, cv::Scalar(cb * 64 + cu * 128, 0, 255), 2, 8);
+					}
 
 				}
 				else {
-#ifndef IGNORE_USELESS
-					cv::rectangle(frameBGR, privateZone, cv::Scalar(155, 255, 155), 2, 8);
-#endif
+					if (!hideUseless) {
+						cv::rectangle(frameBGR, privateZone, cv::Scalar(155, 255, 155), 2, 8);
+					}
 				}
 				//std::cout << "coll b: " << cv::countNonZero(roiOuterBorder) << std::endl;
 			}
@@ -323,12 +324,12 @@ void FrontCameraVision::Run() {
 				}
 				if (ballOk){
 					break;
-				} else {
+				}
+				else {
 					cv::Rect bounding_rect = cv::Rect(possibleClosest - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
 						possibleClosest + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
-#ifndef IGNORE_USELESS
-					rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), cv::Scalar(255, 0, 255), 2, 8, 0);
-#endif
+					if (!hideUseless) 
+						rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), cv::Scalar(255, 0, 255), 2, 8, 0);
 				}
 			}
 
@@ -339,9 +340,8 @@ void FrontCameraVision::Run() {
 			
 			cv::Rect bounding_rect = cv::Rect(m_pState->balls.closest.filteredRawCoords - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
 				m_pState->balls.closest.filteredRawCoords + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
-#ifndef IGNORE_USELESS
-			rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), cv::Scalar(255, 0, 0), 2, 8, 0);
-#endif
+			if (!hideUseless)
+				rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), cv::Scalar(255, 0, 0), 2, 8, 0);
 
 			// check if air is clear around ball
 			if (detectObjectsNearBall){
@@ -355,9 +355,8 @@ void FrontCameraVision::Run() {
 					cv::Mat roiField(thresholdedImages[FIELD], bigAreaAroundBall);
 					//std::cout << cv::countNonZero(roiField) << std::endl;
 					bool cb = cv::countNonZero(roiField) < 9000/*tune this*/;
-#ifndef IGNORE_USELESS
-					rectangle(frameBGR, bigAreaAroundBall.tl(), bigAreaAroundBall.br(), cv::Scalar(255, 50, cb? 255:50), 2, 8, 0);
-#endif
+					if (!hideUseless)
+						rectangle(frameBGR, bigAreaAroundBall.tl(), bigAreaAroundBall.br(), cv::Scalar(255, 50, cb ? 255 : 50), 2, 8, 0);
 					m_pState->obstacleNearBall = cb;
 				} catch(...){
 					//std::cout << "ball is near image border!" << std::endl;
@@ -410,18 +409,18 @@ void FrontCameraVision::Run() {
 
 		//OTHER ROBOTS POSITION ====================================================================================================
 
-		if (detectOtherRobots) {
+			if (detectOtherRobots) {
 
-			std::vector<cv::Point2i> robots;
-			cv::bitwise_or(thresholdedImages[OUTER_BORDER], thresholdedImages[FIELD], thresholdedImages[FIELD]);
-			bool robotsFound = robotFinder.Locate(thresholdedImages[FIELD], frameHSV, frameBGR, robots);
-#ifndef IGNORE_USELESS
-			for (auto robot : robots) {
-				cv::Rect robotRectangle = cv::Rect(robot - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
-					robot + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
-				rectangle(frameBGR, robotRectangle.tl(), robotRectangle.br(), cv::Scalar(10, 255, 101), 2, 8, 0);
-			}
-#endif
+				std::vector<cv::Point2i> robots;
+				cv::bitwise_or(thresholdedImages[OUTER_BORDER], thresholdedImages[FIELD], thresholdedImages[FIELD]);
+				bool robotsFound = robotFinder.Locate(thresholdedImages[FIELD], frameHSV, frameBGR, robots);
+				if (!hideUseless) {
+					for (auto robot : robots) {
+						cv::Rect robotRectangle = cv::Rect(robot - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
+							robot + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
+						rectangle(frameBGR, robotRectangle.tl(), robotRectangle.br(), cv::Scalar(10, 255, 101), 2, 8, 0);
+					}
+				}
 			bool ourRobotBlueBottom = (m_pState->robotColor == FieldState::ROBOT_COLOR_YELLOW_UP);
 			//std::vector<cv::Point2d> robots;
 			//bool ballsFound = ballFinder.Locate(thresholdedImages[FIELD], frameHSV, frameBGR, robots);
@@ -454,9 +453,8 @@ void FrontCameraVision::Run() {
 			else {
 				m_pState->partner.updateRawCoordinates(cv::Point(-1, -1), cv::Point(0, 0));
 			}
-#ifndef IGNORE_USELESS
-			circle(frameBGR, m_pState->partner.rawPixelCoords, 10, cv::Scalar(0, 0, 255), 2, 8, 0);
-#endif
+			if (!hideUseless)
+				circle(frameBGR, m_pState->partner.rawPixelCoords, 10, cv::Scalar(0, 0, 255), 2, 8, 0);
 		}
 		else {
 			m_pState->partner.updateRawCoordinates(cv::Point(-1, -1), cv::Point(0, 0));
@@ -492,11 +490,10 @@ void FrontCameraVision::Run() {
 			blue.copyTo(frameBGR, thresholdedImages[BLUE_GATE]);
 		}
 
-#ifndef IGNORE_USELESS
-		cv::line(frameBGR, (frameSize / 2) + cv::Size(0, -30), (frameSize / 2) + cv::Size(0, 30), cv::Scalar(0, 0, 255), 3, 8, 0);
-		cv::line(frameBGR, (frameSize / 2) + cv::Size(-30, 0), (frameSize / 2) + cv::Size(30,0), cv::Scalar(0, 0, 255), 3, 8, 0);
-		m_pDisplay->ShowImage(frameBGR);
-#endif
-		
+		if (!hideUseless) {
+			cv::line(frameBGR, (frameSize / 2) + cv::Size(0, -30), (frameSize / 2) + cv::Size(0, 30), cv::Scalar(0, 0, 255), 3, 8, 0);
+			cv::line(frameBGR, (frameSize / 2) + cv::Size(-30, 0), (frameSize / 2) + cv::Size(30, 0), cv::Scalar(0, 0, 255), 3, 8, 0);
+			m_pDisplay->ShowImage(frameBGR);
+		}
 	}
 }

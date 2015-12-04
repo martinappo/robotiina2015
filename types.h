@@ -15,7 +15,6 @@
 #endif
 #define PI 3.14159265
 #define TAU (2*PI)
-#define IGNORE_USELESS
 
 struct ColorRange
 {
