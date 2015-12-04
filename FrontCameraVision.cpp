@@ -323,8 +323,11 @@ void FrontCameraVision::Run() {
 				}
 			}
 
-			m_pState->resetBallsUpdateState();
-			m_pState->balls.updateAndFilterClosest(possibleClosest, balls, possibleClosest != theClosest);
+			if (ballsFound) {
+				m_pState->resetBallsUpdateState();
+				m_pState->balls.updateAndFilterClosest(possibleClosest, balls, possibleClosest != theClosest);
+			}
+			
 			cv::Rect bounding_rect = cv::Rect(m_pState->balls.closest.filteredRawCoords - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
 				m_pState->balls.closest.filteredRawCoords + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
 			rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), cv::Scalar(255, 0, 0), 2, 8, 0);
