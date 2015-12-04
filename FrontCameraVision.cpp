@@ -33,6 +33,7 @@ FrontCameraVision::FrontCameraVision(ICamera *pCamera, IDisplay *pDisplay, Field
 	ADD_BOOL_SETTING(detectOtherRobots);
 	ADD_BOOL_SETTING(detectObjectsNearBall);
 	ADD_BOOL_SETTING(hideUseless);
+	ADD_BOOL_SETTING(useKalmanFilter);
 	videoRecorder = new VideoRecorder("videos/", 30, m_pCamera->GetFrameSize(true));
 	LoadSettings();
 	Start();
@@ -301,7 +302,7 @@ void FrontCameraVision::Run() {
 		bool ballsFound = ballFinder.Locate(thresholdedImages[BALL], frameHSV, frameBGR, balls); 
 		if (!ballsFound) {
 			m_pState->resetBallsUpdateState();
-			m_pState->balls.updateAndFilterClosest(cv::Point2i(-500, -500), balls, false);
+			m_pState->balls.updateAndFilterClosest(cv::Point2i(0,0), balls, false, useKalmanFilter);
 			balls.push_back(m_pState->balls.closest.filteredRawCoords);
 		}
 			std::sort(balls.begin(), balls.end(), [](cv::Point2d a, cv::Point2d b)
@@ -335,13 +336,17 @@ void FrontCameraVision::Run() {
 
 			if (ballsFound) {
 				m_pState->resetBallsUpdateState();
-				m_pState->balls.updateAndFilterClosest(possibleClosest, balls, possibleClosest != theClosest);
+				m_pState->balls.updateAndFilterClosest(possibleClosest, balls, possibleClosest != theClosest, useKalmanFilter);
 			}
 			
-			cv::Rect bounding_rect = cv::Rect(m_pState->balls.closest.filteredRawCoords - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
-				m_pState->balls.closest.filteredRawCoords + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
-			if (!hideUseless)
+			if (!hideUseless) {
+				cv::Rect bounding_rect = cv::Rect(
+					(useKalmanFilter ? m_pState->balls.closest.filteredRawCoords : possibleClosest) - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
+					(useKalmanFilter ? m_pState->balls.closest.filteredRawCoords : possibleClosest) + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2)
+				);
 				rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), cv::Scalar(255, 0, 0), 2, 8, 0);
+			}
+
 
 			// check if air is clear around ball
 			if (detectObjectsNearBall){

@@ -26,6 +26,7 @@ protected:
 	bool detectOtherRobots = false;
 	bool detectObjectsNearBall = false;
 	bool hideUseless = false;
+	bool useKalmanFilter = false;
 
 	VideoRecorder *videoRecorder  = NULL;
 	double time = 0;

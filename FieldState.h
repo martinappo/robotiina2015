@@ -29,7 +29,7 @@ public:
 	const BallPosition& getClosest() {
 		return closest;
 	}
-	const void updateAndFilterClosest(cv::Point2i closestRaw, std::vector<cv::Point2i> rawBallCoords, bool ballIsNotValid);
+	const void updateAndFilterClosest(cv::Point2i closestRaw, std::vector<cv::Point2i> rawBallCoords, bool ballIsNotValid, bool filterEnabled);
 
 	size_t size() {
 		return balls.size();
