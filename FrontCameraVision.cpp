@@ -360,9 +360,9 @@ void FrontCameraVision::Run() {
 #endif
 					m_pState->obstacleNearBall = cb;
 				} catch(...){
-					std::cout << "ball is near image border!" << std::endl;
-					std::cout << m_pState->balls.closest.filteredRawCoords << std::endl;
-					std::cout << bigAreaAroundBall << std::endl;
+					//std::cout << "ball is near image border!" << std::endl;
+					//std::cout << m_pState->balls.closest.filteredRawCoords << std::endl;
+					//std::cout << bigAreaAroundBall << std::endl;
 					m_pState->obstacleNearBall = true;				
 				}
 			}
