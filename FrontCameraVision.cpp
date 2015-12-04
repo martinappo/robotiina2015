@@ -291,9 +291,11 @@ void FrontCameraVision::Run() {
 		//cv::Mat balls(3, m_pState->balls.size(), CV_64FC1);
 		std::vector<cv::Point2i> balls;
 		bool ballsFound = ballFinder.Locate(thresholdedImages[BALL], frameHSV, frameBGR, balls); 
-		if (ballsFound) {
-			//balls.row(0) -= frameBGR.size().width / 2;
-			//balls.row(1) -= frameBGR.size().height / 2;
+		if (!ballsFound) {
+			m_pState->resetBallsUpdateState();
+			m_pState->balls.updateAndFilterClosest(cv::Point2i(-500, -500), balls, false);
+			balls.push_back(m_pState->balls.closest.filteredRawCoords);
+		}
 			std::sort(balls.begin(), balls.end(), [](cv::Point2d a, cv::Point2d b)
 			{
 				return cv::norm(a) < cv::norm(b);
@@ -382,7 +384,7 @@ void FrontCameraVision::Run() {
 				cv::Point(balls.at<double>(0, ball_idx), balls.at<double>(1, ball_idx)) + cv::Point(30, 30) + cv::Point(frameBGR.size() / 2));
 			rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), cv::Scalar(255, 255, 0), 2, 8, 0);
 			*/
-		}
+		
 		/*
 		ObjectPosition *targetGatePos = 0;
 		if (targetGate == BLUE_GATE && BlueGateFound) targetGatePos = &blueGatePos;
