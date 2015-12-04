@@ -22,6 +22,7 @@ enum MultiModeDriveStates {
 	DRIVEMODE_2V2_GOAL_KEEPER,
 	DRIVEMODE_2V2_DRIVE_TO_BALL_NAIVE,
 	DRIVEMODE_2V2_CATCH_BALL_NAIVE,
+	DRIVEMODE_2V2_DRIVE_TO_BALL_AIM_GATE,
 
 
 };
@@ -180,7 +181,7 @@ class MasterModeIdle : public Idle {
 		case FieldState::GAME_MODE_START_OUR_KICK_OFF:
 		case FieldState::GAME_MODE_START_OUR_FREE_KICK:
 		case FieldState::GAME_MODE_START_OUR_THROWIN:
-			return m_pFieldState->isPlaying ? DRIVEMODE_2V2_DRIVE_TO_BALL_NAIVE : DRIVEMODE_IDLE;
+			return m_pFieldState->isPlaying ? DRIVEMODE_2V2_DRIVE_TO_BALL_AIM_GATE : DRIVEMODE_IDLE;
 		}
 		return DRIVEMODE_IDLE;
 	}
@@ -295,7 +296,7 @@ public:
 	CatchKickOff() : DriveToBallv2("2V2_CATCH_KICKOFF"){};
 
 	virtual DriveMode step(double dt){
-		if (m_pFieldState->gameMode == FieldState::GAME_MODE_TAKE_BALL){
+		if (m_pFieldState->gameMode == FieldState::GAME_MODE_TAKE_BALL) {
 			m_pFieldState->gameMode = FieldState::GAME_MODE_IN_PROGRESS;
 			return DRIVEMODE_DRIVE_TO_BALL;
 		}
@@ -442,6 +443,50 @@ public:
 	}
 };
 
+class DriveToBallAimGate2v2 : public DriveInstruction
+{
+public:
+	DriveToBallAimGate2v2(const std::string &name = "2V2_DRIVE_TO_BALL_AIM_GATE") : DriveInstruction(name) {};
+
+	DriveMode step(double dt) {
+		if (m_pCom->BallInTribbler()) return DRIVEMODE_2V2_AIM_PARTNER;
+
+		const ObjectPosition &ball = getClosestBall();
+		const ObjectPosition &gate = m_pFieldState->GetHomeGate();
+		double gateHeading = gate.getHeading();
+		double ballHeading = ball.getHeading();
+		double ballDistance = ball.getDistance();
+		double rotation = 0;
+		double errorMargin = 5;
+		double maxDistance = 40;
+		if (fabs(gateHeading) > errorMargin) rotation = -sign0(gateHeading) * std::min(40.0, std::max(fabs(gateHeading), 5.0));
+		double heading = 0;
+		double speed = 0;
+		if (ballDistance > maxDistance) {
+			heading = ballHeading;// +sign(gateHeading) / ballDistance;
+			if (fabs(heading) > 30) heading = sign0(heading)*(fabs(heading) + 15);
+			speed = std::max(60.0, ballDistance);
+		}
+		else {
+			if (fabs(ballHeading) <= errorMargin && fabs(gateHeading) <= errorMargin) {
+				m_pCom->Drive(0, 0, 0);
+				return DRIVEMODE_CATCH_BALL;
+			}
+			if (fabs(ballHeading) > errorMargin) {
+				heading = ballHeading + sign0(ballHeading) * 45;
+				speed = 35;
+			}
+			rotation = 0;
+			if (fabs(gateHeading) > errorMargin) rotation = -sign0(gateHeading) * std::min(40.0, std::max(fabs(gateHeading), 5.0));
+			// drive around the ball
+			//heading = ballHeading + sign(ballHeading) * 90;
+			//std::max(fabs(ballHeading), 35.0);
+		}
+		m_pCom->Drive(speed, heading, rotation);
+		return DRIVEMODE_2V2_DRIVE_TO_BALL_AIM_GATE;
+	}
+};
+
 std::pair<DriveMode, DriveInstruction*> MasterDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_IDLE, new MasterModeIdle()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_BALL, new DriveToBallv2()),
@@ -455,7 +500,8 @@ std::pair<DriveMode, DriveInstruction*> MasterDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DRIVE_HOME, new DriveHome2v2()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_OPPONENT_KICKOFF, new OpponentKickoff(true)),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_GOAL_KEEPER, new GoalKeeper()),
-	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DRIVE_TO_BALL_NAIVE, new DriveToBallNaivev2())
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DRIVE_TO_BALL_NAIVE, new DriveToBallNaivev2()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DRIVE_TO_BALL_AIM_GATE, new DriveToBallAimGate2v2())
 };
 
 std::pair<DriveMode, DriveInstruction*> SlaveDriveModes[] = {
