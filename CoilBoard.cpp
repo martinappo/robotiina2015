@@ -25,7 +25,7 @@ void CoilBoard::HandleMessage(const std::string & message)
 			if (!ballInTribbler && inTribbler)
 				ballCatchTime = boost::posix_time::microsec_clock::local_time();
 			if (ballInTribbler && !inTribbler)
-				ballLostTIme = boost::posix_time::microsec_clock::local_time();
+				ballLostTime = boost::posix_time::microsec_clock::local_time();
 			ballInTribbler = inTribbler;
 		}
 		else if (message[3] == 'c') { // charge done
