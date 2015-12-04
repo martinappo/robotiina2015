@@ -266,11 +266,11 @@ public:
 		if (aimTarget(target, speed, KICKOFF_ANGLE)){
 			m_pCom->Drive(0, 0, sign(m_pFieldState->self.getHeading())*20);
 			std::this_thread::sleep_for(std::chrono::milliseconds(500));
-			m_pCom->Kick(1200);
+			m_pCom->Kick(2500);
 			m_pFieldState->SendPartnerMessage("PAS #");
 			std::this_thread::sleep_for(std::chrono::milliseconds(1500));
 			//return DRIVEMODE_2V2_DRIVE_HOME;
-			return DRIVEMODE_IDLE;
+			//return DRIVEMODE_IDLE;
 			return DRIVEMODE_2V2_DEFENSIVE;
 		}
 		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
