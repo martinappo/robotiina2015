@@ -363,17 +363,20 @@ public:
 		auto homeGate = m_pFieldState->GetHomeGate();
 		double homeGateDist = homeGate.getDistance();
 		double gateAngle = homeGate.getHeading() - 180 * sign(homeGate.getHeading());
-		aimTarget(target, speed,2);		
-		if (gateAngle < 0) {
-			speed.heading = 90;
-		}
-		else {
-			speed.heading = -90;
-		}
+		aimTarget(target, speed,2);	
 		if (homeGateDist < 30) {
-			speed.heading = 0;
+			driveToTargetWithAngle(target, speed, 40, 5);
+		} else {	
+			if (gateAngle < 0) {
+				speed.heading = 90;
+			}
+			else {
+				speed.heading = -90;
+			}
+			speed.velocity = 50;
 		}
-		m_pCom->Drive(30, speed.heading, speed.rotation);
+
+		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 		return DRIVEMODE_2V2_GOAL_KEEPER;
 	}
 };
