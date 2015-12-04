@@ -5,6 +5,7 @@
 #include "TBBImageThresholder.h"
 #include "GateFinder.h"
 #include "BallFinder.h"
+#include "RobotFinder.h"
 #include "AutoCalibrator.h"
 #include <queue>          // std::priority_queue
 #include <functional>     // std::greater
@@ -76,6 +77,7 @@ void FrontCameraVision::Run() {
 	GateFinder blueGateFinder;
 	GateFinder yellowGateFinder;
 	BallFinder ballFinder;
+	RobotFinder robotFinder;
 
 	auto frameSize = m_pCamera->GetFrameSize();	
 
@@ -380,6 +382,24 @@ void FrontCameraVision::Run() {
 		else if (targetGate == YELLOW_GATE && YellowGateFound) targetGatePos = &yellowGatePos;
 		// else leave to NULL
 		*/
+
+		//OTHER POSITION =====================================================================================================
+		std::vector<cv::Point2i> robots;
+		cv::Mat tmp(thresholdedImages[FIELD].size(), thresholdedImages[FIELD].type(), cv::Scalar(255));
+		cv::Mat invField;// (thresholdedImages[FIELD].size(), thresholdedImages[FIELD].type(), cv::Scalar(0));
+		tmp.copyTo(invField, thresholdedImages[FIELD]);
+		//thresholdedImages[INNER_BORDER].copyTo(tmp2);
+		//thresholdedImages[OUTER_BORDER].copyTo(tmp2);
+		//thresholdedImages[BALL].copyTo(tmp2);
+		
+		bool robotsFound = robotFinder.Locate(invField, frameHSV, frameBGR, robots);
+
+		for (auto robot : robots) {
+			cv::Rect robotRectangle = cv::Rect(robot - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
+				robot + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
+			rectangle(frameBGR, robotRectangle.tl(), robotRectangle.br(), cv::Scalar(10, 255, 101), 2, 8, 0);
+		}
+
 
 		//PARTNER POSITION ====================================================================================================
 		if (detectOtherRobots) {

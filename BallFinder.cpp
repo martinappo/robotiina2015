@@ -62,6 +62,7 @@ bool BallFinder::validateBall(ThresholdedImages &HSVRanges, cv::Point2d endPoint
 	cv::Mat innerThresholded = HSVRanges[INNER_BORDER];
 	cv::Mat outerThresholded = HSVRanges[OUTER_BORDER];
 	cv::Mat fieldThresholded = HSVRanges[FIELD];
+
 /*	
 	cv::circle(innerThresholded, cv::Point(innerThresholded.size() / 2), 70, cv::Scalar(0, 255, 0), -1);
 	cv::circle(outerThresholded, cv::Point(outerThresholded.size() / 2), 70, cv::Scalar(0, 255, 0), -1);
