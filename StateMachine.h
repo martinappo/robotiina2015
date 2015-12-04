@@ -68,6 +68,10 @@ public:
 		speed = { 0, 0, 0 };
 		return step(dt);
 	};
+	virtual DriveMode step2(double dt, DriveMode driveMode){
+		speed = { 0, 0, 0 };
+		return step(dt);
+	}
 	virtual DriveMode step(double dt) = 0;
 	virtual void onExit(){};
 
