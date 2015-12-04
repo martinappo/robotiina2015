@@ -18,7 +18,8 @@ enum MultiModeDriveStates {
 	DRIVEMODE_2V2_DRIVE_TO_BALL,
 	DRIVEMODE_2V2_CATCH_BALL,
 	DRIVEMODE_2V2_DRIVE_HOME,
-	DRIVEMODE_2V2_OPPONENT_KICKOFF
+	DRIVEMODE_2V2_OPPONENT_KICKOFF,
+	DRIVEMODE_2V2_GOAL_KEEPER
 
 };
 class DriveToBallv2 : public DriveToBall
@@ -155,15 +156,7 @@ public:
 	Defensive() : DriveInstruction("2V2_DEFENSIVE"){};
 	virtual DriveMode step(double dt){
 		auto & target = m_pFieldState->partner;
-		if (m_pFieldState->partnerHomeGate.getDistance() > 100){//is ally in defense area?
-			if (m_pFieldState->GetHomeGate().getDistance() > 80) return DRIVEMODE_2V2_DRIVE_HOME;
-			else{
-				BallPosition ball = DriveInstruction::getClosestBall();
-				if (ball.polarMetricCoords.x != INT_MAX)
-					DriveInstruction::aimTarget(ball, speed);
-				//block gate & look for ball
-			}
-		}
+		if (/*partner not goal keeper become goal keeper*/ false){ return DRIVEMODE_2V2_DRIVE_HOME;}//ToDo goalKeeper message 
 		else{
 			auto & opponent = m_pFieldState->opponents[0];//get the one with ball?
 			//auto & opponent = m_pFieldState->GetTargetGate(); for testing
@@ -289,7 +282,7 @@ public:
 	DriveHome2v2() : DriveInstruction("2V2_DRIVE_HOME"){};
 	virtual DriveMode step(double dt){
 		ObjectPosition &lastGateLocation = m_pFieldState->GetHomeGate();
-		if (DriveInstruction::driveToTargetWithAngle(lastGateLocation, speed))return DRIVEMODE_2V2_DEFENSIVE;
+		if (DriveInstruction::driveToTargetWithAngle(lastGateLocation, speed))return DRIVEMODE_2V2_GOAL_KEEPER;
 		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 		return DRIVEMODE_2V2_DRIVE_HOME;
 	}
@@ -318,6 +311,24 @@ private:
 	bool mode;
 };
 
+class GoalKeeper : public DriveInstruction
+{
+private:
+	bool wentLeft = false;
+public:
+	GoalKeeper() : DriveInstruction("2V2_GOAL_KEEPER"){};
+
+	virtual DriveMode step(double dt){
+		auto &target = getClosestBall();
+		aimTarget(target, speed,2);
+		if (wentLeft) speed.heading = 90;
+		else speed.heading = 90;
+		wentLeft = !(wentLeft);
+		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
+		return DRIVEMODE_2V2_GOAL_KEEPER;
+	}
+};
+
 std::pair<DriveMode, DriveInstruction*> MasterDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_IDLE, new MasterModeIdle()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_BALL, new DriveToBallv2()),
@@ -330,6 +341,7 @@ std::pair<DriveMode, DriveInstruction*> MasterDriveModes[] = {
 //	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_KICKOFF, new KickOff()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DRIVE_HOME, new DriveHome2v2()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_OPPONENT_KICKOFF, new OpponentKickoff(true)),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_GOAL_KEEPER, new GoalKeeper())
 };
 
 std::pair<DriveMode, DriveInstruction*> SlaveDriveModes[] = {
@@ -344,6 +356,7 @@ std::pair<DriveMode, DriveInstruction*> SlaveDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_CATCH_KICKOFF, new CatchKickOff()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_KICK, new Kick()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_OPPONENT_KICKOFF, new OpponentKickoff(false)),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_GOAL_KEEPER, new GoalKeeper())
 //	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_CATCH_BALL, new CatchBall()),
 };
 
