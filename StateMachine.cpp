@@ -98,8 +98,8 @@ void StateMachine::Run()
 		if (testMode){
 			if (testDriveMode != DRIVEMODE_IDLE && newMode == DRIVEMODE_IDLE) newMode = testDriveMode;
 			else if (newMode != testDriveMode) {
-				newMode = DRIVEMODE_IDLE;
-				testDriveMode = DRIVEMODE_IDLE;
+				//newMode = DRIVEMODE_IDLE;
+				//testDriveMode = DRIVEMODE_IDLE;
 			}
 		}
 

@@ -14,7 +14,7 @@ enum MultiModeDriveStates {
 	DRIVEMODE_2V2_CATCH_KICKOFF,
 	DRIVEMODE_2V2_AIM_PARTNER,
 	//DRIVEMODE_AIM_GATE,
-	DRIVEMODE_2V2_KICK,
+	//DRIVEMODE_2V2_KICK,
 	//DRIVEMODE_DRIVE_TO_BALL,
 	//DRIVEMODE_CATCH_BALL,
 	DRIVEMODE_2V2_DRIVE_HOME,
@@ -342,13 +342,13 @@ public:
 
 		ObjectPosition &lastGateLocation = m_pFieldState->GetTargetGate();
 		bool sightObstructed = m_pFieldState->gateObstructed;
-		if (!m_pCom->BallInTribbler()) return DRIVEMODE_2V2_OFFENSIVE;
+		if (!m_pCom->BallInTribbler(true)) return DRIVEMODE_2V2_OFFENSIVE;
 		if (aimTarget(lastGateLocation, speed, 2)){
 			if (sightObstructed) { //then move sideways away from gate
 				speed.velocity = 45;
 				speed.heading += 90;
 			}
-			else return DRIVEMODE_2V2_KICK;
+			else return DRIVEMODE_KICK;
 		}
 		else {
 			speed.rotation = lastGateLocation.getHeading();
@@ -377,7 +377,7 @@ public:
 	DriveHome2v2() : DriveInstruction("2V2_DRIVE_HOME"){};
 	virtual DriveMode step(double dt){
 		ObjectPosition &lastGateLocation = m_pFieldState->GetHomeGate();
-		if (DriveInstruction::driveToTargetWithAngle(lastGateLocation, speed))return DRIVEMODE_2V2_GOAL_KEEPER;
+		if (DriveInstruction::driveToTargetWithAngle(lastGateLocation, speed, 65))return DRIVEMODE_2V2_GOAL_KEEPER;
 		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 		return DRIVEMODE_2V2_DRIVE_HOME;
 	}
@@ -415,7 +415,10 @@ public:
 
 	virtual DriveMode step(double dt){
 		auto &target = getClosestBall();
-		if (target.getDistance() < 25) {
+		if (target.getDistance() == 0) {
+			return DRIVEMODE_2V2_GOAL_KEEPER;
+		}
+		if (target.getDistance() < 70 && !m_pFieldState->obstacleNearBall ) {
 			return DRIVEMODE_DRIVE_TO_BALL;
 		}
 		auto homeGate = m_pFieldState->GetHomeGate();

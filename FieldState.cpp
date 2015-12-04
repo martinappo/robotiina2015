@@ -1,6 +1,14 @@
 #include "FieldState.h"
 
-const void BallArray::updateAndFilterClosest(cv::Point2i possibleClosestRaw, std::vector<cv::Point2i> rawBallCoords, bool ballIsNotValid) {
+const void BallArray::updateAndFilterClosest(cv::Point2i possibleClosestRaw, std::vector<cv::Point2i> rawBallCoords, bool ballIsNotValid, bool filterEnabled) {
+
+	if (!filterEnabled) {
+		closest.updateRawCoordinates(possibleClosestRaw); //Update all coordinates after filtering raw ones
+		closest.lastRawCoords = possibleClosestRaw;
+		closest.isUpdated = true;
+		return;
+	}
+
 	if (reset == true || ballIsNotValid) { 
 		closest.filteredRawCoords = possibleClosestRaw;
 		closest.lastRawCoords = possibleClosestRaw;
