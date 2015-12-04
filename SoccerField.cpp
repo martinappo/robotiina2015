@@ -9,11 +9,13 @@ extern DistanceCalculator gDistanceCalculator;
 SoccerField::SoccerField(boost::asio::io_service &io, IDisplay *pDisplay, bool master, int number_of_balls, int port) :m_pDisplay(pDisplay)
 , UdpServer(io, port, master), FieldState(number_of_balls), ThreadedClass("SoccerField")
 {
+#ifndef IGNORE_USELESS
 	green = cv::imread("field.png", CV_LOAD_IMAGE_COLOR);   // Read the file
 	field = cv::Mat(green.size(), CV_8UC3, cv::Scalar::all(245));
 	c = cv::Point2d(green.size()) / 2;
 
 	Start();
+#endif
 }
 
 
@@ -62,13 +64,14 @@ void SoccerField::Run(){
 			//SendMessage(message.str());
 		}
 
+
 		cv::circle(field, self.rawFieldCoords + c, 24, cv::Scalar(0, 33, 255), 4);
 		cv::circle(field, self.fieldCoords + c, 14, cv::Scalar(133, 33, 55), 4);
 		cv::line(field, self.fieldCoords + c,
 			cv::Point2d((40.0*sin(self.getAngle() / 360 * TAU)),( -40 * cos(self.getAngle() / 360 * TAU)))
 			+ self.fieldCoords + c
 			, cv::Scalar(133, 33, 55), 3);
-		
+	
 		cv::circle(field, balls.closest.fieldCoords + c, 12, cv::Scalar(48, 154, 236), 2);
 		for (size_t i = 0, ilen = balls.size(); i < ilen; i++) {
 			BallPosition &_ball = balls[i];

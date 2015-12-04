@@ -60,14 +60,13 @@ bool GateFinder::Locate(cv::Mat &imgThresholded, cv::Mat &frameHSV, cv::Mat &fra
 	else {
 		assert(false);
 	}
-
 	cv::RotatedRect bounding_rect2 = cv::minAreaRect(contours[largest_contour_index]);
 	bounding_rect2.points(bounds);
-	
-	//Drawing gate //TODO: turn off, when in competition
+#ifndef IGNORE_USELESS
 	for (int j = 0; j < 4; j++) {
 		line(frameBGR, bounds[j], bounds[(j + 1) % 4], color, 1, 8);
 	}
+#endif
 
 	return true;
 }

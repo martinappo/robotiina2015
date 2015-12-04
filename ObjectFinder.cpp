@@ -65,7 +65,9 @@ void drawLine(cv::Mat & img, cv::Mat & img2, cv::Vec4f line, int thickness, CvSc
 	else {
 		std::cout << "unable to fill line: " << startPoint << ", " << endPoint << std::endl;
 	}
+#ifndef IGNORE_USELESS
 	cv::line(img, startPoint, endPoint, color, thickness, 8, 0);
+#endif
 	return;
 	
 
