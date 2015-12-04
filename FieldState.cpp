@@ -46,7 +46,7 @@ const void BallArray::updateAndFilterClosest(cv::Point2i possibleClosestRaw, std
 	ballLost = (double)cv::getTickCount();
 }
 
-FieldState::FieldState(int number_of_balls) :yellowGate(YELLOW_GATE), blueGate(BLUE_GATE), self(yellowGate, blueGate, cv::Point(0, 0)), balls(number_of_balls, this){
+FieldState::FieldState(int number_of_balls) :yellowGate(YELLOW_GATE), blueGate(BLUE_GATE), self(yellowGate, blueGate, cv::Point(0, 0)), balls(number_of_balls, this), opponents(2, this) {
 	gameMode = GAME_MODE_START_SINGLE_PLAY;
 	collisionWithBorder = false;
 	collisionWithUnknown = false;

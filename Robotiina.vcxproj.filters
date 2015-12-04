@@ -121,6 +121,9 @@
     <ClCompile Include="refereeCom.cpp">
       <Filter>ComModule</Filter>
     </ClCompile>
+    <ClCompile Include="RobotFinder.cpp">
+      <Filter>VisionModule</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="robot.h">
@@ -263,6 +266,9 @@
     </ClInclude>
     <ClInclude Include="refereeCom.h">
       <Filter>ComModule</Filter>
+    </ClInclude>
+    <ClInclude Include="RobotFinder.h">
+      <Filter>VisionModule</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

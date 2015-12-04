@@ -658,10 +658,10 @@ void Robot::Run()
 
 		//m_pDisplay->putShadowedText( "border: " + std::to_string(borderDistance.distance), cv::Point(-140, 280), 0.5, cv::Scalar(255, 255, 255));
 
-		m_pDisplay->putShadowedText("Blue gate d: " + std::to_string((int)field.blueGate.getDistance()) + " a: " + std::to_string(field.blueGate.getAngle()), cv::Point(-250, 280), 0.4, cv::Scalar(255, 255, 255));
+		m_pDisplay->putShadowedText("Blue gate d: " + std::to_string((int)field.blueGate.getDistance()) + " a: " + std::to_string(field.blueGate.getAngle() - 180 * sign(field.blueGate.getAngle())), cv::Point(-250, 280), 0.4, cv::Scalar(255, 255, 255));
 //		if (pSim != NULL)
 //			m_pDisplay->putShadowedText("Blue gate d: " + std::to_string((int)pSim->blueGate.getDistance()) + " a: " + std::to_string(pSim->blueGate.getAngle()), cv::Point(-250, 280), 0.4, cv::Scalar(255, 255, 255));
-		m_pDisplay->putShadowedText("Yell gate d: " + std::to_string((int)field.yellowGate.getDistance()) + " a: " + std::to_string(field.yellowGate.getAngle()), cv::Point(-250, 310), 0.4, cv::Scalar(255, 255, 255));
+		m_pDisplay->putShadowedText("Yell gate d: " + std::to_string((int)field.yellowGate.getDistance()) + " a: " + std::to_string(field.yellowGate.getAngle() -180 * sign(field.yellowGate.getAngle())), cv::Point(-250, 310), 0.4, cv::Scalar(255, 255, 255));
 //		if (pSim != NULL)
 //			m_pDisplay->putShadowedText("Yell gate d: " + std::to_string((int)pSim->yellowGate.getDistance()) + " a: " + std::to_string(pSim->yellowGate.getAngle()), cv::Point(-250, 330), 0.4, cv::Scalar(255, 255, 255));
 

@@ -5,6 +5,7 @@
 #include "TBBImageThresholder.h"
 #include "GateFinder.h"
 #include "BallFinder.h"
+#include "RobotFinder.h"
 #include "AutoCalibrator.h"
 #include <queue>          // std::priority_queue
 #include <functional>     // std::greater
@@ -76,6 +77,7 @@ void FrontCameraVision::Run() {
 	GateFinder blueGateFinder;
 	GateFinder yellowGateFinder;
 	BallFinder ballFinder;
+	RobotFinder robotFinder;
 
 	auto frameSize = m_pCamera->GetFrameSize();	
 
@@ -329,6 +331,7 @@ void FrontCameraVision::Run() {
 			if (detectObjectsNearBall){
 				
 				cv::bitwise_or(thresholdedImages[INNER_BORDER], thresholdedImages[FIELD], thresholdedImages[FIELD]);
+				
 				//cv::bitwise_or(thresholdedImages[BALL], thresholdedImages[FIELD], thresholdedImages[FIELD]);
 				cv::Rect bigAreaAroundBall = cv::Rect(m_pState->balls.closest.filteredRawCoords - cv::Point(50, 50) + cv::Point(frameBGR.size() / 2),
 					m_pState->balls.closest.filteredRawCoords + cv::Point(50, 50) + cv::Point(frameBGR.size() / 2));
@@ -386,6 +389,18 @@ void FrontCameraVision::Run() {
 		else if (targetGate == YELLOW_GATE && YellowGateFound) targetGatePos = &yellowGatePos;
 		// else leave to NULL
 		*/
+
+		//OTHER POSITION =====================================================================================================
+		std::vector<cv::Point2i> robots;
+		cv::bitwise_or(thresholdedImages[OUTER_BORDER], thresholdedImages[FIELD], thresholdedImages[FIELD]);
+		bool robotsFound = robotFinder.Locate(thresholdedImages[FIELD], frameHSV, frameBGR, robots);
+/*
+		for (auto robot : robots) {
+			cv::Rect robotRectangle = cv::Rect(robot - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
+				robot + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
+			rectangle(frameBGR, robotRectangle.tl(), robotRectangle.br(), cv::Scalar(10, 255, 101), 2, 8, 0);
+		}*/
+
 
 		//PARTNER POSITION ====================================================================================================
 		if (detectOtherRobots) {

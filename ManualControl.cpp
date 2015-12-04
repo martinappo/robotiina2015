@@ -17,7 +17,7 @@ ManualControl::ManualControl(ICommunicationModule *pComModule) :ConfigurableModu
 
 	AddSetting("Move Forward", []{return "w"; }, [this]{this->speed.y += 10; });
 	AddSetting("Move Back", []{return "s"; }, [this]{this->speed.y -= 10; });
-	AddSetting("Stop (space)", []{return "q"; }, [this]{this->speed = cv::Point2d(0,0); });
+	AddSetting("Stop (space)", []{return "q"; }, [this]{this->speed = cv::Point2d(0, 0); this->rotation = 0; });
 
 //	AddSetting("Rotate Right", []{return ""; }, [this]{this->wheels->Rotate(0, 20); });
 //	AddSetting("Rotate Left", []{return ""; }, [this]{this->wheels->Rotate(1, 20); });

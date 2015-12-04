@@ -94,6 +94,7 @@
     <ClInclude Include="AutoPlayHelpers.h" />
     <ClInclude Include="MultiModePlay.h" />
     <ClInclude Include="refereeCom.h" />
+    <ClInclude Include="RobotFinder.h" />
     <ClInclude Include="SingleModePlay.h" />
     <ClInclude Include="StateMachine.h" />
     <ClInclude Include="BallFinder.h" />
@@ -142,6 +143,7 @@
     <ClCompile Include="autocalibrator.cpp" />
     <ClCompile Include="MultiModePlay.cpp" />
     <ClCompile Include="refereeCom.cpp" />
+    <ClCompile Include="RobotFinder.cpp" />
     <ClCompile Include="SingleModePlay.cpp" />
     <ClCompile Include="StateMachine.cpp" />
     <ClCompile Include="BallFinder.cpp" />

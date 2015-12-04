@@ -46,8 +46,8 @@ bool BallFinder::Locate(cv::Mat &imgThresholded, cv::Mat &frameHSV, cv::Mat &fra
 			int ballArea = (int)(cv::contourArea(contours[i], false));
 			if (ballArea >= smallestBallArea) {
 				cv::Moments M = cv::moments(contours[i]);
-				cv::Rect bounding_rect = cv::boundingRect(contours[i]);
-				rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), redColor, 1, 8, 0);
+				//cv::Rect bounding_rect = cv::boundingRect(contours[i]);
+				//rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), redColor, 1, 8, 0);
 				try{objectCoords.push_back(cv::Point2d((M.m10 / M.m00), (M.m01 / M.m00)) - frameCenter);}
 				catch(cv::Exception ex){return false;}
 				ballsUpdatedCount++;
@@ -62,6 +62,7 @@ bool BallFinder::validateBall(ThresholdedImages &HSVRanges, cv::Point2d endPoint
 	cv::Mat innerThresholded = HSVRanges[INNER_BORDER];
 	cv::Mat outerThresholded = HSVRanges[OUTER_BORDER];
 	cv::Mat fieldThresholded = HSVRanges[FIELD];
+
 /*	
 	cv::circle(innerThresholded, cv::Point(innerThresholded.size() / 2), 70, cv::Scalar(0, 255, 0), -1);
 	cv::circle(outerThresholded, cv::Point(outerThresholded.size() / 2), 70, cv::Scalar(0, 255, 0), -1);

@@ -102,7 +102,7 @@ public:
 	GatePosition yellowGate;
 	RobotPosition self; //Robot distance on field
 	ObjectPosition partner;
-	ObjectPosition opponents[2];
+	BallArray opponents;
 	ObjectPosition partnerHomeGate;
 	std::atomic_bool gateObstructed;
 	virtual void SetTargetGate(OBJECT gate) = 0;
