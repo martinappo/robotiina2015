@@ -10,6 +10,7 @@ class FieldState;
 class BallArray {
 public:
 	BallArray(unsigned ballCount, FieldState* field):field(field){
+		reset = true;
 		balls.resize(ballCount);
 		// distribute balls uniformly
 		for (unsigned i = 0; i < ballCount; i++) {
@@ -28,7 +29,7 @@ public:
 	const BallPosition& getClosest(){
 		return closest;
 	}
-	const BallPosition& calcClosest(int * index);
+	const void updateAndFilterClosest(cv::Point2i closestRaw);
 
 	size_t size() {
 		return balls.size();

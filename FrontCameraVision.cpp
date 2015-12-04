@@ -212,7 +212,7 @@ void FrontCameraVision::Run() {
 		}
 
 		cv::circle(thresholdedImages[FIELD], cv::Point(frameBGR.size() / 2), 80, 255, -1);
-		cv::circle(thresholdedImages[BALL], cv::Point(frameBGR.size() / 2), 50, 0, -1);
+		//cv::circle(thresholdedImages[BALL], cv::Point(frameBGR.size() / 2), 50, 0, -1);
 		//imshow("tb",thresholdedImages[BALL]);
 		//cv::waitKey(1);
 		//COLLISION DETECTION ====================================================================================================
@@ -289,30 +289,26 @@ void FrontCameraVision::Run() {
 				return cv::norm(a) < cv::norm(b);
 			});
 			// validate balls
-			cv::Point2i closest;
+			cv::Point2i possibleClosest;
 			for (auto ball : balls) {
-				closest = ball;
+				possibleClosest = ball;
 				if (BallFinder::validateBall(thresholdedImages, ball, frameHSV, frameBGR)){
 					break;
 				} else {
-					cv::Rect bounding_rect = cv::Rect(closest - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
-						closest + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
+					cv::Rect bounding_rect = cv::Rect(possibleClosest - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
+						possibleClosest + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
 					rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), cv::Scalar(255, 0, 255), 2, 8, 0);
 
 				}
 			}
-			cv::Rect bounding_rect = cv::Rect(closest - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
-				closest + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
-			rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), cv::Scalar(255, 0, 0), 2, 8, 0);
 
-//			cv::Mat rotatedBalls(balls.size(), balls.type());
 
-//			rotatedBalls = rotMat * balls;
 			m_pState->resetBallsUpdateState();
-			m_pState->balls.closest.updateRawCoordinates(closest, cv::Point(0,0));
-			m_pState->balls.closest.updateFieldCoords(m_pState->self.getFieldPos(), m_pState->self.getAngle());
-			m_pState->balls.closest.isUpdated = true;
 
+			m_pState->balls.updateAndFilterClosest(possibleClosest);
+			cv::Rect bounding_rect = cv::Rect(m_pState->balls.closest.filteredRawCoords - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
+				m_pState->balls.closest.filteredRawCoords + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
+			rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), cv::Scalar(255, 0, 0), 2, 8, 0);
 
 			/* find balls that are close by */
 			/*
@@ -334,7 +330,7 @@ void FrontCameraVision::Run() {
 			//TODO: use returned ball instead of balls.at<double>(0, ball_idx) 
 			/*
 			int ball_idx = 0;
-			m_pState->balls.calcClosest(&ball_idx);
+			
 			if (ball_idx >= 0) {
 				cv::Rect bounding_rect = cv::Rect(cv::Point(balls.at<double>(0, ball_idx), balls.at<double>(1, ball_idx)) - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
 					cv::Point(balls.at<double>(0, ball_idx), balls.at<double>(1, ball_idx)) + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));

@@ -9,26 +9,18 @@ BallPosition::~BallPosition()
 void BallPosition::setIsUpdated(bool updated) {
 	isUpdated = updated;
 }
-void BallPosition::filterCoords(const BallPosition &ball, ObjectPosition robot, bool reset) {
-
+void BallPosition::filterCoords(const BallPosition &ball, bool reset) {
 	if (reset) {
-		filter.reset(ball.fieldCoords);
-		fieldCoords = ball.fieldCoords;
-		polarMetricCoords = ball.polarMetricCoords;
-		rawPixelCoords = ball.rawPixelCoords;
+		filter.reset(ball.rawPixelCoords);
+		filteredRawCoords = ball.rawPixelCoords;
 	}
 	else {
-		fieldCoords = filter.doFiltering(ball.fieldCoords);
+		filteredRawCoords = filter.doFiltering(ball.rawPixelCoords);
 	}
-	//polarMetricCoords = ball.polarMetricCoords;
-	polarMetricCoords.x = cv::norm(robot.fieldCoords - fieldCoords);
-	polarMetricCoords.y = gDistanceCalculator.angleBetween(cv::Point(0, -1), robot.fieldCoords - fieldCoords) + robot.getAngle();
-	rawPixelCoords = ball.rawPixelCoords;
-
 }
 
 void BallPosition::predictCoords() {
-
+	filteredRawCoords = filter.getPrediction();
 }
 
 void BallPosition::updateFieldCoords(cv::Point2d orgin, double heading) {
