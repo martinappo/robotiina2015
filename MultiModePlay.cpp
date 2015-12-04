@@ -30,19 +30,14 @@ public:
 	{
 
 		auto &target = getClosestBall();
-		if (target.getDistance() > 10000) return DRIVEMODE_IDLE;
-		if (m_pCom->BallInTribbler()) {
-			if (m_pFieldState->gameMode == FieldState::GAME_MODE_START_OUR_KICK_OFF)return DRIVEMODE_2V2_AIM_PARTNER;
-			else return DRIVEMODE_2V2_OFFENSIVE;
+
+		if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
+		if (driveToTargetWithAngle(target, speed, 25, 5)){return DRIVEMODE_CATCH_BALL;}
+		else {
+			m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
+			return DRIVEMODE_DRIVE_TO_BALL;
 		}
-		speed.velocity = 0;
-		speed.heading = 0;
-		if (driveToTargetWithAngle(target, speed)){
-			m_pCom->Drive(0,0,0);
-			return DRIVEMODE_CATCH_BALL;
-		}
-		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
-		return DRIVEMODE_DRIVE_TO_BALL;
+
 	}
 };
 
@@ -55,23 +50,23 @@ public:
 	CatchBall2v2(bool mode) : CatchBall("2V2_CATCH_BALL"), master(mode){};
 	virtual DriveMode step(double dt){
 
-		auto &target = getClosestBall();
-		if (STUCK_IN_STATE(3000) || target.getDistance() > initDist + 10) return DRIVEMODE_DRIVE_TO_BALL;
-
-		if (fabs(target.getHeading()) <= 2.) {
-			if (catchTarget(target, speed)) {
-				if (m_pFieldState->gameMode == FieldState::GAME_MODE_START_OUR_KICK_OFF)return DRIVEMODE_2V2_AIM_PARTNER;
+	FIND_TARGET_BALL //TODO: use it?
+	if (STUCK_IN_STATE(3000) || target.getDistance() > initDist  + 10) return DRIVEMODE_DRIVE_TO_BALL;
+	speed.velocity, speed.heading, speed.rotation = 0;
+	if(fabs(target.getHeading()) <= 2) { 
+		if(catchTarget(target, speed)){
+			if (m_pFieldState->gameMode == FieldState::GAME_MODE_START_OUR_KICK_OFF)return DRIVEMODE_2V2_AIM_PARTNER;
 				else return DRIVEMODE_2V2_OFFENSIVE;
-			}
-		}
-		else {
-			double heading = -sign(target.getHeading())*10.;
-			//move slightly in order not to get stuck
-			speed.velocity = -10;
-			speed.rotation = heading;
+
 		}
 		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 		return DRIVEMODE_CATCH_BALL;
+	}
+	double heading = sign(target.getHeading())*10;
+	//move slightly in order not to get stuck
+	if(heading == 0) m_pCom->Drive(-10,0, 0);
+	else m_pCom->Drive(0,0, heading);
+	return DRIVEMODE_DRIVE_TO_BALL;
 	}
 };
 

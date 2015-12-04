@@ -206,7 +206,7 @@ DriveMode CatchBall::step(double dt)
 		double heading = -sign(target.getHeading())*10.;
 		//move slightly in order not to get stuck
 		speed.velocity = -10;
-		speed.rotation = heading;
+		speed.rotation = -heading;
 	}
 	m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 	return DRIVEMODE_CATCH_BALL;

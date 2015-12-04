@@ -105,11 +105,15 @@ void StateMachine::Run()
 
 		if (newMode != curDriveMode->first){
 			boost::mutex::scoped_lock lock(mutex);
+						std::cout << "state: " << curDriveMode->second->name;
+
 			curDriveMode->second->onExit();
 			curDriveMode = driveModes.find(newMode);
 			if (curDriveMode == driveModes.end()) curDriveMode = driveModes.find(DRIVEMODE_IDLE);
+						std::cout << " -> " << curDriveMode->second->name << std::endl;
+
 			curDriveMode->second->onEnter();
-			std::this_thread::sleep_for(std::chrono::milliseconds(10)); // We should remove this
+			//std::this_thread::sleep_for(std::chrono::milliseconds(10)); // We should remove this
 		}
 	}
 }
