@@ -347,9 +347,9 @@ void FrontCameraVision::Run() {
 					rectangle(frameBGR, bigAreaAroundBall.tl(), bigAreaAroundBall.br(), cv::Scalar(255, 50, cb? 255:50), 2, 8, 0);
 					m_pState->obstacleNearBall = cb;
 				} catch(...){
-					std::cout << "ball is near image border!" << std::endl;
-					std::cout << m_pState->balls.closest.filteredRawCoords << std::endl;
-					std::cout << bigAreaAroundBall << std::endl;
+					//std::cout << "ball is near image border!" << std::endl;
+					//std::cout << m_pState->balls.closest.filteredRawCoords << std::endl;
+					//std::cout << bigAreaAroundBall << std::endl;
 					m_pState->obstacleNearBall = true;				
 				}
 			}
