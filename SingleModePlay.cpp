@@ -196,16 +196,21 @@ void CatchBall::onEnter()
 #ifdef ANDRESE_CATCH_BALL
 DriveMode CatchBall::step(double dt)
 {
+	if (m_pCom->BallInTribbler())return DRIVEMODE_AIM_GATE;
+
 	FIND_TARGET_BALL //TODO: use it?
+	double heading = target.getHeading();
 		if (/*STUCK_IN_STATE(3000) ||*/ target.getDistance() > (initDist + 10)) return DRIVEMODE_DRIVE_TO_BALL;
 	speed.velocity, speed.heading, speed.rotation = 0;
 	if (fabs(target.getHeading()) <= 2.) {
 		if (catchTarget(target, speed)) return DRIVEMODE_AIM_GATE;
+		speed.rotation = - sign0(heading) * std::min(40.0, std::max(fabs(heading),5.0));
+
 	}
 	else {
-		double heading = -sign(target.getHeading())*10.;
+		double heading = sign(target.getHeading())*10.;
 		//move slightly in order not to get stuck
-		speed.velocity = -10;
+		speed.velocity = 50;
 		speed.rotation = -heading;
 	}
 	m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
