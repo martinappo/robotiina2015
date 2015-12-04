@@ -50,6 +50,33 @@ private:
 public:
 	CatchBall2v2(bool mode) : CatchBall("2V2_CATCH_BALL"), master(mode){};
 	virtual DriveMode step(double dt){
+			if (m_pCom->BallInTribbler()){
+				if (m_pFieldState->gameMode == FieldState::GAME_MODE_START_OUR_KICK_OFF)return DRIVEMODE_2V2_AIM_PARTNER;
+		else return DRIVEMODE_2V2_OFFENSIVE;
+			};
+
+	FIND_TARGET_BALL //TODO: use it?
+	double heading = target.getHeading();
+		if (/*STUCK_IN_STATE(3000) ||*/ target.getDistance() > (initDist + 10)) return DRIVEMODE_DRIVE_TO_BALL;
+	speed.velocity, speed.heading, speed.rotation = 0;
+	if (fabs(target.getHeading()) <= 2.) {
+		if (catchTarget(target, speed)) {
+			if (m_pFieldState->gameMode == FieldState::GAME_MODE_START_OUR_KICK_OFF)return DRIVEMODE_2V2_AIM_PARTNER;
+		else return DRIVEMODE_2V2_OFFENSIVE;
+			
+		}
+		speed.rotation = - sign0(heading) * std::min(40.0, std::max(fabs(heading),5.0));
+
+	}
+	else {
+		double heading = sign(target.getHeading())*10.;
+		//move slightly in order not to get stuck
+		speed.velocity = 50;
+		speed.rotation = -heading;
+	}
+	m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
+
+/*
 	if(m_pCom->BallInTribbler()){
 		if (m_pFieldState->gameMode == FieldState::GAME_MODE_START_OUR_KICK_OFF)return DRIVEMODE_2V2_AIM_PARTNER;
 		else return DRIVEMODE_2V2_OFFENSIVE;
@@ -72,7 +99,9 @@ public:
 	if(heading == 0) m_pCom->Drive(-10,0, 0);
 	else m_pCom->Drive(0,0, heading);
 	return DRIVEMODE_DRIVE_TO_BALL;
+	*/
 	}
+	
 };
 
 class MasterModeIdle : public Idle {
