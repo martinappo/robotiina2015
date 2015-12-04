@@ -26,13 +26,16 @@ class DriveToBallv2 : public DriveToBall
 {
 public:
 	DriveToBallv2(const std::string &name = "DRIVE_TO_BALL_V2") : DriveToBall(name){};
+	void onEnter(){ 
+		m_pCom->ToggleTribbler(false);
+	}
 
 	DriveMode step(double dt)
 	{
 
 		auto &target = getClosestBall();
 
-		if (m_pCom->BallInTribbler()) {
+		if (m_pCom->BallInTribbler(true)) {
 			std::cout << "BallInTribbler" << std::endl;
 			return DRIVEMODE_AIM_GATE;
 		}
@@ -53,10 +56,10 @@ private:
 public:
 	CatchBall2v2(bool mode) : CatchBall("2V2_CATCH_BALL"), master(mode){};
 	virtual DriveMode step(double dt){
-			if (m_pCom->BallInTribbler()){
+			if (m_pCom->BallInTribbler(true)){
 				std::cout << "BallInTribbler" << std::endl;
 				if (m_pFieldState->gameMode == FieldState::GAME_MODE_START_OUR_KICK_OFF)return DRIVEMODE_2V2_AIM_PARTNER;
-		else return DRIVEMODE_2V2_OFFENSIVE;
+				else return DRIVEMODE_2V2_OFFENSIVE;
 			};
 
 	FIND_TARGET_BALL //TODO: use it?
@@ -79,7 +82,6 @@ public:
 		speed.rotation = -heading;
 	}
 	m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
-	std::this_thread::sleep_for(std::chrono::milliseconds(250));
 	return DRIVEMODE_CATCH_BALL;
 
 /*
@@ -153,7 +155,7 @@ class Offensive : public DriveInstruction
 public:
 	Offensive() : DriveInstruction("2V2_OFFENSIVE"){};
 	virtual DriveMode step(double dt){
-		if (m_pCom->BallInTribbler()){
+		if (m_pCom->BallInTribbler(true)){
 			//Reverese to GOAL			
 			const ObjectPosition &gate = m_pFieldState->GetTargetGate();
 			double reverseHeading = gate.getHeading() - 180 * sign(gate.getHeading());
@@ -266,7 +268,9 @@ public:
 			//std::this_thread::sleep_for(std::chrono::milliseconds(500));
 			m_pCom->Kick(2600);
 			m_pFieldState->SendPartnerMessage("PAS #");
-			return DRIVEMODE_2V2_DRIVE_HOME;
+			std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+			//return DRIVEMODE_2V2_DRIVE_HOME;
+			return DRIVEMODE_IDLE;
 		}
 		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 		return DRIVEMODE_2V2_AIM_PARTNER;

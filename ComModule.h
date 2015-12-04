@@ -17,8 +17,8 @@ public:
 		m_pWheels->Drive(speed, angularSpeed);
 	}
 
-	virtual bool BallInTribbler() {
-		return m_pCoilGun->BallInTribbler();
+	virtual bool BallInTribbler(bool wait=false) {
+		return m_pCoilGun->BallInTribbler(wait);
 	}
 
 	virtual long BallInTribblerTime() {

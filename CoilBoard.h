@@ -35,11 +35,18 @@ public:
 	};
 	void Kick(int force);
 	void ToggleTribbler(int speed);
-	bool BallInTribbler() { return ballInTribbler; }
+	bool BallInTribbler(bool wait=false) { 
+		if(wait) {
+			return BallInTribblerTime() > 500;
+		}else {
+			return ballInTribbler; 
+		}
+	}
 	long BallInTribblerTime(){
 		if (ballInTribbler) return (boost::posix_time::microsec_clock::local_time() - ballCatchTime).total_milliseconds();
 		else return 0l;
 	}
+
 	void Run();
 	virtual ~CoilBoard() {
 		if (m_pComPort) m_pComPort->SetMessageHandler(NULL);
