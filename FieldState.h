@@ -26,10 +26,10 @@ public:
 	std::vector<BallPosition>::iterator end() {
 		return balls.end();
 	}
-	const BallPosition& getClosest(){
+	const BallPosition& getClosest() {
 		return closest;
 	}
-	const void updateAndFilterClosest(cv::Point2i closestRaw, bool ballIsNotValid);
+	const void updateAndFilterClosest(cv::Point2i closestRaw, std::vector<cv::Point2i> rawBallCoords, bool ballIsNotValid);
 
 	size_t size() {
 		return balls.size();

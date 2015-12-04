@@ -1,32 +1,48 @@
 #include "FieldState.h"
 
-const void BallArray::updateAndFilterClosest(cv::Point2i closestRaw, bool ballIsNotValid) {
-	if (reset == true || ballIsNotValid) {
-		closest.filteredRawCoords = closestRaw;
-		closest.lastRawCoords = closestRaw;
-		closest.rawPixelCoords = closestRaw;
+const void BallArray::updateAndFilterClosest(cv::Point2i possibleClosestRaw, std::vector<cv::Point2i> rawBallCoords, bool ballIsNotValid) {
+	if (reset == true || ballIsNotValid) { 
+		closest.filteredRawCoords = possibleClosestRaw;
+		closest.lastRawCoords = possibleClosestRaw;
+		closest.rawPixelCoords = possibleClosestRaw;
 	}
 
-	double distance = cv::norm(closestRaw - closest.lastRawCoords);
+	double distance = cv::norm(possibleClosestRaw - closest.lastRawCoords);
 	if (distance > 20) { // another ball found
-		double t2 = (double)cv::getTickCount();
-		double dt = (t2 - ballLost) / cv::getTickFrequency();
-		if (dt < 1.5) {
-			//closest.predictCoords();
-			closest.filteredRawCoords = closest.lastRawCoords;
-			closest.rawPixelCoords = closest.lastRawCoords;
-			closest.updateRawCoordinates(closest.filteredRawCoords);
-			return;
+		//detect, if correct ball is in vector
+		cv::Point2i foundBall = closest.lastRawCoords;
+		bool foundFromVector = false;
+		for (auto rawBallCoord : rawBallCoords) { //Sorted
+			foundBall = rawBallCoord;
+			if (cv::norm(rawBallCoord - possibleClosestRaw) <= 20) {
+				foundFromVector = true;
+				break;
+			}
+		}
+
+		if (foundFromVector) {
+			possibleClosestRaw = foundBall;
 		}
 		else {
-			reset = true;
+			double t2 = (double)cv::getTickCount();
+			double dt = (t2 - ballLost) / cv::getTickFrequency();
+			if (dt < 0.3) {
+				//closest.predictCoords();
+				closest.filteredRawCoords = foundBall;
+				closest.rawPixelCoords = foundBall;
+				closest.updateRawCoordinates(closest.filteredRawCoords);
+				return;
+			}
+			else {
+				reset = true;
+			}
 		}
 	}
 
-	closest.rawPixelCoords = closestRaw; //Filter needs the raw coords to be set
+	closest.rawPixelCoords = possibleClosestRaw; //Filter needs the raw coords to be set
 	closest.filterCoords(closest, reset); //Sets filtered raw coords
 	closest.updateRawCoordinates(closest.filteredRawCoords); //Update all coordinates after filtering raw ones
-	closest.lastRawCoords = closestRaw;
+	closest.lastRawCoords = possibleClosestRaw;
 	if (reset) {
 		reset = false;
 	}

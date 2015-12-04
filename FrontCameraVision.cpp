@@ -283,8 +283,8 @@ void FrontCameraVision::Run() {
 		//Balls pos 
 //		cv::Mat rotMat = getRotationMatrix2D(cv::Point(0,0), -m_pState->self.getAngle(), 1);
 		//cv::Mat balls(3, m_pState->balls.size(), CV_64FC1);
-		std::vector<cv::Point2d> balls;
-		bool ballsFound = ballFinder.Locate(thresholdedImages[BALL], frameHSV, frameBGR, balls);
+		std::vector<cv::Point2i> balls;
+		bool ballsFound = ballFinder.Locate(thresholdedImages[BALL], frameHSV, frameBGR, balls); 
 		if (ballsFound) {
 			//balls.row(0) -= frameBGR.size().width / 2;
 			//balls.row(1) -= frameBGR.size().height / 2;
@@ -312,13 +312,11 @@ void FrontCameraVision::Run() {
 					cv::Rect bounding_rect = cv::Rect(possibleClosest - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
 						possibleClosest + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
 					rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), cv::Scalar(255, 0, 255), 2, 8, 0);
-
 				}
 			}
 
-
 			m_pState->resetBallsUpdateState();
-			m_pState->balls.updateAndFilterClosest(possibleClosest, possibleClosest != theClosest);
+			m_pState->balls.updateAndFilterClosest(possibleClosest, balls, possibleClosest != theClosest);
 			cv::Rect bounding_rect = cv::Rect(m_pState->balls.closest.filteredRawCoords - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
 				m_pState->balls.closest.filteredRawCoords + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
 			rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), cv::Scalar(255, 0, 0), 2, 8, 0);

@@ -12,7 +12,7 @@ BallFinder::~BallFinder()
 
 
 
-bool BallFinder::Locate(cv::Mat &imgThresholded, cv::Mat &frameHSV, cv::Mat &frameBGR, std::vector<cv::Point2d> &objectCoords) {
+bool BallFinder::Locate(cv::Mat &imgThresholded, cv::Mat &frameHSV, cv::Mat &frameBGR, std::vector<cv::Point2i> &objectCoords) {
 
 	try{
 		cv::Point2d notValidPosition = cv::Point2d(-1.0, -1.0);
