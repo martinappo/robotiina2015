@@ -221,7 +221,7 @@ public:
 	Defensive() : DriveInstruction("2V2_DEFENSIVE"){};
 	virtual DriveMode step(double dt){
 		auto & target = m_pFieldState->partner;
-		if (/*partner not goal keeper become goal keeper*/ false){ return DRIVEMODE_2V2_DRIVE_HOME;}//ToDo goalKeeper message 
+		if (/*partner not goal keeper become goal keeper*/ true){ return DRIVEMODE_2V2_DRIVE_HOME;}//ToDo goalKeeper message 
 		else{
 			auto & opponent = m_pFieldState->opponents[0];//get the one with ball?
 			//auto & opponent = m_pFieldState->GetTargetGate(); for testing
@@ -389,7 +389,7 @@ public:
 	virtual DriveMode step(double dt){
 		auto &target = getClosestBall();
 		if (target.getDistance() < 25) {
-			return DRIVEMODE_DRIVE_HOME;
+			return DRIVEMODE_DRIVE_TO_BALL;
 		}
 		auto homeGate = m_pFieldState->GetHomeGate();
 		double homeGateDist = homeGate.getDistance();
