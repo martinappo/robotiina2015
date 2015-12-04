@@ -55,9 +55,11 @@ void SoccerField::Run(){
 			std::stringstream message;
 			message.precision(3);
 			message << "POS " << " " << self.fieldCoords.x << " " << self.fieldCoords.y << " " << self.getAngle() 
-				<< " " << GetHomeGate().getDistance() << " " << GetHomeGate().getAngle()
+				<< " " << GetHomeGate().getDistance() << " " << (GetHomeGate().getAngle() - self.getAngle())
+				<< " " << balls.closest.getDistance() << " " << (balls.closest.getAngle() - self.getAngle())
+				<< " " << GetTargetGate().getDistance() << " " << (GetTargetGate().getAngle() - self.getAngle())
 				<< " #";
-			SendMessage(message.str());
+			//SendMessage(message.str());
 		}
 
 		cv::circle(field, self.rawFieldCoords + c, 24, cv::Scalar(0, 33, 255), 4);

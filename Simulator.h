@@ -54,7 +54,7 @@ public:
 	virtual void SetMessageHandler(ISerialListener *callback){
 		messageCallback = callback;
 	};
-
+	virtual void SendPartnerMessage(const std::string message) {};
 protected:
 	ISerialListener *messageCallback = NULL;
 

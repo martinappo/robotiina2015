@@ -8,7 +8,7 @@
 extern DistanceCalculator gDistanceCalculator;
 extern cv::Mat wheelAngles;
 
-const double SIMULATOR_SPEED = 0.1;
+const double SIMULATOR_SPEED = 0.5;
 const bool INIT_RANDOM = false;
 
 Simulator::Simulator(boost::asio::io_service &io, bool master, const std::string game_mode) :

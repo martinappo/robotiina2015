@@ -3,6 +3,7 @@
 #include "DistanceCalculator.h"
 #include "AutoPlayHelpers.h"
 
+const float KICKOFF_ANGLE = 45.;
 extern DistanceCalculator gDistanceCalculator;
 
 enum MultiModeDriveStates {
@@ -92,7 +93,7 @@ class MasterModeIdle : public Idle {
 class SlaveModeIdle : public Idle {
 
 	virtual DriveMode step(double dt) {
-		while (!m_pFieldState->isPlaying) return DRIVEMODE_IDLE;
+		//while (!m_pFieldState->isPlaying) return DRIVEMODE_IDLE;
 		switch (m_pFieldState->gameMode) {
 		case FieldState::GAME_MODE_START_OPPONENT_KICK_OFF:
 			return DRIVEMODE_2V2_DEFENSIVE;
@@ -204,8 +205,13 @@ private:
 	bool active = false;
 public:
 	CatchKickOff() : DriveToBallv2("2V2_CATCH_KICKOFF"){};
+
 	virtual DriveMode step(double dt){
-		DriveMode next = DriveToBallv2::step(dt);
+		if (m_pFieldState->gameMode == FieldState::GAME_MODE_TAKE_BALL){
+			m_pFieldState->gameMode = FieldState::GAME_MODE_IN_PROGRESS;
+			return DRIVEMODE_DRIVE_TO_BALL;
+		}
+		
 		return DRIVEMODE_2V2_CATCH_KICKOFF;
 	}
 };
@@ -224,11 +230,11 @@ public:
 		//auto & target = m_pFieldState->partner;
 		auto target = m_pFieldState->GetHomeGate();
 		std::cout << target.polarMetricCoords.y << std::endl;
-		if (aimTarget(target, speed, 45)){
+		if (aimTarget(target, speed, KICKOFF_ANGLE)){
 			m_pCom->Drive(0, 0, sign(m_pFieldState->self.getHeading())*20);
 			std::this_thread::sleep_for(std::chrono::milliseconds(500));
 			m_pCom->Kick(1200);
-			m_pFieldState->SendMessage("PAS #");
+			m_pFieldState->SendPartnerMessage("PAS #");
 			return DRIVEMODE_2V2_DEFENSIVE;
 		}
 		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
