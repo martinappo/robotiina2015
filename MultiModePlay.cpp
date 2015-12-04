@@ -363,7 +363,7 @@ public:
 		else {
 			speed.heading = -90;
 		}
-		m_pCom->Drive(10, speed.heading, speed.rotation);
+		m_pCom->Drive(50, speed.heading, speed.rotation);
 		return DRIVEMODE_2V2_GOAL_KEEPER;
 	}
 };

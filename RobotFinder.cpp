@@ -17,8 +17,8 @@ bool RobotFinder::Locate(cv::Mat &imgThresholded, cv::Mat &frameHSV, cv::Mat &fr
 	try{
 		cv::Point2d notValidPosition = cv::Point2d(-1.0, -1.0);
 	
-		int smallestArea = 20;
-		int largestArea = 5000;
+		int smallestArea = 300;
+		int largestArea = 8000;
 		cv::Point2d center(-1, -1);
 
 		if (imgThresholded.rows == 0){
@@ -33,9 +33,9 @@ bool RobotFinder::Locate(cv::Mat &imgThresholded, cv::Mat &frameHSV, cv::Mat &fr
 
 		cv::Scalar blackColor(0, 0, 0);
 		cv::Scalar whiteColor(255, 255, 255);
-		cv::Scalar redColor(0, 0, 255);
-
-		findContours(imgThresholded, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE); // Find the contours in the image
+		cv::Scalar green(10, 255, 101);
+		
+		findContours(imgThresholded, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE); // Find the contours in the image
 
 		if (contours.size() == 0){ //if no contours found
 			return false;
@@ -45,10 +45,10 @@ bool RobotFinder::Locate(cv::Mat &imgThresholded, cv::Mat &frameHSV, cv::Mat &fr
 		for (unsigned int i = 0; i < contours.size(); i++)
 		{
 			int blobArea = (int)(cv::contourArea(contours[i], false));
-			if (blobArea >= smallestArea || blobArea <= largestArea) {
+			if (blobArea >= smallestArea) {
 				cv::Moments M = cv::moments(contours[i]);
-				cv::Rect bounding_rect = cv::boundingRect(contours[i]);
-				rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), redColor, 1, 8, 0);
+				//cv::Rect bounding_rect = cv::boundingRect(contours[i]);
+				//rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), green, 1, 8, 0);
 				try{objectCoords.push_back(cv::Point2d((M.m10 / M.m00), (M.m01 / M.m00)) - frameCenter);}
 				catch(cv::Exception ex){return false;}
 			}

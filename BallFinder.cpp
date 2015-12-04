@@ -46,8 +46,8 @@ bool BallFinder::Locate(cv::Mat &imgThresholded, cv::Mat &frameHSV, cv::Mat &fra
 			int ballArea = (int)(cv::contourArea(contours[i], false));
 			if (ballArea >= smallestBallArea) {
 				cv::Moments M = cv::moments(contours[i]);
-				cv::Rect bounding_rect = cv::boundingRect(contours[i]);
-				rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), redColor, 1, 8, 0);
+				//cv::Rect bounding_rect = cv::boundingRect(contours[i]);
+				//rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), redColor, 1, 8, 0);
 				try{objectCoords.push_back(cv::Point2d((M.m10 / M.m00), (M.m01 / M.m00)) - frameCenter);}
 				catch(cv::Exception ex){return false;}
 				ballsUpdatedCount++;

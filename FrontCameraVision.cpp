@@ -330,6 +330,7 @@ void FrontCameraVision::Run() {
 			if (detectObjectsNearBall){
 				
 				cv::bitwise_or(thresholdedImages[INNER_BORDER], thresholdedImages[FIELD], thresholdedImages[FIELD]);
+				
 				//cv::bitwise_or(thresholdedImages[BALL], thresholdedImages[FIELD], thresholdedImages[FIELD]);
 
 				cv::Rect bigAreaAroundBall = cv::Rect(m_pState->balls.closest.filteredRawCoords - cv::Point(50, 50) + cv::Point(frameBGR.size() / 2),
@@ -385,20 +386,14 @@ void FrontCameraVision::Run() {
 
 		//OTHER POSITION =====================================================================================================
 		std::vector<cv::Point2i> robots;
-		cv::Mat tmp(thresholdedImages[FIELD].size(), thresholdedImages[FIELD].type(), cv::Scalar(255));
-		cv::Mat invField;// (thresholdedImages[FIELD].size(), thresholdedImages[FIELD].type(), cv::Scalar(0));
-		tmp.copyTo(invField, thresholdedImages[FIELD]);
-		//thresholdedImages[INNER_BORDER].copyTo(tmp2);
-		//thresholdedImages[OUTER_BORDER].copyTo(tmp2);
-		//thresholdedImages[BALL].copyTo(tmp2);
-		
-		bool robotsFound = robotFinder.Locate(invField, frameHSV, frameBGR, robots);
-
+		cv::bitwise_or(thresholdedImages[OUTER_BORDER], thresholdedImages[FIELD], thresholdedImages[FIELD]);
+		bool robotsFound = robotFinder.Locate(thresholdedImages[FIELD], frameHSV, frameBGR, robots);
+/*
 		for (auto robot : robots) {
 			cv::Rect robotRectangle = cv::Rect(robot - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
 				robot + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
 			rectangle(frameBGR, robotRectangle.tl(), robotRectangle.br(), cv::Scalar(10, 255, 101), 2, 8, 0);
-		}
+		}*/
 
 
 		//PARTNER POSITION ====================================================================================================
