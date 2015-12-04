@@ -388,7 +388,7 @@ public:
 
 	virtual DriveMode step(double dt){
 		auto &target = getClosestBall();
-		if (target.getDistance == 0) {
+		if (target.getDistance() == 0) {
 			return DRIVEMODE_2V2_GOAL_KEEPER;
 		}
 		if (target.getDistance() < 70 && !m_pFieldState->obstacleNearBall ) {
