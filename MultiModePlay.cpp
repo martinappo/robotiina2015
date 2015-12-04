@@ -426,7 +426,7 @@ public:
 		double homeGateDist = homeGate.getDistance();
 		double gateAngle = homeGate.getHeading() - 180 * sign(homeGate.getHeading());
 		aimTarget(target, speed,2);	
-		if (homeGateDist < 30) {
+		if (homeGateDist < 30 || homeGate.minCornerPolarCoords.x < 30) {
 			driveToTargetWithAngle(target, speed, 40, 5);
 		} else {	
 			if (gateAngle < 0) {

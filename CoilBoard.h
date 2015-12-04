@@ -37,14 +37,20 @@ public:
 	void ToggleTribbler(int speed);
 	bool BallInTribbler(bool wait=false) { 
 		if(wait) {
-			return BallInTribblerTime() > 500;
+			if (ballInTribbler) { return BallInTribblerTime() > 500; }
+			else return BallNotInTribblerTime() > 500;
+			
 		}else {
 			return ballInTribbler; 
 		}
 	}
 	long BallInTribblerTime(){
 		if (ballInTribbler) return (boost::posix_time::microsec_clock::local_time() - ballCatchTime).total_milliseconds();
-		else return (boost::posix_time::microsec_clock::local_time() - ballLostTime).total_milliseconds();
+		else return 0L;
+	}
+	long BallNotInTribblerTime() {
+		if (!ballInTribbler) return (boost::posix_time::microsec_clock::local_time() - ballLostTime).total_milliseconds();
+		else return 0L;
 	}
 
 	void Run();
