@@ -216,6 +216,7 @@ void FrontCameraVision::Run() {
 		cv::circle(thresholdedImages[OUTER_BORDER], cv::Point(frameBGR.size() / 2), 70, 0, -1);
 		cv::circle(thresholdedImages[INNER_BORDER], cv::Point(frameBGR.size() / 2), 70, 0, -1);
 		cv::circle(thresholdedImages[BALL], cv::Point(frameBGR.size() / 2), 50, 0, -1);
+
 		//imshow("tb",thresholdedImages[BALL]);
 		//cv::waitKey(1);
 		//COLLISION DETECTION ====================================================================================================
@@ -295,10 +296,13 @@ void FrontCameraVision::Run() {
 				return cv::norm(a) < cv::norm(b);
 			});
 			// validate balls
-			cv::Point2i closest;
 			bool ballOk;
+
+			cv::Point2i possibleClosest;
+			cv::Point2i theClosest = balls.size()>0 ? balls[0] : cv::Point2d(0, 0);
+
 			for (auto ball : balls) {
-				closest = ball;
+				possibleClosest = ball;
 				ballOk = BallFinder::validateBall(thresholdedImages, ball, frameHSV, frameBGR);
 				if (ballOk && m_pState->collisionWithBorder){
 					if (gDistanceCalculator.angleInRange(ball, m_pState->collisionRange)) {
@@ -308,30 +312,29 @@ void FrontCameraVision::Run() {
 				if (ballOk){
 					break;
 				} else {
-					cv::Rect bounding_rect = cv::Rect(closest - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
-						closest + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
+					cv::Rect bounding_rect = cv::Rect(possibleClosest - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
+						possibleClosest + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
 					rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), cv::Scalar(255, 0, 255), 2, 8, 0);
 
 				}
 			}
-			cv::Rect bounding_rect = cv::Rect(closest - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
-				closest + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
+
+
+			m_pState->resetBallsUpdateState();
+			m_pState->balls.updateAndFilterClosest(possibleClosest, possibleClosest != theClosest);
+			cv::Rect bounding_rect = cv::Rect(m_pState->balls.closest.filteredRawCoords - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
+				m_pState->balls.closest.filteredRawCoords + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
 			rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), cv::Scalar(255, 0, 0), 2, 8, 0);
 
-//			cv::Mat rotatedBalls(balls.size(), balls.type());
-
-//			rotatedBalls = rotMat * balls;
-			m_pState->resetBallsUpdateState();
-			m_pState->balls.closest.updateRawCoordinates(closest, cv::Point(0,0));
-			m_pState->balls.closest.updateFieldCoords(m_pState->self.getFieldPos(), m_pState->self.getAngle());
-			m_pState->balls.closest.isUpdated = true;
 			// check if air is clear around ball
 			if (detectObjectsNearBall){
 				
 				cv::bitwise_or(thresholdedImages[INNER_BORDER], thresholdedImages[FIELD], thresholdedImages[FIELD]);
 				//cv::bitwise_or(thresholdedImages[BALL], thresholdedImages[FIELD], thresholdedImages[FIELD]);
-				cv::Rect bigAreaAroundBall = cv::Rect(closest - cv::Point(50, 50) + cv::Point(frameBGR.size() / 2),
-					closest + cv::Point(50, 50) + cv::Point(frameBGR.size() / 2));
+
+				cv::Rect bigAreaAroundBall = cv::Rect(m_pState->balls.closest.filteredRawCoords - cv::Point(50, 50) + cv::Point(frameBGR.size() / 2),
+					m_pState->balls.closest.filteredRawCoords + cv::Point(50, 50) + cv::Point(frameBGR.size() / 2));
+
 				cv::Mat roiField(thresholdedImages[FIELD], bigAreaAroundBall);
 				//std::cout << cv::countNonZero(roiField) << std::endl;
 				bool cb = cv::countNonZero(roiField) < 9000/*tune this*/;
@@ -359,7 +362,7 @@ void FrontCameraVision::Run() {
 			//TODO: use returned ball instead of balls.at<double>(0, ball_idx) 
 			/*
 			int ball_idx = 0;
-			m_pState->balls.calcClosest(&ball_idx);
+			
 			if (ball_idx >= 0) {
 				cv::Rect bounding_rect = cv::Rect(cv::Point(balls.at<double>(0, ball_idx), balls.at<double>(1, ball_idx)) - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
 					cv::Point(balls.at<double>(0, ball_idx), balls.at<double>(1, ball_idx)) + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));

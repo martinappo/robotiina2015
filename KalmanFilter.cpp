@@ -1,10 +1,10 @@
 #include "KalmanFilter.h"
 
 KalmanFilter::KalmanFilter(const cv::Point2i &startPoint){
-	KF.transitionMatrix = (cv::Mat_<float>(4, 4) << 1, 0, 1, 0, 
-													 0, 1, 0, 1, 
-													 0, 0, 1, 0, 
-													 0, 0, 0, 1);
+	KF.transitionMatrix = (cv::Mat_<float>(4, 4) << 1, 0, 1, 0,
+		0, 1, 0, 1,
+		0, 0, 1, 0,
+		0, 0, 0, 1);
 
 	/*
 	measurement(0) = (float)(startPoint.x);
@@ -26,7 +26,7 @@ KalmanFilter::KalmanFilter(const cv::Point2i &startPoint){
 	*/
 
 	setIdentity(KF.measurementMatrix);
-	setIdentity(KF.processNoiseCov, cv::Scalar::all(1e-4));
+	setIdentity(KF.processNoiseCov, cv::Scalar::all(1e-1));
 	setIdentity(KF.measurementNoiseCov, cv::Scalar::all(1e-1));
 	setIdentity(KF.errorCovPost, cv::Scalar::all(0.1));
 }

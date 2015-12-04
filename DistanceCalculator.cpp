@@ -80,6 +80,7 @@ cv::Point2d DistanceCalculator::getFieldCoordinates(const cv::Point2d &pos, cons
 	return cv::Point2d(fieldX, fieldY);
 
 }
+
 double DistanceCalculator::getDistanceInverted(const cv::Point2d &pos, const cv::Point2d &orgin) const{
 	double dist_cm = cv::norm(pos - orgin);
 	double dist_px = 125 * log(dist_cm / 13.13);
