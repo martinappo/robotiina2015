@@ -29,8 +29,9 @@ public:
 	};
 	virtual DriveMode step1(double dt, DriveMode driveMode){
 		//not executed in test mode
-		if (!m_pFieldState->isPlaying){
-			return DRIVEMODE_IDLE;
+		if (!m_pFieldState->isPlaying && driveMode != DRIVEMODE_IDLE){
+			std::cout << "Stoping game (referee stop)" << std::endl;
+ 			return DRIVEMODE_IDLE;
 		}
 		/*
 		// handle crash
