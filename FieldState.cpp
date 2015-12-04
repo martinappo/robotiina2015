@@ -11,11 +11,11 @@ const void BallArray::updateAndFilterClosest(cv::Point2i closestRaw) {
 	if (distance > 20) { // another ball found
 		double t2 = (double)cv::getTickCount();
 		double dt = (t2 - ballLost) / cv::getTickFrequency();
-		if (dt < 0.2) {
-			closest.predictCoords();
+		if (dt < 1.5) {
+			//closest.predictCoords();
+			closest.filteredRawCoords = closest.lastRawCoords;
 			closest.rawPixelCoords = closest.lastRawCoords;
 			closest.updateRawCoordinates(closest.filteredRawCoords);
-			closest.lastRawCoords = closest.filteredRawCoords;
 			return;
 		}
 		else {
