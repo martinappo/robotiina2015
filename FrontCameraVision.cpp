@@ -30,6 +30,7 @@ FrontCameraVision::FrontCameraVision(ICamera *pCamera, IDisplay *pDisplay, Field
 	ADD_BOOL_SETTING(fieldCollisonEnabled);
 	ADD_BOOL_SETTING(nightVisionEnabled);
 	ADD_BOOL_SETTING(detectOtherRobots);
+	ADD_BOOL_SETTING(detectObjectsNearBall);
 	videoRecorder = new VideoRecorder("videos/", 30, m_pCamera->GetFrameSize(true));
 	LoadSettings();
 	Start();
@@ -222,6 +223,9 @@ void FrontCameraVision::Run() {
 			// mask ourself
 			//cv::circle(frameBGR, cv::Point(frameBGR.size() / 2), 70, 255, -1);
 			cv::bitwise_or(thresholdedImages[INNER_BORDER], thresholdedImages[FIELD], thresholdedImages[FIELD]);
+//			cv::bitwise_or(thresholdedImages[FIELD], thresholdedImages[BALL], thresholdedImages[FIELD]);
+//			cv::bitwise_or(thresholdedImages[FIELD], thresholdedImages[BLUE_GATE], thresholdedImages[FIELD]);
+//			cv::bitwise_or(thresholdedImages[FIELD], thresholdedImages[YELLOW_GATE], thresholdedImages[FIELD]);
 			//imshow("a", thresholdedImages[FIELD]);
 			//cv::waitKey(1);
 			m_pState->collisionRange = { -1, -1 };
@@ -239,7 +243,7 @@ void FrontCameraVision::Run() {
 				privateZone += cv::Point(frameBGR.size() / 2);
 				cv::Mat roiOuterBorder(thresholdedImages[OUTER_BORDER], privateZone);
 				cv::Mat roiField(thresholdedImages[FIELD], privateZone);
-				bool cb = borderCollisonEnabled ? cv::countNonZero(roiOuterBorder) > 160 : false;
+				bool cb = borderCollisonEnabled ? cv::countNonZero(roiOuterBorder) > 300 : false;
 				bool cu = fieldCollisonEnabled ? cv::countNonZero(roiField) < 9000 : false;
 				//if(c==1) {
 				//	std::cout << "coll b: " << cv::countNonZero(roiField) << std::endl;
@@ -289,10 +293,20 @@ void FrontCameraVision::Run() {
 				return cv::norm(a) < cv::norm(b);
 			});
 			// validate balls
+			bool ballOk;
+
 			cv::Point2i possibleClosest;
+			cv::Point2i theClosest = balls.size()>0 ? balls[0] : cv::Point(0, 0);
+
 			for (auto ball : balls) {
 				possibleClosest = ball;
-				if (BallFinder::validateBall(thresholdedImages, ball, frameHSV, frameBGR)){
+				ballOk = BallFinder::validateBall(thresholdedImages, ball, frameHSV, frameBGR);
+				if (ballOk && m_pState->collisionWithBorder){
+					if (gDistanceCalculator.angleInRange(ball, m_pState->collisionRange)) {
+						ballOk = false;
+					};
+				}
+				if (ballOk){
 					break;
 				} else {
 					cv::Rect bounding_rect = cv::Rect(possibleClosest - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
@@ -304,11 +318,24 @@ void FrontCameraVision::Run() {
 
 
 			m_pState->resetBallsUpdateState();
-
-			m_pState->balls.updateAndFilterClosest(possibleClosest);
+			m_pState->balls.updateAndFilterClosest(possibleClosest, possibleClosest != theClosest);
 			cv::Rect bounding_rect = cv::Rect(m_pState->balls.closest.filteredRawCoords - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
 				m_pState->balls.closest.filteredRawCoords + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2));
 			rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), cv::Scalar(255, 0, 0), 2, 8, 0);
+
+			// check if air is clear around ball
+			if (detectObjectsNearBall){
+				cv::bitwise_or(thresholdedImages[INNER_BORDER], thresholdedImages[FIELD], thresholdedImages[FIELD]);
+				//cv::bitwise_or(thresholdedImages[BALL], thresholdedImages[FIELD], thresholdedImages[FIELD]);
+
+				cv::Rect bigAreaAroundBall = cv::Rect(m_pState->balls.closest.filteredRawCoords - cv::Point(50, 50) + cv::Point(frameBGR.size() / 2),
+					m_pState->balls.closest.filteredRawCoords + cv::Point(50, 50) + cv::Point(frameBGR.size() / 2));
+				cv::Mat roiField(thresholdedImages[FIELD], bigAreaAroundBall);
+				//std::cout << cv::countNonZero(roiField) << std::endl;
+				bool cb = cv::countNonZero(roiField) > 300/*tune this*/;
+				rectangle(frameBGR, bigAreaAroundBall.tl(), bigAreaAroundBall.br(), cv::Scalar(255, 50, cb? 255:50), 2, 8, 0);
+				m_pState->obstacleNearBall = cb;
+			}
 
 			/* find balls that are close by */
 			/*
@@ -354,6 +381,8 @@ void FrontCameraVision::Run() {
 		//PARTNER POSITION ====================================================================================================
 		if (detectOtherRobots) {
 			bool ourRobotBlueBottom = (m_pState->robotColor == FieldState::ROBOT_COLOR_YELLOW_UP);
+			//std::vector<cv::Point2d> robots;
+			//bool ballsFound = ballFinder.Locate(thresholdedImages[FIELD], frameHSV, frameBGR, robots);
 
 			std::vector<std::pair<cv::Point2i, double>> positionsToDistances; //One of the colors position and according distances
 			for (size_t blueIndex = 0; blueIndex < notBlueGates.size(); blueIndex++) {

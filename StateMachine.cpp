@@ -13,7 +13,7 @@ bool DriveInstruction::catchTarget(const ObjectPosition &target, Speed &speed){
 	if (m_pCom->BallInTribbler()) return true;
 	double heading =  target.getHeading();
 	double dist = target.getDistance();
-	speed.velocity = 50;
+	speed.velocity = 60;
 	speed.heading = 0;
 	return false;
 }
@@ -105,11 +105,15 @@ void StateMachine::Run()
 
 		if (newMode != curDriveMode->first){
 			boost::mutex::scoped_lock lock(mutex);
+						std::cout << "state: " << curDriveMode->second->name;
+
 			curDriveMode->second->onExit();
 			curDriveMode = driveModes.find(newMode);
 			if (curDriveMode == driveModes.end()) curDriveMode = driveModes.find(DRIVEMODE_IDLE);
+						std::cout << " -> " << curDriveMode->second->name << std::endl;
+
 			curDriveMode->second->onEnter();
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			std::this_thread::sleep_for(std::chrono::milliseconds(50)); // this seems to be neccecary
 		}
 	}
 }
@@ -129,3 +133,4 @@ StateMachine::~StateMachine()
 }
 
 DriveMode DriveInstruction::prevDriveMode = DRIVEMODE_IDLE;
+DriveMode DriveInstruction::ACTIVE_DRIVE_TO_BALL_MODE = DRIVEMODE_IDLE;

@@ -31,8 +31,8 @@ ManualControl::ManualControl(ICommunicationModule *pComModule) :ConfigurableModu
 void ManualControl::Run(){
 	speed = { 0, 0 };
 	rotation = 0;
+	last_tick = boost::posix_time::microsec_clock::local_time();
 	while (!stop_thread){
-		last_tick = boost::posix_time::microsec_clock::local_time();
 		m_pComModule->Drive(speed, rotation);
 		boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
 		double dt = (double)((time - last_tick).total_milliseconds())/1000;

@@ -1,7 +1,7 @@
 #include "FieldState.h"
 
-const void BallArray::updateAndFilterClosest(cv::Point2i closestRaw) {
-	if (reset == true) {
+const void BallArray::updateAndFilterClosest(cv::Point2i closestRaw, bool ballIsNotValid) {
+	if (reset == true || ballIsNotValid) {
 		closest.filteredRawCoords = closestRaw;
 		closest.lastRawCoords = closestRaw;
 		closest.rawPixelCoords = closestRaw;
