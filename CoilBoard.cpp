@@ -71,7 +71,7 @@ void CoilBoard::Run(){
 			waitDuration = (time - waitTime).total_milliseconds();
 			//if(m_pComPort) m_pComPort->WriteString("5:bl\n");
 			if (waitDuration > 300){
-				if(m_pComPort) m_pComPort->WriteString("5:p\n");
+				if(m_pComPort) m_pComPort->WriteString("5:c\n");
 				waitTime = time;
 			}
 			if (kickForce !=0) {

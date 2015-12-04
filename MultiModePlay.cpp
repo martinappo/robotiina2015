@@ -14,7 +14,7 @@ enum MultiModeDriveStates {
 	DRIVEMODE_2V2_CATCH_KICKOFF,
 	DRIVEMODE_2V2_AIM_PARTNER,
 	//DRIVEMODE_AIM_GATE,
-	DRIVEMODE_2V2_KICK,
+	//DRIVEMODE_KICK,
 	//DRIVEMODE_DRIVE_TO_BALL,
 	//DRIVEMODE_CATCH_BALL,
 	DRIVEMODE_2V2_DRIVE_HOME,
@@ -79,6 +79,7 @@ public:
 		speed.rotation = -heading;
 	}
 	m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
+	std::this_thread::sleep_for(std::chrono::milliseconds(250));
 	return DRIVEMODE_CATCH_BALL;
 
 /*
@@ -261,11 +262,11 @@ public:
 		auto target = m_pFieldState->GetHomeGate();
 		//std::cout << target.polarMetricCoords.y << std::endl;
 		if (aimTarget(target, speed, KICKOFF_ANGLE)){
-			m_pCom->Drive(0, 0, sign(m_pFieldState->self.getHeading())*20);
-			std::this_thread::sleep_for(std::chrono::milliseconds(500));
-			m_pCom->Kick(1200);
+			//m_pCom->Drive(0, 0, sign(m_pFieldState->self.getHeading())*20);
+			//std::this_thread::sleep_for(std::chrono::milliseconds(500));
+			m_pCom->Kick(2600);
 			m_pFieldState->SendPartnerMessage("PAS #");
-			return DRIVEMODE_2V2_DEFENSIVE;
+			return DRIVEMODE_2V2_DRIVE_HOME;
 		}
 		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 		return DRIVEMODE_2V2_AIM_PARTNER;
@@ -287,7 +288,7 @@ public:
 				speed.velocity = 45;
 				speed.heading += 90;
 			}
-			else return DRIVEMODE_2V2_KICK;
+			else return DRIVEMODE_KICK;
 		}
 		else {
 			speed.rotation = lastGateLocation.getHeading();
@@ -314,9 +315,13 @@ class DriveHome2v2 : public DriveInstruction
 {
 public:
 	DriveHome2v2() : DriveInstruction("2V2_DRIVE_HOME"){};
+		virtual void onEnter(){
+			m_pCom->ToggleTribbler(false);
+			
+		}
 	virtual DriveMode step(double dt){
 		ObjectPosition &lastGateLocation = m_pFieldState->GetHomeGate();
-		if (DriveInstruction::driveToTargetWithAngle(lastGateLocation, speed))return DRIVEMODE_2V2_GOAL_KEEPER;
+		if (DriveInstruction::driveToTargetWithAngle(lastGateLocation, speed, 50))return DRIVEMODE_2V2_GOAL_KEEPER;
 		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 		return DRIVEMODE_2V2_DRIVE_HOME;
 	}
@@ -377,7 +382,7 @@ std::pair<DriveMode, DriveInstruction*> MasterDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_AIM_PARTNER, new AimPartner()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_AIM_GATE, new AimGate2v2()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_KICK, new Kick()),
-//	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_KICKOFF, new KickOff()),
+//	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_KICKOFF, new KickOff()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DRIVE_HOME, new DriveHome2v2()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_OPPONENT_KICKOFF, new OpponentKickoff(true)),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_GOAL_KEEPER, new GoalKeeper())
