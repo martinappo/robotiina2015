@@ -212,7 +212,9 @@ void FrontCameraVision::Run() {
 			m_pState->yellowGate.polarMetricCoords.y = 360 - gDistanceCalculator.angleBetween(cv::Point(0, 1), m_pState->self.fieldCoords - (m_pState->yellowGate.fieldCoords)) + m_pState->self.getAngle();
 		}
 
-		cv::circle(thresholdedImages[FIELD], cv::Point(frameBGR.size() / 2), 80, 255, -1);
+		cv::circle(thresholdedImages[FIELD], cv::Point(frameBGR.size() / 2), 70, 255, -1);
+		cv::circle(thresholdedImages[OUTER_BORDER], cv::Point(frameBGR.size() / 2), 70, 0, -1);
+		cv::circle(thresholdedImages[INNER_BORDER], cv::Point(frameBGR.size() / 2), 70, 0, -1);
 		cv::circle(thresholdedImages[BALL], cv::Point(frameBGR.size() / 2), 50, 0, -1);
 		//imshow("tb",thresholdedImages[BALL]);
 		//cv::waitKey(1);
@@ -325,14 +327,14 @@ void FrontCameraVision::Run() {
 			m_pState->balls.closest.isUpdated = true;
 			// check if air is clear around ball
 			if (detectObjectsNearBall){
+				
 				cv::bitwise_or(thresholdedImages[INNER_BORDER], thresholdedImages[FIELD], thresholdedImages[FIELD]);
 				//cv::bitwise_or(thresholdedImages[BALL], thresholdedImages[FIELD], thresholdedImages[FIELD]);
-
 				cv::Rect bigAreaAroundBall = cv::Rect(closest - cv::Point(50, 50) + cv::Point(frameBGR.size() / 2),
 					closest + cv::Point(50, 50) + cv::Point(frameBGR.size() / 2));
 				cv::Mat roiField(thresholdedImages[FIELD], bigAreaAroundBall);
 				//std::cout << cv::countNonZero(roiField) << std::endl;
-				bool cb = cv::countNonZero(roiField) > 300/*tune this*/;
+				bool cb = cv::countNonZero(roiField) < 9000/*tune this*/;
 				rectangle(frameBGR, bigAreaAroundBall.tl(), bigAreaAroundBall.br(), cv::Scalar(255, 50, cb? 255:50), 2, 8, 0);
 				m_pState->obstacleNearBall = cb;
 			}
