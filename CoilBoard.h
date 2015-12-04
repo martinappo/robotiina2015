@@ -44,7 +44,7 @@ public:
 	}
 	long BallInTribblerTime(){
 		if (ballInTribbler) return (boost::posix_time::microsec_clock::local_time() - ballCatchTime).total_milliseconds();
-		else return 0l;
+		else return (boost::posix_time::microsec_clock::local_time() - ballLostTime).total_milliseconds();
 	}
 
 	void Run();
@@ -60,6 +60,7 @@ public:
 protected:
 	std::atomic_bool ballInTribbler;
 	boost::posix_time::ptime ballCatchTime;
+	boost::posix_time::ptime ballLostTime;
 	std::string last_message;
 
 

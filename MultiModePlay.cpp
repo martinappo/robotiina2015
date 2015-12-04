@@ -315,7 +315,7 @@ public:
 
 		ObjectPosition &lastGateLocation = m_pFieldState->GetTargetGate();
 		bool sightObstructed = m_pFieldState->gateObstructed;
-		if (!m_pCom->BallInTribbler()) return DRIVEMODE_2V2_OFFENSIVE;
+		if (!m_pCom->BallInTribbler(true)) return DRIVEMODE_2V2_OFFENSIVE;
 		if (aimTarget(lastGateLocation, speed, 2)){
 			if (sightObstructed) { //then move sideways away from gate
 				speed.velocity = 45;
