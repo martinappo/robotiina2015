@@ -359,16 +359,19 @@ public:
 
 	virtual DriveMode step(double dt){
 		auto &target = getClosestBall();
+		aimTarget(target, speed, 2);
 		auto homeGate = m_pFieldState->GetHomeGate();
 		double gateAngle = homeGate.getHeading() - 180 * sign(homeGate.getHeading());
 		aimTarget(target, speed,2);		
-		if (gateAngle < 0) {
-			speed.heading = 90;
+		double ang = target.getHeading() + gateAngle;
+		std::cout << ang << std::endl;
+		if (ang < 0) {
+			speed.heading = target.getAngle();
 		}
 		else {
 			speed.heading = -90;
 		}
-		m_pCom->Drive(50, speed.heading, speed.rotation);
+		m_pCom->Drive(abs(ang)>10 ? abs(ang): 0, -ang, speed.rotation);
 		return DRIVEMODE_2V2_GOAL_KEEPER;
 	}
 };
