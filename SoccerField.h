@@ -11,7 +11,6 @@ class SoccerField :
 	public UdpServer, ThreadedClass, public FieldState
 {
 public:
-	using UdpServer::SendMessage;
 	SoccerField(boost::asio::io_service &io, IDisplay *pDisplay, bool master, int number_of_balls, int port=45000);
 	virtual ~SoccerField();
 	void Run();
@@ -22,6 +21,10 @@ public:
 	void Lock(){};
 	void UnLock(){};
 	virtual void MessageReceived(const std::string & message);
+	virtual void SendPartnerMessage(const std::string message) {
+		UdpServer::SendMessage(message);
+	}
+
 
 private:
 	std::atomic_int m_targetGate;

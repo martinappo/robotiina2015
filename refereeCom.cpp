@@ -55,6 +55,7 @@ void RefereeCom::handleMessage(const std::string & message){
 		command = command.substr(3);
 		if (command == "START----") m_pFieldState->isPlaying = true;
 		else if (command == "STOP-----") {
+			m_pFieldState->gameMode = FieldState::GAME_MODE_END_HALF;
 			m_pFieldState->isPlaying = false;
 		}
 		else if (command == "PLACEDBAL") m_pFieldState->gameMode = FieldState::GAME_MODE_PLACED_BALL;

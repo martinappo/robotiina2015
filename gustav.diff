@@ -1,0 +1,98 @@
+diff --git a/DistanceCalculator.cpp b/DistanceCalculator.cpp
+index 10f15f9..92e9d37 100644
+--- a/DistanceCalculator.cpp
++++ b/DistanceCalculator.cpp
+@@ -93,7 +93,7 @@ double DistanceCalculator::getDistance(const cv::Point2d &pos, const cv::Point2d
+ 	//return (8E-8)*pow(dist, 4) - (6E-5)*pow(dist, 3) + 0.0167*pow(dist, 2) - 1.5818 * dist + 72.791;
+ 
+ 	//y = 13,136e^0,008x
+-	//return std::max(0.0, 13.13*exp(0.008 * dist));
++	return std::max(0.0, 13.13*exp(0.008 * dist));
+ 
+ 	double minDif = INT_MAX;
+ 	int index = 0;
+diff --git a/FieldState.cpp b/FieldState.cpp
+index e661208..1ef6e12 100644
+--- a/FieldState.cpp
++++ b/FieldState.cpp
+@@ -4,23 +4,28 @@
+ const BallPosition& BallArray::calcClosest(int * index){
+ 	double alpha = 3;
+ 	double target_distance = INT_MAX;
++	double targetAngle = 180;
+ 	int target_index = -1;
+ 	std::vector<int> badBalls;
+ 	for (unsigned i = 0; i < balls.size(); i++) {
+-		if ((fabs(balls[i].fieldCoords.y) > 220) || (fabs(balls[i].fieldCoords.x) > 140)) {
++		if (((fabs(balls[i].fieldCoords.y) > 220) || (fabs(balls[i].fieldCoords.x) > 140))&&false) {
+ 			badBalls.push_back(i);
+ 			continue; // too far outside of the field
+ 		}
+ 		double curDist = balls[i].getDistance();
++		double curAngle = balls[i].getHeading();
+ 		//if (includeHeading)
+ 		//	curDist += alpha * curDist * sin(fabs(balls[i].getHeading()) / 180 * CV_PI);
+ 		//std::cout << "getClosest: " << (includeHeading ? 1 : 0) << " " << balls[i].getDistance() << ", " << balls[i].getHeading() << " -> " << curDist << std::endl;
+ 		if (curDist < target_distance) {
+-			target_index = i;
+-			target_distance = curDist;
++			if (target_distance - curDist > 20 || fabs(curAngle) < targetAngle){
++				target_index = i;
++				target_distance = curDist;
++				targetAngle = curAngle;
++			}
+ 		}
+ 	}
+-	if (target_index < 0 && !badBalls.empty()){
++	if (target_index < 0 && !badBalls.empty() && false){
+ 		// do special check for bad balls
+ 		for (unsigned i = 0; i < balls.size(); i++) {
+ 
+diff --git a/SingleModePlay.cpp b/SingleModePlay.cpp
+index 53c5674..3c8fe9b 100644
+--- a/SingleModePlay.cpp
++++ b/SingleModePlay.cpp
+@@ -128,7 +128,7 @@ public:
+ 
+ 		double rotation = 0;
+ 		double errorMargin = 5;
+-		double maxDistance = 30;
++		double maxDistance = 35;
+ 		//if (fabs(gateHeading - ballHeading) > 90) { // we are between gate and ball
+ 		//	return stepAngled(dt); 
+ 		//}
+@@ -144,10 +144,11 @@ public:
+ 			speed = std::max(60.0, ballDistance);
+ 		}
+ 		else {
+-			if (fabs(ballHeading) <= errorMargin && fabs(gateHeading) <= errorMargin){
++			if (fabs(ballHeading) <= 0.5 && fabs(gateHeading) <= errorMargin){
++				m_pCom->Drive(0, 0, 0);
+ 				return DRIVEMODE_CATCH_BALL;
+ 			}
+-			if (fabs(ballHeading) > errorMargin){
++			if (fabs(ballHeading) > 0.5){
+ 				heading = ballHeading + sign(ballHeading) * 55;
+ 			}
+ 			rotation = 0;
+@@ -156,7 +157,10 @@ public:
+ 			}
+ 			// drive around the ball
+ 			//heading = ballHeading + sign(ballHeading) * 90;
+-			speed = std::max(fabs(ballHeading), 35.0);
++			speed = 35.0;
++		}if (((speed) < 0.01) && (fabs(heading) < 0.01) && (fabs(rotation) < 0.01)){
++			// nowhere to go, error margins are out-of-sync
++			return DRIVEMODE_CATCH_BALL;
+ 		}
+ 		m_pCom->Drive(speed, heading, rotation);
+ 		return DRIVEMODE_DRIVE_TO_BALL_AIM_GATE;
+@@ -298,7 +302,7 @@ public:
+ 		}
+ 		if (((speed) < 0.01) && (fabs(heading) < 0.01) && (fabs(rotation) < 0.01)){
+ 			// nowhere to go, error margins are out-of-sync
+-			return DRIVEMODE_CATCH_BALL;
++			return DRIVEMODE_IDLE;
+ 		}
+ 		m_pCom->Drive(speed, heading, rotation);
+ 		return DRIVEMODE_ROTATE_AROUND_BALL;

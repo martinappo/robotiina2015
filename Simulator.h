@@ -40,14 +40,21 @@ public:
 	virtual void MessageReceived(const std::string & message); // UDP
 
 	void giveCommand(FieldState::GameMode command);
-	void SendCommand(int id, const std::string &cmd, int param = INT_MAX){};
+	void SendCommand(int id, const std::string &cmd, int param = INT_MAX){
+		std::ostringstream oss;
+
+		oss << id << ":" << cmd;
+		if (param < INT_MAX) oss << param;
+		oss << "\n";
+		WriteString(oss.str());
+	};
 
 	virtual void WriteString(const std::string &s);
 	//virtual void DataReceived(const std::string & message){};
 	virtual void SetMessageHandler(ISerialListener *callback){
 		messageCallback = callback;
 	};
-
+	virtual void SendPartnerMessage(const std::string message) {};
 protected:
 	ISerialListener *messageCallback = NULL;
 
@@ -60,7 +67,7 @@ protected:
 	void UpdateGatePos();
 	void UpdateBallPos(double dt);
 	void UpdateRobotPos(double dt);
-	void UpdateBallIntTribbler();
+	void UpdateBallIntTribbler(cv::Mat robotSpeed, double dt);
 	std::mutex mutex;
 	ObjectPosition robots[MAX_ROBOTS];
 

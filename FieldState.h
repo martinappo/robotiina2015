@@ -76,6 +76,7 @@ public:
 
 		GAME_MODE_START_OUR_YELLOW_CARD,
 		GAME_MODE_START_OPPONENT_YELLOW_CARD,
+
 		/* our states */
 		CAME_MODE_CATCH_KICK_OFF,
 		GAME_MODE_IN_PROGRESS,
@@ -90,6 +91,7 @@ public:
 	RobotColor robotColor = ROBOT_COLOR_BLUE_UP;
 	std::atomic_bool collisionWithBorder;
 	std::atomic_bool collisionWithUnknown;
+	std::atomic_bool obstacleNearBall;
 	cv::Point2d collisionRange; // which directions are blocked
 	FieldState(const int number_of_balls);
 	virtual ~FieldState();
@@ -108,7 +110,7 @@ public:
 	void resetBallsUpdateState();
 	virtual void Lock() {};
 	virtual void UnLock() {};
-	virtual void SendMessage(const std::string message){};
+	virtual void SendPartnerMessage(const std::string message) = 0;
 };
 
 class FieldStateLock{

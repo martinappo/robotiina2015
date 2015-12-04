@@ -1,5 +1,6 @@
 #include "SingleModePlay.h"
 #include "AutoPlayHelpers.h"
+#define ANDRESE_CATCH_BALL
 
 enum {
 	DRIVEMODE_DRIVE_TO_BALL_NAIVE = 5000,
@@ -16,16 +17,19 @@ void DriveToBall::onEnter()
 	DriveInstruction::onEnter();	
 	initialBall = getClosestBall(false, true);
 	initialGate = m_pFieldState->GetTargetGate();
+	if (ACTIVE_DRIVE_TO_BALL_MODE == DRIVEMODE_IDLE)
+		ACTIVE_DRIVE_TO_BALL_MODE = DRIVEMODE_DRIVE_TO_BALL_AIM_GATE;
 }
 
 DriveMode DriveToBall::step(double dt){
+	if(initialBall.getDistance() == 0) return DRIVEMODE_DRIVE_HOME;
 	//return DRIVEMODE_DRIVE_TO_BALL_ANGLED;
 	//return DRIVEMODE_DRIVE_TO_BALL_NAIVE;
 	//return DRIVEMODE_ROTATE_AROUND_BALL;
-	return DRIVEMODE_DRIVE_TO_BALL_AIM_GATE;
+	return ACTIVE_DRIVE_TO_BALL_MODE;
 }
 class DriveToBallNaive : public DriveToBall
-{
+{ 
 public:
 	int colisionTicker = 0;
 	Speed lastSpeed;
@@ -120,6 +124,16 @@ public:
 
 	DriveMode step(double dt){
 		if (m_pCom->BallInTribbler())return DRIVEMODE_AIM_GATE;
+		if (m_pFieldState->obstacleNearBall) {
+			ACTIVE_DRIVE_TO_BALL_MODE = DRIVEMODE_DRIVE_TO_BALL_ANGLED;
+			return DRIVEMODE_DRIVE_TO_BALL_ANGLED;
+		}
+		/*
+		if (m_pFieldState->collisionWithBorder) {
+			ACTIVE_DRIVE_TO_BALL_MODE = DRIVEMODE_DRIVE_TO_BALL_NAIVE;
+			return DRIVEMODE_DRIVE_TO_BALL_NAIVE;
+		}
+		*/
 		const ObjectPosition &ball = getClosestBall();
 		const ObjectPosition &gate = m_pFieldState->GetTargetGate();
 		double gateHeading = gate.getHeading();
@@ -179,6 +193,25 @@ void CatchBall::onEnter()
 	initDist = target.getDistance();
 	STOP_DRIVING
 }
+#ifdef ANDRESE_CATCH_BALL
+DriveMode CatchBall::step(double dt)
+{
+	FIND_TARGET_BALL //TODO: use it?
+		if (/*STUCK_IN_STATE(3000) ||*/ target.getDistance() > (initDist + 10)) return DRIVEMODE_DRIVE_TO_BALL;
+	speed.velocity, speed.heading, speed.rotation = 0;
+	if (fabs(target.getHeading()) <= 2.) {
+		if (catchTarget(target, speed)) return DRIVEMODE_AIM_GATE;
+	}
+	else {
+		double heading = -sign(target.getHeading())*10.;
+		//move slightly in order not to get stuck
+		speed.velocity = -10;
+		speed.rotation = heading;
+	}
+	m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
+	return DRIVEMODE_CATCH_BALL;
+}
+#else
 DriveMode CatchBall::step(double dt)
 {
 	FIND_TARGET_BALL //TODO: use it?
@@ -195,6 +228,7 @@ DriveMode CatchBall::step(double dt)
 	else m_pCom->Drive(0,0, heading);
 	return DRIVEMODE_DRIVE_TO_BALL;
 }
+#endif
 void CatchBall::onExit(){}//DO_NOT_STOP_TRIBBLER
 /*END CatchBall*/
 
@@ -220,6 +254,7 @@ void Kick::onEnter()
 	DriveInstruction::onEnter();
 	STOP_TRIBBLER
 	STOP_DRIVING
+	ACTIVE_DRIVE_TO_BALL_MODE = DRIVEMODE_DRIVE_TO_BALL_AIM_GATE;
 }
 DriveMode Kick::step(double dt)
 {

@@ -30,6 +30,7 @@ FrontCameraVision::FrontCameraVision(ICamera *pCamera, IDisplay *pDisplay, Field
 	ADD_BOOL_SETTING(fieldCollisonEnabled);
 	ADD_BOOL_SETTING(nightVisionEnabled);
 	ADD_BOOL_SETTING(detectOtherRobots);
+	ADD_BOOL_SETTING(detectObjectsNearBall);
 	videoRecorder = new VideoRecorder("videos/", 30, m_pCamera->GetFrameSize(true));
 	LoadSettings();
 	Start();
@@ -322,7 +323,19 @@ void FrontCameraVision::Run() {
 			m_pState->balls.closest.updateRawCoordinates(closest, cv::Point(0,0));
 			m_pState->balls.closest.updateFieldCoords(m_pState->self.getFieldPos(), m_pState->self.getAngle());
 			m_pState->balls.closest.isUpdated = true;
+			// check if air is clear around ball
+			if (detectObjectsNearBall){
+				cv::bitwise_or(thresholdedImages[INNER_BORDER], thresholdedImages[FIELD], thresholdedImages[FIELD]);
+				//cv::bitwise_or(thresholdedImages[BALL], thresholdedImages[FIELD], thresholdedImages[FIELD]);
 
+				cv::Rect bigAreaAroundBall = cv::Rect(closest - cv::Point(50, 50) + cv::Point(frameBGR.size() / 2),
+					closest + cv::Point(50, 50) + cv::Point(frameBGR.size() / 2));
+				cv::Mat roiField(thresholdedImages[FIELD], bigAreaAroundBall);
+				//std::cout << cv::countNonZero(roiField) << std::endl;
+				bool cb = cv::countNonZero(roiField) > 300/*tune this*/;
+				rectangle(frameBGR, bigAreaAroundBall.tl(), bigAreaAroundBall.br(), cv::Scalar(255, 50, cb? 255:50), 2, 8, 0);
+				m_pState->obstacleNearBall = cb;
+			}
 
 			/* find balls that are close by */
 			/*
