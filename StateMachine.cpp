@@ -109,8 +109,11 @@ void StateMachine::Run()
 
 			curDriveMode->second->onExit();
 			curDriveMode = driveModes.find(newMode);
-			if (curDriveMode == driveModes.end()) curDriveMode = driveModes.find(DRIVEMODE_IDLE);
-						std::cout << " -> " << curDriveMode->second->name << std::endl;
+			if (curDriveMode == driveModes.end()){
+				curDriveMode = driveModes.find(DRIVEMODE_IDLE);
+				std::cout << "-> unknown state: " << newMode << std::endl;
+			} 
+				std::cout << " -> " << curDriveMode->second->name << std::endl;
 
 			curDriveMode->second->onEnter();
 			std::this_thread::sleep_for(std::chrono::milliseconds(50)); // this seems to be neccecary
