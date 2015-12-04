@@ -244,6 +244,7 @@ void FrontCameraVision::Run() {
 				//else if (c == 3) privateZone = cv::Rect(-100, 0, 100, 100); //c==3
 				privateZone += cv::Point((c == 0 || c == 1) ? 0 : -1, (c == 0 || c == 3) ? 0 : -1) * 100;
 				privateZone += cv::Point(frameBGR.size() / 2);
+				std::cout << privateZone << std::endl;
 				cv::Mat roiOuterBorder(thresholdedImages[OUTER_BORDER], privateZone);
 				cv::Mat roiField(thresholdedImages[FIELD], privateZone);
 				bool cb = borderCollisonEnabled ? cv::countNonZero(roiOuterBorder) > 300 : false;
@@ -329,15 +330,20 @@ void FrontCameraVision::Run() {
 				
 				cv::bitwise_or(thresholdedImages[INNER_BORDER], thresholdedImages[FIELD], thresholdedImages[FIELD]);
 				//cv::bitwise_or(thresholdedImages[BALL], thresholdedImages[FIELD], thresholdedImages[FIELD]);
-
 				cv::Rect bigAreaAroundBall = cv::Rect(m_pState->balls.closest.filteredRawCoords - cv::Point(50, 50) + cv::Point(frameBGR.size() / 2),
 					m_pState->balls.closest.filteredRawCoords + cv::Point(50, 50) + cv::Point(frameBGR.size() / 2));
-
-				cv::Mat roiField(thresholdedImages[FIELD], bigAreaAroundBall);
-				//std::cout << cv::countNonZero(roiField) << std::endl;
-				bool cb = cv::countNonZero(roiField) < 9000/*tune this*/;
-				rectangle(frameBGR, bigAreaAroundBall.tl(), bigAreaAroundBall.br(), cv::Scalar(255, 50, cb? 255:50), 2, 8, 0);
-				m_pState->obstacleNearBall = cb;
+				try {
+					cv::Mat roiField(thresholdedImages[FIELD], bigAreaAroundBall);
+					//std::cout << cv::countNonZero(roiField) << std::endl;
+					bool cb = cv::countNonZero(roiField) < 9000/*tune this*/;
+					rectangle(frameBGR, bigAreaAroundBall.tl(), bigAreaAroundBall.br(), cv::Scalar(255, 50, cb? 255:50), 2, 8, 0);
+					m_pState->obstacleNearBall = cb;
+				} catch(...){
+					std::cout << "ball is near image border!" << std::endl;
+					std::cout << m_pState->balls.closest.filteredRawCoords << std::endl;
+					std::cout << bigAreaAroundBall << std::endl;
+					m_pState->obstacleNearBall = true;				
+				}
 			}
 
 			/* find balls that are close by */

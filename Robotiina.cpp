@@ -60,12 +60,13 @@ int main(int argc, char *argv[])
 
     Robot robotiina(io);
 //    RemoteControl sr(io, &robotiina);
+		robotiina.Launch(argc, argv);
 
 	try
 	{
 //           sr.Start();
 
-		robotiina.Launch(argc, argv);
+		//robotiina.Launch(argc, argv);
     }
 	catch (std::exception &e)
 	{
