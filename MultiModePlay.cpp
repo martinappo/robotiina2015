@@ -49,7 +49,11 @@ private:
 public:
 	CatchBall2v2(bool mode) : CatchBall("2V2_CATCH_BALL"), master(mode){};
 	virtual DriveMode step(double dt){
+	if(m_pCom->BallInTribbler()){
+		if (m_pFieldState->gameMode == FieldState::GAME_MODE_START_OUR_KICK_OFF)return DRIVEMODE_2V2_AIM_PARTNER;
+		else return DRIVEMODE_2V2_OFFENSIVE;
 
+	}
 	FIND_TARGET_BALL //TODO: use it?
 	if (STUCK_IN_STATE(3000) || target.getDistance() > initDist  + 10) return DRIVEMODE_DRIVE_TO_BALL;
 	speed.velocity, speed.heading, speed.rotation = 0;
@@ -83,7 +87,7 @@ class MasterModeIdle : public Idle {
 		case FieldState::GAME_MODE_START_OUR_KICK_OFF:
 		case FieldState::GAME_MODE_START_OUR_FREE_KICK:
 		case FieldState::GAME_MODE_START_OUR_THROWIN:
-			return DRIVEMODE_DRIVE_TO_BALL;
+			return m_pFieldState->isPlaying ? DRIVEMODE_DRIVE_TO_BALL : DRIVEMODE_IDLE;		
 		}
 		return DRIVEMODE_IDLE;
 	}
@@ -228,7 +232,7 @@ public:
 
 		//auto & target = m_pFieldState->partner;
 		auto target = m_pFieldState->GetHomeGate();
-		std::cout << target.polarMetricCoords.y << std::endl;
+		//std::cout << target.polarMetricCoords.y << std::endl;
 		if (aimTarget(target, speed, KICKOFF_ANGLE)){
 			m_pCom->Drive(0, 0, sign(m_pFieldState->self.getHeading())*20);
 			std::this_thread::sleep_for(std::chrono::milliseconds(500));
