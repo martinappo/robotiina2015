@@ -88,6 +88,7 @@ public:
 		ROBOT_COLOR_BLUE_UP
 	};
 	std::atomic_int gameMode;
+	std::atomic_bool partnerGoalKeeper;
 	std::atomic_bool isPlaying;
 	RobotColor robotColor = ROBOT_COLOR_BLUE_UP;
 	std::atomic_bool collisionWithBorder;

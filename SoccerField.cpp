@@ -139,4 +139,10 @@ void SoccerField::MessageReceived(const std::string & message){
 		partnerHomeGate.polarMetricCoords.x = atof(gd.c_str());
 		partnerHomeGate.polarMetricCoords.y = atof(ga.c_str());
 	}
+	else  if (command == "GLK") {
+		partnerGoalKeeper = true;
+	}
+	else  if (command == "GL2O") {//GoalKeeperToOffensive
+		partnerGoalKeeper = false;
+	}
 }

@@ -13,10 +13,6 @@ enum MultiModeDriveStates {
 	DRIVEMODE_2V2_WAIT_KICKOFF,
 	DRIVEMODE_2V2_CATCH_KICKOFF,
 	DRIVEMODE_2V2_AIM_PARTNER,
-	//DRIVEMODE_AIM_GATE,
-	//DRIVEMODE_2V2_KICK,
-	//DRIVEMODE_DRIVE_TO_BALL,
-	//DRIVEMODE_CATCH_BALL,
 	DRIVEMODE_2V2_DRIVE_HOME,
 	DRIVEMODE_2V2_OPPONENT_KICKOFF,
 	DRIVEMODE_2V2_GOAL_KEEPER,
@@ -26,9 +22,8 @@ enum MultiModeDriveStates {
 	DRIVEMODE_2V2_AIM_BALL,
 	DRIVEMODE_2V2_BACK_UP,
 	DRIVEMODE_2V2_DRIVE_TARGET_GATE,
-
-
 };
+
 class AimBall : public DriveToBall
 {
 public:
@@ -40,14 +35,15 @@ public:
 		speed = {0,0, 0};
 		auto &target = getClosestBall();
 		if (aimTarget(target, speed, 6)){
-		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
-					return DRIVEMODE_CATCH_BALL;
+			m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
+			return DRIVEMODE_CATCH_BALL;
 		}
-		std::cout << "1 " << target.getHeading() << " " << speed.velocity << " " << speed.heading << " " << speed.rotation << std::endl;
+		//std::cout << "1 " << target.getHeading() << " " << speed.velocity << " " << speed.heading << " " << speed.rotation << std::endl;
 		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 		return DRIVEMODE_2V2_AIM_BALL;
 	}
 };
+
 class BackUp : public DriveToBall
 {
 public:
@@ -77,13 +73,6 @@ public:
 	{
 		speed = {0,0, 0};
 		auto &target = getClosestBall();
-/*
-		if (target.getDistance() < 50) {
-			m_pCom->ToggleTribbler(200);
-		} else if (target.getDistance() > 70) {
-			m_pCom->ToggleTribbler(0);
-		}
-*/
 		if (m_pCom->BallInTribbler(true)) return DRIVEMODE_CATCH_BALL;
 		if (aimTarget(target, speed, 10)){
 			if (driveToTarget(target, speed, 35)) {
@@ -108,10 +97,11 @@ public:
 	CatchBallNaivev2(const std::string &name = "CATCH_BALL_NAIVE") : DriveToBall(name){};
 	void onEnter(){ 
 		m_pCom->ToggleTribbler(200);
-		std::cout << "x" << std::endl;
+		//std::cout << "x" << std::endl;
 		lastSpeed = {0,0,0};
-		 lastHeading = getClosestBall().getHeading();
+		lastHeading = getClosestBall().getHeading();
 	}
+
 	DriveMode step(double dt)
 	{
 		if(m_pCom->BallInTribbler(true)) {
@@ -120,21 +110,18 @@ public:
 		}
 		auto &target = getClosestBall();
 
-		std::cout << "a " << ((boost::posix_time::microsec_clock::local_time() - actionStart)).total_milliseconds()<<std::endl;
+		//std::cout << "a " << ((boost::posix_time::microsec_clock::local_time() - actionStart)).total_milliseconds()<<std::endl;
 		if (STUCK_IN_STATE(1000) /*|| (target.getDistance() > 50*/) {
-			std::cout << "b " << std::endl;
-
+			//std::cout << "b " << std::endl;
 			return DRIVEMODE_2V2_BACK_UP;
 		}
 		if (target.getHeading() > 15.f && target.getDistance() < 40) {
-						std::cout << "c " << std::endl;
+			//std::cout << "c " << std::endl;
 			return DRIVEMODE_2V2_AIM_BALL;
 		}
 		lastSpeed.velocity = 50; 
-		
 		m_pCom->Drive(lastSpeed.velocity, lastSpeed.heading, lastSpeed.rotation);
 		lastBallPos = target.polarMetricCoords;
-
 		return DRIVEMODE_2V2_CATCH_BALL_NAIVE;
 	}
 };
@@ -151,9 +138,8 @@ public:
 	{
 
 		auto &target = getClosestBall();
-
 		if (m_pCom->BallInTribbler(true)) {
-			std::cout << "BallInTribbler" << std::endl;
+			//std::cout << "BallInTribbler" << std::endl;
 			return DRIVEMODE_AIM_GATE;
 		}
 		if (driveToTargetWithAngle(target, speed, 25, 5)){return DRIVEMODE_CATCH_BALL;}
@@ -173,11 +159,11 @@ private:
 public:
 	CatchBall2v2(bool mode) : CatchBall("2V2_CATCH_BALL"), master(mode){};
 	virtual DriveMode step(double dt){
-			if (m_pCom->BallInTribbler(true)){
-				std::cout << "BallInTribbler" << std::endl;
-				if (m_pFieldState->gameMode == FieldState::GAME_MODE_START_OUR_KICK_OFF)return DRIVEMODE_2V2_AIM_PARTNER;
-				else return DRIVEMODE_2V2_OFFENSIVE;
-			};
+		if (m_pCom->BallInTribbler(true)){
+			//std::cout << "BallInTribbler" << std::endl;
+			if (m_pFieldState->gameMode == FieldState::GAME_MODE_START_OUR_KICK_OFF)return DRIVEMODE_2V2_AIM_PARTNER;
+			else return DRIVEMODE_2V2_OFFENSIVE;
+		};
 
 		if(STUCK_IN_STATE(1200) /* && check gamemode*/) {
 			m_pFieldState->SendPartnerMessage("PAS #");
@@ -185,15 +171,14 @@ public:
 			return DRIVEMODE_2V2_DRIVE_HOME;	
 		}
 
-	FIND_TARGET_BALL //TODO: use it?
-	double heading = target.getHeading();
-		if (/*STUCK_IN_STATE(3000) ||*/ target.getDistance() > (initDist + 10)) return DRIVEMODE_DRIVE_TO_BALL;
-	speed.velocity, speed.heading, speed.rotation = 0;
-	if (fabs(target.getHeading()) <= 2.) {
-		if (catchTarget(target, speed)) {
+		FIND_TARGET_BALL //TODO: use it?
+		double heading = target.getHeading();
+			if (/*STUCK_IN_STATE(3000) ||*/ target.getDistance() > (initDist + 10)) return DRIVEMODE_DRIVE_TO_BALL;
+		speed.velocity, speed.heading, speed.rotation = 0;
+		if (fabs(target.getHeading()) <= 2.) {
+			if (catchTarget(target, speed)) {
 			//if (m_pFieldState->gameMode == FieldState::GAME_MODE_START_OUR_KICK_OFF)return DRIVEMODE_2V2_AIM_PARTNER;
-			//else return DRIVEMODE_2V2_OFFENSIVE;
-			
+			//else return DRIVEMODE_2V2_OFFENSIVE;			
 		}
 		speed.rotation = - sign0(heading) * std::min(40.0, std::max(fabs(heading),5.0));
 
@@ -319,8 +304,9 @@ class Defensive : public DriveInstruction
 public:
 	Defensive() : DriveInstruction("2V2_DEFENSIVE"){};
 	virtual DriveMode step(double dt){
-		auto & target = m_pFieldState->partner;
-		if (/*partner not goal keeper become goal keeper*/ true){ return DRIVEMODE_2V2_DRIVE_HOME;}//ToDo goalKeeper message 
+		if (!m_pFieldState->partnerGoalKeeper){ 
+			m_pFieldState->SendPartnerMessage("GLK #");
+			return DRIVEMODE_2V2_DRIVE_HOME; }
 		else{
 			auto & opponent = m_pFieldState->opponents[0];//get the one with ball?
 			//auto & opponent = m_pFieldState->GetTargetGate(); for testing
@@ -370,8 +356,7 @@ public:
 		if (m_pFieldState->gameMode == FieldState::GAME_MODE_TAKE_BALL) {
 			m_pFieldState->gameMode = FieldState::GAME_MODE_IN_PROGRESS;
 			return DRIVEMODE_DRIVE_TO_BALL;
-		}
-		
+		}		
 		return DRIVEMODE_2V2_CATCH_KICKOFF;
 	}
 };
@@ -449,7 +434,7 @@ public:
 class DriveTargetGate2v2 : public DriveInstruction
 {
 public:
-	DriveTargetGate2v2() : DriveInstruction("2V2_DRIVE_HOME"){};
+	DriveTargetGate2v2() : DriveInstruction("2V2_TO_TARGET_GATE"){};
 	virtual DriveMode step(double dt){
 		ObjectPosition &lastGateLocation = m_pFieldState->GetTargetGate();
 		if (DriveInstruction::driveToTargetWithAngle(lastGateLocation, speed, 95))return DRIVEMODE_2V2_DRIVE_TARGET_GATE;
@@ -503,6 +488,7 @@ public:
 
 	virtual DriveMode step(double dt){
 		if(m_pCom->BallInTribbler(true)) {
+			m_pFieldState->SendPartnerMessage("GL2O #");
 			return DRIVEMODE_2V2_OFFENSIVE;
 		}
 		auto &target = getClosestBall();
@@ -610,10 +596,10 @@ std::pair<DriveMode, DriveInstruction*> MasterDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_GOAL_KEEPER, new GoalKeeper()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DRIVE_TO_BALL_NAIVE, new DriveToBallNaivev2()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DRIVE_TO_BALL_AIM_GATE, new DriveToBallAimGate2v2()),
-        std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_CATCH_BALL_NAIVE, new CatchBallNaivev2()),
-		std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_AIM_BALL, new AimBall()),
-		std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_BACK_UP, new BackUp()),
-		std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DRIVE_TARGET_GATE, new DriveTargetGate2v2()),
+    std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_CATCH_BALL_NAIVE, new CatchBallNaivev2()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_AIM_BALL, new AimBall()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_BACK_UP, new BackUp()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DRIVE_TARGET_GATE, new DriveTargetGate2v2()),
 
 };
 
@@ -631,10 +617,10 @@ std::pair<DriveMode, DriveInstruction*> SlaveDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_OPPONENT_KICKOFF, new OpponentKickoff(false)),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_GOAL_KEEPER, new GoalKeeper()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DRIVE_TO_BALL_NAIVE, new DriveToBallNaivev2()),
-        std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_CATCH_BALL_NAIVE, new CatchBallNaivev2()),
-		std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_AIM_BALL, new AimBall()),
-		std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_BACK_UP, new BackUp()),
-		std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DRIVE_TARGET_GATE, new DriveTargetGate2v2()),
+    std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_CATCH_BALL_NAIVE, new CatchBallNaivev2()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_AIM_BALL, new AimBall()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_BACK_UP, new BackUp()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DRIVE_TARGET_GATE, new DriveTargetGate2v2()),
 //	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_CATCH_BALL, new CatchBall()),
 };
 
