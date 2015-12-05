@@ -3,7 +3,7 @@
 
 bool DriveInstruction::aimTarget(const ObjectPosition &target, Speed &speed, double errorMargin){
 	double heading = target.getHeading();
-	if (fabs(heading) > errorMargin){
+	if (fabs(heading - 6.f) > errorMargin){
 		speed.rotation = -sign0(heading) * std::min(40.0, std::max(fabs(heading), 5.0));
 		return false;
 	}
@@ -98,8 +98,8 @@ void StateMachine::Run()
 		if (testMode){
 			if (testDriveMode != DRIVEMODE_IDLE && newMode == DRIVEMODE_IDLE) newMode = testDriveMode;
 			else if (newMode != testDriveMode) {
-				//newMode = DRIVEMODE_IDLE;
-				//testDriveMode = DRIVEMODE_IDLE;
+				newMode = DRIVEMODE_IDLE;
+				testDriveMode = DRIVEMODE_IDLE;
 			}
 		}
 

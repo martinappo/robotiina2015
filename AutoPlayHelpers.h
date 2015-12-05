@@ -35,4 +35,4 @@ void DriveToTagetFromFar(ICommunicationModule*pCom, const ObjectPosition &target
 #define TARGET_GATE_IS_IN_CENTER HEADING(target.getAngle()) < 2
 
 #define STOP_DRIVING m_pCom->Drive(0,0,0);
-#define STUCK_IN_STATE(delay) (boost::posix_time::microsec_clock::local_time() - actionStart).total_milliseconds() > delay
+#define STUCK_IN_STATE(delay) ((boost::posix_time::microsec_clock::local_time() - actionStart)).total_milliseconds() > delay

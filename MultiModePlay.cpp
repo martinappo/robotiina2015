@@ -39,15 +39,15 @@ public:
 		speed = {0,0, 0};
 		auto &target = getClosestBall();
 		if (target.getDistance() < 50) {
-			m_pCom->ToggleTribbler(true);
-		} else if (target.getDistance() > 170) {
-			m_pCom->ToggleTribbler(false);
+			m_pCom->ToggleTribbler(200);
+		} else if (target.getDistance() > 70) {
+			m_pCom->ToggleTribbler(0);
 		}
 		
 		if (m_pCom->BallInTribbler(true)) return DRIVEMODE_CATCH_BALL;
 		if (aimTarget(target, speed, 10)){
 			if (driveToTarget(target, speed, 35)) {
-				if (aimTarget(target, speed, 1)) {
+				if (aimTarget(target, speed, 5)) {
 					return DRIVEMODE_2V2_CATCH_BALL_NAIVE;
 				}
 			}
@@ -65,13 +65,17 @@ public:
 	Speed lastSpeed;
 	CatchBallNaivev2(const std::string &name = "CATCH_BALL_NAIVE") : DriveToBall(name){};
 	void onEnter(){ 
-		m_pCom->ToggleTribbler(true);
+		m_pCom->ToggleTribbler(255);
+		lastSpeed = {0,0,0};
 	}
 	DriveMode step(double dt)
 	{
-		if (STUCK_IN_STATE(3000)) return DRIVEMODE_2V2_DRIVE_TO_BALL_NAIVE;
-
-		lastSpeed.velocity += 100*dt; 
+		std::cout << "a" << std::endl;
+		if (STUCK_IN_STATE(3000)) {
+		std::cout << "b" << std::endl;
+			return DRIVEMODE_2V2_DRIVE_TO_BALL_NAIVE;
+		}
+		lastSpeed.velocity=100; 
 
 		m_pCom->Drive(lastSpeed.velocity, lastSpeed.heading, lastSpeed.rotation);
 		return DRIVEMODE_2V2_CATCH_BALL_NAIVE;
@@ -181,7 +185,9 @@ class MasterModeIdle : public Idle {
 		case FieldState::GAME_MODE_START_OUR_KICK_OFF:
 		case FieldState::GAME_MODE_START_OUR_FREE_KICK:
 		case FieldState::GAME_MODE_START_OUR_THROWIN:
-			return m_pFieldState->isPlaying ? DRIVEMODE_2V2_DRIVE_TO_BALL_AIM_GATE : DRIVEMODE_IDLE;
+//			return m_pFieldState->isPlaying ? DRIVEMODE_2V2_DRIVE_TO_BALL_AIM_GATE : DRIVEMODE_IDLE;
+                        return m_pFieldState->isPlaying ? DRIVEMODE_2V2_DRIVE_TO_BALL_NAIVE : DRIVEMODE_IDLE;
+
 		}
 		return DRIVEMODE_IDLE;
 	}
@@ -501,7 +507,9 @@ std::pair<DriveMode, DriveInstruction*> MasterDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_OPPONENT_KICKOFF, new OpponentKickoff(true)),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_GOAL_KEEPER, new GoalKeeper()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DRIVE_TO_BALL_NAIVE, new DriveToBallNaivev2()),
-	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DRIVE_TO_BALL_AIM_GATE, new DriveToBallAimGate2v2())
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DRIVE_TO_BALL_AIM_GATE, new DriveToBallAimGate2v2()),
+        std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_CATCH_BALL_NAIVE, new CatchBallNaivev2())
+
 };
 
 std::pair<DriveMode, DriveInstruction*> SlaveDriveModes[] = {
@@ -517,7 +525,8 @@ std::pair<DriveMode, DriveInstruction*> SlaveDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_KICK, new Kick()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_OPPONENT_KICKOFF, new OpponentKickoff(false)),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_GOAL_KEEPER, new GoalKeeper()),
-	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DRIVE_TO_BALL_NAIVE, new DriveToBallNaivev2())
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DRIVE_TO_BALL_NAIVE, new DriveToBallNaivev2()),
+        std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_CATCH_BALL_NAIVE, new CatchBallNaivev2())
 //	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_CATCH_BALL, new CatchBall()),
 };
 
