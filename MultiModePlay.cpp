@@ -278,7 +278,7 @@ public:
 			return DRIVEMODE_2V2_DRIVE_HOME; }
 		else{
 			if (/*opponent detection not working*/ false){
-				if (driveToTargetWithAngle(m_pFieldState->GetHomeGate, speed, 110))
+				if (driveToTargetWithAngle(m_pFieldState->GetHomeGate, speed, 110.))
 					return DRIVEMODE_2V2_OFFENSIVE;//maybe
 			}
 			else{
