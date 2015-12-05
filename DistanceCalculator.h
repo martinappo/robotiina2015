@@ -8,6 +8,7 @@ public:
 	DistanceCalculator();
 	double getDistanceInverted(const cv::Point2d &pos, const cv::Point2d &orgin) const;
 	cv::Point2d getPolarCoordinates(const cv::Point2d &pos, const cv::Point2d &orgin) const;
+	cv::Point2d getPolarFromCartesian(const cv::Point2d &pos) const;
 	cv::Point2d getFieldCoordinates(const cv::Point2d &pos, const cv::Point2d &orgin) const;
 	void loadConf();
 
