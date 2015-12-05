@@ -11,19 +11,16 @@ void BallPosition::setIsUpdated(bool updated) {
 }
 void BallPosition::filterCoords(const BallPosition &ball, bool reset) {
 	if (reset) {
-		filter.reset(ball.polarMetricCoords);
-		polarMetricCoords = ball.polarMetricCoords;
+		filter.reset(ball.rawPixelCoords);
+		filteredRawCoords = ball.rawPixelCoords;
 	}
 	else {
-		cv::Point2d cartesianCoords = gDistanceCalculator.getFieldCoordinates(ball.rawPixelCoords, cv::Point(0,0));
-		cv::Point2d filteredCartesianCoords = filter.doFiltering(cartesianCoords);
-		polarMetricCoords = gDistanceCalculator.getPolarFromCartesian(filteredCartesianCoords);
+		filteredRawCoords = filter.doFiltering(ball.rawPixelCoords);
 	}
 }
 
 void BallPosition::predictCoords() {
-	cv::Point2d filteredCartesianCoords = filter.getPrediction();
-	polarMetricCoords = gDistanceCalculator.getPolarFromCartesian(filteredCartesianCoords);
+	filteredRawCoords = filter.getPrediction();
 }
 
 void BallPosition::updateFieldCoords(cv::Point2d orgin, double heading) {

@@ -27,7 +27,6 @@ public:
 	void filterCoords(const BallPosition &ball, bool reset=false);
 	void predictCoords();
 	cv::Point2i lastRawCoords;
-	cv::Point2i filteredRawCoords;
 private:
 	KalmanFilter filter = KalmanFilter(cv::Point2i(0, 0));
 	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
