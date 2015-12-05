@@ -21,7 +21,7 @@ private:
 	std::mutex lock;
 	ISerial *m_pComPort;
 	//bool forcedNotInTribbler = false;
-
+	int lastTribblerSpeed=0;
 public:
 	CoilBoard(ISerial *port) : m_pComPort(port), ThreadedClass("CoilBoard") {
 		kickForce = 0;
@@ -31,6 +31,9 @@ public:
 		if (m_pComPort) {
 			m_pComPort->SetMessageHandler(this);
 		}
+		ballCatchTime = boost::posix_time::microsec_clock::local_time();
+		ballLostTime = boost::posix_time::microsec_clock::local_time();
+
 		Start();
 	};
 	void Kick(int force);
