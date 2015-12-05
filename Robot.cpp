@@ -92,9 +92,9 @@ std::pair<std::string, FieldState::GameMode> refCommands[] = {
 	std::pair<std::string, FieldState::GameMode>("Our throw in", FieldState::GAME_MODE_START_OUR_THROWIN),
 	std::pair<std::string, FieldState::GameMode>("Our corner kick", FieldState::GAME_MODE_START_OUR_CORNER_KICK),
 	std::pair<std::string, FieldState::GameMode>("Our penalty", FieldState::GAME_MODE_START_OUR_PENALTY),
-	std::pair<std::string, FieldState::GameMode>("Our goal", FieldState::GAME_MODE_START_OUR_GOAL),
-	std::pair<std::string, FieldState::GameMode>("Our yellow card", FieldState::GAME_MODE_START_OUR_YELLOW_CARD),
-/*
+//	std::pair<std::string, FieldState::GameMode>("Our goal", FieldState::GAME_MODE_START_OUR_GOAL),
+//	std::pair<std::string, FieldState::GameMode>("Our yellow card", FieldState::GAME_MODE_START_OUR_YELLOW_CARD),
+
 	std::pair<std::string, FieldState::GameMode>("Opponent kickoff", FieldState::GAME_MODE_START_OPPONENT_KICK_OFF),
 	std::pair<std::string, FieldState::GameMode>("Opponent indirect free kick", FieldState::GAME_MODE_START_OPPONENT_INDIRECT_FREE_KICK),
 	std::pair<std::string, FieldState::GameMode>("Opponent direct free kick", FieldState::GAME_MODE_START_OPPONENT_FREE_KICK),
@@ -102,9 +102,9 @@ std::pair<std::string, FieldState::GameMode> refCommands[] = {
 	std::pair<std::string, FieldState::GameMode>("Opponent throw in", FieldState::GAME_MODE_START_OPPONENT_THROWIN),
 	std::pair<std::string, FieldState::GameMode>("Opponent corner kick", FieldState::GAME_MODE_START_OPPONENT_CORNER_KICK),
 	std::pair<std::string, FieldState::GameMode>("Opponent penalty", FieldState::GAME_MODE_START_OPPONENT_PENALTY),
-	std::pair<std::string, FieldState::GameMode>("Opponent goal", FieldState::GAME_MODE_START_OPPONENT_GOAL),
-	std::pair<std::string, FieldState::GameMode>("Opponent yellow card", FieldState::GAME_MODE_START_OPPONENT_YELLOW_CARD)
-*/
+//	std::pair<std::string, FieldState::GameMode>("Opponent goal", FieldState::GAME_MODE_START_OPPONENT_GOAL),
+//	std::pair<std::string, FieldState::GameMode>("Opponent yellow card", FieldState::GAME_MODE_START_OPPONENT_YELLOW_CARD)
+
 };
 
 DistanceCalculator gDistanceCalculator;
