@@ -31,12 +31,12 @@ const void BallArray::updateAndFilterClosest(cv::Point2i possibleClosestRaw, std
 		if (!foundFromVector) {
 			double t2 = (double)cv::getTickCount();
 			double dt = (t2 - ballLost) / cv::getTickFrequency();
-			if (dt < 1) {
+			if (dt < 0.8) {
 				closest.predictCoords();
 				//closest.filteredRawCoords = closest.lastRawCoords;
 				closest.rawPixelCoords = possibleClosestRaw;
 				closest.updateRawCoordinates(closest.filteredRawCoords);
-				//closest.lastRawCoords = closest.filteredRawCoords;
+				closest.lastRawCoords = closest.filteredRawCoords;
 				return;
 			}
 			else {
