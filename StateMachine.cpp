@@ -1,6 +1,6 @@
 #include "StateMachine.h"
 #include <algorithm>
-#define THREADLESS_STATEMACHINE
+//#define THREADLESS_STATEMACHINE
 bool DriveInstruction::aimTarget(const ObjectPosition &target, Speed &speed, double errorMargin){
 	double heading = target.getHeading();
 	double distance = target.getDistance();
