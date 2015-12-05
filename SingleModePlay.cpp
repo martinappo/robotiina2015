@@ -141,14 +141,14 @@ public:
 		double ballDistance = ball.getDistance();
 		double rotation = 0;
 		double errorMargin = 5;
-		double maxDistance = 40;
+		double maxDistance = 45;
 		if (fabs(gateHeading) > errorMargin) rotation = -sign0(gateHeading) * std::min(40.0, std::max(fabs(gateHeading), 5.0));
 		double heading = 0;
 		double speed = 0;
 		if (ballDistance > maxDistance) {
 			heading = ballHeading;// +sign(gateHeading) / ballDistance;
 			if (fabs(heading) > 30) heading = sign0(heading)*(fabs(heading) + 15);
-			speed = std::max(60.0, ballDistance);
+			speed = std::max(80.0, ballDistance);
 		}
 		else {
 			if (fabs(ballHeading) <= errorMargin && fabs(gateHeading) <= errorMargin){
@@ -180,7 +180,7 @@ public:
 			m_pCom->Drive(0,0,0);	
 			return DRIVEMODE_DRIVE_TO_BALL;
 		} 
-		else m_pCom->Drive(40, target.getHeading());
+		else m_pCom->Drive(80, target.getHeading());
 	return DRIVEMODE_DRIVE_HOME;
 	}
 };
