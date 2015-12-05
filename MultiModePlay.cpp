@@ -506,13 +506,10 @@ public:
 	DriveToBallAimGate2v2(const std::string &name = "2V2_DRIVE_TO_BALL_AIM_GATE") : DriveInstruction(name) {};
 
 	DriveMode step(double dt) {
-		if (m_pCom->BallInTribbler()) return DRIVEMODE_2V2_AIM_PARTNER;
-		/*
-		if(STUCK_IN_STATE(3000)) {
-			m_pFieldState->SendPartnerMessage("PAS #");
-			return DRIVEMODE_2V2_DRIVE_HOME;	
+		if (m_pCom->BallInTribbler()){
+			if (m_pFieldState->gameMode == FieldState::GAME_MODE_START_OUR_KICK_OFF)return DRIVEMODE_2V2_AIM_PARTNER;
+			else return DRIVEMODE_2V2_OFFENSIVE;
 		}
-		*/
 		const ObjectPosition &ball = getClosestBall();
 		const ObjectPosition &gate = m_pFieldState->GetHomeGate();
 		double gateHeading = gate.getHeading();
@@ -570,7 +567,7 @@ std::pair<DriveMode, DriveInstruction*> MasterDriveModes[] = {
 
 std::pair<DriveMode, DriveInstruction*> SlaveDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_IDLE, new SlaveModeIdle()),
-	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_BALL, new DriveToBallv2()),
+	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_BALL, new DriveToBallAimGate2v2()), //new DriveToBallv2()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_CATCH_BALL, new CatchBall2v2(false)),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DEFENSIVE, new Defensive()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_OFFENSIVE, new Offensive()),
