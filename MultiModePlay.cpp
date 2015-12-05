@@ -178,6 +178,11 @@ public:
 				else return DRIVEMODE_2V2_OFFENSIVE;
 			};
 
+		if(STUCK_IN_STATE(1200)) {
+			m_pFieldState->SendPartnerMessage("PAS #");
+			return DRIVEMODE_2V2_DRIVE_HOME;	
+		}
+
 	FIND_TARGET_BALL //TODO: use it?
 	double heading = target.getHeading();
 		if (/*STUCK_IN_STATE(3000) ||*/ target.getDistance() > (initDist + 10)) return DRIVEMODE_DRIVE_TO_BALL;
@@ -386,8 +391,12 @@ public:
 		if (aimTarget(target, speed, KICKOFF_ANGLE)){
 			m_pCom->Drive(0, 0, sign(m_pFieldState->self.getHeading())*20);
 			std::this_thread::sleep_for(std::chrono::milliseconds(500));
-			m_pCom->Kick(2500);
-			m_pFieldState->SendPartnerMessage("PAS #");
+			if(m_pFieldState->gameMode == FieldState::GAME_MODE_START_OUR_KICK_OFF) {
+				m_pFieldState->SendPartnerMessage("PAS #");
+				m_pCom->Kick(1500);
+			} else 
+				m_pCom->Kick(5000);
+				
 			std::this_thread::sleep_for(std::chrono::milliseconds(1500));
 			//return DRIVEMODE_2V2_DRIVE_HOME;
 			//return DRIVEMODE_IDLE;
@@ -479,6 +488,9 @@ public:
 	GoalKeeper() : DriveInstruction("2V2_GOAL_KEEPER"){};
 
 	virtual DriveMode step(double dt){
+		if(m_pCom->BallInTribbler(true)) {
+			return DRIVEMODE_2V2_OFFENSIVE;
+		}
 		auto &target = getClosestBall();
 		auto homeGate = m_pFieldState->GetHomeGate();
 		auto targetGate = m_pFieldState->GetTargetGate();
@@ -527,6 +539,10 @@ public:
 
 	DriveMode step(double dt) {
 		if (m_pCom->BallInTribbler()) return DRIVEMODE_2V2_AIM_PARTNER;
+		if(STUCK_IN_STATE(3000)) {
+			m_pFieldState->SendPartnerMessage("PAS #");
+			return DRIVEMODE_2V2_DRIVE_HOME;	
+		}
 
 		const ObjectPosition &ball = getClosestBall();
 		const ObjectPosition &gate = m_pFieldState->GetHomeGate();
@@ -623,7 +639,7 @@ DriveMode Kick2v2::step(double dt){
 	m_pCom->ToggleTribbler(0);
 	m_pCom->Drive(0, 0, 0);
 	std::this_thread::sleep_for(std::chrono::milliseconds(50));
-	m_pCom->Kick(2500);
+	m_pCom->Kick(5000);
 	std::this_thread::sleep_for(std::chrono::milliseconds(500)); //half second wait.
 	return DRIVEMODE_2V2_DEFENSIVE;
 }
