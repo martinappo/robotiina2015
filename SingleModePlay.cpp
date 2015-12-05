@@ -141,14 +141,14 @@ public:
 		double ballDistance = ball.getDistance();
 		double rotation = 0;
 		double errorMargin = 5;
-		double maxDistance = 40;
+		double maxDistance = 45;
 		if (fabs(gateHeading) > errorMargin) rotation = -sign0(gateHeading) * std::min(40.0, std::max(fabs(gateHeading), 5.0));
 		double heading = 0;
 		double speed = 0;
 		if (ballDistance > maxDistance) {
 			heading = ballHeading;// +sign(gateHeading) / ballDistance;
 			if (fabs(heading) > 30) heading = sign0(heading)*(fabs(heading) + 15);
-			speed = std::max(60.0, ballDistance);
+			speed = std::max(80.0, ballDistance);
 		}
 		else {
 			if (fabs(ballHeading) <= errorMargin && fabs(gateHeading) <= errorMargin){
@@ -176,8 +176,11 @@ public:
 	virtual DriveMode step(double dt){
 		if(m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
 		auto target = m_pFieldState->GetHomeGate();
-		if (target.getDistance() < 80) return DRIVEMODE_DRIVE_TO_BALL;
-		else m_pCom->Drive(40, target.getHeading());
+		if (target.getDistance() < 80){
+			m_pCom->Drive(0,0,0);	
+			return DRIVEMODE_DRIVE_TO_BALL;
+		} 
+		else m_pCom->Drive(80, target.getHeading());
 	return DRIVEMODE_DRIVE_HOME;
 	}
 };
@@ -278,17 +281,21 @@ DriveMode AimGate::step(double dt)
 	double errorMargin;
 	if (target.getDistance() > 200) errorMargin = 1;
 	else errorMargin = 2;	
-	if (aimTarget(target, speed, errorMargin)) return DRIVEMODE_KICK; 
-	m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
+	if (aimTarget(target, speed, errorMargin)){ 
+		m_pCom->Drive(0,0,0);
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		if (aimTarget(target, speed, errorMargin))return DRIVEMODE_KICK; 
+	}
+	m_pCom->Drive(speed.velocity, speed.heading, speed.rotation); 
 	return DRIVEMODE_AIM_GATE;
 }
 
 
-/*BEGIN Kick*/
+/*BEGIN Kick*/ 
 void Kick::onEnter()
 {
 	DriveInstruction::onEnter();
-	STOP_TRIBBLER
+	STOP_TRIBBLER 
 	STOP_DRIVING
 	ACTIVE_DRIVE_TO_BALL_MODE = DRIVEMODE_DRIVE_TO_BALL_AIM_GATE;
 }
