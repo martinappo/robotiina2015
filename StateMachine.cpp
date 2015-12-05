@@ -90,34 +90,37 @@ void StateMachine::enableTestMode(bool enable)
 void StateMachine::StepOnce()
 {
 #ifdef THREADLESS_STATEMACHINE
+
 	if (!running) return;
+	DriveMode newMode = curDriveMode->first;
+	curDriveMode->second->onEnter();
 
 	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
-		boost::posix_time::time_duration::tick_type dt = (time - lastStep).total_milliseconds();
-		DriveMode newMode = testMode ? curDriveMode->second->step2(double(dt), newMode) : curDriveMode->second->step1(double(dt), newMode);
-		auto old = curDriveMode;
-		if (testMode){
-			if (testDriveMode != DRIVEMODE_IDLE && newMode == DRIVEMODE_IDLE) newMode = testDriveMode;
-			else if (newMode != testDriveMode) {
-				newMode = DRIVEMODE_IDLE;
-				testDriveMode = DRIVEMODE_IDLE;
-			}
+	boost::posix_time::time_duration::tick_type dt = (time - lastStep).total_milliseconds();
+	newMode = testMode ? curDriveMode->second->step2(double(dt), newMode) : curDriveMode->second->step1(double(dt), newMode);
+	auto old = curDriveMode;
+	if (testMode){
+		if (testDriveMode != DRIVEMODE_IDLE && newMode == DRIVEMODE_IDLE) newMode = testDriveMode;
+		else if (newMode != testDriveMode) {
+			newMode = DRIVEMODE_IDLE;
+			testDriveMode = DRIVEMODE_IDLE;
 		}
+	}
 
-		if (newMode != curDriveMode->first){
-			boost::mutex::scoped_lock lock(mutex);
-			std::cout << "state: " << curDriveMode->second->name;
+	if (newMode != curDriveMode->first){
+		boost::mutex::scoped_lock lock(mutex);
+		std::cout << "state: " << curDriveMode->second->name;
 
-			curDriveMode->second->onExit();
-			curDriveMode = driveModes.find(newMode);
-			if (curDriveMode == driveModes.end()){
-				curDriveMode = driveModes.find(DRIVEMODE_IDLE);
-				std::cout << "-> unknown state: " << newMode << std::endl;
-			}
-			std::cout << " -> " << curDriveMode->second->name << std::endl;
-
-			curDriveMode->second->onEnter1();
+		curDriveMode->second->onExit();
+		curDriveMode = driveModes.find(newMode);
+		if (curDriveMode == driveModes.end()){
+			curDriveMode = driveModes.find(DRIVEMODE_IDLE);
+			std::cout << "-> unknown state: " << newMode << std::endl;
 		}
+		std::cout << " -> " << curDriveMode->second->name << std::endl;
+
+		curDriveMode->second->onEnter1();
+	}
 #else
 #endif
 }
