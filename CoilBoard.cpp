@@ -35,6 +35,15 @@ void CoilBoard::HandleMessage(const std::string & message)
 
 }
 
+long CoilBoard::BallInTribblerTime(){
+	if (ballInTribbler) return (boost::posix_time::microsec_clock::local_time() - ballCatchTime).total_milliseconds();
+	else return 0L;
+}
+long CoilBoard::BallNotInTribblerTime() {
+	if (!ballInTribbler) return (boost::posix_time::microsec_clock::local_time() - ballLostTime).total_milliseconds();
+	else return 0L;
+}
+
 
 void CoilBoard::Kick(int force){
 	std::cout << "kickforce " << force << std::endl;
