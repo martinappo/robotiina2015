@@ -175,7 +175,7 @@ public:
 	DriveToHome(const std::string &name = "DRIVE_HOME") : DriveInstruction(name){};
 	virtual DriveMode step(double dt){
 		auto target = m_pFieldState->GetHomeGate();
-		if (target.getDistance() < 50) return DRIVEMODE_DRIVE_TO_BALL;
+		if (target.getDistance() < 80) return DRIVEMODE_DRIVE_TO_BALL;
 		else m_pCom->Drive(40, target.getHeading());
 	return DRIVEMODE_DRIVE_HOME;
 	}
@@ -187,25 +187,25 @@ public:
 	DriveHomeAtStart(const std::string &name = "DRIVE_HOME_AT_START") : DriveInstruction(name){};
 	virtual DriveMode step(double dt){
 		auto target = m_pFieldState->GetHomeGate();
-		if (target.getDistance() < 90) return DRIVEMODE_DRIVE_TO_BALL;
+		const ObjectPosition &ball = getClosestBall();
+		if (target.getDistance() < 90 || target.getDistance()/2 > ball.getDistance()){
+			m_pCom->Drive(0, 0, 0);
+			return DRIVEMODE_DRIVE_TO_BALL;
+		}
 		//else m_pCom->Drive(90, 0, -sign0(target.getHeading())*20);
 		else{
 			const ObjectPosition &homeGate = m_pFieldState->GetHomeGate();
 			const ObjectPosition &gate = m_pFieldState->GetTargetGate();
 			double gateHeading = gate.getHeading();
 			double ballHeading = sign(homeGate.getHeading())*(fabs(homeGate.getHeading())-35) ;
-			double ballDistance = homeGate.getDistance();
 			double rotation = 0;
 			double errorMargin = 5;
-			double maxDistance = 40;
 			if (fabs(gateHeading) > errorMargin) rotation = -sign0(gateHeading) * std::min(40.0, std::max(fabs(gateHeading), 5.0));
 			double heading = 0;
 			double speed = 0;
-			if (ballDistance > maxDistance) {
-				heading = ballHeading;// +sign(gateHeading) / ballDistance;
-				if (fabs(heading) > 30) heading = sign0(heading)*(fabs(heading) + 15);
-				speed = std::max(60.0, ballDistance);
-			}
+			heading = ballHeading;// +sign(gateHeading) / ballDistance;
+			if (fabs(heading) > 30) heading = sign0(heading)*(fabs(heading) + 15);
+			speed = 80;//std::min(30.0,std::max(60.0, target.getDistance()));//limited speed			
 			m_pCom->Drive(speed, heading, 0);
 		}
 	return DRIVEMODE_DRIVE_HOME_AT_START;
