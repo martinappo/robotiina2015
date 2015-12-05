@@ -2,7 +2,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 #include <thread>
-
+#define THREADLESS_WHEELS
 
 cv::Mat wheelAngles = (cv::Mat_<double>(4, 3) <<
 	-sin(45.0 / 180 * CV_PI),  cos(45.0 / 180 * CV_PI), 1,
@@ -18,7 +18,9 @@ WheelController::WheelController(ISerial *port, int iWheelCount/* = 3*/) : Threa
 m_iWheelCount(iWheelCount), m_pComPort(port)
 {
 	targetSpeed = { 0, 0, 0 };
+#ifndef THREADLESS_WHEELS
 	Start();
+#endif
 	Drive(0);
 };
 
@@ -79,7 +81,15 @@ void WheelController::DriveRotate(double velocity, double direction, double rota
 	targetSpeedXYW.at<double>(0) = sin(direction* CV_PI / 180.0)* velocity;
 	targetSpeedXYW.at<double>(1) = cos(direction* CV_PI / 180.0)* velocity;
 	targetSpeedXYW.at<double>(2) = rotate;
-
+#ifdef THREADLESS_WHEELS
+		cv::Mat speeds = wheelAngles * targetSpeedXYW; 
+		std::ostringstream oss;
+		for (auto i = 0; i < speeds.rows; i++) {
+			oss << (i + id_start) << ":sd" << (int)speeds.at<double>(i) << "\n";
+		}
+		//std::cout << oss.str() << std::endl;
+		m_pComPort->WriteString(oss.str());
+#endif
 	directControl = false;
 	updateSpeed = true;
 	lastUpdate = boost::posix_time::microsec_clock::local_time();
@@ -93,6 +103,16 @@ void WheelController::Drive(const cv::Point2d &speed, double angularSpeed){
 	targetSpeedXYW.at<double>(1) = speed.y;
 	targetSpeedXYW.at<double>(2) = angularSpeed;
 
+#ifdef THREADLESS_WHEELS
+		cv::Mat speeds = wheelAngles * targetSpeedXYW; 
+		std::ostringstream oss;
+		for (auto i = 0; i < speeds.rows; i++) {
+			oss << (i + id_start) << ":sd" << (int)speeds.at<double>(i) << "\n";
+		}
+		//std::cout << oss.str() << std::endl;
+		m_pComPort->WriteString(oss.str());
+
+#endif
 	/*cv::Mat speeds = wheelAngles * targetSpeedXYW;
 	//std::cout << targetSpeedXYW << std::endl;
 	std::ostringstream oss;

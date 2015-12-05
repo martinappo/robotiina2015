@@ -340,7 +340,7 @@ void Robot::Run()
 	//RobotTracker tracker(wheels);
 
 	std::stringstream subtitles;
-
+	bool wasInTrib =false;
 	while (true)
     {
 
@@ -680,12 +680,18 @@ void Robot::Run()
 			m_pDisplay->putShadowedText( s, cv::Point(10, -150 + j), 0.5, cv::Scalar(255, 255, 255));
 			j += 20;
 		}
-
+		bool inTrib = comModule.BallInTribbler(true);
+		if(wasInTrib && !inTrib){
+			std::cout << "not in tribbler" << std::endl;
+		}
+		if(!wasInTrib && inTrib){
+			std::cout << "is in tribbler" << std::endl;
+		}
+		wasInTrib = inTrib;
 		/* robot tracker */
 		cv::Point2i center(-100, 200);
 		double velocity = 0, direction = 0, rotate = 0;
 		auto speed = comModule.GetTargetSpeed();
-
 		/*
 		//Draw circle
 		cv::Scalar colorCircle(133, 33, 55);

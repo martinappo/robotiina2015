@@ -52,9 +52,9 @@ bool GateFinder::Locate(cv::Mat &imgThresholded, cv::Mat &frameHSV, cv::Mat &fra
 	
 	std::vector<cv::Point> merged_contour_points;
 	//merge two contours if they are close	
-	if (contours.size() > 1 &&
+	if (contours.size() > 1 && cv::contourArea(contours[1], false) > 2000/* &&
 		(cv::norm(getCenterFromContour(contours[0]) - 
-			getCenterFromContour(contours[1])) < 500)) 
+			getCenterFromContour(contours[1])) < 500)*/) 
 	{
 		for (int i = 0; i < contours[0].size(); i++) {
 			merged_contour_points.push_back(contours[0][i]);

@@ -40,8 +40,8 @@ public:
 	void ToggleTribbler(int speed);
 	bool BallInTribbler(bool wait=false) { 
 		if(wait) {
-			if (ballInTribbler) { return BallInTribblerTime() > 300; }
-			else return BallNotInTribblerTime() < 300;
+			if (ballInTribbler) { return BallInTribblerTime() > 700; }
+			else return BallNotInTribblerTime() < 100;
 			
 		}else {
 			return ballInTribbler; 

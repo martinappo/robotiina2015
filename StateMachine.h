@@ -16,6 +16,7 @@ protected:
 	Speed speed;
 	static DriveMode prevDriveMode;
 	static DriveMode ACTIVE_DRIVE_TO_BALL_MODE;
+	static cv::Point2d lastBallPos;
 public:
 	const std::string name;
 	DriveInstruction(const std::string &name) : name(name){

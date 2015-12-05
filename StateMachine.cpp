@@ -3,8 +3,9 @@
 #define THREADLESS_STATEMACHINE
 bool DriveInstruction::aimTarget(const ObjectPosition &target, Speed &speed, double errorMargin){
 	double heading = target.getHeading();
-	if (fabs(heading - 6.f) > errorMargin){
-		speed.rotation = -sign0(heading) * std::min(40.0, std::max(fabs(heading), 5.0));
+	double distance = target.getDistance();
+	if (fabs(heading) > errorMargin){
+		speed.rotation = -sign0(heading) * std::min(40.0, std::max(5*log(fabs(heading)), 5.0));
 		return false;
 	}
 	else return fabs(heading) < errorMargin;
@@ -90,18 +91,16 @@ void StateMachine::StepOnce()
 {
 #ifdef THREADLESS_STATEMACHINE
 	if (!running) return;
-	DriveMode newMode = curDriveMode->first;
-	curDriveMode->second->onEnter();
 
 	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
 		boost::posix_time::time_duration::tick_type dt = (time - lastStep).total_milliseconds();
-		newMode = testMode ? curDriveMode->second->step2(double(dt), newMode) : curDriveMode->second->step1(double(dt), newMode);
+		DriveMode newMode = testMode ? curDriveMode->second->step2(double(dt), newMode) : curDriveMode->second->step1(double(dt), newMode);
 		auto old = curDriveMode;
 		if (testMode){
 			if (testDriveMode != DRIVEMODE_IDLE && newMode == DRIVEMODE_IDLE) newMode = testDriveMode;
 			else if (newMode != testDriveMode) {
-				//newMode = DRIVEMODE_IDLE;
-				//testDriveMode = DRIVEMODE_IDLE;
+				newMode = DRIVEMODE_IDLE;
+				testDriveMode = DRIVEMODE_IDLE;
 			}
 		}
 
@@ -142,8 +141,8 @@ void StateMachine::Run()
 		if (testMode){
 			if (testDriveMode != DRIVEMODE_IDLE && newMode == DRIVEMODE_IDLE) newMode = testDriveMode;
 			else if (newMode != testDriveMode) {
-				newMode = DRIVEMODE_IDLE;
-				testDriveMode = DRIVEMODE_IDLE;
+				//newMode = DRIVEMODE_IDLE;
+				//testDriveMode = DRIVEMODE_IDLE;
 			}
 		}
 
@@ -182,3 +181,5 @@ StateMachine::~StateMachine()
 
 DriveMode DriveInstruction::prevDriveMode = DRIVEMODE_IDLE;
 DriveMode DriveInstruction::ACTIVE_DRIVE_TO_BALL_MODE = DRIVEMODE_IDLE;
+cv::Point2d DriveInstruction::lastBallPos = cv::Point2d(0,0);
+

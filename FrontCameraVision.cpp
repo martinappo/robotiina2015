@@ -232,7 +232,7 @@ void FrontCameraVision::Run() {
 			m_pState->yellowGate.polarMetricCoords.y = 360 - gDistanceCalculator.angleBetween(cv::Point(0, 1), m_pState->self.fieldCoords - (m_pState->yellowGate.fieldCoords)) + m_pState->self.getAngle();
 		}
 
-		cv::circle(thresholdedImages[FIELD], cv::Point(frameBGR.size() / 2), 70, 255, -1);
+		cv::circle(thresholdedImages[FIELD], cv::Point(frameBGR.size() / 2),90, 255, -1);
 		cv::circle(thresholdedImages[OUTER_BORDER], cv::Point(frameBGR.size() / 2), 70, 0, -1);
 		cv::circle(thresholdedImages[INNER_BORDER], cv::Point(frameBGR.size() / 2), 70, 0, -1);
 		cv::circle(thresholdedImages[BALL], cv::Point(frameBGR.size() / 2), 50, 0, -1);
@@ -264,7 +264,6 @@ void FrontCameraVision::Run() {
 				//else if (c == 3) privateZone = cv::Rect(-100, 0, 100, 100); //c==3
 				privateZone += cv::Point((c == 0 || c == 1) ? 0 : -1, (c == 0 || c == 3) ? 0 : -1) * 100;
 				privateZone += cv::Point(frameBGR.size() / 2);
-				std::cout << privateZone << std::endl;
 				cv::Mat roiOuterBorder(thresholdedImages[OUTER_BORDER], privateZone);
 				cv::Mat roiField(thresholdedImages[FIELD], privateZone);
 				bool cb = borderCollisonEnabled ? cv::countNonZero(roiOuterBorder) > 300 : false;
