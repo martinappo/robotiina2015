@@ -16,11 +16,12 @@ const void BallArray::updateAndFilterClosest(cv::Point2i possibleClosestRaw, std
 	}
 
 	double distance = cv::norm(possibleClosestRaw - closest.lastRawCoords);
-	if (distance > 40) { // another ball found
+	int deviation = 120;
+	if (distance > deviation) { // another ball found
 		//detect, if correct ball is in vector
 		bool foundFromVector = false;
 		for (auto rawBallCoord : rawBallCoords) { //Sorted
-			if (cv::norm(rawBallCoord - closest.lastRawCoords) <= 50) {
+			if (cv::norm(rawBallCoord - closest.lastRawCoords) <= deviation) {
 				possibleClosestRaw = rawBallCoord;
 				foundFromVector = true;
 				break;
@@ -35,7 +36,7 @@ const void BallArray::updateAndFilterClosest(cv::Point2i possibleClosestRaw, std
 				//closest.filteredRawCoords = closest.lastRawCoords;
 				closest.rawPixelCoords = possibleClosestRaw;
 				closest.updateRawCoordinates(closest.filteredRawCoords);
-				closest.lastRawCoords = closest.filteredRawCoords;
+				//closest.lastRawCoords = closest.filteredRawCoords;
 				return;
 			}
 			else {

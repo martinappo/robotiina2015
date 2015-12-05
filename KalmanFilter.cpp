@@ -6,12 +6,12 @@ KalmanFilter::KalmanFilter(const cv::Point2i &startPoint){
 		0, 0, 1, 0,
 		0, 0, 0, 1);
 
-	/*
+	
 	measurement(0) = (float)(startPoint.x);
 	measurement(1) = (float)(startPoint.y);
 	estimated(0) = (float)(startPoint.x);
 	estimated(1) = (float)(startPoint.y);
-	*/
+	
 	measurement.setTo(cv::Scalar(0));
 
 	KF.statePre.at<float>(0) = (float)(startPoint.x);
@@ -26,9 +26,9 @@ KalmanFilter::KalmanFilter(const cv::Point2i &startPoint){
 	*/
 
 	setIdentity(KF.measurementMatrix);
-	setIdentity(KF.processNoiseCov, cv::Scalar::all(1e-2));
-	setIdentity(KF.measurementNoiseCov, cv::Scalar::all(1e-6));
-	setIdentity(KF.errorCovPost, cv::Scalar::all(1e-6));
+	setIdentity(KF.processNoiseCov, cv::Scalar::all(1.7));
+	setIdentity(KF.measurementNoiseCov, cv::Scalar::all(1.2));
+	setIdentity(KF.errorCovPost, cv::Scalar::all(1.5));
 }
 
 cv::Point2d KalmanFilter::doFiltering(const cv::Point2i &point) {
