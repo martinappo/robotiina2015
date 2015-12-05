@@ -277,36 +277,42 @@ public:
 			m_pFieldState->SendPartnerMessage("GLK #");
 			return DRIVEMODE_2V2_DRIVE_HOME; }
 		else{
-			auto & opponent = m_pFieldState->opponents[0];//get the one with ball?
-			//auto & opponent = m_pFieldState->GetTargetGate(); for testing
-			auto & homeGate = m_pFieldState->GetHomeGate();
-			double gateHeading = homeGate.getHeading() - 180 * sign(homeGate.getHeading());
-			double gateAngle = homeGate.getHeading() - 180 * sign(homeGate.getHeading());;
-			double opponentAngle = opponent.getAngle();
-			double opponentHeading = opponent.getHeading();
-			double opponentDistance = opponent.getDistance();
-			double rotation = 0;
-			double heading = 0;
-			double velocity = 0;
-			double errorMargin = 5;
-			double maxDistance = 30;
-			if (fabs(gateHeading) > errorMargin) rotation = -sign(gateHeading) * std::min(40.0, std::max(fabs(gateHeading), 5.0));
-			if (opponentDistance > maxDistance) {
-				maxDistance = 30;
-				double top = 1;
-				heading = opponentAngle + sign(opponentHeading) * top*asin(maxDistance / opponentDistance) * 180 / CV_PI;
-				velocity = std::max(60.0, opponentDistance);
+			if (/*opponent detection not working*/ false){
+				if (driveToTargetWithAngle(m_pFieldState->GetHomeGate, speed, 110))
+					return DRIVEMODE_2V2_OFFENSIVE;//maybe
 			}
-			else if (fabs(gateHeading - opponentHeading) > errorMargin / 2){
-				double top = 1;
-				double left = sign(opponentHeading);
-				heading = opponentAngle + top*left * 90;
-				velocity = 40;
-				maxDistance = 60;
+			else{
+				auto & opponent = m_pFieldState->opponents[0];//get the one with ball?
+				//auto & opponent = m_pFieldState->GetTargetGate(); for testing
+				auto & homeGate = m_pFieldState->GetHomeGate();
+				double gateHeading = homeGate.getHeading() - 180 * sign(homeGate.getHeading());
+				double gateAngle = homeGate.getHeading() - 180 * sign(homeGate.getHeading());;
+				double opponentAngle = opponent.getAngle();
+				double opponentHeading = opponent.getHeading();
+				double opponentDistance = opponent.getDistance();
+				double rotation = 0;
+				double heading = 0;
+				double velocity = 0;
+				double errorMargin = 5;
+				double maxDistance = 30;
+				if (fabs(gateHeading) > errorMargin) rotation = -sign(gateHeading) * std::min(40.0, std::max(fabs(gateHeading), 5.0));
+				if (opponentDistance > maxDistance) {
+					maxDistance = 30;
+					double top = 1;
+					heading = opponentAngle + sign(opponentHeading) * top*asin(maxDistance / opponentDistance) * 180 / CV_PI;
+					velocity = std::max(60.0, opponentDistance);
+				}
+				else if (fabs(gateHeading - opponentHeading) > errorMargin / 2){
+					double top = 1;
+					double left = sign(opponentHeading);
+					heading = opponentAngle + top*left * 90;
+					velocity = 40;
+					maxDistance = 60;
+				}
+				speed.velocity = velocity;
+				speed.heading = heading;
+				speed.rotation = rotation;
 			}
-			speed.velocity = velocity;
-			speed.heading = heading;
-			speed.rotation = rotation;
 			
 		}
 		m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
@@ -436,7 +442,7 @@ public:
 	DriveMode step(double dt){
 		if (ball.getDistance() > 500) return DRIVEMODE_2V2_DEFENSIVE;
 		const BallPosition& newBall = getClosestBall();
-		if (abs(ball.getDistance() - newBall.getDistance()) > 10 || abs(ball.getAngle() - newBall.getAngle()) > 5){ return DRIVEMODE_2V2_OFFENSIVE;	}
+		if (abs(ball.getDistance() - newBall.getDistance()) > 80 || abs(ball.getAngle() - newBall.getAngle()) > 10){ return DRIVEMODE_2V2_OFFENSIVE;	}
 		else{
 			std::this_thread::sleep_for(std::chrono::milliseconds(500)); //half second wait.
 			return DRIVEMODE_2V2_OPPONENT_KICKOFF;
