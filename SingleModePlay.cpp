@@ -161,9 +161,6 @@ public:
 			}
 			rotation = 0;
 			if (fabs(gateHeading) > errorMargin) rotation = -sign0(gateHeading) * std::min(40.0, std::max(fabs(gateHeading), 5.0));
-			// drive around the ball
-			//heading = ballHeading + sign(ballHeading) * 90;
-			//std::max(fabs(ballHeading), 35.0);
 		}
 		m_pCom->Drive(speed, heading, rotation);
 		return DRIVEMODE_DRIVE_TO_BALL_AIM_GATE;

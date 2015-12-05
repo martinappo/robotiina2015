@@ -165,10 +165,9 @@ public:
 			else return DRIVEMODE_2V2_OFFENSIVE;
 		};
 
-		if(STUCK_IN_STATE(1200) /* && check gamemode*/) {
-			m_pFieldState->SendPartnerMessage("PAS #");
-			return DRIVEMODE_2V2_DRIVE_TARGET_GATE;
-			return DRIVEMODE_2V2_DRIVE_HOME;	
+		if(STUCK_IN_STATE(1200)) {
+			if (m_pFieldState->gameMode == FieldState::GAME_MODE_START_OUR_KICK_OFF) return DRIVEMODE_2V2_DRIVE_TO_BALL_AIM_GATE;
+			else return DRIVEMODE_DRIVE_TO_BALL;
 		}
 
 		FIND_TARGET_BALL //TODO: use it?
@@ -572,9 +571,6 @@ public:
 			}
 			rotation = 0;
 			if (fabs(gateHeading) > errorMargin) rotation = -sign0(gateHeading) * std::min(40.0, std::max(fabs(gateHeading), 5.0));
-			// drive around the ball
-			//heading = ballHeading + sign(ballHeading) * 90;
-			//std::max(fabs(ballHeading), 35.0);
 		}
 		m_pCom->Drive(speed, heading, rotation);
 		return DRIVEMODE_2V2_DRIVE_TO_BALL_AIM_GATE;
@@ -609,7 +605,7 @@ std::pair<DriveMode, DriveInstruction*> SlaveDriveModes[] = {
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_CATCH_BALL, new CatchBall2v2(false)),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DEFENSIVE, new Defensive()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_OFFENSIVE, new Offensive()),
-	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_BALL, new DriveToBallv2()),
+	//std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_DRIVE_TO_BALL, new DriveToBallv2()), // duplicate
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_DRIVE_HOME, new DriveHome2v2()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_AIM_GATE, new AimGate2v2()),
 	std::pair<DriveMode, DriveInstruction*>(DRIVEMODE_2V2_CATCH_KICKOFF, new CatchKickOff()),
