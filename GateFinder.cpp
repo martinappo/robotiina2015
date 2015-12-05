@@ -34,37 +34,50 @@ bool GateFinder::Locate(cv::Mat &imgThresholded, cv::Mat &frameHSV, cv::Mat &fra
 		return false;
 	}
 
+	double largest_area = 0;
+	double area = 0;
+	size_t sec_largest_contour_index = 0;
+	size_t largest_contour_index = 0;
+
 	for (size_t i = 0; i < contours.size(); i++)
 	{
-		notGates.push_back(getCenterFromContour(contours[i]));
+		area = cv::contourArea(contours[i], false);
+		if (area > largest_area){
+			notGates.push_back(getCenterFromContour(contours[i]));
+			largest_area = area;
+			sec_largest_contour_index = largest_contour_index;
+			largest_contour_index = i;  //Store the index of largest contour
+		}
 	}
 
-	std::sort(contours.begin(), contours.end(), [](std::vector<cv::Point> a, std::vector<cv::Point> b)
-	{
-		return cv::contourArea(a, false) > cv::contourArea(b, false);
-	});
-
-	int largestArea = cv::contourArea(contours[0], false);
 	//validate gate area
-	if (largestArea < smallestGateArea){
+	if (largest_area < smallestGateArea){
 		return false;
 	}
+
+
 	
+
+	if (contours.size() <= largest_contour_index) {
+		assert(false);
+	}
+
 	std::vector<cv::Point> merged_contour_points;
 	//merge two contours if they are close	
-	if (contours.size() > 1 &&
-		(cv::norm(getCenterFromContour(contours[0]) - 
-			getCenterFromContour(contours[1])) < 500)) 
+	if (contours.size() > sec_largest_contour_index &&
+		(cv::norm(getCenterFromContour(contours[largest_contour_index]) - 
+			getCenterFromContour(contours[sec_largest_contour_index])) < 500)) 
 	{
-		for (int i = 0; i < contours[0].size(); i++) {
-			merged_contour_points.push_back(contours[0][i]);
+		for (int i = 0; i < contours[largest_contour_index].size(); i++) {
+			merged_contour_points.push_back(contours[largest_contour_index][i]);
 		}
-		for (int j = 0; j < contours[1].size(); j++) {
-			merged_contour_points.push_back(contours[1][j]);
+		for (int j = 0; j < contours[sec_largest_contour_index].size(); j++) {
+			merged_contour_points.push_back(contours[sec_largest_contour_index][j]);
 		}
+
 	}
 	else {
-		merged_contour_points = contours[0];
+		merged_contour_points = contours[largest_contour_index];
 	}
 
 	if (merged_contour_points.size() > 0) {
