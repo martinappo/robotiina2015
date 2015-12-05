@@ -31,6 +31,7 @@ public:
 		//not executed in test mode
 		if (!m_pFieldState->isPlaying && driveMode != DRIVEMODE_IDLE){
 			std::cout << "Stoping game (referee stop)" << std::endl;
+			m_pCom->ToggleTribbler(0);
  			return DRIVEMODE_IDLE;
 		}
 		/*

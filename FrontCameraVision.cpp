@@ -121,20 +121,23 @@ void FrontCameraVision::Run() {
 		/* this is done here, because finding contures	  */
 		/* corrupts thresholded imagees					  */
 		/**************************************************/
-		if (false && gateObstructionDetectionEnabled) {
+		if (gateObstructionDetectionEnabled) {
 			cv::Mat selected(frameSize.height, frameSize.width, CV_8U, cv::Scalar::all(0));
 			cv::Mat mask(frameSize.height, frameSize.width, CV_8U, cv::Scalar::all(0));
 			cv::Mat	tmp(frameSize.height, frameSize.width, CV_8U, cv::Scalar::all(0));
 			//cv::line(mask, cv::Point(frameSize.width / 2, 200), cv::Point(frameSize.width / 2 - 40, frameSize.height - 100), cv::Scalar(255, 255, 255), 40);
 			//cv::line(mask, cv::Point(frameSize.width / 2, 200), cv::Point(frameSize.width / 2 + 40, frameSize.height - 100), cv::Scalar(255, 255, 255), 40);
 			std::vector<cv::Point2i> triangle;
-			triangle.push_back(cv::Point(frameSize.width / 2, 50));
-			triangle.push_back(cv::Point(frameSize.width / 2 - 80, frameSize.height - 100));
-			triangle.push_back(cv::Point(frameSize.width / 2 + 80, frameSize.height - 100));
+			int halfWidth = frameSize.width / 2;
+			int halfHeight = frameSize.height / 2;
+			triangle.push_back(cv::Point(halfWidth, halfHeight- 45));
+			triangle.push_back(cv::Point(halfWidth - 80, halfHeight / 2 -45));
+			triangle.push_back(cv::Point(halfWidth + 80, halfHeight / 2 -45));
 			cv::fillConvexPoly(mask, triangle, cv::Scalar::all(255));
 			tmp = 255 - (thresholdedImages[INNER_BORDER] + thresholdedImages[OUTER_BORDER] + thresholdedImages[FIELD]);
 			tmp.copyTo(selected, mask); // perhaps use field and inner border
-			thresholdedImages[SIGHT_MASK] = selected;
+			thresholdedImages[SIGHT_MASK] = selected; 
+			cv::polylines(frameBGR, triangle, true, (255, 255, 255));
 			//sightObstructed = countNonZero(selected) > 10;
 		}
 
@@ -207,19 +210,6 @@ void FrontCameraVision::Run() {
 			}
 			m_pState->blueGate.updateRawCoordinates(c1-cv::Point2d(frameBGR.size() / 2));
 			m_pState->yellowGate.updateRawCoordinates(c2- cv::Point2d(frameBGR.size() / 2));
-			
-			cv::Point2d closestBlue = cv::norm(blueGate[min_i1] - cv::Point2f(frameBGR.size() / 2)) < cv::norm(blueGate[min_i2] - cv::Point2f(frameBGR.size() / 2))
-				? blueGate[min_i1] : blueGate[min_i2];
-			m_pState->blueGate.minCornerPolarCoords = gDistanceCalculator.getPolarCoordinates(cv::Point2d(frameBGR.size() / 2), closestBlue);
-
-			cv::Point2d closestYellow = cv::norm(yellowGate[min_j1] - cv::Point2f(frameBGR.size() / 2)) < cv::norm(yellowGate[min_j2] - cv::Point2f(frameBGR.size() / 2))
-				? yellowGate[min_j1] : yellowGate[min_j2];
-			m_pState->yellowGate.minCornerPolarCoords = gDistanceCalculator.getPolarCoordinates(cv::Point2d(frameBGR.size() / 2), closestYellow);
-
-			if (!hideUseless) {
-				circle(frameBGR, closestYellow, 7, color4, -1, 8, 0);
-				circle(frameBGR, closestBlue, 7, color2, -1, 12, 0);
-			}
 
 			m_pState->self.updateFieldCoords(cv::Point2d(0,0), dt);
 		}
@@ -482,8 +472,7 @@ void FrontCameraVision::Run() {
 		if (gateObstructionDetectionEnabled) {
 			// step 3.2
 			int count = countNonZero(thresholdedImages[SIGHT_MASK]);
-			std::ostringstream osstr;
-			osstr << "nonzero :" << count;
+			std::cout << "obsCount: " << count << std::endl;
 			m_pState->gateObstructed = count > 900;
 			//cv::putText(thresholdedImages[SIGHT_MASK], osstr.str(), cv::Point(20, 20), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 			//cv::imshow("mmm", thresholdedImages[SIGHT_MASK]);

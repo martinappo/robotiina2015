@@ -34,50 +34,37 @@ bool GateFinder::Locate(cv::Mat &imgThresholded, cv::Mat &frameHSV, cv::Mat &fra
 		return false;
 	}
 
+	double largest_area = 0;
+	double area = 0;
+	size_t largest_contour_index = 0;
+
 	for (size_t i = 0; i < contours.size(); i++)
 	{
-		notGates.push_back(getCenterFromContour(contours[i]));
+		area = cv::contourArea(contours[i], false);
+		if (area > largest_area){
+			notGates.push_back(getCenterFromContour(contours[i]));
+			largest_area = area;
+			largest_contour_index = i;  //Store the index of largest contour
+		}
 	}
 
-	std::sort(contours.begin(), contours.end(), [](std::vector<cv::Point> a, std::vector<cv::Point> b)
-	{
-		return cv::contourArea(a, false) > cv::contourArea(b, false);
-	});
-
-	int largestArea = cv::contourArea(contours[0], false);
 	//validate gate area
-	if (largestArea < smallestGateArea){
+	if (largest_area < smallestGateArea){
 		return false;
 	}
-	
-	std::vector<cv::Point> merged_contour_points;
-	//merge two contours if they are close	
-	if (contours.size() > 1 &&
-		(cv::norm(getCenterFromContour(contours[0]) - 
-			getCenterFromContour(contours[1])) < 500)) 
-	{
-		for (int i = 0; i < contours[0].size(); i++) {
-			merged_contour_points.push_back(contours[0][i]);
-		}
-		for (int j = 0; j < contours[1].size(); j++) {
-			merged_contour_points.push_back(contours[1][j]);
-		}
+
+	//find center of actual gate (i.e largest contour)
+	if (contours.size() > largest_contour_index) {
+		center = getCenterFromContour(contours[largest_contour_index]);
 	}
 	else {
-		merged_contour_points = contours[0];
+		assert(false);
 	}
+	cv::RotatedRect bounding_rect2 = cv::minAreaRect(contours[largest_contour_index]);
+	bounding_rect2.points(bounds);
 
-	if (merged_contour_points.size() > 0) {
-		center = getCenterFromContour(merged_contour_points);
-		cv::RotatedRect bounding_rect2 = cv::minAreaRect(merged_contour_points);
-		bounding_rect2.points(bounds);
-
-		for (int j = 0; j < 4; j++) {
-			line(frameBGR, bounds[j], bounds[(j + 1) % 4], color, 1, 8);
-		}
-	}
-	else {
-		return false;
+	for (int j = 0; j < 4; j++) {
+		line(frameBGR, bounds[j], bounds[(j + 1) % 4], color, 1, 8);
 	}
 
 	return true;
