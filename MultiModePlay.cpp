@@ -278,8 +278,8 @@ public:
 			return DRIVEMODE_2V2_DRIVE_HOME; }
 		else{
 			if (/*opponent detection not working*/ false){
-				if (driveToTargetWithAngle(m_pFieldState->GetHomeGate, speed, 110.))
-					return DRIVEMODE_2V2_OFFENSIVE;//maybe
+				/*if (driveToTargetWithAngle(m_pFieldState->GetHomeGate, speed, 110.0))
+					return DRIVEMODE_2V2_OFFENSIVE;//maybe*/
 			}
 			else{
 				auto & opponent = m_pFieldState->opponents[0];//get the one with ball?
