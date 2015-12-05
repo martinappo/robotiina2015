@@ -312,7 +312,6 @@ void Robot::Run()
 	refCom->setField(&field);
 
 	/* Vision modules */
-	FrontCameraVision visionModule(m_pCamera, m_pDisplay, &field);
 	//AutoCalibrator visionModule(m_pCamera, this);
 	MouseVision mouseVision(m_pCamera, m_pDisplay, &field);
 
@@ -331,6 +330,7 @@ void Robot::Run()
 	else  {
 		autoPilot = new SingleModePlay(&comModule, &field);
 	}
+	FrontCameraVision *visionModule = new FrontCameraVision(m_pCamera, m_pDisplay, &field, autoPilot);
 
 	ManualControl manualControl(&comModule);
 #ifdef ENABLE_REMOTE_CONTROL
@@ -366,7 +366,7 @@ void Robot::Run()
 			START_DIALOG
 				mouseVision.Enable(false);
 				calibrator.Enable(false);
-				visionModule.Enable(true);
+				visionModule->Enable(true);
 				if (last_state == STATE_TEST){
 					autoPilot->Enable(false);
 				}
@@ -396,8 +396,8 @@ void Robot::Run()
 			//				STATE_BUTTON("(D)ance", STATE_DANCE)
 				//STATE_BUTTON("(D)ance", STATE_DANCE)
 				STATE_BUTTON("(R)emote Control", 'r', STATE_REMOTE_CONTROL)
-				m_pDisplay->createButton(std::string("Save video: ") + (visionModule.captureFrames() ? "on" : "off"), 'v', [this, &visionModule]{
-					visionModule.captureFrames(!visionModule.captureFrames());
+				m_pDisplay->createButton(std::string("Save video: ") + (visionModule->captureFrames() ? "on" : "off"), 'v', [this, &visionModule]{
+					visionModule->captureFrames(!visionModule->captureFrames());
 
 					this->last_state = STATE_END_OF_GAME; // force dialog redraw
 				});
@@ -441,7 +441,7 @@ void Robot::Run()
 		
 		else if (STATE_AUTOCALIBRATE == state) {
 			START_DIALOG
-				visionModule.Enable(false);
+				visionModule->Enable(false);
 				mouseVision.Enable(false);
 				calibrator.Enable(true);
 				calibrator.reset();
@@ -454,7 +454,7 @@ void Robot::Run()
 		}
 		else if (STATE_MOUSE_VISION == state) {
 			START_DIALOG
-				visionModule.Enable(false);
+				visionModule->Enable(false);
 				calibrator.Enable(false);
 				mouseVision.Enable(true);
 			STATE_BUTTON("BACK", 8, STATE_NONE)
@@ -503,7 +503,7 @@ void Robot::Run()
 		}
 		else if (STATE_SETTINGS == state) {
 			START_DIALOG
-				IConfigurableModule *pModule = static_cast<IConfigurableModule*>(&visionModule);
+				IConfigurableModule *pModule = static_cast<IConfigurableModule*>(visionModule);
 				for (auto setting : pModule->GetSettings()){
 					m_pDisplay->createButton(setting.first + ": " + std::get<0>(setting.second)(), '-', [this, setting]{
 						std::get<1>(setting.second)();
@@ -709,7 +709,8 @@ void Robot::Run()
 	if (outputVideo != NULL) {
 		delete outputVideo;
 	}
-
+	if (visionModule != NULL)
+		delete visionModule;
 	if (autoPilot != NULL)
 		delete autoPilot;
 	refCom->setField(NULL);

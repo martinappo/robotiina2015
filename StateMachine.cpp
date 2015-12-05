@@ -1,6 +1,6 @@
 #include "StateMachine.h"
 #include <algorithm>
-
+#define THREADLESS_STATEMACHINE
 bool DriveInstruction::aimTarget(const ObjectPosition &target, Speed &speed, double errorMargin){
 	double heading = target.getHeading();
 	if (fabs(heading - 6.f) > errorMargin){
@@ -73,6 +73,7 @@ StateMachine::StateMachine(ICommunicationModule *pComModule, FieldState *pState,
 	m_pFieldState = pState;
 	for (auto driveMode : driveModes) driveMode.second->Init(pComModule, pState);
 	curDriveMode = this->driveModes.find(DRIVEMODE_IDLE);
+
 }
 
 void StateMachine::setTestMode(DriveMode mode){ testDriveMode = mode; }
@@ -85,12 +86,55 @@ void StateMachine::enableTestMode(bool enable)
 }
 
 
+void StateMachine::StepOnce()
+{
+#ifdef THREADLESS_STATEMACHINE
+	if (!running) return;
+	DriveMode newMode = curDriveMode->first;
+	curDriveMode->second->onEnter();
+
+	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
+		boost::posix_time::time_duration::tick_type dt = (time - lastStep).total_milliseconds();
+		newMode = testMode ? curDriveMode->second->step2(double(dt), newMode) : curDriveMode->second->step1(double(dt), newMode);
+		auto old = curDriveMode;
+		if (testMode){
+			if (testDriveMode != DRIVEMODE_IDLE && newMode == DRIVEMODE_IDLE) newMode = testDriveMode;
+			else if (newMode != testDriveMode) {
+				//newMode = DRIVEMODE_IDLE;
+				//testDriveMode = DRIVEMODE_IDLE;
+			}
+		}
+
+		if (newMode != curDriveMode->first){
+			boost::mutex::scoped_lock lock(mutex);
+			std::cout << "state: " << curDriveMode->second->name;
+
+			curDriveMode->second->onExit();
+			curDriveMode = driveModes.find(newMode);
+			if (curDriveMode == driveModes.end()){
+				curDriveMode = driveModes.find(DRIVEMODE_IDLE);
+				std::cout << "-> unknown state: " << newMode << std::endl;
+			}
+			std::cout << " -> " << curDriveMode->second->name << std::endl;
+
+			curDriveMode->second->onEnter1();
+		}
+#else
+#endif
+}
+
+
 void StateMachine::Run()
 {
-	boost::posix_time::ptime lastStep = boost::posix_time::microsec_clock::local_time();
+	lastStep = boost::posix_time::microsec_clock::local_time();
 	DriveMode newMode = curDriveMode->first;
 	curDriveMode->second->onEnter();
 	while (!stop_thread) {
+#ifdef THREADLESS_STATEMACHINE
+		Sleep(100);
+		continue;
+#else
+		// StepOnce is called from FrontCameraVision
 		boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
 		boost::posix_time::time_duration::tick_type dt = (time - lastStep).total_milliseconds();
 		newMode = testMode ? curDriveMode->second->step2(double(dt), newMode) : curDriveMode->second->step1(double(dt), newMode);
@@ -118,6 +162,7 @@ void StateMachine::Run()
 			curDriveMode->second->onEnter1();
 			std::this_thread::sleep_for(std::chrono::milliseconds(50)); // this seems to be neccecary
 		}
+#endif
 	}
 }
 

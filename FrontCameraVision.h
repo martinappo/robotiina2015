@@ -3,6 +3,7 @@
 #include "ThreadedClass.h"
 #include "ConfigurableModule.h"
 #include "FieldState.h"
+class StateMachine;
 class VideoRecorder;
 class FrontCameraVision :
 	public ConfigurableModule, public IVisionModule, public ThreadedClass
@@ -30,9 +31,9 @@ protected:
 
 	VideoRecorder *videoRecorder  = NULL;
 	double time = 0;
-
+	StateMachine *m_pSM = NULL;
 public:
-	FrontCameraVision(ICamera * pCamera, IDisplay *pDisplay, FieldState *pFieldState);
+	FrontCameraVision(ICamera * pCamera, IDisplay *pDisplay, FieldState *pFieldState, StateMachine *pSM);
 	virtual ~FrontCameraVision();
 	void Run();
 	const cv::Mat & GetFrame() { return m_pCamera->Capture();  }

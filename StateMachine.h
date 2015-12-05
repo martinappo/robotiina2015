@@ -149,12 +149,14 @@ private:
 	DriveMode testDriveMode = DRIVEMODE_IDLE;
 
 protected:
-	void Step();
+	boost::posix_time::ptime lastStep = boost::posix_time::microsec_clock::local_time();
+
 public:
 	StateMachine(ICommunicationModule *pComModule, FieldState *pState, const TDriveModes &driveModes);
 	void setTestMode(DriveMode mode);
 	void enableTestMode(bool enable);
 	void Run();
+	void StepOnce();
 	virtual ~StateMachine();
 	std::string GetDebugInfo();
 };

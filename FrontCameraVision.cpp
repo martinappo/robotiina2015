@@ -12,17 +12,17 @@
 #include "kdNode2D.h"
 #include "DistanceCalculator.h"
 #include "VideoRecorder.h"
-
+#include "StateMachine.h"
 
 extern DistanceCalculator gDistanceCalculator;
 
 
-FrontCameraVision::FrontCameraVision(ICamera *pCamera, IDisplay *pDisplay, FieldState *pFieldState) : ConfigurableModule("FrontCameraVision"), ThreadedClass("FrontCameraVision")
+FrontCameraVision::FrontCameraVision(ICamera *pCamera, IDisplay *pDisplay, FieldState *pFieldState, StateMachine *pSM) : ConfigurableModule("FrontCameraVision"), ThreadedClass("FrontCameraVision")
 {
 	m_pCamera = pCamera;
 	m_pDisplay = pDisplay;
 	m_pState = pFieldState;
-
+	m_pSM = pSM;
 	ADD_BOOL_SETTING(gaussianBlurEnabled);
 	ADD_BOOL_SETTING(greenAreaDetectionEnabled);
 	ADD_BOOL_SETTING(gateObstructionDetectionEnabled);
@@ -498,6 +498,7 @@ void FrontCameraVision::Run() {
 			somethingOnWay |= notEnoughtGreen;
 		}
 
+		m_pSM->StepOnce();
 		// copy thresholded images before they are destroyed
 		if (nightVisionEnabled) {
 			green.copyTo(frameBGR, thresholdedImages[FIELD]);
