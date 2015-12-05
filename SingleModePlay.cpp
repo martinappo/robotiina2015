@@ -174,6 +174,7 @@ class DriveToHome : public DriveInstruction
 public:
 	DriveToHome(const std::string &name = "DRIVE_HOME") : DriveInstruction(name){};
 	virtual DriveMode step(double dt){
+		if(m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
 		auto target = m_pFieldState->GetHomeGate();
 		if (target.getDistance() < 80) return DRIVEMODE_DRIVE_TO_BALL;
 		else m_pCom->Drive(40, target.getHeading());
