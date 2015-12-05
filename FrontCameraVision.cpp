@@ -316,7 +316,7 @@ void FrontCameraVision::Run() {
 		if (!ballsFound) {
 			m_pState->resetBallsUpdateState();
 			m_pState->balls.updateAndFilterClosest(cv::Point2i(0,0), balls, false, useKalmanFilter);
-			balls.push_back(m_pState->balls.closest.filteredRawCoords);
+			balls.push_back(m_pState->balls.closest.rawPixelCoords);
 		}
 			std::sort(balls.begin(), balls.end(), [](cv::Point2d a, cv::Point2d b)
 			{
@@ -354,8 +354,8 @@ void FrontCameraVision::Run() {
 			
 			if (!hideUseless) {
 				cv::Rect bounding_rect = cv::Rect(
-					(useKalmanFilter ? m_pState->balls.closest.filteredRawCoords : possibleClosest) - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
-					(useKalmanFilter ? m_pState->balls.closest.filteredRawCoords : possibleClosest) + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2)
+					(possibleClosest) - cv::Point(20, 20) + cv::Point(frameBGR.size() / 2),
+					(possibleClosest) + cv::Point(20, 20) + cv::Point(frameBGR.size() / 2)
 				);
 				rectangle(frameBGR, bounding_rect.tl(), bounding_rect.br(), cv::Scalar(255, 0, 0), 2, 8, 0);
 			}
@@ -367,8 +367,8 @@ void FrontCameraVision::Run() {
 				cv::bitwise_or(thresholdedImages[INNER_BORDER], thresholdedImages[FIELD], thresholdedImages[FIELD]);
 				
 				//cv::bitwise_or(thresholdedImages[BALL], thresholdedImages[FIELD], thresholdedImages[FIELD]);
-				cv::Rect bigAreaAroundBall = cv::Rect(m_pState->balls.closest.filteredRawCoords - cv::Point(50, 50) + cv::Point(frameBGR.size() / 2),
-					m_pState->balls.closest.filteredRawCoords + cv::Point(50, 50) + cv::Point(frameBGR.size() / 2));
+				cv::Rect bigAreaAroundBall = cv::Rect(possibleClosest - cv::Point(50, 50) + cv::Point(frameBGR.size() / 2),
+					possibleClosest + cv::Point(50, 50) + cv::Point(frameBGR.size() / 2));
 				try {
 					cv::Mat roiField(thresholdedImages[FIELD], bigAreaAroundBall);
 					//std::cout << cv::countNonZero(roiField) << std::endl;

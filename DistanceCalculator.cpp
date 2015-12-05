@@ -81,6 +81,12 @@ cv::Point2d DistanceCalculator::getFieldCoordinates(const cv::Point2d &pos, cons
 
 }
 
+cv::Point2d DistanceCalculator::getPolarFromCartesian(const cv::Point2d &cartesian) const {
+	double r = sqrt(pow(cartesian.x,2) + pow(cartesian.y,2));
+	double angle = atan2(cartesian.y, cartesian.x) * 57.2958;
+	return cv::Point2d(r, angle);
+}
+
 double DistanceCalculator::getDistanceInverted(const cv::Point2d &pos, const cv::Point2d &orgin) const{
 	double dist_cm = cv::norm(pos - orgin);
 	double dist_px = 125 * log(dist_cm / 13.13);
