@@ -63,11 +63,12 @@ void CoilBoard::Kick(int force){
 }
 
 void CoilBoard::ToggleTribbler(int speed){
-	std::ostringstream oss;
-	oss << ID_MAIN_BOARD << ":dm" << speed << "\n";
-	if(m_pComPort) m_pComPort->WriteString(oss.str());
-	
-	
+	if (lastTribblerSpeed != speed) {
+		std::ostringstream oss;
+		oss << ID_MAIN_BOARD << ":dm" << speed << "\n";
+		if (m_pComPort) m_pComPort->WriteString(oss.str());
+		lastTribblerSpeed = speed;
+	}
 	return;
 }
 
