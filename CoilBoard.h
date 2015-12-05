@@ -40,8 +40,13 @@ public:
 	void ToggleTribbler(int speed);
 	bool BallInTribbler(bool wait=false) { 
 		if(wait) {
-			if (ballInTribbler) { return BallInTribblerTime() > 700; }
-			else return BallNotInTribblerTime() < 100;
+			if(ballInTribbler && BallInTribblerTime() > 300) {
+				tribblerLastState = true;
+			}
+			else if(!ballInTribbler && BallNotInTribblerTime() > 100){
+				tribblerLastState = false;
+			};
+			return tribblerLastState;
 			
 		}else {
 			return ballInTribbler; 
@@ -49,7 +54,7 @@ public:
 	}
 	long BallInTribblerTime(); 
 	long BallNotInTribblerTime();
-
+	bool tribblerLastState = false;
 	void Run();
 	virtual ~CoilBoard() {
 		if (m_pComPort) m_pComPort->SetMessageHandler(NULL);

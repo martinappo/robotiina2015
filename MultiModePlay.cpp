@@ -243,8 +243,8 @@ class MasterModeIdle : public Idle {
 		case FieldState::GAME_MODE_START_OUR_KICK_OFF:
 		case FieldState::GAME_MODE_START_OUR_FREE_KICK:
 		case FieldState::GAME_MODE_START_OUR_THROWIN:
-//		return DRIVEMODE_2V2_DRIVE_TO_BALL_AIM_GATE;
-        return DRIVEMODE_2V2_DRIVE_TO_BALL_NAIVE;
+		return DRIVEMODE_2V2_DRIVE_TO_BALL_AIM_GATE;
+//        return DRIVEMODE_2V2_DRIVE_TO_BALL_NAIVE;
 
 		}
 		return DRIVEMODE_IDLE;
@@ -491,7 +491,7 @@ public:
 		}
 		// if we are to close to gate
 		if(m_pFieldState->collisionWithUnknown) {
-			m_pCom->Drive(10, targetGate.getHeading(), 0);
+			m_pCom->Drive(20, targetGate.getHeading()+45, 0);
 			return DRIVEMODE_2V2_GOAL_KEEPER;
 			
 		}
