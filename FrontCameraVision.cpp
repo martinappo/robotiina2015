@@ -207,19 +207,6 @@ void FrontCameraVision::Run() {
 			}
 			m_pState->blueGate.updateRawCoordinates(c1-cv::Point2d(frameBGR.size() / 2));
 			m_pState->yellowGate.updateRawCoordinates(c2- cv::Point2d(frameBGR.size() / 2));
-			
-			cv::Point2d closestBlue = cv::norm(blueGate[min_i1] - cv::Point2f(frameBGR.size() / 2)) < cv::norm(blueGate[min_i2] - cv::Point2f(frameBGR.size() / 2))
-				? blueGate[min_i1] : blueGate[min_i2];
-			m_pState->blueGate.minCornerPolarCoords = gDistanceCalculator.getPolarCoordinates(cv::Point2d(frameBGR.size() / 2), closestBlue);
-
-			cv::Point2d closestYellow = cv::norm(yellowGate[min_j1] - cv::Point2f(frameBGR.size() / 2)) < cv::norm(yellowGate[min_j2] - cv::Point2f(frameBGR.size() / 2))
-				? yellowGate[min_j1] : yellowGate[min_j2];
-			m_pState->yellowGate.minCornerPolarCoords = gDistanceCalculator.getPolarCoordinates(cv::Point2d(frameBGR.size() / 2), closestYellow);
-
-			if (!hideUseless) {
-				circle(frameBGR, closestYellow, 7, color4, -1, 8, 0);
-				circle(frameBGR, closestBlue, 7, color2, -1, 12, 0);
-			}
 
 			m_pState->self.updateFieldCoords(cv::Point2d(0,0), dt);
 		}
