@@ -115,7 +115,7 @@ void StateMachine::Run()
 			}
 			std::cout << " -> " << curDriveMode->second->name << std::endl;
 
-			curDriveMode->second->onEnter();
+			curDriveMode->second->onEnter1();
 			std::this_thread::sleep_for(std::chrono::milliseconds(50)); // this seems to be neccecary
 		}
 	}

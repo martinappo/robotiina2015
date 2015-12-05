@@ -423,17 +423,20 @@ public:
 	virtual DriveMode step(double dt){
 		auto &target = getClosestBall();
 		if (target.getDistance() == 0.0) {
+			speed = { 0, 0, 0 };
+			m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 			return DRIVEMODE_2V2_GOAL_KEEPER;
 		}
-		if (target.getDistance() < 35 && !m_pFieldState->obstacleNearBall ) {
+		if (target.getDistance() < 35 && !m_pFieldState->obstacleNearBall) {
 			return DRIVEMODE_DRIVE_TO_BALL;
 		}
 		auto homeGate = m_pFieldState->GetHomeGate();
 		double homeGateDist = homeGate.getDistance();
 		double gateAngle = homeGate.getHeading() - 180 * sign(homeGate.getHeading());
 		aimTarget(target, speed,2);	
-		if (homeGateDist < 45 || homeGate.minCornerPolarCoords.x < 45) {
+		if (homeGateDist < 30 || homeGate.minCornerPolarCoords.x < 30) {
 			driveToTargetWithAngle(target, speed, 40, 5);
+			speed.velocity = 30;
 		} else {	
 			if (gateAngle < 0) {
 				speed.heading = 90;

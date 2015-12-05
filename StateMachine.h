@@ -24,8 +24,11 @@ public:
 		m_pCom = pCom;
 		m_pFieldState = pFieldState;
 	};
-	virtual void onEnter(){
+	virtual void onEnter1(){
 		actionStart = boost::posix_time::microsec_clock::local_time();
+		onEnter();
+	};
+	virtual void onEnter(){
 	};
 	virtual DriveMode step1(double dt, DriveMode driveMode){
 		//not executed in test mode
