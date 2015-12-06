@@ -123,7 +123,7 @@ public:
 	DriveToBallAimGate(const std::string &name = "DRIVE_TO_BALL_AIM_GATE") : DriveInstruction(name){};
 
 	DriveMode step(double dt){
-		if (m_pCom->BallInTribbler())return DRIVEMODE_AIM_GATE;
+		if (m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
 		if (m_pFieldState->obstacleNearBall) {
 			ACTIVE_DRIVE_TO_BALL_MODE = DRIVEMODE_DRIVE_TO_BALL_ANGLED;
 			return DRIVEMODE_DRIVE_TO_BALL_ANGLED;

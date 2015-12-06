@@ -2,10 +2,14 @@
 #include "DistanceCalculator.h"
 extern DistanceCalculator gDistanceCalculator;
 
-
-
-void ObjectPosition::updateRawCoordinates(const cv::Point2d pos, cv::Point2d orgin) {
+void ObjectPosition::updateRawCoordinates(const cv::Point2d pos, cv::Point2d orgin, bool useKalman) {
 	lastFieldCoords = fieldCoords;
-	rawPixelCoords = pos;
+	if (useKalman) {
+		rawPixelCoords = filter.doFiltering(pos);
+	}
+	else {
+		rawPixelCoords = pos;
+	}
+	
 	polarMetricCoords = gDistanceCalculator.getPolarCoordinates(orgin, pos);
 }
