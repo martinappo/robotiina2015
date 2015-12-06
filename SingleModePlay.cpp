@@ -283,14 +283,14 @@ DriveMode AimGate::step(double dt)
 	else errorMargin = 2;
 	if (aimTarget(target, speed, errorMargin)) {
 		if (target.getDistance() > 160 && m_pFieldState->gateObstructed) {
-			double gateAngle = target.getHeading() - 180 * sign(target.getHeading());
-			if (gateAngle < 0) {
+			std::cout << m_pFieldState->GetHomeGate().getHeading() << std::endl;
+			if (m_pFieldState->GetHomeGate().getHeading() < 0) {
 				speed.heading = -90;
 			}
 			else {
 				speed.heading = 90;
 			}
-			speed.velocity = 50;
+			speed.velocity = 100;
 		}
 		else {
 			m_pCom->Drive(0, 0, 0);

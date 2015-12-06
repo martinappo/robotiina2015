@@ -472,7 +472,7 @@ void FrontCameraVision::Run() {
 		if (gateObstructionDetectionEnabled) {
 			// step 3.2
 			int count = countNonZero(thresholdedImages[SIGHT_MASK]);
-			m_pState->gateObstructed = count > 2000;
+			m_pState->gateObstructed = count > 2500;
 			//cv::putText(thresholdedImages[SIGHT_MASK], osstr.str(), cv::Point(20, 20), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255));
 			//cv::imshow("mmm", thresholdedImages[SIGHT_MASK]);
 		}
