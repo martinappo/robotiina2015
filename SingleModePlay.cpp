@@ -282,7 +282,7 @@ DriveMode AimGate::step(double dt)
 	if (target.getDistance() > 200) errorMargin = 1;
 	else errorMargin = 2;	
 	if (aimTarget(target, speed, errorMargin)) {
-		if (m_pFieldState->gateObstructed) {
+		if (target.getDistance() > 160 && m_pFieldState->gateObstructed) {
 			double gateAngle = target.getHeading() - 180 * sign(target.getHeading());
 			if (gateAngle < 0) {
 				speed.heading = -90;
