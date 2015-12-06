@@ -196,21 +196,15 @@ void FrontCameraVision::Run() {
 			// find longest side
 			min_j2 = (cv::norm(yellowGate[min_j1] - yellowGate[next]) > cv::norm(yellowGate[min_j1] - yellowGate[prev])) ? next : prev;
 			cv::Scalar color4(0, 0, 0);
-
 			cv::Scalar color2(0, 0, 255);
-
 			cv::Point2d c1 = (blueGate[min_i1] + blueGate[min_i2]) / 2;
-			
-
 			cv::Point2d c2 = (yellowGate[min_j1] + yellowGate[min_j2]) / 2;
-
 			if (!hideUseless) {
 				circle(frameBGR, c2, 12, color2, -1, 8, 0);
 				circle(frameBGR, c1, 12, color4, -1, 12, 0);
 			}
-			m_pState->blueGate.updateRawCoordinates(c1-cv::Point2d(frameBGR.size() / 2));
-			m_pState->yellowGate.updateRawCoordinates(c2- cv::Point2d(frameBGR.size() / 2));
-
+			m_pState->blueGate.updateRawCoordinates(c1-cv::Point2d(frameBGR.size() / 2), cv::Point2d(0, 0), useKalmanFilter);
+			m_pState->yellowGate.updateRawCoordinates(c2- cv::Point2d(frameBGR.size() / 2), cv::Point2d(0, 0), useKalmanFilter);
 			m_pState->self.updateFieldCoords(cv::Point2d(0,0), dt);
 		}
 		else {

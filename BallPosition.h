@@ -1,15 +1,13 @@
 #pragma once
 #include "types.h"
 #include "ObjectPosition.h"
-#include "KalmanFilter.h"
 #include <boost/timer/timer.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 class BallPosition : public ObjectPosition
 {
 public:
-	BallPosition() :useKalman(false){};
-	BallPosition(bool useKalman) :useKalman(useKalman){};
+	BallPosition(){};
 	BallPosition(const BallPosition & ballPos){
 		rawPixelCoords = ballPos.rawPixelCoords;
 		polarMetricCoords = ballPos.polarMetricCoords;
@@ -28,8 +26,6 @@ public:
 	void predictCoords();
 	cv::Point2i lastRawCoords;
 private:
-	KalmanFilter filter = KalmanFilter(cv::Point2i(0, 0));
 	boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
 	boost::posix_time::ptime lastStep = time;
-	bool useKalman = false;
 };

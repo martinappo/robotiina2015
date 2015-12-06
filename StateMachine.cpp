@@ -62,6 +62,18 @@ bool DriveInstruction::driveToTargetWithAngle(const ObjectPosition &target, Spee
 
 
 const BallPosition &DriveInstruction::getClosestBall(bool includeHeading, bool reset){
+	if (includeHeading){
+		BallPosition & closestBall = m_pFieldState->balls[0];
+		double dist = (fabs(closestBall.getHeading()*1.5) + closestBall.getDistance());
+		int index = 0;
+		for(int i = 0; i < m_pFieldState->balls.size(); i++){
+			if ((fabs(m_pFieldState->balls[i].getHeading()) + m_pFieldState->balls[i].getDistance()) < dist){
+				index = i;
+				dist = (fabs(m_pFieldState->balls[i].getHeading()) + m_pFieldState->balls[i].getDistance());
+			}
+		}
+		return m_pFieldState->balls[index];
+	}
 	return  m_pFieldState->balls.getClosest();
 }
 
