@@ -180,6 +180,9 @@ public:
 			m_pCom->Drive(0,0,0);	
 			return DRIVEMODE_DRIVE_TO_BALL;
 		} 
+		else if (getClosestBall().rawPixelCoords == cv::Point(0, 0)) {
+			return DRIVEMODE_DRIVE_TO_BALL;
+		}
 		else m_pCom->Drive(80, target.getHeading());
 	return DRIVEMODE_DRIVE_HOME;
 	}
