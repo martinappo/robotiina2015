@@ -64,6 +64,10 @@ class AimGate : public DriveInstruction
 public:
 	AimGate() : DriveInstruction("AIM_GATE"){};
 	virtual DriveMode step(double dt);
+protected:
+	boost::posix_time::ptime dodgeTime = boost::posix_time::microsec_clock::local_time();
+	bool alreadyDodged = false;
+	Speed lastSpeed;
 };
 
 class Kick : public DriveInstruction

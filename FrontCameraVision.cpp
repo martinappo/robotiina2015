@@ -254,7 +254,6 @@ void FrontCameraVision::Run() {
 				//else if (c == 3) privateZone = cv::Rect(-100, 0, 100, 100); //c==3
 				privateZone += cv::Point((c == 0 || c == 1) ? 0 : -1, (c == 0 || c == 3) ? 0 : -1) * 100;
 				privateZone += cv::Point(frameBGR.size() / 2);
-				std::cout << privateZone << std::endl;
 				cv::Mat roiOuterBorder(thresholdedImages[OUTER_BORDER], privateZone);
 				cv::Mat roiField(thresholdedImages[FIELD], privateZone);
 				bool cb = borderCollisonEnabled ? cv::countNonZero(roiOuterBorder) > 300 : false;

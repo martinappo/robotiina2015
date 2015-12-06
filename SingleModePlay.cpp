@@ -176,7 +176,7 @@ public:
 	virtual DriveMode step(double dt){
 		if(m_pCom->BallInTribbler()) return DRIVEMODE_AIM_GATE;
 		auto target = m_pFieldState->GetHomeGate();
-		if (target.getDistance() < 80 || getClosestBall().rawPixelCoords == cv::Point(0, 0)) {
+		if (target.getDistance() < 80 || getClosestBall().rawPixelCoords != cv::Point(0, 0)) {
 			m_pCom->Drive(0,0,0);	
 			return DRIVEMODE_DRIVE_TO_BALL;
 		} 
@@ -277,27 +277,34 @@ void CatchBall::onExit(){}//DO_NOT_STOP_TRIBBLER
 DriveMode AimGate::step(double dt)
 {
 	FIND_TARGET_GATE
-	if (!BALL_IN_TRIBBLER) return DRIVEMODE_DRIVE_TO_BALL;	
-	double errorMargin;
-	if (target.getDistance() > 200) errorMargin = 1;
-	else errorMargin = 2;
-	if (aimTarget(target, speed, errorMargin)) {
-		if (target.getDistance() > 160 && m_pFieldState->gateObstructed) {
-			std::cout << m_pFieldState->GetHomeGate().getHeading() << std::endl;
-			if (m_pFieldState->GetHomeGate().getHeading() < 0) {
-				speed.heading = -90;
+	if (!BALL_IN_TRIBBLER) return DRIVEMODE_DRIVE_TO_BALL;
+	if ((boost::posix_time::microsec_clock::local_time() - dodgeTime).total_milliseconds() < 800){
+		speed = lastSpeed;
+	} else {
+		double errorMargin;
+		if (target.getDistance() > 200) errorMargin = 1;
+		else errorMargin = 2;
+		if (aimTarget(target, speed, errorMargin)) {
+			if (target.getDistance() > 125 && m_pFieldState->gateObstructed && !alreadyDodged) {
+				alreadyDodged = true;
+				dodgeTime = boost::posix_time::microsec_clock::local_time();
+				double heading = m_pFieldState->GetHomeGate().getHeading();
+				if (heading < 0) {
+					speed.heading = heading + 80;
+				}
+				else {
+					speed.heading = heading - 80;
+				}
+				speed.velocity = 100;
 			}
 			else {
-				speed.heading = 90;
+				m_pCom->Drive(0, 0, 0);
+				std::this_thread::sleep_for(std::chrono::milliseconds(20));
+				if (aimTarget(target, speed, errorMargin)) {alreadyDodged = false; return DRIVEMODE_KICK;}
 			}
-			speed.velocity = 100;
-		}
-		else {
-			m_pCom->Drive(0, 0, 0);
-			std::this_thread::sleep_for(std::chrono::milliseconds(50));
-			if (aimTarget(target, speed, errorMargin))return DRIVEMODE_KICK;
 		}
 	}
+	lastSpeed = speed;
 	m_pCom->Drive(speed.velocity, speed.heading, speed.rotation);
 	return DRIVEMODE_AIM_GATE;
 }
@@ -316,6 +323,7 @@ DriveMode Kick::step(double dt)
 	m_pCom->Kick(5000);
 	std::this_thread::sleep_for(std::chrono::milliseconds(50)); //less than half second wait.
 	if (m_pCom->BallInTribbler()) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(100)); //less than half second wait.
 		return DRIVEMODE_KICK;
 	}
 	return DRIVEMODE_DRIVE_TO_BALL;

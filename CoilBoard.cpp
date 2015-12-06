@@ -53,7 +53,7 @@ void CoilBoard::Kick(int force){
 		std::cout << "coil not ready, not kicking" << std::endl;
 		//return;
 	}
-	if ((time2 - afterKickTime).total_milliseconds() < 1500) return;
+	if ((time2 - afterKickTime).total_milliseconds() < 500) return;
 	//WriteString("k800\n");
 	kickForce = force; // set flag, so that we do not corrupt writing in Run method
 	//forcedNotInTribbler = true;
