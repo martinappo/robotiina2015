@@ -280,7 +280,7 @@ DriveMode AimGate::step(double dt)
 	if (!BALL_IN_TRIBBLER) return DRIVEMODE_DRIVE_TO_BALL;	
 	double errorMargin;
 	if (target.getDistance() > 200) errorMargin = 1;
-	else errorMargin = 2;	
+	else errorMargin = 2;
 	if (aimTarget(target, speed, errorMargin)) {
 		if (target.getDistance() > 160 && m_pFieldState->gateObstructed) {
 			double gateAngle = target.getHeading() - 180 * sign(target.getHeading());
@@ -313,9 +313,11 @@ void Kick::onEnter()
 }
 DriveMode Kick::step(double dt)
 {
-	std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	m_pCom->Kick(5000);
 	std::this_thread::sleep_for(std::chrono::milliseconds(50)); //less than half second wait.
+	if (m_pCom->BallInTribbler()) {
+		return DRIVEMODE_KICK;
+	}
 	return DRIVEMODE_DRIVE_TO_BALL;
 }
 
